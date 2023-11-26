@@ -30,9 +30,9 @@ class UserModel extends Model {
       id: json[UserEnum.id.name]?.toString() ?? defaultUserModel.id,
       displayName: json[UserEnum.displayName.name]?.toString() ??
           defaultUserModel.displayName,
-      photoUrl: Utils.getUrlFromMap(json[UserEnum.photoUrl.name]),
-      email: Utils.getEmailFromMap(json[UserEnum.email.name]),
-      jwt: Utils.mapFromString(json[UserEnum.jwt.name]),
+      photoUrl: Utils.getUrlFromDynamic(json[UserEnum.photoUrl.name]),
+      email: Utils.getEmailFromDynamic(json[UserEnum.email.name]),
+      jwt: Utils.mapFromDynamic(json[UserEnum.jwt.name]),
     );
   }
 
@@ -67,5 +67,25 @@ class UserModel extends Model {
       UserEnum.email.name: email,
       UserEnum.jwt.name: Utils.mapToString(jwt),
     };
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is UserModel &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          displayName == other.displayName &&
+          photoUrl == other.photoUrl &&
+          jwt == other.jwt &&
+          email == other.email &&
+          hashCode == other.hashCode;
+
+  @override
+  int get hashCode => '$id$displayName$photoUrl$email$jwt'.hashCode;
+
+  @override
+  String toString() {
+    return '${toJson()}';
   }
 }

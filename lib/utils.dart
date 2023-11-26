@@ -11,29 +11,26 @@ class Utils {
   ///
   /// Returns an empty [Map] by default. Override this method to customize
   /// the conversion of your entity model.
-  static Map<String, dynamic> mapFromString(
+  static Map<String, dynamic> mapFromDynamic(
     dynamic jsonString,
   ) {
     if (jsonString is Map<String, dynamic>) {
       return jsonString;
     }
 
-    try {
-      final dynamic json = jsonDecode(jsonString.toString());
-      if (json is Map) {
-        final Map<String, dynamic> result = <String, dynamic>{};
-        json.forEach((dynamic key, dynamic value) {
-          result['$key'] = value;
-        });
-        return result;
-      }
-    } catch (e) {
-      return <String, dynamic>{};
+    final dynamic json = jsonDecode(jsonString.toString());
+    if (json is Map) {
+      final Map<String, dynamic> result = <String, dynamic>{};
+      json.forEach((dynamic key, dynamic value) {
+        result['$key'] = value;
+      });
+      return result;
     }
+
     return <String, dynamic>{};
   }
 
-  static String getEmailFromMap(dynamic value) {
+  static String getEmailFromDynamic(dynamic value) {
     final String email = value.toString();
     if (isEmail(email)) {
       return email;
@@ -41,7 +38,7 @@ class Utils {
     return '';
   }
 
-  static String getUrlFromMap(dynamic value) {
+  static String getUrlFromDynamic(dynamic value) {
     final String url = value.toString();
     if (isValidUrl(url)) {
       return url;
@@ -63,5 +60,26 @@ class Utils {
     );
 
     return regex.hasMatch(url);
+  }
+
+  /// Converts a JSON string to a list of strings.
+  ///
+  /// [json] is the JSON string to be converted.
+  ///
+  /// Returns an empty list if the conversion fails.
+  static List<String> convertJsonToList(String? json) {
+    json = json.toString();
+    try {
+      final dynamic decodedJson = jsonDecode(json);
+      if (decodedJson == null) {
+        return <String>[];
+      }
+      if (decodedJson is List) {
+        return decodedJson.map((dynamic item) => item.toString()).toList();
+      }
+      return <String>[decodedJson.toString()];
+    } catch (e) {
+      return <String>[];
+    }
   }
 }
