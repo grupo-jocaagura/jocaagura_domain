@@ -6,9 +6,9 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return const Scaffold(
       body: Column(
-        children: const <Widget>[
+        children: <Widget>[
           Text('Examples availables'),
           SizedBox(
             height: 16,
@@ -20,6 +20,10 @@ class HomePage extends StatelessWidget {
           _ListTile(
             label: 'AddressModel',
             model: defaultAddressModel,
+          ),
+          _ListTile(
+            label: 'StoreModel',
+            model: defaultStoreModel,
           ),
         ],
       ),

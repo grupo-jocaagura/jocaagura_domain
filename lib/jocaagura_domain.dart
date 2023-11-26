@@ -7,6 +7,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 
 part 'domain/address_model.dart';
+part 'domain/store_model.dart';
 part 'domain/user_model.dart';
 part 'utils.dart';
 

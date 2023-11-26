@@ -14,3 +14,7 @@
 ## 0.0.4
 
 * AddressModel added
+
+## 0.0.5
+
+* StoreModel added

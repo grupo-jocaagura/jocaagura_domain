@@ -58,7 +58,6 @@ class Utils {
     final RegExp regex = RegExp(
       r'^(https?|ftp):\/\/[^\s\/$.?#].[^\s]*$',
     );
-
     return regex.hasMatch(url);
   }
 

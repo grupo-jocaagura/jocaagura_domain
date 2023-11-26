@@ -61,6 +61,21 @@ void main() {
       expect(url2, '');
     });
 
+    test('getUrlFromMap with segments is valid', () {
+      final Map<String, String> validUrlMap = <String, String>{
+        'url': 'https://example.com/photo.jpg',
+        'urly': 'https://www.youtube.com/watch?v=x3G_-Jbb4Sw',
+      };
+
+      final String url = Utils.getUrlFromDynamic(validUrlMap['url']);
+      final String url2 = Utils.getUrlFromDynamic(validUrlMap['url2']);
+      final String url3 = Utils.getUrlFromDynamic(validUrlMap['urly']);
+
+      expect(url, 'https://example.com/photo.jpg');
+      expect(url3, 'https://www.youtube.com/watch?v=x3G_-Jbb4Sw');
+      expect(url2, '');
+    });
+
     test('getUrlFromMap should return an empty string for an invalid URL', () {
       final Map<String, String> invalidUrlMap = <String, String>{
         'url': 'invalid-url',
@@ -87,12 +102,14 @@ void main() {
       expect(result, false);
     });
 
-    test('isValidUrl should return true for a valid URL', () {
+    test('isValidUrl should return true for valid URLs', () {
       const String validUrl = 'https://example.com';
+      const String validUrl2 = 'https://example.com/photo.jpg';
+      const String validUrl3 = 'https://www.youtube.com/watch?v=x3G_-Jbb4Sw';
 
-      final bool result = Utils.isValidUrl(validUrl);
-
-      expect(result, true);
+      expect(Utils.isValidUrl(validUrl), true);
+      expect(Utils.isValidUrl(validUrl2), true);
+      expect(Utils.isValidUrl(validUrl3), true);
     });
 
     test('isValidUrl should return false for an invalid URL', () {
