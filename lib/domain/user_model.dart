@@ -86,6 +86,6 @@ class UserModel extends Model {
 
   @override
   String toString() {
-    return '${toJson()}';
+    return 'UserModel: ${toJson()}';
   }
 }
