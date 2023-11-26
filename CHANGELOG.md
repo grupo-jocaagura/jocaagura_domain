@@ -1,3 +1,16 @@
 ## 0.0.1
 
-* TODO: Describe initial release.
+* Initial abstract class Model added
+
+## 0.0.2
+
+* UserModel and some inmutable conditions established
+
+## 0.0.3
+
+* Utils class added for managment of json convertions
+* Unit test coverage improve
+
+## 0.0.4
+
+* AddressModel added

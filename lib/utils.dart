@@ -2,7 +2,7 @@ part of 'jocaagura_domain.dart';
 
 class Utils {
   static String mapToString(Map<String, dynamic> inputMap) {
-    return jsonEncode(inputMap);
+    return getJsonEncode(inputMap);
   }
 
   /// Converts a string to a [Map].
@@ -80,6 +80,22 @@ class Utils {
       return <String>[decodedJson.toString()];
     } catch (e) {
       return <String>[];
+    }
+  }
+
+  static String getStringFromDynamic(dynamic value) {
+    return value?.toString() ?? '';
+  }
+
+  static int getIntegerFromDynamic(dynamic value) {
+    return int.tryParse(value.toString()) ?? 0;
+  }
+
+  static String getJsonEncode(Map<String, dynamic> map) {
+    try {
+      return jsonEncode(map);
+    } catch (e) {
+      return <String, String>{'error': e.toString()}.toString();
     }
   }
 }

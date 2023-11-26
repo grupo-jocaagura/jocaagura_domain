@@ -134,4 +134,72 @@ void main() {
       expect(result, <String>['hello']);
     });
   });
+
+  group('Testing String from dynamic', () {
+    const String name = 'joao';
+    const int number = 123;
+    final Map<String, dynamic> valueMap = <String, dynamic>{
+      'name': name,
+      'number': number,
+    };
+    test('return empty from null', () {
+      final String testString =
+          Utils.getStringFromDynamic(valueMap['Non existing']);
+      expect(testString, '');
+    });
+    test('return number to String', () {
+      final String testString = Utils.getStringFromDynamic(valueMap['number']);
+      expect(testString, number.toString());
+    });
+    test('return String from string', () {
+      final String testString = Utils.getStringFromDynamic(valueMap['name']);
+      expect(testString, name);
+    });
+  });
+
+  group('Testing integer numbers from dynamic', () {
+    const String name = 'joao';
+    const int number = 123;
+    final Map<String, dynamic> valueMap = <String, dynamic>{
+      'name': name,
+      'number': number,
+    };
+    test('return 0 from null', () {
+      final int testNumber =
+          Utils.getIntegerFromDynamic(valueMap['Non existing']);
+      expect(testNumber, 0);
+    });
+    test('return number from number', () {
+      final int testNumber = Utils.getIntegerFromDynamic(valueMap['number']);
+      expect(testNumber, number);
+    });
+    test('return 0 from string', () {
+      final int testNumber = Utils.getIntegerFromDynamic(valueMap['name']);
+      expect(testNumber, 0);
+    });
+  });
+
+  group('Json encode and decode', () {
+    test('jsonEncode should encode a map correctly', () {
+      final Map<String, dynamic> inputMap = <String, dynamic>{'key': 'value'};
+      final String encodedJson = Utils.getJsonEncode(inputMap);
+
+      expect(encodedJson, '{"key":"value"}');
+    });
+  });
+
+  group('Utils', () {
+    test('jsonEncode should throw an exception with invalid input', () {
+      final Map<String, dynamic> invalidInput = <String, dynamic>{
+        'name': <dynamic, DateTime>{null: DateTime.now()},
+      };
+
+      final String result = Utils.getJsonEncode(invalidInput);
+
+      expect(
+        result.contains('error'),
+        isTrue,
+      );
+    });
+  });
 }
