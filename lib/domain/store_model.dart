@@ -153,6 +153,11 @@ class StoreModel extends Model {
             hashCode == other.hashCode;
   }
 
+  String get nitNumber => '$nit - ${StoreModel.getVerificationNITNumber(nit)}';
+  String get formatedPhoneNumber1 => Utils.getFormatedPhoneNumber(phoneNumber1);
+  String get formatedPhoneNumber2 =>
+      Utils.getFormatedPhoneNumberAlt(phoneNumber2);
+
   static int getVerificationNITNumber(int nitNumber) {
     final List<int> digitos = nitNumber
         .toString()

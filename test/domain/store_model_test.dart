@@ -60,5 +60,11 @@ void main() {
       expect(StoreModel.getVerificationNITNumber(1070955061), 3);
       expect(StoreModel.getVerificationNITNumber(12345), 8);
     });
+
+    test('format numbers and nit', () {
+      expect(defaultStoreModel.nitNumber, '12345 - 8');
+      expect(defaultStoreModel.formatedPhoneNumber1, '(00) 0 012 3456');
+      expect(defaultStoreModel.formatedPhoneNumber2, '000 078 9012');
+    });
   });
 }

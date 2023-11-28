@@ -18,3 +18,7 @@
 ## 0.0.5
 
 * StoreModel added
+
+## 0.0.6
+
+* StoreModel completed with formated options

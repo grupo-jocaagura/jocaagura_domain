@@ -219,4 +219,60 @@ void main() {
       );
     });
   });
+
+  group('Formatted numbers', () {
+    test('Formato correcto para número de teléfono válido', () {
+      expect(
+        Utils.getFormatedPhoneNumber(6018923465),
+        equals('(60) 1 892 3465'),
+      );
+    });
+
+    test(
+        'Formato correcto para número de teléfono válido con menos de 10 dígitos',
+        () {
+      expect(Utils.getFormatedPhoneNumber(8923465), equals('(00) 0 892 3465'));
+    });
+
+    test(
+        'Formato correcto para número de teléfono válido con 10 dígitos pero prefijo inválido',
+        () {
+      expect(
+        Utils.getFormatedPhoneNumber(1234567890),
+        equals('(12) 3 456 7890'),
+      );
+    });
+
+    test(
+        'Formato correcto para número de teléfono con todos los dígitos iguales',
+        () {
+      expect(
+        Utils.getFormatedPhoneNumber(5555555555),
+        equals('(55) 5 555 5555'),
+      );
+    });
+
+    test(
+        'Formato correcto para número de teléfono con todos los dígitos iguales',
+        () {
+      expect(
+          Utils.getFormatedPhoneNumberAlt(5555555555), equals('555 555 5555'));
+    });
+
+    test('Formato correcto para número de teléfono con menos de 10 dígitos',
+        () {
+      expect(Utils.getFormatedPhoneNumberAlt(8923465), equals('000 892 3465'));
+    });
+
+    test('Formato correcto para número de teléfono con 10 dígitos', () {
+      expect(
+          Utils.getFormatedPhoneNumberAlt(3000000000), equals('300 000 0000'));
+    });
+
+    test(
+        'Formato correcto para número de teléfono con todos los dígitos como ceros',
+        () {
+      expect(Utils.getFormatedPhoneNumberAlt(0), equals('000 000 0000'));
+    });
+  });
 }

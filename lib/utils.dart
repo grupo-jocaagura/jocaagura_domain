@@ -97,4 +97,24 @@ class Utils {
       return <String, String>{'error': e.toString()}.toString();
     }
   }
+
+  /// phoneNumbers formaters
+  static String getFormatedPhoneNumber(int numeroTelefono) {
+    final String numeroString = numeroTelefono.toString().padLeft(10, '0');
+    final String prefijo = numeroString.substring(0, 2);
+    final String resto = numeroString.substring(2);
+
+    String resultado = '($prefijo)';
+
+    resultado += ' ${resto.substring(0, 1)} '
+        '${resto.substring(1, 4)} '
+        '${resto.substring(4)}';
+
+    return resultado;
+  }
+
+  static String getFormatedPhoneNumberAlt(int numeroTelefono) {
+    final String numeroString = numeroTelefono.toString().padLeft(10, '0');
+    return '${numeroString.substring(0, 3)} ${numeroString.substring(3, 6)} ${numeroString.substring(6)}';
+  }
 }
