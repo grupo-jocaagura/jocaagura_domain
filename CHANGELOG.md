@@ -22,3 +22,7 @@
 ## 0.0.6
 
 * StoreModel completed with formated options
+
+* ## 0.0.7
+
+* PersonModel completed with subModelClass (AttributeModel) for info

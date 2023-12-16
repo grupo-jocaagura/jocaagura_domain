@@ -256,7 +256,7 @@ void main() {
         'Formato correcto para número de teléfono con todos los dígitos iguales',
         () {
       expect(
-          Utils.getFormatedPhoneNumberAlt(5555555555), equals('555 555 5555'));
+          Utils.getFormatedPhoneNumberAlt(5555555555), equals('555 555 5555'),);
     });
 
     test('Formato correcto para número de teléfono con menos de 10 dígitos',
@@ -266,7 +266,7 @@ void main() {
 
     test('Formato correcto para número de teléfono con 10 dígitos', () {
       expect(
-          Utils.getFormatedPhoneNumberAlt(3000000000), equals('300 000 0000'));
+          Utils.getFormatedPhoneNumberAlt(3000000000), equals('300 000 0000'),);
     });
 
     test(

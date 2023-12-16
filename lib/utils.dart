@@ -117,4 +117,12 @@ class Utils {
     final String numeroString = numeroTelefono.toString().padLeft(10, '0');
     return '${numeroString.substring(0, 3)} ${numeroString.substring(3, 6)} ${numeroString.substring(6)}';
   }
+
+  static double getDouble(dynamic json) {
+    return double.tryParse(json.toString()) ?? double.nan;
+  }
+
+  static bool getBoolFromDynamic(dynamic json) {
+    return json == true;
+  }
 }

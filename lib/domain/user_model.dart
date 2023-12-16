@@ -45,16 +45,16 @@ class UserModel extends Model {
   @override
   UserModel copyWith({
     String? id,
-    String? displayName,
+    String? names,
     String? photoUrl,
-    String? email,
+    String? lastNames,
     Map<String, dynamic>? jwt,
   }) =>
       UserModel(
         id: id ?? this.id,
-        displayName: displayName ?? this.displayName,
+        displayName: names ?? this.displayName,
         photoUrl: photoUrl ?? this.photoUrl,
-        email: email ?? this.email,
+        email: lastNames ?? this.email,
         jwt: jwt ?? this.jwt,
       );
 
