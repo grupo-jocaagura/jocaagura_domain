@@ -7,7 +7,8 @@ void main() {
   group('AttributeModel tests', () {
     // Constructor tests
     test('Constructor creates AttributeModel', () {
-      const model = AttributeModel<String>(value: 'test', name: 'name');
+      const AttributeModel<String> model =
+          AttributeModel<String>(value: 'test', name: 'name');
 
       expect(model.value, 'test');
       expect(model.name, 'name');
@@ -15,9 +16,11 @@ void main() {
 
     // CopyWith tests
     test('copyWith creates new AttributeModel with updated values', () {
-      const originalModel = AttributeModel<String>(value: 'test', name: 'name');
-      final cloneModel = originalModel.copyWith();
-      final newModel = originalModel.copyWith(value: 'new value');
+      const AttributeModel<String> originalModel =
+          AttributeModel<String>(value: 'test', name: 'name');
+      final AttributeModel<String> cloneModel = originalModel.copyWith();
+      final AttributeModel<String> newModel =
+          originalModel.copyWith(value: 'new value');
       expect(cloneModel == originalModel, true);
       expect(newModel.value, 'new value');
       expect(newModel.name, originalModel.name);
@@ -45,14 +48,10 @@ void main() {
     });
 
     test('fromJson handles DateTime values', () {
-      const Map<String, String> json = {
+      const Map<String, String> json = <String, String>{
         'value': '2023-10-27T00:00:00.000Z',
-        'name': 'date'
+        'name': 'date',
       };
-
-      //AttributeModel<DateTime>(
-      //           value: DateUtils.dateTimeFromDynamic(json['value']),
-      //           name: json['name'].toString());
 
       final AttributeModel<DateTime> model =
           attributeModelfromJson<DateTime>(json, DateUtils.dateTimeFromDynamic);
@@ -75,8 +74,10 @@ void main() {
 
     // Equality tests
     test('AttributeModel instances are equal if values are equal', () {
-      const model1 = AttributeModel<String>(value: 'test', name: 'name');
-      const model2 = AttributeModel<String>(value: 'test', name: 'name');
+      const AttributeModel<String> model1 =
+          AttributeModel<String>(value: 'test', name: 'name');
+      const AttributeModel<String> model2 =
+          AttributeModel<String>(value: 'test', name: 'name');
 
       expect(model1 == model2, true);
       expect(model1 == Object(), false);
@@ -85,8 +86,10 @@ void main() {
     // hashCode tests
     test('AttributeModel instances with same values have the same hashCode',
         () {
-      const model1 = AttributeModel<String>(value: 'test', name: 'name');
-      const model2 = AttributeModel<String>(value: 'test', name: 'name');
+      const AttributeModel<String> model1 =
+          AttributeModel<String>(value: 'test', name: 'name');
+      const AttributeModel<String> model2 =
+          AttributeModel<String>(value: 'test', name: 'name');
 
       expect(model1.hashCode == model2.hashCode, true);
     });
