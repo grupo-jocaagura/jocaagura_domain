@@ -40,9 +40,9 @@ void main() {
 
       final UserModel copiedModel = originalModel.copyWith(
         id: 'newId',
-        names: 'New Name',
+        displayName: 'New Name',
         photoUrl: 'https://example.com/new.png',
-        lastNames: 'new@example.com',
+        email: 'new@example.com',
         jwt: <String, dynamic>{'new': 'token'},
       );
       final UserModel copiedModel2 = originalModel.copyWith();

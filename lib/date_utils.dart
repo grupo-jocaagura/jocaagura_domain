@@ -18,4 +18,8 @@ class DateUtils {
     // Valor por defecto: fecha actual
     return DateTime.now();
   }
+
+  static String dateTimeToString(DateTime dateTime) {
+    return dateTime.toIso8601String();
+  }
 }

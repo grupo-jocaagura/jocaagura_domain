@@ -30,3 +30,7 @@
 * ## 0.0.71
 
 * Change attributes in Models for Map<String, AttributteModel<dynamic>>
+
+* ## 0.0.8
+
+* Add DateTime to String utility

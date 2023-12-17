@@ -37,4 +37,22 @@ void main() {
       expect(result, isA<DateTime>());
     });
   });
+
+  group('dateTimeToString Tests', () {
+    test('Converts a DateTime to an ISO 8601 string', () {
+      final DateTime dateTime = DateTime(2023, 4, 20, 12, 30);
+      final String result = DateUtils.dateTimeToString(dateTime);
+
+      // Verificar que el resultado es una cadena en formato ISO 8601
+      expect(result, '2023-04-20T12:30:00.000');
+    });
+
+    test('Handles different time zones correctly', () {
+      final DateTime dateTime = DateTime.utc(2023, 4, 20, 12, 30);
+      final String result = DateUtils.dateTimeToString(dateTime);
+
+      // Verificar que la zona horaria UTC se maneja correctamente
+      expect(result, '2023-04-20T12:30:00.000Z');
+    });
+  });
 }

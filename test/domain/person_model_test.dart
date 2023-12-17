@@ -66,7 +66,7 @@ void main() {
 
       final PersonModel copy = original.copyWith(
         id: '456',
-        names: 'Jane Doe',
+        displayName: 'Jane Doe',
       );
 
       expect(copy.id, '456');
