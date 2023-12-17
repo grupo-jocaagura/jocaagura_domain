@@ -51,7 +51,9 @@ class AttributeModel<T> extends Model {
 }
 
 AttributeModel<T> attributeModelfromJson<T>(
-    Map<String, dynamic> json, T Function(dynamic) fromJsonT) {
+  Map<String, dynamic> json,
+  T Function(dynamic) fromJsonT,
+) {
   dynamic value = json['value'];
   value = fromJsonT(value);
   return AttributeModel<T>(

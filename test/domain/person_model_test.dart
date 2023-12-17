@@ -9,7 +9,7 @@ void main() {
         names: 'J.J.',
         photoUrl: '',
         lastNames: 'anonimo@anonimo.com.co',
-        attributtes: <AttributeModel<dynamic>>[],
+        attributtes: <String, AttributeModel<dynamic>>{},
       );
 
       expect(person.id, '');
@@ -43,7 +43,7 @@ void main() {
         names: 'John Doe',
         photoUrl: 'url',
         lastNames: 'Doe',
-        attributtes: <AttributeModel<dynamic>>[],
+        attributtes: <String, AttributeModel<dynamic>>{},
       );
 
       final Map<String, dynamic> json = person.toJson();
@@ -61,7 +61,7 @@ void main() {
         names: 'John Doe',
         photoUrl: 'url',
         lastNames: 'Doe',
-        attributtes: <AttributeModel<dynamic>>[],
+        attributtes: <String, AttributeModel<dynamic>>{},
       );
 
       final PersonModel copy = original.copyWith(
@@ -82,7 +82,7 @@ void main() {
         names: 'John Doe',
         photoUrl: 'url',
         lastNames: 'Doe',
-        attributtes: <AttributeModel<dynamic>>[],
+        attributtes: <String, AttributeModel<dynamic>>{},
       );
 
       const PersonModel person2 = PersonModel(
@@ -90,7 +90,7 @@ void main() {
         names: 'John Doe',
         photoUrl: 'url',
         lastNames: 'Doe',
-        attributtes: <AttributeModel<dynamic>>[],
+        attributtes: <String, AttributeModel<dynamic>>{},
       );
 
       expect(person1, equals(person2));

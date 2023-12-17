@@ -12,8 +12,8 @@ const PersonModel defaultPersonModel = PersonModel(
   id: '',
   names: 'J.J.',
   photoUrl: '',
-  lastNames: 'anonimo@anonimo.com.co',
-  attributtes: <AttributeModel<dynamic>>[],
+  lastNames: 'Last Names',
+  attributtes: <String, AttributeModel<dynamic>>{},
 );
 
 class PersonModel extends Model {
@@ -31,7 +31,7 @@ class PersonModel extends Model {
       names: Utils.getStringFromDynamic(json[PersonEnum.names.name]),
       photoUrl: Utils.getUrlFromDynamic(json[PersonEnum.photoUrl.name]),
       lastNames: Utils.getStringFromDynamic(json[PersonEnum.lastNames.name]),
-      attributtes: const <AttributeModel<dynamic>>[],
+      attributtes: const <String, AttributeModel<dynamic>>{},
     );
   }
 
@@ -39,7 +39,7 @@ class PersonModel extends Model {
   final String names;
   final String photoUrl;
   final String lastNames;
-  final List<AttributeModel<dynamic>> attributtes;
+  final Map<String, AttributeModel<dynamic>> attributtes;
 
   @override
   PersonModel copyWith({
@@ -47,7 +47,7 @@ class PersonModel extends Model {
     String? names,
     String? photoUrl,
     String? lastNames,
-    List<AttributeModel<dynamic>>? attributtes,
+    Map<String, AttributeModel<dynamic>>? attributtes,
   }) =>
       PersonModel(
         id: id ?? this.id,
@@ -60,8 +60,9 @@ class PersonModel extends Model {
   @override
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> mapTmp = <String, dynamic>{};
-    for (final AttributeModel<dynamic> element in attributtes) {
-      mapTmp.addAll(element.toJson());
+    for (final MapEntry<String, AttributeModel<dynamic>> element
+        in attributtes.entries) {
+      mapTmp.addAll(element.value.toJson());
     }
 
     return <String, dynamic>{

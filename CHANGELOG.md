@@ -26,3 +26,7 @@
 * ## 0.0.7
 
 * PersonModel completed with subModelClass (AttributeModel) for info
+
+* ## 0.0.71
+
+* Change attributes in Models for Map<String, AttributteModel<dynamic>>
