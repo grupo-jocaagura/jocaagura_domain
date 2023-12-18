@@ -34,3 +34,9 @@
 * ## 0.0.8
 
 * Add DateTime to String utility
+
+* ## 0.0.9
+
+* Add ObituaryModel.
+* Minor fix to PersonModel to cover variable names properly.
+* Increase of person model and DateUtils test coverage

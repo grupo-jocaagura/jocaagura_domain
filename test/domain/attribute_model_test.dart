@@ -38,7 +38,7 @@ void main() {
     test('fromJson parses JSON string and creates AttributeModel', () {
       const Map<String, dynamic> json = <String, dynamic>{
         'value': 'test',
-        'name': 'name'
+        'name': 'name',
       };
       final AttributeModel<String> model =
           attributeModelfromJson<String>(json, Utils.getStringFromDynamic);
@@ -63,7 +63,7 @@ void main() {
     test('fromJson handles int values', () {
       const Map<String, dynamic> json = <String, dynamic>{
         'value': 123,
-        'name': 'age'
+        'name': 'age',
       };
       final AttributeModel<int> model =
           attributeModelfromJson<int>(json, Utils.getIntegerFromDynamic);

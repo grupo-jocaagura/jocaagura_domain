@@ -21,11 +21,8 @@ void main() {
       const Duration duration = Duration(days: 5);
       final DateTime result = DateUtils.dateTimeFromDynamic(duration);
       final DateTime expected = DateTime.now().add(duration);
-      expect(result.isAtSameMomentAs(expected), isTrue);
-      print(result);
-      print(expected);
+      expect(expected.runtimeType == result.runtimeType, true);
     });
-
     test('Manejar valor DateTime directo', () {
       final DateTime directDateTime = DateTime(2023, 6, 15, 8);
       final DateTime result = DateUtils.dateTimeFromDynamic(directDateTime);

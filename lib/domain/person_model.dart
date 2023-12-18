@@ -44,14 +44,14 @@ class PersonModel extends Model {
   @override
   PersonModel copyWith({
     String? id,
-    String? displayName,
+    String? names,
     String? photoUrl,
     String? lastNames,
     Map<String, AttributeModel<dynamic>>? attributtes,
   }) =>
       PersonModel(
         id: id ?? this.id,
-        names: displayName ?? this.names,
+        names: names ?? this.names,
         photoUrl: photoUrl ?? this.photoUrl,
         lastNames: lastNames ?? this.lastNames,
         attributtes: attributtes ?? this.attributtes,

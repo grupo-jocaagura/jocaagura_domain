@@ -43,7 +43,9 @@ void main() {
         names: 'John Doe',
         photoUrl: 'url',
         lastNames: 'Doe',
-        attributtes: <String, AttributeModel<dynamic>>{},
+        attributtes: <String, AttributeModel<dynamic>>{
+          'eyesColor': AttributeModel<String>(value: 'red', name: 'eyesColor'),
+        },
       );
 
       final Map<String, dynamic> json = person.toJson();
@@ -66,7 +68,7 @@ void main() {
 
       final PersonModel copy = original.copyWith(
         id: '456',
-        displayName: 'Jane Doe',
+        names: 'Jane Doe',
       );
 
       expect(copy.id, '456');
@@ -74,6 +76,9 @@ void main() {
       expect(copy.photoUrl, original.photoUrl);
       expect(copy.lastNames, original.lastNames);
       expect(copy.attributtes, original.attributtes);
+      final PersonModel copy2 = copy.copyWith();
+      expect(copy == copy2, true);
+      expect(copy.toString(), copy2.toString());
     });
 
     test('Equality and hashCode work correctly', () {
