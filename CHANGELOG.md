@@ -40,3 +40,8 @@
 * Add ObituaryModel.
 * Minor fix to PersonModel to cover variable names properly.
 * Increase of person model and DateUtils test coverage
+
+* ## 0.1.01
+
+* Change officialy to beta.
+* Minor fix to ObituaryModel to cover message in parameters.
