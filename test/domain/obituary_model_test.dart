@@ -44,6 +44,8 @@ void main() {
         id: '123',
         person: person,
         creationDate: DateTime(2023, 4, 20, 12, 30),
+        vigilDate: DateTime(2023, 4, 20, 16, 30),
+        burialDate: DateTime(2023, 4, 20, 18, 30),
         vigilAddress: address,
         burialAddress: address,
         photoUrl: 'http://example.com/photo.jpg',
@@ -59,6 +61,7 @@ void main() {
       final ObituaryModel original = defaultObituary;
 
       final ObituaryModel copy = original.copyWith(id: '456');
+      expect(defaultObituary.toString() == original.toString(), true);
 
       expect(copy.id, '456');
       // ... más expectativas para otros campos

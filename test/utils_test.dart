@@ -256,7 +256,9 @@ void main() {
         'Formato correcto para número de teléfono con todos los dígitos iguales',
         () {
       expect(
-          Utils.getFormatedPhoneNumberAlt(5555555555), equals('555 555 5555'),);
+        Utils.getFormatedPhoneNumberAlt(5555555555),
+        equals('555 555 5555'),
+      );
     });
 
     test('Formato correcto para número de teléfono con menos de 10 dígitos',
@@ -266,13 +268,44 @@ void main() {
 
     test('Formato correcto para número de teléfono con 10 dígitos', () {
       expect(
-          Utils.getFormatedPhoneNumberAlt(3000000000), equals('300 000 0000'),);
+        Utils.getFormatedPhoneNumberAlt(3000000000),
+        equals('300 000 0000'),
+      );
     });
 
     test(
         'Formato correcto para número de teléfono con todos los dígitos como ceros',
         () {
       expect(Utils.getFormatedPhoneNumberAlt(0), equals('000 000 0000'));
+    });
+  });
+  group('getDouble Tests', () {
+    test('Correctly parses valid double string', () {
+      expect(Utils.getDouble('123.45'), 123.45);
+    });
+
+    test('Returns NaN for invalid double string', () {
+      expect(Utils.getDouble('not_a_double'), isNaN);
+    });
+
+    test('Handles null input', () {
+      expect(Utils.getDouble(null), isNaN);
+    });
+  });
+
+  group('getBoolFromDynamic Tests', () {
+    test('Returns true for true boolean', () {
+      expect(Utils.getBoolFromDynamic(true), isTrue);
+    });
+
+    test('Returns false for false boolean', () {
+      expect(Utils.getBoolFromDynamic(false), isFalse);
+    });
+
+    test('Returns false for non-boolean values', () {
+      expect(Utils.getBoolFromDynamic('true'), isFalse);
+      expect(Utils.getBoolFromDynamic(1), isFalse);
+      expect(Utils.getBoolFromDynamic(null), isFalse);
     });
   });
 }

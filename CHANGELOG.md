@@ -45,3 +45,8 @@
 
 * Change officialy to beta.
 * Minor fix to ObituaryModel to cover message in parameters.
+
+* ## 0.1.2
+
+* Minor fix to ObituaryModel to cover vigilDate and burialDate in parameters.
+* increase unit tets coverage

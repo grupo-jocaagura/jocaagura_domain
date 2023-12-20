@@ -7,17 +7,22 @@ enum ObituaryEnum {
   creationDate,
   vigilAddress,
   burialAddress,
+  vigilDate,
+  burialDate,
   message,
 }
 
 final ObituaryModel defaultObituary = ObituaryModel(
-    id: 'qwerty',
-    person: defaultPersonModel,
-    creationDate: DateTime(2023, 12, 18),
-    vigilAddress: defaultAddressModel,
-    burialAddress: defaultAddressModel,
-    message:
-        "Lamentamos profundamente tu perdida. Esperamos que tu memoria perdure como una fuente de inspiración y amor.");
+  id: 'qwerty',
+  person: defaultPersonModel,
+  creationDate: DateTime(2023, 12, 18),
+  vigilDate: DateTime(2023, 07, 05, 14, 30),
+  burialDate: DateTime(2023, 07, 05, 16, 30),
+  vigilAddress: defaultAddressModel,
+  burialAddress: defaultAddressModel,
+  message:
+      'Lamentamos profundamente tu perdida. Esperamos que tu memoria perdure como una fuente de inspiración y amor.',
+);
 
 @immutable
 class ObituaryModel extends Model {
@@ -25,6 +30,8 @@ class ObituaryModel extends Model {
     required this.id,
     required this.person,
     required this.creationDate,
+    required this.vigilDate,
+    required this.burialDate,
     required this.vigilAddress,
     required this.burialAddress,
     this.photoUrl = '',
@@ -40,6 +47,10 @@ class ObituaryModel extends Model {
       ),
       creationDate:
           DateUtils.dateTimeFromDynamic(json[ObituaryEnum.creationDate.name]),
+      vigilDate:
+          DateUtils.dateTimeFromDynamic(json[ObituaryEnum.vigilDate.name]),
+      burialDate:
+          DateUtils.dateTimeFromDynamic(json[ObituaryEnum.burialDate.name]),
       vigilAddress: AddressModel.fromJson(
         Utils.mapFromDynamic(json[ObituaryEnum.vigilAddress.name]),
       ),
@@ -54,6 +65,8 @@ class ObituaryModel extends Model {
   final String photoUrl;
   final PersonModel person;
   final DateTime creationDate;
+  final DateTime vigilDate;
+  final DateTime burialDate;
   final AddressModel vigilAddress;
   final AddressModel burialAddress;
   final String message;
@@ -64,17 +77,21 @@ class ObituaryModel extends Model {
     String? photoUrl,
     PersonModel? person,
     DateTime? creationDate,
+    DateTime? vigilDate,
+    DateTime? burialDate,
     AddressModel? vigilAddress,
     AddressModel? burialAddress,
-    String? msg,
+    String? message,
   }) {
     return ObituaryModel(
       id: id ?? this.id,
       person: person ?? this.person,
       creationDate: creationDate ?? this.creationDate,
+      vigilDate: vigilDate ?? this.vigilDate,
+      burialDate: burialDate ?? this.burialDate,
       vigilAddress: vigilAddress ?? this.vigilAddress,
       burialAddress: burialAddress ?? this.burialAddress,
-      message: msg ?? this.message,
+      message: message ?? this.message,
     );
   }
 
@@ -87,6 +104,8 @@ class ObituaryModel extends Model {
       ObituaryEnum.vigilAddress.name: vigilAddress.toJson(),
       ObituaryEnum.burialAddress.name: burialAddress.toJson(),
       ObituaryEnum.creationDate.name: DateUtils.dateTimeToString(creationDate),
+      ObituaryEnum.vigilDate.name: DateUtils.dateTimeToString(vigilDate),
+      ObituaryEnum.burialDate.name: DateUtils.dateTimeToString(burialDate),
       ObituaryEnum.message.name: message,
     };
   }
@@ -99,6 +118,8 @@ class ObituaryModel extends Model {
       vigilAddress.hashCode ^
       burialAddress.hashCode ^
       message.hashCode ^
+      vigilDate.hashCode ^
+      burialDate.hashCode ^
       creationDate.hashCode;
 
   @override
@@ -112,6 +133,8 @@ class ObituaryModel extends Model {
             other.vigilAddress == vigilAddress &&
             other.burialAddress == burialAddress &&
             other.message == message &&
+            other.vigilDate == vigilDate &&
+            other.burialDate == burialDate &&
             other.creationDate == creationDate;
   }
 
