@@ -50,3 +50,7 @@
 
 * Minor fix to ObituaryModel to cover vigilDate and burialDate in parameters.
 * increase unit tets coverage
+
+* ## 0.2.0
+
+* Add DeathRecordModel

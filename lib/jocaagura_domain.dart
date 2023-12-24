@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 part 'date_utils.dart';
 part 'domain/address_model.dart';
 part 'domain/attribute_model.dart';
+part 'domain/death_record_model.dart';
 part 'domain/obituary_model.dart';
 part 'domain/person_model.dart';
 part 'domain/store_model.dart';
