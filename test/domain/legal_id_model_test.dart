@@ -60,7 +60,7 @@ void main() {
         'legalIdNumber': '123456789',
       };
 
-      final LegalIdModel fromJsonLegalId = defaultLegalIdModel.from(json);
+      final LegalIdModel fromJsonLegalId = LegalIdModel.fromJson(json);
       expect(fromJsonLegalId, isA<LegalIdModel>());
       // Add more assertions for each property as needed
     });
@@ -117,7 +117,8 @@ void main() {
       );
       expect(
         getEnumValueFromString(
-            LegalIdTypeEnum.certificadoNacidoVivo.description),
+          LegalIdTypeEnum.certificadoNacidoVivo.description,
+        ),
         LegalIdTypeEnum.certificadoNacidoVivo,
       );
       expect(

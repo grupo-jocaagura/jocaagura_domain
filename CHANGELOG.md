@@ -58,3 +58,7 @@
 * ## 0.3.0
 
 * Add LegalIdModel
+
+* ## 0.3.1
+
+* fixed factory fromJson constructor in LegalIdModel

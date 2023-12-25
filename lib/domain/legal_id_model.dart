@@ -86,6 +86,16 @@ class LegalIdModel implements Model {
     this.id = '',
     this.attributes = const <String, AttributeModel<dynamic>>{},
   });
+  factory LegalIdModel.fromJson(Map<String, dynamic> json) {
+    return LegalIdModel(
+      idType: getEnumValueFromString(json[LegalIdEnum.idType.name].toString()),
+      id: Utils.getStringFromDynamic(json[LegalIdEnum.id.name]),
+      names: Utils.getStringFromDynamic(json[LegalIdEnum.names.name]),
+      lastNames: Utils.getStringFromDynamic(json[LegalIdEnum.lastNames.name]),
+      legalIdNumber:
+          Utils.getStringFromDynamic(json[LegalIdEnum.legalIdNumber.name]),
+    );
+  }
 
   final String id;
   final LegalIdTypeEnum idType;
@@ -110,17 +120,6 @@ class LegalIdModel implements Model {
       lastNames: lastNames ?? this.lastNames,
       legalIdNumber: legalIdNumber ?? this.legalIdNumber,
       attributes: attributes ?? this.attributes,
-    );
-  }
-
-  LegalIdModel from(Map<String, dynamic> json) {
-    return LegalIdModel(
-      idType: getEnumValueFromString(json[LegalIdEnum.idType.name].toString()),
-      id: Utils.getStringFromDynamic(json[LegalIdEnum.id.name]),
-      names: Utils.getStringFromDynamic(json[LegalIdEnum.names.name]),
-      lastNames: Utils.getStringFromDynamic(json[LegalIdEnum.lastNames.name]),
-      legalIdNumber:
-          Utils.getStringFromDynamic(json[LegalIdEnum.legalIdNumber.name]),
     );
   }
 
