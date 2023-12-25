@@ -9,14 +9,14 @@ void main() {
         names: 'J.J.',
         photoUrl: '',
         lastNames: 'anonimo@anonimo.com.co',
-        attributtes: <String, AttributeModel<dynamic>>{},
+        attributes: <String, AttributeModel<dynamic>>{},
       );
 
       expect(person.id, '');
       expect(person.names, 'J.J.');
       expect(person.photoUrl, '');
       expect(person.lastNames, 'anonimo@anonimo.com.co');
-      expect(person.attributtes, isEmpty);
+      expect(person.attributes, isEmpty);
     });
 
     test('fromJson creates correct instance', () {
@@ -34,7 +34,7 @@ void main() {
       expect(person.names, 'John Doe');
       expect(person.photoUrl, '');
       expect(person.lastNames, 'Doe');
-      expect(person.attributtes, isEmpty);
+      expect(person.attributes, isEmpty);
     });
 
     test('toJson returns correct map', () {
@@ -43,7 +43,7 @@ void main() {
         names: 'John Doe',
         photoUrl: 'url',
         lastNames: 'Doe',
-        attributtes: <String, AttributeModel<dynamic>>{
+        attributes: <String, AttributeModel<dynamic>>{
           'eyesColor': AttributeModel<String>(value: 'red', name: 'eyesColor'),
         },
       );
@@ -63,7 +63,7 @@ void main() {
         names: 'John Doe',
         photoUrl: 'url',
         lastNames: 'Doe',
-        attributtes: <String, AttributeModel<dynamic>>{},
+        attributes: <String, AttributeModel<dynamic>>{},
       );
 
       final PersonModel copy = original.copyWith(
@@ -75,7 +75,7 @@ void main() {
       expect(copy.names, 'Jane Doe');
       expect(copy.photoUrl, original.photoUrl);
       expect(copy.lastNames, original.lastNames);
-      expect(copy.attributtes, original.attributtes);
+      expect(copy.attributes, original.attributes);
       final PersonModel copy2 = copy.copyWith();
       expect(copy == copy2, true);
       expect(copy.toString(), copy2.toString());
@@ -87,7 +87,7 @@ void main() {
         names: 'John Doe',
         photoUrl: 'url',
         lastNames: 'Doe',
-        attributtes: <String, AttributeModel<dynamic>>{},
+        attributes: <String, AttributeModel<dynamic>>{},
       );
 
       const PersonModel person2 = PersonModel(
@@ -95,7 +95,7 @@ void main() {
         names: 'John Doe',
         photoUrl: 'url',
         lastNames: 'Doe',
-        attributtes: <String, AttributeModel<dynamic>>{},
+        attributes: <String, AttributeModel<dynamic>>{},
       );
 
       expect(person1, equals(person2));

@@ -36,7 +36,7 @@ void main() {
         names: 'John Doe',
         photoUrl: '',
         lastNames: 'Doe',
-        attributtes: <String, AttributeModel<dynamic>>{},
+        attributes: <String, AttributeModel<dynamic>>{},
       );
       const AddressModel address = defaultAddressModel;
 

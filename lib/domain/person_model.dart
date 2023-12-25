@@ -13,7 +13,7 @@ const PersonModel defaultPersonModel = PersonModel(
   names: 'J.J.',
   photoUrl: '',
   lastNames: 'Last Names',
-  attributtes: <String, AttributeModel<dynamic>>{},
+  attributes: <String, AttributeModel<dynamic>>{},
 );
 
 class PersonModel extends Model {
@@ -22,7 +22,7 @@ class PersonModel extends Model {
     required this.names,
     required this.photoUrl,
     required this.lastNames,
-    required this.attributtes,
+    required this.attributes,
   });
 
   factory PersonModel.fromJson(Map<String, dynamic> json) {
@@ -31,7 +31,7 @@ class PersonModel extends Model {
       names: Utils.getStringFromDynamic(json[PersonEnum.names.name]),
       photoUrl: Utils.getUrlFromDynamic(json[PersonEnum.photoUrl.name]),
       lastNames: Utils.getStringFromDynamic(json[PersonEnum.lastNames.name]),
-      attributtes: const <String, AttributeModel<dynamic>>{},
+      attributes: const <String, AttributeModel<dynamic>>{},
     );
   }
 
@@ -39,7 +39,7 @@ class PersonModel extends Model {
   final String names;
   final String photoUrl;
   final String lastNames;
-  final Map<String, AttributeModel<dynamic>> attributtes;
+  final Map<String, AttributeModel<dynamic>> attributes;
 
   @override
   PersonModel copyWith({
@@ -47,21 +47,21 @@ class PersonModel extends Model {
     String? names,
     String? photoUrl,
     String? lastNames,
-    Map<String, AttributeModel<dynamic>>? attributtes,
+    Map<String, AttributeModel<dynamic>>? attributes,
   }) =>
       PersonModel(
         id: id ?? this.id,
         names: names ?? this.names,
         photoUrl: photoUrl ?? this.photoUrl,
         lastNames: lastNames ?? this.lastNames,
-        attributtes: attributtes ?? this.attributtes,
+        attributes: attributes ?? this.attributes,
       );
 
   @override
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> mapTmp = <String, dynamic>{};
     for (final MapEntry<String, AttributeModel<dynamic>> element
-        in attributtes.entries) {
+        in attributes.entries) {
       mapTmp.addAll(element.value.toJson());
     }
 
@@ -82,12 +82,12 @@ class PersonModel extends Model {
           id == other.id &&
           names == other.names &&
           photoUrl == other.photoUrl &&
-          attributtes == other.attributtes &&
+          attributes == other.attributes &&
           lastNames == other.lastNames &&
           hashCode == other.hashCode;
 
   @override
-  int get hashCode => '$id$names$photoUrl$lastNames$attributtes'.hashCode;
+  int get hashCode => '$id$names$photoUrl$lastNames$attributes'.hashCode;
 
   @override
   String toString() {

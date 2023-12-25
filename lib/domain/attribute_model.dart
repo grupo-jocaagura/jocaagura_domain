@@ -5,6 +5,13 @@ enum AttributeEnum {
   value,
 }
 
+/// el tipo [T] debe mantener la compatibilidad de datos de firebase
+/// Compatibilidad de Tipos de Datos: Asegúrate de que todos los valores dentro
+/// del Map sean tipos de datos que Firestore puede manejar.
+/// Estos incluyen String, Number (enteros y flotantes),
+/// Boolean, Map, Array, Null, Timestamp, puntos geográficos y blobs binarios.
+/// Cualquier valor que no sea de estos tipos puede causar errores o
+/// comportamientos inesperados.
 class AttributeModel<T> extends Model {
   const AttributeModel({
     required this.value,
