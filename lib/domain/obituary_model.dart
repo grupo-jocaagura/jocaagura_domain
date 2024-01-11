@@ -10,6 +10,7 @@ enum ObituaryEnum {
   vigilDate,
   burialDate,
   message,
+  deathRecord,
 }
 
 final ObituaryModel defaultObituary = ObituaryModel(
@@ -36,6 +37,7 @@ class ObituaryModel extends Model {
     required this.burialAddress,
     this.photoUrl = '',
     this.message = '',
+    this.deathRecord,
   });
 
   factory ObituaryModel.fromJson(Map<String, dynamic> json) {
@@ -70,6 +72,7 @@ class ObituaryModel extends Model {
   final AddressModel vigilAddress;
   final AddressModel burialAddress;
   final String message;
+  final DeathRecordModel? deathRecord;
 
   @override
   ObituaryModel copyWith({
@@ -82,6 +85,7 @@ class ObituaryModel extends Model {
     AddressModel? vigilAddress,
     AddressModel? burialAddress,
     String? message,
+    DeathRecordModel? deathRecord,
   }) {
     return ObituaryModel(
       id: id ?? this.id,
@@ -92,6 +96,7 @@ class ObituaryModel extends Model {
       vigilAddress: vigilAddress ?? this.vigilAddress,
       burialAddress: burialAddress ?? this.burialAddress,
       message: message ?? this.message,
+      deathRecord: deathRecord ?? this.deathRecord,
     );
   }
 
@@ -107,6 +112,7 @@ class ObituaryModel extends Model {
       ObituaryEnum.vigilDate.name: DateUtils.dateTimeToString(vigilDate),
       ObituaryEnum.burialDate.name: DateUtils.dateTimeToString(burialDate),
       ObituaryEnum.message.name: message,
+      ObituaryEnum.deathRecord.name: deathRecord?.toJson(),
     };
   }
 
@@ -120,6 +126,7 @@ class ObituaryModel extends Model {
       message.hashCode ^
       vigilDate.hashCode ^
       burialDate.hashCode ^
+      deathRecord.hashCode ^
       creationDate.hashCode;
 
   @override
@@ -135,6 +142,7 @@ class ObituaryModel extends Model {
             other.message == message &&
             other.vigilDate == vigilDate &&
             other.burialDate == burialDate &&
+            other.deathRecord == deathRecord &&
             other.creationDate == creationDate;
   }
 

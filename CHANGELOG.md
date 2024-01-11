@@ -62,3 +62,7 @@
 * ## 0.3.1
 
 * fixed factory fromJson constructor in LegalIdModel
+
+* ## 0.3.2
+
+* Add DeathRecordModel into ObituaryModel
