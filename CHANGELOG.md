@@ -66,3 +66,8 @@
 * ## 0.3.2
 
 * Add DeathRecordModel into ObituaryModel
+
+* ## 1.0.0
+
+* Add Either class 
+* Approved for production
