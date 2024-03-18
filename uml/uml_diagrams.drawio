@@ -1,4 +1,4 @@
-<mxfile host="Electron" modified="2024-03-17T17:29:59.682Z" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/22.1.21 Chrome/120.0.6099.109 Electron/28.1.0 Safari/537.36" etag="j_M8BS98UlBMYZ9-lP0Q" version="22.1.21" type="device" pages="3">
+<mxfile host="Electron" modified="2024-03-18T19:14:27.102Z" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/24.0.4 Chrome/120.0.6099.109 Electron/28.1.0 Safari/537.36" etag="TXQmwMKAhUQcfnaev2fo" version="24.0.4" type="device" pages="4">
   <diagram id="C5RBs43oDa-KdzZeNtuy" name="Page-1">
     <mxGraphModel dx="1621" dy="1734" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
       <root>
@@ -648,6 +648,37 @@
         </mxCell>
         <mxCell id="rcfcT3Z_d5_y9H82ViNC-55" value="+&amp;nbsp;dispose(): void" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" parent="rcfcT3Z_d5_y9H82ViNC-43" vertex="1">
           <mxGeometry y="294" width="560" height="26" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="xmCOtIouzrn9aES_qLQq" name="UI">
+    <mxGraphModel dx="794" dy="565" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="nDtPOqHzbCfW2nmoA4aE-4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="3lqOQUsY7bXp1_qb2GWc-1" target="nDtPOqHzbCfW2nmoA4aE-5">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="470" y="140" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="3lqOQUsY7bXp1_qb2GWc-1" value="ModelMainMenuModel" style="swimlane;fontStyle=1;align=center;verticalAlign=middle;childLayout=stackLayout;horizontal=1;startSize=29;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;html=1;whiteSpace=wrap;" parent="1" vertex="1">
+          <mxGeometry x="340" y="250" width="260" height="129" as="geometry" />
+        </mxCell>
+        <mxCell id="3lqOQUsY7bXp1_qb2GWc-2" value="+iconsData: IconData" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;" parent="3lqOQUsY7bXp1_qb2GWc-1" vertex="1">
+          <mxGeometry y="29" width="260" height="25" as="geometry" />
+        </mxCell>
+        <mxCell id="3lqOQUsY7bXp1_qb2GWc-3" value="+ onPressed: void Function" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;" parent="3lqOQUsY7bXp1_qb2GWc-1" vertex="1">
+          <mxGeometry y="54" width="260" height="25" as="geometry" />
+        </mxCell>
+        <mxCell id="nDtPOqHzbCfW2nmoA4aE-1" value="+ label: String" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;" vertex="1" parent="3lqOQUsY7bXp1_qb2GWc-1">
+          <mxGeometry y="79" width="260" height="25" as="geometry" />
+        </mxCell>
+        <mxCell id="nDtPOqHzbCfW2nmoA4aE-2" value="+ description: String" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;" vertex="1" parent="3lqOQUsY7bXp1_qb2GWc-1">
+          <mxGeometry y="104" width="260" height="25" as="geometry" />
+        </mxCell>
+        <mxCell id="nDtPOqHzbCfW2nmoA4aE-5" value="Model" style="whiteSpace=wrap;html=1;aspect=fixed;" vertex="1" parent="1">
+          <mxGeometry x="430" y="100" width="80" height="80" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>

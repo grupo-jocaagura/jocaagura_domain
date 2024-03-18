@@ -24,7 +24,7 @@ part 'domain/legal_id_model.dart';
 part 'domain/obituary_model.dart';
 part 'domain/person_model.dart';
 part 'domain/store_model.dart';
-part 'domain/ui/main_menu_model.dart';
+part 'domain/ui/model_main_menu_model.dart';
 part 'domain/user_model.dart';
 part 'utils.dart';
 
