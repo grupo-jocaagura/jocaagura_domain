@@ -1,6 +1,6 @@
 part of 'jocaagura_domain.dart';
 
-class Utils {
+class Utils extends EntityUtil {
   static String mapToString(Map<String, dynamic> inputMap) {
     return getJsonEncode(inputMap);
   }
@@ -118,8 +118,11 @@ class Utils {
     return '${numeroString.substring(0, 3)} ${numeroString.substring(3, 6)} ${numeroString.substring(6)}';
   }
 
-  static double getDouble(dynamic json) {
-    return double.tryParse(json.toString()) ?? double.nan;
+  static double getDouble(
+    dynamic json, [
+    double defaultValue = double.nan,
+  ]) {
+    return double.tryParse(json.toString()) ?? defaultValue;
   }
 
   static bool getBoolFromDynamic(dynamic json) {

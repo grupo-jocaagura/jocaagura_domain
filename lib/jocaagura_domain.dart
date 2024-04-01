@@ -21,6 +21,7 @@ part 'domain/entity_provider.dart';
 part 'domain/entity_service.dart';
 part 'domain/entity_util.dart';
 part 'domain/legal_id_model.dart';
+part 'domain/model_vector.dart';
 part 'domain/obituary_model.dart';
 part 'domain/person_model.dart';
 part 'domain/store_model.dart';

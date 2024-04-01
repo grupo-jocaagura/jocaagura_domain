@@ -21,10 +21,11 @@ class ModelMainMenuModel extends Model {
     String? description,
   }) {
     return ModelMainMenuModel(
-        iconData: iconData ?? this.iconData,
-        onPressed: onPressed ?? this.onPressed,
-        label: label ?? this.label,
-        description: description ?? this.description);
+      iconData: iconData ?? this.iconData,
+      onPressed: onPressed ?? this.onPressed,
+      label: label ?? this.label,
+      description: description ?? this.description,
+    );
   }
 
   @override
