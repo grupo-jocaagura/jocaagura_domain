@@ -31,8 +31,7 @@ Para utilizar el paquete, se requiere la instalación del SDK de Flutter. No hay
 - [BlocGeneral](#blocgeneral)
 - [BlocModule](#blocmodule)
 - [Either, Left, and Right](#either-left-and-right)
-- [EntityBloc](#entitybloc)
-- [RepeatLastValueExtension](#repeatlastvalueextension)
+- [EntityBloc](#EntityBloc-and-RepeatLastValueExtension)
 - [EntityProvider, EntityService, and EntityUtil](#entityprovider-entityservice-and-entityutil)
 - [ModelMainMenuModel](#modelmainmenumodel)
 
