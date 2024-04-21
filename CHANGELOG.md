@@ -71,3 +71,8 @@
 
 * Add Either class 
 * Approved for production
+
+## 1.2.1
+
+* Add Debouncer class
+* Add documentation in readme file

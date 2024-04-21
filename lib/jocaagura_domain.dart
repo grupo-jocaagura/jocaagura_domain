@@ -15,6 +15,7 @@ part 'domain/bloc_core.dart';
 part 'domain/bloc_general.dart';
 part 'domain/bloc_module.dart';
 part 'domain/death_record_model.dart';
+part 'domain/debouncer.dart';
 part 'domain/either.dart';
 part 'domain/entity_bloc.dart';
 part 'domain/entity_provider.dart';

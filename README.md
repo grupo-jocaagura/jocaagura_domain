@@ -34,6 +34,7 @@ Para utilizar el paquete, se requiere la instalación del SDK de Flutter. No hay
 - [EntityBloc](#EntityBloc-and-RepeatLastValueExtension)
 - [EntityProvider, EntityService, and EntityUtil](#entityprovider-entityservice-and-entityutil)
 - [ModelMainMenuModel](#modelmainmenumodel)
+- [Debouncer](#debouncer)
 
 Cada sección proporciona detalles sobre la implementación y el uso de las clases, ofreciendo ejemplos de código y explicaciones de cómo se integran dentro de tu arquitectura de dominio.
 
@@ -886,3 +887,50 @@ class MainMenuTile extends StatelessWidget {
 }
 ```
 `ModelMainMenuModel` facilita la creación de menús interactivos en aplicaciones Flutter, permitiendo a los desarrolladores configurar fácilmente los elementos del menú con acciones específicas, mejorando la interactividad y la experiencia del usuario.
+
+# Debouncer
+
+## Descripción
+`Debouncer` es una clase utilitaria diseñada para limitar la tasa a la que se ejecuta una función. Esto es útil en situaciones donde ciertas operaciones no deben dispararse repetidamente en respuesta a eventos frecuentes, como la entrada de texto en una búsqueda o el redimensionamiento de una ventana. La clase permite especificar un intervalo en milisegundos durante el cual, después de llamarse, cualquier invocación posterior a la función se postergará hasta que pase el intervalo.
+```dart
+class Debouncer {
+  Debouncer({this.milliseconds = 500});
+
+  final int milliseconds;
+  Timer? _timer;
+
+  void call(void Function() action) {
+    _timer?.cancel();
+    _timer = Timer(Duration(milliseconds: milliseconds), action);
+  }
+}
+```
+## Ejemplo de Uso en Dart
+El siguiente ejemplo muestra cómo utilizar `Debouncer` para optimizar las operaciones en un campo de texto, reduciendo el número de operaciones ejecutadas mientras el usuario está escribiendo.
+```dart
+class SearchWidget extends StatefulWidget {
+  @override
+  _SearchWidgetState createState() => _SearchWidgetState();
+}
+
+class _SearchWidgetState extends State<SearchWidget> {
+  final Debouncer debouncer = Debouncer(milliseconds: 300);
+
+  void _onSearchChanged(String query) {
+    debouncer(() {
+      print('Searching for: $query');
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return TextField(
+      onChanged: _onSearchChanged,
+      decoration: InputDecoration(
+        labelText: 'Search',
+      ),
+    );
+  }
+}
+```
+Este uso de `Debouncer` asegura que las operaciones como la búsqueda se optimicen para mejorar la performance y la experiencia del usuario, evitando una sobrecarga innecesaria en el procesamiento y las solicitudes de red.
