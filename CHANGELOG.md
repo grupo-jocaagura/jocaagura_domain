@@ -76,3 +76,8 @@
 
 * Add Debouncer class
 * Add documentation in readme file
+
+## 1.3.0
+
+* Add ConnectivityModel
+* Add ConnectivityModel documentation

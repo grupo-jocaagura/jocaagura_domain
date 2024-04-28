@@ -33,6 +33,7 @@ Para utilizar el paquete, se requiere la instalación del SDK de Flutter. No hay
 - [Either, Left, and Right](#either-left-and-right)
 - [EntityBloc](#EntityBloc-and-RepeatLastValueExtension)
 - [EntityProvider, EntityService, and EntityUtil](#entityprovider-entityservice-and-entityutil)
+- [ConnectivityModel](#ConnectivityModel)
 - [ModelMainMenuModel](#modelmainmenumodel)
 - [Debouncer](#debouncer)
 
@@ -205,7 +206,7 @@ void main() {
     'address': '123 Main St',
     'notes': 'Some notes',
   };
-  
+
   AddressModel address = AddressModel.fromJson(addressJson);
   print('AddressModel: ${address.toString()}');
 
@@ -233,10 +234,10 @@ void main() {
     'name': 'height',
     'value': '175',
   };
-  
+
   AttributeModel<double> heightAttribute = attributeModelfromJson<double>(
     attributeJson,
-    (dynamic value) => double.tryParse(value.toString()) ?? 0.0,
+        (dynamic value) => double.tryParse(value.toString()) ?? 0.0,
   );
   print('AttributeModel from JSON: ${heightAttribute.toString()}');
 }
@@ -325,7 +326,7 @@ enum LegalIdTypeEnum {
 extension LegalIdTypeExtension on LegalIdTypeEnum {
   String get description {
     switch (this) {
-      // Aquí irían todos los casos
+    // Aquí irían todos los casos
     }
   }
 }
@@ -415,7 +416,7 @@ final ObituaryModel defaultObituary = ObituaryModel(
   vigilAddress: defaultAddressModel,
   burialAddress: defaultAddressModel,
   message:
-      'Lamentamos profundamente tu perdida. Esperamos que tu memoria perdure como una fuente de inspiración y amor.',
+  'Lamentamos profundamente tu perdida. Esperamos que tu memoria perdure como una fuente de inspiración y amor.',
 );
 ```
 La implementación de `ObituaryModel` en aplicaciones facilita la creación, gestión y visualización de obituarios, proporcionando una estructura coherente para almacenar y presentar esta información sensible y significativa.
@@ -434,9 +435,9 @@ void main() {
 
   // Crear una nueva instancia modificando algunos valores
   PersonModel updatedPerson = person.copyWith(
-    names: 'Maria',
-    lastNames: 'Gonzalez',
-    photoUrl: 'https://example.com/new-photo.jpg'
+      names: 'Maria',
+      lastNames: 'Gonzalez',
+      photoUrl: 'https://example.com/new-photo.jpg'
   );
   print('PersonModel actualizado: ${updatedPerson.toString()}');
 }
@@ -467,10 +468,10 @@ void main() {
 
   // Crear una nueva instancia modificando algunos valores
   StoreModel updatedStore = store.copyWith(
-    name: 'New Store Name',
-    email: 'newstore@example.com',
-    phoneNumber1: 987654,
-    phoneNumber2: 321098
+      name: 'New Store Name',
+      email: 'newstore@example.com',
+      phoneNumber1: 987654,
+      phoneNumber2: 321098
   );
   print('StoreModel actualizado: ${updatedStore.toString()}');
 }
@@ -555,7 +556,7 @@ class MyModule extends BlocModule {
 
 void main() {
   final blocCore = BlocCore();
-  
+
   final myBloc = MyBloc('initial value');
   blocCore.addBlocGeneral('myBloc', myBloc);
 
@@ -607,7 +608,7 @@ class MyBlocGeneral extends BlocGeneral<String> {
 
 void main() {
   final myBlocGeneral = MyBlocGeneral('Hello');
-  
+
   myBlocGeneral.addFunctionToProcessTValueOnStream('print', (val) {
     print('Current value: $val');
   }, executeNow: true);
@@ -627,13 +628,13 @@ class BlocGeneral<T> extends Bloc<T> {
   }
 
   final Map<String, void Function(T val)> _functionsMap =
-      <String, void Function(T val)>{};
+  <String, void Function(T val)>{};
 
   void addFunctionToProcessTValueOnStream(
-    String key,
-    Function(T val) function, [
-    bool executeNow = false,
-  ]) {
+      String key,
+      Function(T val) function, [
+        bool executeNow = false,
+      ]) {
     _functionsMap[key.toLowerCase()] = function;
     if (executeNow) {
       function(value);
@@ -730,8 +731,8 @@ Al implementar subclases de `BlocModule`, se garantiza que todos los BLoCs y otr
 void main() {
   Either<int, String> eitherValue = Right<int, String>('hello');
   String result = eitherValue.when(
-    (leftValue) => 'Error code: $leftValue',  // not executed
-    (rightValue) => 'Greeting: ${rightValue.toUpperCase()}',  // executed
+        (leftValue) => 'Error code: $leftValue',  // not executed
+        (rightValue) => 'Greeting: ${rightValue.toUpperCase()}',  // executed
   );
 
   print(result);  // Outputs: Greeting: HELLO
@@ -741,9 +742,9 @@ El uso de `Either` permite una gestión clara de los flujos de control en aplica
 ```dart
 abstract class Either<L, R> {
   T when<T>(
-    T Function(L) left,
-    T Function(R) right,
-  ) {
+      T Function(L) left,
+      T Function(R) right,
+      ) {
     if (this is Left<L, R>) {
       return left((this as Left<L, R>).value);
     }
@@ -782,8 +783,8 @@ void main() {
   final repeatingStream = myStream.repeatLastValue(0);
 
   repeatingStream.listen(
-    (value) => print(value),  // Prints 0, 1, 2, 3
-    onDone: () => print('Done')
+          (value) => print(value),  // Prints 0, 1, 2, 3
+      onDone: () => print('Done')
   );
 }
 ```
@@ -812,6 +813,45 @@ Utilizando `EntityBloc` y `RepeatLastValueExtension`, los desarrolladores pueden
 `EntityUtil` ofrece una base para clases que proporcionan métodos de utilidad relacionados con entidades. Estos pueden incluir conversiones, validaciones y otras operaciones que son comunes a varias partes de la aplicación.
 
 Estas clases son fundamentales en el diseño y la implementación de un sistema robusto, permitiendo un mantenimiento y una expansión eficientes del código base.
+
+# ConnectivityModel
+
+## Descripción
+`ConnectivityModel` representa el estado de la conexión a internet de un dispositivo. Mantiene información sobre el tipo de conexión y la velocidad de internet actual. Extiende de `Model`, lo que le permite ser serializable y comparable fácilmente.
+
+## Parámetros
+- `connectionType`: Especifica el tipo de conexión de red, representado por el `enum ConnectionTypeEnum`. Puede ser `none`, `wifi`, `wired`, `sim`, entre otros, para representar la ausencia de conexión o los diferentes tipos de conexiones disponibles.
+- `internetSpeed`: Un `double` que indica la velocidad actual de la conexión a internet en Mbps.
+
+## Métodos
+- `copyWith`: Permite crear una copia del modelo con algunos valores cambiados.
+- `toJson`: Convierte el modelo en un mapa para su serialización JSON.
+- `hashCode` y `==`: Permiten comparar instancias de `ConnectivityModel` para determinar si son iguales.
+- `getConnectionTypeEnumFromString`: Un método estático que convierte una cadena en un valor correspondiente de `ConnectionTypeEnum`.
+- `isConnected`: Un getter que devuelve `true` si la conexión actual no es `none`.
+- `toString`: Proporciona una representación en cadena del modelo.
+
+## Ejemplo de Uso en Dart
+El siguiente ejemplo ilustra cómo puedes crear una nueva instancia de `ConnectivityModel` y trabajar con sus métodos.
+```dart
+void main() {
+  final connectivity = ConnectivityModel(
+    connectionType: ConnectionTypeEnum.wifi,
+    internetSpeed: 100.0,
+  );
+
+  // Crear una copia con velocidad de internet actualizada
+  final updatedConnectivity = connectivity.copyWith(internetSpeed: 50.0);
+
+  // Convertir el modelo a JSON
+  final json = updatedConnectivity.toJson();
+
+  // Imprimir el modelo
+  print(updatedConnectivity);
+}
+```
+Utiliza `ConnectivityModel` para gestionar y representar el estado de la conexión de red en tus aplicaciones, aprovechando su estructura inmutable y sus métodos de ayuda.
+
 
 # UI
 
@@ -845,22 +885,22 @@ class MyApp extends StatelessWidget {
           children: [
             MainMenuTile(
               model: ModelMainMenuModel(
-                iconData: Icons.home,
-                onPressed: () {
-                  print('Home pressed');
-                },
-                label: 'Home',
-                description: 'Return to the home screen'
+                  iconData: Icons.home,
+                  onPressed: () {
+                    print('Home pressed');
+                  },
+                  label: 'Home',
+                  description: 'Return to the home screen'
               ),
             ),
             MainMenuTile(
               model: ModelMainMenuModel(
-                iconData: Icons.settings,
-                onPressed: () {
-                  print('Settings pressed');
-                },
-                label: 'Settings',
-                description: 'Adjust your settings'
+                  iconData: Icons.settings,
+                  onPressed: () {
+                    print('Settings pressed');
+                  },
+                  label: 'Settings',
+                  description: 'Adjust your settings'
               ),
             ),
           ],
