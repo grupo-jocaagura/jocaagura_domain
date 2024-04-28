@@ -2,6 +2,7 @@ part of '../jocaagura_domain.dart';
 
 /// An abstract class representing an either type, where the value can be either
 /// of type [L] or [R].
+@immutable
 abstract class Either<L, R> {
   /// Returns the result of applying either [left] or [right] function depending
   /// on whether the value is of type [Left] or [Right].
@@ -46,6 +47,16 @@ class Left<L, R> extends Either<L, R> {
 
   /// The value of type [L] stored in the [Left] object.
   final L value;
+
+  @override
+  bool operator ==(Object other) {
+    return other is Left<L, R> &&
+        other.value == value &&
+        other.hashCode == hashCode;
+  }
+
+  @override
+  int get hashCode => value.hashCode;
   @override
   String toString() => 'Left($value)';
 }
@@ -57,6 +68,16 @@ class Right<L, R> extends Either<L, R> {
 
   /// The value of type [R] stored in the [Right] object.
   final R value;
+
+  @override
+  bool operator ==(Object other) {
+    return other is Right<L, R> &&
+        other.value == value &&
+        other.hashCode == hashCode;
+  }
+
+  @override
+  int get hashCode => value.hashCode;
 
   @override
   String toString() => 'Right($value)';
