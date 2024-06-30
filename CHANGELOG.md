@@ -3,6 +3,23 @@
 Este documento sigue las pautas de [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 y este proyecto se adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.2] - 2024-06-30
+### Added
+- `Colores`: Se agrega un mapa de colores en el diagrama UML y se incluye explicación en el README para mejorar la visualización del estado de implementación de los modelos.
+
+### Fixed
+- `Diagrama UML`: Actualización para reflejar el estado de implementación de los modelos:
+  - `Either`, `Left`, `Right`: Confirmados.
+  - `Model`, `UserModel`, `AttributeModel<T>`: Confirmados.
+  - `Bloc`, `BlocModule`, `BlocGeneral<T>`, `BlocCore`: Confirmados.
+  - `UI`: `ModelMainMenuModel` confirmado.
+  - `Connectivity`: `ConnectionTypeEnum`, `ConnectivityModel` confirmados.
+  - `Citizen`: `PersonModel` en revisión, `LegalIdModel` confirmado.
+  - `Obituary`: `ObituaryModel`, `DeathRecordModel` confirmados.
+  - `Shops`: `StoreModel` confirmado.
+  - `Geolocation`: `AddressModel` confirmado.
+
+
 ## [1.4.1] - 2024-06-30
 ### Fixed
 - `version` Se corrige a version para iniciar el trabajo con los nuevos modelos.

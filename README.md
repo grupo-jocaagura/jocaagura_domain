@@ -36,6 +36,7 @@ Para utilizar el paquete, se requiere la instalación del SDK de Flutter. No hay
 - [ConnectivityModel](#ConnectivityModel)
 - [ModelMainMenuModel](#modelmainmenumodel)
 - [Debouncer](#debouncer)
+- [Documentacion de modelos](#documentación-de-modelos)
 
 Cada sección proporciona detalles sobre la implementación y el uso de las clases, ofreciendo ejemplos de código y explicaciones de cómo se integran dentro de tu arquitectura de dominio.
 
@@ -974,3 +975,13 @@ class _SearchWidgetState extends State<SearchWidget> {
 }
 ```
 Este uso de `Debouncer` asegura que las operaciones como la búsqueda se optimicen para mejorar la performance y la experiencia del usuario, evitando una sobrecarga innecesaria en el procesamiento y las solicitudes de red.
+
+
+# Documentación de Modelos
+
+Los diagramas UML de este proyecto utilizan colores para indicar el estado de implementación de cada modelo:
+- **Verde:** El modelo ha sido completamente implementado y está incluido en el paquete actual.
+- **Blanco/Gris:** El modelo está pendiente de implementación o en proceso de desarrollo.
+- **Naranja:** El modelo está revisión y/o proceso de transformación.
+
+  Una legenda correspondiente se encuentra incluida en cada diagrama para facilitar la interpretación de estos colores.
