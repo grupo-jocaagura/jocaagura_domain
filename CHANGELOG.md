@@ -3,6 +3,12 @@
 Este documento sigue las pautas de [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 y este proyecto se adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.0] - 2024-07-07
+### changed
+- `flutter_lints` upgraded to 4.0.0 in dev dependencies
+### added
+- `SignatureModel` Se agrega el modelo para la firma del usuario con sus test unitarios
+
 ## [1.4.2] - 2024-06-30
 ### Added
 - `Colores`: Se agrega un mapa de colores en el diagrama UML y se incluye explicación en el README para mejorar la visualización del estado de implementación de los modelos.
