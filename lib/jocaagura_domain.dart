@@ -18,6 +18,7 @@ part 'domain/citizen/signature_model.dart';
 part 'domain/connectivity_model.dart';
 part 'domain/death_record_model.dart';
 part 'domain/debouncer.dart';
+part 'domain/dentist_app/diagnosis_model.dart';
 part 'domain/either.dart';
 part 'domain/entity_bloc.dart';
 part 'domain/entity_provider.dart';

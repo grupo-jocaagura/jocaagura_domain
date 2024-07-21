@@ -3,6 +3,10 @@
 Este documento sigue las pautas de [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 y este proyecto se adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.7.0] - 2024-07-22
+### added
+- `MedicalDiagnosisModel` se agrega para garantizar los diagnosticos
+
 ## [1.6.1] - 2024-07-21
 ### changed
 - `medical_diagnosis_tab_model_test` para aumentar el coverage de las pruebas
