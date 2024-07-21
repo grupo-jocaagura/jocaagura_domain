@@ -3,6 +3,13 @@
 Este documento sigue las pautas de [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 y este proyecto se adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.6.0] - 2024-07-21
+### changed
+- `signature_model` para incluir el hascode
+### added
+- `MedicalDiagnosisTabModel` Se agrega el modelo para la recolección de los diagnosticos medicos y sus test unitarios
+
+
 ## [1.5.0] - 2024-07-07
 ### changed
 - `flutter_lints` upgraded to 4.0.0 in dev dependencies

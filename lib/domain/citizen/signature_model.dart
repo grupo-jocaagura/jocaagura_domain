@@ -101,10 +101,7 @@ class SignatureModel extends Model {
       identical(this, other) ||
       other is SignatureModel &&
           runtimeType == other.runtimeType &&
-          id == other.id &&
-          created == other.created &&
-          appId == other.appId &&
-          png64Image == other.png64Image;
+          hashCode == other.hashCode;
 
   /// Returns a hash code for this [SignatureModel].
   ///
