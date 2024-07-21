@@ -12,6 +12,29 @@ const DiagnosisModel defaultDiagnosisModel = DiagnosisModel(
   description: 'Descripcion del diagnostico',
 );
 
+/// Represents a medical diagnosis within an application that manages
+/// healthcare records.
+///
+/// This model class encapsulates a diagnosis, storing the unique identifier,
+/// the [title] of the diagnosis, and a more detailed [description]. It is suitable
+/// for use in healthcare applications where detailed records of diagnoses are necessary.
+///
+/// Example of using [DiagnosisModel] in a practical application:
+///
+/// ```dart
+/// void main() {
+///   var diagnosis = DiagnosisModel(
+///     id: '001',
+///     title: 'Type 2 Diabetes',
+///     description: 'A chronic condition that affects the way the body processes blood sugar (glucose).',
+///   );
+///
+///   print('Diagnosis ID: ${diagnosis.id}');
+///   print('Title: ${diagnosis.title}');
+///   print('Description: ${diagnosis.description}');
+/// }
+/// ```.
+
 class DiagnosisModel implements Model {
   const DiagnosisModel({
     required this.id,
@@ -30,9 +53,16 @@ class DiagnosisModel implements Model {
   }
 
   final String id;
+
+  /// The title or name of the medical condition diagnosed.
   final String title;
+
+  /// A detailed description of the diagnosis.
   final String description;
 
+  /// Creates a copy of this [DiagnosisModel] with optional modifications.
+  ///
+  /// Useful for creating a modified diagnosis while preserving immutability.
   @override
   DiagnosisModel copyWith({
     String? id,
@@ -46,6 +76,7 @@ class DiagnosisModel implements Model {
     );
   }
 
+  /// Converts this [DiagnosisModel] into a JSON map.
   @override
   Map<String, dynamic> toJson() {
     return <String, dynamic>{
