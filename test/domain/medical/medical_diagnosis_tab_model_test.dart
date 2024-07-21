@@ -36,18 +36,25 @@ void main() {
     test('copyWith updates values', () {
       final MedicalDiagnosisTabModel updatedDiagnosis =
           defaultMMedicalDiagnosisModel.copyWith(
-        id: 'newId',
-        condition: 'newCondition',
-        observation: 'newObservation',
-        quantity: 1.0,
-        dateTimeOfRecord: DateTime(2025, 07, 21),
+        id: 'newId2',
+        condition: 'newCondition2',
+        observation: 'newObservation2',
+        quantity: 2.0,
+        dateTimeOfRecord: DateTime(2025, 07, 22),
       );
+      final MedicalDiagnosisTabModel sameUpdatedDiagnosis =
+          defaultMMedicalDiagnosisModel.copyWith();
 
-      expect(updatedDiagnosis.id, 'newId');
-      expect(updatedDiagnosis.condition, 'newCondition');
-      expect(updatedDiagnosis.observation, 'newObservation');
-      expect(updatedDiagnosis.quantity, 1.0);
-      expect(updatedDiagnosis.dateTimeOfRecord, DateTime(2025, 07, 21));
+      expect(updatedDiagnosis.id, 'newId2');
+      expect(updatedDiagnosis.condition, 'newCondition2');
+      expect(updatedDiagnosis.observation, 'newObservation2');
+      expect(updatedDiagnosis.quantity, 2.0);
+      expect(updatedDiagnosis.dateTimeOfRecord, DateTime(2025, 07, 22));
+      expect(updatedDiagnosis == defaultMMedicalDiagnosisModel, false);
+      expect(
+        sameUpdatedDiagnosis.hashCode == defaultMMedicalDiagnosisModel.hashCode,
+        true,
+      );
     });
 
     // Test toJson

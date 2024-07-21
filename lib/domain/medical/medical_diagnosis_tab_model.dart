@@ -121,11 +121,7 @@ class MedicalDiagnosisTabModel extends Model {
       identical(this, other) ||
       other is MedicalDiagnosisTabModel &&
           runtimeType == other.runtimeType &&
-          id == other.id &&
-          condition == other.condition &&
-          observation == other.observation &&
-          quantity == other.quantity &&
-          dateTimeOfRecord == other.dateTimeOfRecord;
+          hashCode == other.hashCode;
 
   /// Returns the hash code for this [MedicalDiagnosisTabModel].
   @override
