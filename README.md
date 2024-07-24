@@ -40,6 +40,7 @@ Para utilizar el paquete, se requiere la instalación del SDK de Flutter. No hay
 - SignatureModel
 - MedicalDiagnosisTabModel
 - DiagnosisModel
+- DentalConditionModel
 
 Cada sección proporciona detalles sobre la implementación y el uso de las clases, ofreciendo ejemplos de código y explicaciones de cómo se integran dentro de tu arquitectura de dominio.
 
