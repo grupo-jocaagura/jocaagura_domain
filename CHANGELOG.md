@@ -3,6 +3,12 @@
 Este documento sigue las pautas de [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 y este proyecto se adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.9.0] - 2024-07-28
+### added
+- `MedicalTreatmentModel` se agrega el modelo para manejar tratamientos a los pacientes
+### changed
+- `dental_condition_model` `dental_condition_model_test` `medical_diagnosis_model` correcciones menores de formato
+
 ## [1.8.0] - 2024-07-24
 ### added
 - `DentalConditionModel` se agrega el modelo y la documentación para la condicion dental.

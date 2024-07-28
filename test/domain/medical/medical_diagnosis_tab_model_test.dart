@@ -66,8 +66,10 @@ void main() {
       expect(json[MedicalDiagnosisTabModelEnum.condition.name], condition);
       expect(json[MedicalDiagnosisTabModelEnum.observation.name], observation);
       expect(json[MedicalDiagnosisTabModelEnum.quantity.name], quantity);
-      expect(json[MedicalDiagnosisTabModelEnum.dateTimeOfRecord.name],
-          DateUtils.dateTimeToString(dateTimeOfRecord));
+      expect(
+        json[MedicalDiagnosisTabModelEnum.dateTimeOfRecord.name],
+        DateUtils.dateTimeToString(dateTimeOfRecord),
+      );
     });
 
     // Test fromJson

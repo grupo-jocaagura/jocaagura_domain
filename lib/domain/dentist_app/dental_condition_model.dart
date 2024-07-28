@@ -241,7 +241,8 @@ class DentalConditionModel extends Model {
     return DentalConditionModel(
       id: Utils.getStringFromDynamic(json[DentalConditionEnum.id.name]),
       dentalId: getDentalIDAsInt(
-          Utils.getStringFromDynamic(json[DentalConditionEnum.dentalId.name])),
+        Utils.getStringFromDynamic(json[DentalConditionEnum.dentalId.name]),
+      ),
       dentalRegion: getDentalRegionFromString(
         Utils.getStringFromDynamic(
           json[DentalConditionEnum.dentalRegion.name],

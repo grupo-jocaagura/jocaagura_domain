@@ -59,8 +59,10 @@ void main() {
       final DentalConditionModel copiedCondition =
           dentalConditionModelDefault.copyWith();
       expect(copiedCondition, equals(dentalConditionModelDefault));
-      expect(copiedCondition.hashCode,
-          equals(dentalConditionModelDefault.hashCode));
+      expect(
+        copiedCondition.hashCode,
+        equals(dentalConditionModelDefault.hashCode),
+      );
     });
 
     // Test toJson
@@ -73,8 +75,10 @@ void main() {
       expect(json[DentalConditionEnum.dentalId.name], dentalId);
       expect(json[DentalConditionEnum.dentalRegion.name], dentalRegion.name);
       expect(json[DentalConditionEnum.condition.name], condition.name);
-      expect(json[DentalConditionEnum.dateTimeOfRecord.name],
-          DateUtils.dateTimeToString(dateTimeOfRecord));
+      expect(
+        json[DentalConditionEnum.dateTimeOfRecord.name],
+        DateUtils.dateTimeToString(dateTimeOfRecord),
+      );
     });
 
     // Test fromJson
@@ -119,150 +123,272 @@ void main() {
     // Test getDentalRegionFromString
     test('getDentalRegionFromString returns correct enum for valid strings',
         () {
-      expect(DentalConditionModel.getDentalRegionFromString('occlusal'),
-          DentalRegionEnum.occlusal);
-      expect(DentalConditionModel.getDentalRegionFromString('vestibular'),
-          DentalRegionEnum.vestibular);
-      expect(DentalConditionModel.getDentalRegionFromString('mesial'),
-          DentalRegionEnum.mesial);
-      expect(DentalConditionModel.getDentalRegionFromString('distal'),
-          DentalRegionEnum.distal);
-      expect(DentalConditionModel.getDentalRegionFromString('palatal'),
-          DentalRegionEnum.palatal);
-      expect(DentalConditionModel.getDentalRegionFromString('lingual'),
-          DentalRegionEnum.lingual);
-      expect(DentalConditionModel.getDentalRegionFromString('buccal'),
-          DentalRegionEnum.buccal);
-      expect(DentalConditionModel.getDentalRegionFromString('labial'),
-          DentalRegionEnum.labial);
-      expect(DentalConditionModel.getDentalRegionFromString('incisal'),
-          DentalRegionEnum.incisal);
-      expect(DentalConditionModel.getDentalRegionFromString('gingival'),
-          DentalRegionEnum.gingival);
-      expect(DentalConditionModel.getDentalRegionFromString('periodontal'),
-          DentalRegionEnum.periodontal);
-      expect(DentalConditionModel.getDentalRegionFromString('maxillary'),
-          DentalRegionEnum.maxillary);
-      expect(DentalConditionModel.getDentalRegionFromString('mandibular'),
-          DentalRegionEnum.mandibular);
-      expect(DentalConditionModel.getDentalRegionFromString('none'),
-          DentalRegionEnum.none);
+      expect(
+        DentalConditionModel.getDentalRegionFromString('occlusal'),
+        DentalRegionEnum.occlusal,
+      );
+      expect(
+        DentalConditionModel.getDentalRegionFromString('vestibular'),
+        DentalRegionEnum.vestibular,
+      );
+      expect(
+        DentalConditionModel.getDentalRegionFromString('mesial'),
+        DentalRegionEnum.mesial,
+      );
+      expect(
+        DentalConditionModel.getDentalRegionFromString('distal'),
+        DentalRegionEnum.distal,
+      );
+      expect(
+        DentalConditionModel.getDentalRegionFromString('palatal'),
+        DentalRegionEnum.palatal,
+      );
+      expect(
+        DentalConditionModel.getDentalRegionFromString('lingual'),
+        DentalRegionEnum.lingual,
+      );
+      expect(
+        DentalConditionModel.getDentalRegionFromString('buccal'),
+        DentalRegionEnum.buccal,
+      );
+      expect(
+        DentalConditionModel.getDentalRegionFromString('labial'),
+        DentalRegionEnum.labial,
+      );
+      expect(
+        DentalConditionModel.getDentalRegionFromString('incisal'),
+        DentalRegionEnum.incisal,
+      );
+      expect(
+        DentalConditionModel.getDentalRegionFromString('gingival'),
+        DentalRegionEnum.gingival,
+      );
+      expect(
+        DentalConditionModel.getDentalRegionFromString('periodontal'),
+        DentalRegionEnum.periodontal,
+      );
+      expect(
+        DentalConditionModel.getDentalRegionFromString('maxillary'),
+        DentalRegionEnum.maxillary,
+      );
+      expect(
+        DentalConditionModel.getDentalRegionFromString('mandibular'),
+        DentalRegionEnum.mandibular,
+      );
+      expect(
+        DentalConditionModel.getDentalRegionFromString('none'),
+        DentalRegionEnum.none,
+      );
     });
 
     test('getDentalRegionFromString returns none for invalid string', () {
-      expect(DentalConditionModel.getDentalRegionFromString('invalid'),
-          DentalRegionEnum.none);
+      expect(
+        DentalConditionModel.getDentalRegionFromString('invalid'),
+        DentalRegionEnum.none,
+      );
     });
 
     // Test getToothConditionFromString
     test('getToothConditionFromString returns correct enum for valid strings',
         () {
-      expect(DentalConditionModel.getToothConditionFromString('healthy'),
-          ToothConditionEnum.healthy);
-      expect(DentalConditionModel.getToothConditionFromString('cavity'),
-          ToothConditionEnum.cavity);
-      expect(DentalConditionModel.getToothConditionFromString('filled'),
-          ToothConditionEnum.filled);
-      expect(DentalConditionModel.getToothConditionFromString('missing'),
-          ToothConditionEnum.missing);
-      expect(DentalConditionModel.getToothConditionFromString('broken'),
-          ToothConditionEnum.broken);
-      expect(DentalConditionModel.getToothConditionFromString('sensitive'),
-          ToothConditionEnum.sensitive);
-      expect(DentalConditionModel.getToothConditionFromString('impacted'),
-          ToothConditionEnum.impacted);
-      expect(DentalConditionModel.getToothConditionFromString('decayed'),
-          ToothConditionEnum.decayed);
-      expect(DentalConditionModel.getToothConditionFromString('root canal'),
-          ToothConditionEnum.rootCanal);
-      expect(DentalConditionModel.getToothConditionFromString('crown'),
-          ToothConditionEnum.crown);
       expect(
-          DentalConditionModel.getToothConditionFromString('extraction needed'),
-          ToothConditionEnum.extractionNeeded);
+        DentalConditionModel.getToothConditionFromString('healthy'),
+        ToothConditionEnum.healthy,
+      );
       expect(
-          DentalConditionModel.getToothConditionFromString('orthodontic issue'),
-          ToothConditionEnum.orthodonticIssue);
-      expect(DentalConditionModel.getToothConditionFromString('none'),
-          ToothConditionEnum.none);
+        DentalConditionModel.getToothConditionFromString('cavity'),
+        ToothConditionEnum.cavity,
+      );
+      expect(
+        DentalConditionModel.getToothConditionFromString('filled'),
+        ToothConditionEnum.filled,
+      );
+      expect(
+        DentalConditionModel.getToothConditionFromString('missing'),
+        ToothConditionEnum.missing,
+      );
+      expect(
+        DentalConditionModel.getToothConditionFromString('broken'),
+        ToothConditionEnum.broken,
+      );
+      expect(
+        DentalConditionModel.getToothConditionFromString('sensitive'),
+        ToothConditionEnum.sensitive,
+      );
+      expect(
+        DentalConditionModel.getToothConditionFromString('impacted'),
+        ToothConditionEnum.impacted,
+      );
+      expect(
+        DentalConditionModel.getToothConditionFromString('decayed'),
+        ToothConditionEnum.decayed,
+      );
+      expect(
+        DentalConditionModel.getToothConditionFromString('root canal'),
+        ToothConditionEnum.rootCanal,
+      );
+      expect(
+        DentalConditionModel.getToothConditionFromString('crown'),
+        ToothConditionEnum.crown,
+      );
+      expect(
+        DentalConditionModel.getToothConditionFromString('extraction needed'),
+        ToothConditionEnum.extractionNeeded,
+      );
+      expect(
+        DentalConditionModel.getToothConditionFromString('orthodontic issue'),
+        ToothConditionEnum.orthodonticIssue,
+      );
+      expect(
+        DentalConditionModel.getToothConditionFromString('none'),
+        ToothConditionEnum.none,
+      );
     });
 
     test('getToothConditionFromString returns none for invalid string', () {
-      expect(DentalConditionModel.getToothConditionFromString('invalid'),
-          ToothConditionEnum.none);
+      expect(
+        DentalConditionModel.getToothConditionFromString('invalid'),
+        ToothConditionEnum.none,
+      );
     });
 
     // Test getDentalIDFromString
     test('getDentalIDFromString returns correct enum for valid strings', () {
       expect(
-          DentalConditionModel.getDentalIDFromString('11'), DentalIDEnum.q11);
+        DentalConditionModel.getDentalIDFromString('11'),
+        DentalIDEnum.q11,
+      );
       expect(
-          DentalConditionModel.getDentalIDFromString('12'), DentalIDEnum.q12);
+        DentalConditionModel.getDentalIDFromString('12'),
+        DentalIDEnum.q12,
+      );
       expect(
-          DentalConditionModel.getDentalIDFromString('13'), DentalIDEnum.q13);
+        DentalConditionModel.getDentalIDFromString('13'),
+        DentalIDEnum.q13,
+      );
       expect(
-          DentalConditionModel.getDentalIDFromString('14'), DentalIDEnum.q14);
+        DentalConditionModel.getDentalIDFromString('14'),
+        DentalIDEnum.q14,
+      );
       expect(
-          DentalConditionModel.getDentalIDFromString('15'), DentalIDEnum.q15);
+        DentalConditionModel.getDentalIDFromString('15'),
+        DentalIDEnum.q15,
+      );
       expect(
-          DentalConditionModel.getDentalIDFromString('16'), DentalIDEnum.q16);
+        DentalConditionModel.getDentalIDFromString('16'),
+        DentalIDEnum.q16,
+      );
       expect(
-          DentalConditionModel.getDentalIDFromString('17'), DentalIDEnum.q17);
+        DentalConditionModel.getDentalIDFromString('17'),
+        DentalIDEnum.q17,
+      );
       expect(
-          DentalConditionModel.getDentalIDFromString('18'), DentalIDEnum.q18);
+        DentalConditionModel.getDentalIDFromString('18'),
+        DentalIDEnum.q18,
+      );
       expect(
-          DentalConditionModel.getDentalIDFromString('21'), DentalIDEnum.q21);
+        DentalConditionModel.getDentalIDFromString('21'),
+        DentalIDEnum.q21,
+      );
       expect(
-          DentalConditionModel.getDentalIDFromString('22'), DentalIDEnum.q22);
+        DentalConditionModel.getDentalIDFromString('22'),
+        DentalIDEnum.q22,
+      );
       expect(
-          DentalConditionModel.getDentalIDFromString('23'), DentalIDEnum.q23);
+        DentalConditionModel.getDentalIDFromString('23'),
+        DentalIDEnum.q23,
+      );
       expect(
-          DentalConditionModel.getDentalIDFromString('24'), DentalIDEnum.q24);
+        DentalConditionModel.getDentalIDFromString('24'),
+        DentalIDEnum.q24,
+      );
       expect(
-          DentalConditionModel.getDentalIDFromString('25'), DentalIDEnum.q25);
+        DentalConditionModel.getDentalIDFromString('25'),
+        DentalIDEnum.q25,
+      );
       expect(
-          DentalConditionModel.getDentalIDFromString('26'), DentalIDEnum.q26);
+        DentalConditionModel.getDentalIDFromString('26'),
+        DentalIDEnum.q26,
+      );
       expect(
-          DentalConditionModel.getDentalIDFromString('27'), DentalIDEnum.q27);
+        DentalConditionModel.getDentalIDFromString('27'),
+        DentalIDEnum.q27,
+      );
       expect(
-          DentalConditionModel.getDentalIDFromString('28'), DentalIDEnum.q28);
+        DentalConditionModel.getDentalIDFromString('28'),
+        DentalIDEnum.q28,
+      );
       expect(
-          DentalConditionModel.getDentalIDFromString('31'), DentalIDEnum.q31);
+        DentalConditionModel.getDentalIDFromString('31'),
+        DentalIDEnum.q31,
+      );
       expect(
-          DentalConditionModel.getDentalIDFromString('32'), DentalIDEnum.q32);
+        DentalConditionModel.getDentalIDFromString('32'),
+        DentalIDEnum.q32,
+      );
       expect(
-          DentalConditionModel.getDentalIDFromString('33'), DentalIDEnum.q33);
+        DentalConditionModel.getDentalIDFromString('33'),
+        DentalIDEnum.q33,
+      );
       expect(
-          DentalConditionModel.getDentalIDFromString('34'), DentalIDEnum.q34);
+        DentalConditionModel.getDentalIDFromString('34'),
+        DentalIDEnum.q34,
+      );
       expect(
-          DentalConditionModel.getDentalIDFromString('35'), DentalIDEnum.q35);
+        DentalConditionModel.getDentalIDFromString('35'),
+        DentalIDEnum.q35,
+      );
       expect(
-          DentalConditionModel.getDentalIDFromString('36'), DentalIDEnum.q36);
+        DentalConditionModel.getDentalIDFromString('36'),
+        DentalIDEnum.q36,
+      );
       expect(
-          DentalConditionModel.getDentalIDFromString('37'), DentalIDEnum.q37);
+        DentalConditionModel.getDentalIDFromString('37'),
+        DentalIDEnum.q37,
+      );
       expect(
-          DentalConditionModel.getDentalIDFromString('38'), DentalIDEnum.q38);
+        DentalConditionModel.getDentalIDFromString('38'),
+        DentalIDEnum.q38,
+      );
       expect(
-          DentalConditionModel.getDentalIDFromString('41'), DentalIDEnum.q41);
+        DentalConditionModel.getDentalIDFromString('41'),
+        DentalIDEnum.q41,
+      );
       expect(
-          DentalConditionModel.getDentalIDFromString('42'), DentalIDEnum.q42);
+        DentalConditionModel.getDentalIDFromString('42'),
+        DentalIDEnum.q42,
+      );
       expect(
-          DentalConditionModel.getDentalIDFromString('43'), DentalIDEnum.q43);
+        DentalConditionModel.getDentalIDFromString('43'),
+        DentalIDEnum.q43,
+      );
       expect(
-          DentalConditionModel.getDentalIDFromString('44'), DentalIDEnum.q44);
+        DentalConditionModel.getDentalIDFromString('44'),
+        DentalIDEnum.q44,
+      );
       expect(
-          DentalConditionModel.getDentalIDFromString('45'), DentalIDEnum.q45);
+        DentalConditionModel.getDentalIDFromString('45'),
+        DentalIDEnum.q45,
+      );
       expect(
-          DentalConditionModel.getDentalIDFromString('46'), DentalIDEnum.q46);
+        DentalConditionModel.getDentalIDFromString('46'),
+        DentalIDEnum.q46,
+      );
       expect(
-          DentalConditionModel.getDentalIDFromString('47'), DentalIDEnum.q47);
+        DentalConditionModel.getDentalIDFromString('47'),
+        DentalIDEnum.q47,
+      );
       expect(
-          DentalConditionModel.getDentalIDFromString('48'), DentalIDEnum.q48);
+        DentalConditionModel.getDentalIDFromString('48'),
+        DentalIDEnum.q48,
+      );
     });
 
     test('getDentalIDFromString returns q11 for invalid string', () {
-      expect(DentalConditionModel.getDentalIDFromString('invalid'),
-          DentalIDEnum.q11);
+      expect(
+        DentalConditionModel.getDentalIDFromString('invalid'),
+        DentalIDEnum.q11,
+      );
     });
 
     // Test getDentalIDAsInt

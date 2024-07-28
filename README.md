@@ -37,10 +37,11 @@ Para utilizar el paquete, se requiere la instalación del SDK de Flutter. No hay
 - [ModelMainMenuModel](#modelmainmenumodel)
 - [Debouncer](#debouncer)
 - [Documentacion de modelos](#documentación-de-modelos)
-- SignatureModel
-- MedicalDiagnosisTabModel
-- DiagnosisModel
-- DentalConditionModel
+- [SignatureModel](lib/domain/citizen/signature_model.dart)
+- [MedicalDiagnosisTabModel](lib/domain/medical/medical_diagnosis_tab_model.dart)
+- [DiagnosisModel](lib/domain/dentist_app/diagnosis_model.dart)
+- [DentalConditionModel](lib/domain/dentist_app/dental_condition_model.dart)
+- [MedicalTreatmentModel](lib/domain/dentist_app/medical_treatment_model.dart)
 
 Cada sección proporciona detalles sobre la implementación y el uso de las clases, ofreciendo ejemplos de código y explicaciones de cómo se integran dentro de tu arquitectura de dominio.
 
