@@ -43,6 +43,7 @@ Para utilizar el paquete, se requiere la instalación del SDK de Flutter. No hay
 - [DentalConditionModel](lib/domain/dentist_app/dental_condition_model.dart)
 - [MedicalTreatmentModel](lib/domain/dentist_app/medical_treatment_model.dart)
 - [TreatmentPlanModel](lib/domain/dentist_app/treatment_plan_model.dart)
+- [AcceptanceClausePlanModel](lib/domain/dentist_app/acceptance_clause_model.dart)
 
 Cada sección proporciona detalles sobre la implementación y el uso de las clases, ofreciendo ejemplos de código y explicaciones de cómo se integran dentro de tu arquitectura de dominio.
 

@@ -3,6 +3,10 @@
 Este documento sigue las pautas de [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 y este proyecto se adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.11.0] - 2024-08-04
+### added
+- `AcceptanceModel` se agrega el modelo para aceptar legalmente el tratamiento medico
+
 ## [1.10.0] - 2024-08-04
 ### added
 - `TreatmentPlanModel` se agrega el plan de tratamiento para el paciente
