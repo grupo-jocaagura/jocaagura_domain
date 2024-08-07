@@ -33,6 +33,7 @@ part 'domain/medical/medical_diagnosis_tab_model.dart';
 part 'domain/model_vector.dart';
 part 'domain/obituary_model.dart';
 part 'domain/person_model.dart';
+part 'domain/pet_app/animal_model.dart';
 part 'domain/store_model.dart';
 part 'domain/ui/model_main_menu_model.dart';
 part 'domain/user_model.dart';
