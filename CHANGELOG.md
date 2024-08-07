@@ -3,7 +3,11 @@
 Este documento sigue las pautas de [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 y este proyecto se adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.12.0] - 2024-08-04
+## [1.12.1] - 2024-08-07
+### changed
+- `AnimaModel` se agrega documentación en formato dart doc para el modelo
+ 
+## [1.12.0] - 2024-08-07
 ### added
 - `AnimaModel` se agrega el modelo para iniciar el tratamiento de la clase animal
 
