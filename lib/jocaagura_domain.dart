@@ -14,6 +14,8 @@ part 'domain/bloc.dart';
 part 'domain/bloc_core.dart';
 part 'domain/bloc_general.dart';
 part 'domain/bloc_module.dart';
+part 'domain/calendar/appointment_model.dart';
+part 'domain/calendar/contact_model.dart';
 part 'domain/citizen/signature_model.dart';
 part 'domain/connectivity_model.dart';
 part 'domain/death_record_model.dart';
