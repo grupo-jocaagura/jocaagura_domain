@@ -3,6 +3,13 @@
 Este documento sigue las pautas de [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 y este proyecto se adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.15.1] - 2024-08-25
+
+### fixed
+
+- Cambios menores en formato dart doc si afectar el codigo o su expresión
+
+
 ## [1.15.0] - 2024-08-25
 
 ### added

@@ -108,8 +108,6 @@ ID: xmio
         AcceptanceClauseEnum.stringAcceptanceLeyend.name: 'new_leyend',
       };
 
-      print(json);
-
       final AcceptanceClauseModel fromJsonClause =
           AcceptanceClauseModel.fromJson(json);
       expect(fromJsonClause, isA<AcceptanceClauseModel>());

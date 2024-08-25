@@ -22,7 +22,7 @@ void main() {
 
     // Test the constructor
     test('constructor sets values properly', () {
-      final ContactModel contact = ContactModel(
+      const ContactModel contact = ContactModel(
         id: id,
         name: name,
         relationship: relationship,

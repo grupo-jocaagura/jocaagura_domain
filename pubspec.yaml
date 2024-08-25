@@ -1,6 +1,6 @@
 name: jocaagura_domain
 description: "A package with domain models for all transversal applications"
-version: 1.15.0
+version: 1.15.1
 homepage: https://github.com/jocaagura/jocaagura_domain
 
 environment:
@@ -15,6 +15,3 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^4.0.0
-
-flutter:
-

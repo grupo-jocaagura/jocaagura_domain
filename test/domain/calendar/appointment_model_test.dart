@@ -66,7 +66,9 @@ void main() {
           defaultAppointmentModel.copyWith();
       expect(copiedAppointment, equals(defaultAppointmentModel));
       expect(
-          copiedAppointment.hashCode, equals(defaultAppointmentModel.hashCode));
+        copiedAppointment.hashCode,
+        equals(defaultAppointmentModel.hashCode),
+      );
     });
 
     // Test toJson

@@ -7,10 +7,10 @@ void main() {
     const String id = 'default';
     const PersonModel patient = defaultPersonModel;
     final List<DiagnosisModel> diagnoses = <DiagnosisModel>[
-      defaultDiagnosisModel
+      defaultDiagnosisModel,
     ];
     final List<DentalConditionModel> dentalConditions = <DentalConditionModel>[
-      dentalConditionModelDefault
+      dentalConditionModelDefault,
     ];
     final TreatmentPlanModel treatmentPlan = defaultTreatmentPlanModel;
     final AcceptanceClauseModel acceptanceClause = defaultAcceptanceClauseModel;
@@ -18,10 +18,10 @@ void main() {
     const LegalIdModel legalId = defaultLegalIdModel;
     const UserModel user = defaultUserModel;
     final List<AppointmentModel> appointments = <AppointmentModel>[
-      defaultAppointmentModel
+      defaultAppointmentModel,
     ];
     final List<MedicationModel> medications = <MedicationModel>[
-      defaultMedicationModel
+      defaultMedicationModel,
     ];
     final List<ContactModel> contacts = <ContactModel>[defaultContactModel];
 
@@ -80,10 +80,10 @@ void main() {
         id: 'new_id',
         patient: patient.copyWith(id: 'new_patient'),
         diagnoses: <DiagnosisModel>[
-          defaultDiagnosisModel.copyWith(id: 'new_diagnosis')
+          defaultDiagnosisModel.copyWith(id: 'new_diagnosis'),
         ],
         dentalConditions: <DentalConditionModel>[
-          dentalConditionModelDefault.copyWith(id: 'new_dental_condition')
+          dentalConditionModelDefault.copyWith(id: 'new_dental_condition'),
         ],
         treatmentPlan: treatmentPlan.copyWith(id: 'new_treatment_plan'),
         acceptanceClause:
@@ -92,21 +92,23 @@ void main() {
         legalId: legalId.copyWith(id: 'new_legal_id'),
         user: user.copyWith(id: 'new_user'),
         appointments: <AppointmentModel>[
-          defaultAppointmentModel.copyWith(id: 'new_appointment')
+          defaultAppointmentModel.copyWith(id: 'new_appointment'),
         ],
         medications: <MedicationModel>[
-          defaultMedicationModel.copyWith(id: 'new_medication')
+          defaultMedicationModel.copyWith(id: 'new_medication'),
         ],
         contacts: <ContactModel>[
-          defaultContactModel.copyWith(id: 'new_contact')
+          defaultContactModel.copyWith(id: 'new_contact'),
         ],
       );
 
       expect(updatedMedicalRecord.id, 'new_id');
       expect(updatedMedicalRecord.patient.id, 'new_patient');
       expect(updatedMedicalRecord.diagnoses.first.id, 'new_diagnosis');
-      expect(updatedMedicalRecord.dentalConditions.first.id,
-          'new_dental_condition');
+      expect(
+        updatedMedicalRecord.dentalConditions.first.id,
+        'new_dental_condition',
+      );
       expect(updatedMedicalRecord.treatmentPlan.id, 'new_treatment_plan');
       expect(updatedMedicalRecord.acceptanceClause.id, 'new_acceptance_clause');
       expect(updatedMedicalRecord.address.id, 'new_address');
@@ -121,8 +123,10 @@ void main() {
       final MedicalRecordModel copiedMedicalRecord =
           defaultMedicalRecordModel.copyWith();
       expect(copiedMedicalRecord, equals(defaultMedicalRecordModel));
-      expect(copiedMedicalRecord.hashCode,
-          equals(defaultMedicalRecordModel.hashCode));
+      expect(
+        copiedMedicalRecord.hashCode,
+        equals(defaultMedicalRecordModel.hashCode),
+      );
     });
 
     // Test toJson
@@ -134,25 +138,36 @@ void main() {
       expect(json[MedicalRecordEnum.id.name], id);
       expect(json[MedicalRecordEnum.patient.name], patient.toJson());
       expect(
-          json[MedicalRecordEnum.treatmentPlan.name], treatmentPlan.toJson());
-      expect(json[MedicalRecordEnum.acceptanceClause.name],
-          acceptanceClause.toJson());
+        json[MedicalRecordEnum.treatmentPlan.name],
+        treatmentPlan.toJson(),
+      );
+      expect(
+        json[MedicalRecordEnum.acceptanceClause.name],
+        acceptanceClause.toJson(),
+      );
       expect(json[MedicalRecordEnum.address.name], address.toJson());
       expect(json[MedicalRecordEnum.legalId.name], legalId.toJson());
       expect(json[MedicalRecordEnum.user.name], user.toJson());
-      expect(json[MedicalRecordEnum.diagnoses.name],
-          diagnoses.map((DiagnosisModel e) => e.toJson()).toList());
       expect(
-          json[MedicalRecordEnum.dentalConditions.name],
-          dentalConditions
-              .map((DentalConditionModel e) => e.toJson())
-              .toList());
-      expect(json[MedicalRecordEnum.appointments.name],
-          appointments.map((AppointmentModel e) => e.toJson()).toList());
-      expect(json[MedicalRecordEnum.medications.name],
-          medications.map((MedicationModel e) => e.toJson()).toList());
-      expect(json[MedicalRecordEnum.contacts.name],
-          contacts.map((ContactModel e) => e.toJson()).toList());
+        json[MedicalRecordEnum.diagnoses.name],
+        diagnoses.map((DiagnosisModel e) => e.toJson()).toList(),
+      );
+      expect(
+        json[MedicalRecordEnum.dentalConditions.name],
+        dentalConditions.map((DentalConditionModel e) => e.toJson()).toList(),
+      );
+      expect(
+        json[MedicalRecordEnum.appointments.name],
+        appointments.map((AppointmentModel e) => e.toJson()).toList(),
+      );
+      expect(
+        json[MedicalRecordEnum.medications.name],
+        medications.map((MedicationModel e) => e.toJson()).toList(),
+      );
+      expect(
+        json[MedicalRecordEnum.contacts.name],
+        contacts.map((ContactModel e) => e.toJson()).toList(),
+      );
     });
 
     // Test fromJson
@@ -161,10 +176,10 @@ void main() {
         MedicalRecordEnum.id.name: 'new_id',
         MedicalRecordEnum.patient.name: patient.toJson(),
         MedicalRecordEnum.diagnoses.name: <Map<String, dynamic>>[
-          defaultDiagnosisModel.toJson()
+          defaultDiagnosisModel.toJson(),
         ],
         MedicalRecordEnum.dentalConditions.name: <Map<String, dynamic>>[
-          dentalConditionModelDefault.toJson()
+          dentalConditionModelDefault.toJson(),
         ],
         MedicalRecordEnum.treatmentPlan.name: treatmentPlan.toJson(),
         MedicalRecordEnum.acceptanceClause.name: acceptanceClause.toJson(),
@@ -172,13 +187,13 @@ void main() {
         MedicalRecordEnum.legalId.name: legalId.toJson(),
         MedicalRecordEnum.user.name: user.toJson(),
         MedicalRecordEnum.appointments.name: <Map<String, dynamic>>[
-          defaultAppointmentModel.toJson()
+          defaultAppointmentModel.toJson(),
         ],
         MedicalRecordEnum.medications.name: <Map<String, dynamic>>[
-          defaultMedicationModel.toJson()
+          defaultMedicationModel.toJson(),
         ],
         MedicalRecordEnum.contacts.name: <Map<String, dynamic>>[
-          defaultContactModel.toJson()
+          defaultContactModel.toJson(),
         ],
       };
 
@@ -188,18 +203,26 @@ void main() {
       expect(fromJsonMedicalRecord.id, 'new_id');
       expect(fromJsonMedicalRecord.patient, patient);
       expect(
-          fromJsonMedicalRecord.diagnoses.first.id, defaultDiagnosisModel.id);
-      expect(fromJsonMedicalRecord.dentalConditions.first.id,
-          dentalConditionModelDefault.id);
+        fromJsonMedicalRecord.diagnoses.first.id,
+        defaultDiagnosisModel.id,
+      );
+      expect(
+        fromJsonMedicalRecord.dentalConditions.first.id,
+        dentalConditionModelDefault.id,
+      );
       expect(fromJsonMedicalRecord.treatmentPlan.id, treatmentPlan.id);
       expect(fromJsonMedicalRecord.acceptanceClause.id, acceptanceClause.id);
       expect(fromJsonMedicalRecord.address.id, address.id);
       expect(fromJsonMedicalRecord.legalId.id, legalId.id);
       expect(fromJsonMedicalRecord.user.id, user.id);
-      expect(fromJsonMedicalRecord.appointments.first.id,
-          defaultAppointmentModel.id);
-      expect(fromJsonMedicalRecord.medications.first.id,
-          defaultMedicationModel.id);
+      expect(
+        fromJsonMedicalRecord.appointments.first.id,
+        defaultAppointmentModel.id,
+      );
+      expect(
+        fromJsonMedicalRecord.medications.first.id,
+        defaultMedicationModel.id,
+      );
       expect(fromJsonMedicalRecord.contacts.first.id, defaultContactModel.id);
     });
 

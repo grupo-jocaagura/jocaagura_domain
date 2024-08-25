@@ -334,7 +334,7 @@ void main() {
     });
 
     test('returns an empty list when input is not a list', () {
-      final String input = 'this is a string';
+      const String input = 'this is a string';
 
       final List<Map<String, dynamic>> result = Utils.listFromDynamic(input);
 
@@ -362,11 +362,12 @@ void main() {
       expect(result, isA<List<Map<String, dynamic>>>());
       expect(result.length, 2);
       expect(
-          result,
-          equals(<Map<String, String>>[
-            <String, String>{'key1': 'value1'},
-            <String, String>{'key2': 'value2'},
-          ]));
+        result,
+        equals(<Map<String, String>>[
+          <String, String>{'key1': 'value1'},
+          <String, String>{'key2': 'value2'},
+        ]),
+      );
     });
   });
 }

@@ -66,7 +66,9 @@ void main() {
           defaultMedicationModel.copyWith();
       expect(copiedMedication, equals(defaultMedicationModel));
       expect(
-          copiedMedication.hashCode, equals(defaultMedicationModel.hashCode));
+        copiedMedication.hashCode,
+        equals(defaultMedicationModel.hashCode),
+      );
     });
 
     // Test del método toJson
@@ -79,10 +81,14 @@ void main() {
       expect(json[MedicationEnum.name.name], name);
       expect(json[MedicationEnum.dosage.name], dosage);
       expect(json[MedicationEnum.frequency.name], frequency);
-      expect(json[MedicationEnum.startDate.name],
-          DateUtils.dateTimeToString(startDate));
-      expect(json[MedicationEnum.endDate.name],
-          DateUtils.dateTimeToString(endDate));
+      expect(
+        json[MedicationEnum.startDate.name],
+        DateUtils.dateTimeToString(startDate),
+      );
+      expect(
+        json[MedicationEnum.endDate.name],
+        DateUtils.dateTimeToString(endDate),
+      );
     });
 
     // Test del método fromJson
