@@ -308,4 +308,65 @@ void main() {
       expect(Utils.getBoolFromDynamic(null), isFalse);
     });
   });
+
+  group('Utils.listFromDynamic', () {
+    test('returns a list of maps when input is a list of Map<String, dynamic>',
+        () {
+      final List<Map<String, String>> input = <Map<String, String>>[
+        <String, String>{'key1': 'value1'},
+        <String, String>{'key2': 'value2'},
+      ];
+
+      final List<Map<String, dynamic>> result = Utils.listFromDynamic(input);
+
+      expect(result, isA<List<Map<String, dynamic>>>());
+      expect(result.length, 2);
+      expect(result, equals(input));
+    });
+
+    test('returns an empty list when input is a list of non-map elements', () {
+      final List<Object> input = <Object>[1, 2, 3, 'string'];
+
+      final List<Map<String, dynamic>> result = Utils.listFromDynamic(input);
+
+      expect(result, isA<List<Map<String, dynamic>>>());
+      expect(result.isEmpty, isTrue);
+    });
+
+    test('returns an empty list when input is not a list', () {
+      final String input = 'this is a string';
+
+      final List<Map<String, dynamic>> result = Utils.listFromDynamic(input);
+
+      expect(result, isA<List<Map<String, dynamic>>>());
+      expect(result.isEmpty, isTrue);
+    });
+
+    test('returns an empty list when input is null', () {
+      final List<Map<String, dynamic>> result = Utils.listFromDynamic(null);
+
+      expect(result, isA<List<Map<String, dynamic>>>());
+      expect(result.isEmpty, isTrue);
+    });
+
+    test('returns only maps from a mixed list', () {
+      final List<Object> input = <Object>[
+        <String, String>{'key1': 'value1'},
+        2,
+        <String, String>{'key2': 'value2'},
+        'string',
+      ];
+
+      final List<Map<String, dynamic>> result = Utils.listFromDynamic(input);
+
+      expect(result, isA<List<Map<String, dynamic>>>());
+      expect(result.length, 2);
+      expect(
+          result,
+          equals(<Map<String, String>>[
+            <String, String>{'key1': 'value1'},
+            <String, String>{'key2': 'value2'},
+          ]));
+    });
+  });
 }

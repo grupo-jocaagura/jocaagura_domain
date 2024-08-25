@@ -3,13 +3,19 @@
 Este documento sigue las pautas de [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 y este proyecto se adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.15.0] - 2024-08-25
+
+### added
+
+- `MedicalRecordModel` se agrega modelo, test y documentación en formato dart doc para el estado del
+  paciente de la app de odontologo.
+
 ## [1.14.0] - 2024-08-25
 
 ### added
 
 - `MedicationModel` se agrega modelo, test y documentación en formato dart doc para el modelo de
   citas
-
 
 ## [1.13.0] - 2024-08-25
 

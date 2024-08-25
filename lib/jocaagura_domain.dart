@@ -23,6 +23,7 @@ part 'domain/debouncer.dart';
 part 'domain/dentist_app/acceptance_clause_model.dart';
 part 'domain/dentist_app/dental_condition_model.dart';
 part 'domain/dentist_app/diagnosis_model.dart';
+part 'domain/dentist_app/medical_record_model.dart';
 part 'domain/dentist_app/medical_treatment_model.dart';
 part 'domain/dentist_app/treatment_plan_model.dart';
 part 'domain/either.dart';

@@ -128,4 +128,19 @@ class Utils extends EntityUtil {
   static bool getBoolFromDynamic(dynamic json) {
     return json == true;
   }
+
+  /// Converts a dynamic value to a List of Map<String, dynamic>.
+  ///
+  /// [json] is the dynamic value to be converted.
+  ///
+  /// Returns an empty list if the conversion fails or if the value is not a list of maps.
+  static List<Map<String, dynamic>> listFromDynamic(dynamic json) {
+    if (json is List) {
+      return json
+          .whereType<Map<String, dynamic>>()
+          .cast<Map<String, dynamic>>()
+          .toList();
+    }
+    return <Map<String, dynamic>>[];
+  }
 }
