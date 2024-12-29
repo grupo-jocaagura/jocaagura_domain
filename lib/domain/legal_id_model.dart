@@ -1,5 +1,8 @@
 part of '../jocaagura_domain.dart';
 
+/// The default [LegalIdModel] instance, representing a sample legal identification.
+///
+/// This instance includes sample data for testing or as a fallback value.
 const LegalIdModel defaultLegalIdModel = LegalIdModel(
   id: 'vHi05635G',
   idType: LegalIdTypeEnum.cedula,
@@ -15,6 +18,7 @@ const LegalIdModel defaultLegalIdModel = LegalIdModel(
   },
 );
 
+/// Enum representing the types of legal identification documents.
 enum LegalIdTypeEnum {
   registroCivil,
   tarjetaIdentidad,
@@ -25,6 +29,7 @@ enum LegalIdTypeEnum {
   certificadoNacidoVivo,
 }
 
+/// Extension for [LegalIdTypeEnum] to provide human-readable descriptions for the enum values.
 extension LegalIdTypeExtension on LegalIdTypeEnum {
   String get description {
     switch (this) {
@@ -46,6 +51,9 @@ extension LegalIdTypeExtension on LegalIdTypeEnum {
   }
 }
 
+/// Retrieves a [LegalIdTypeEnum] value based on its description.
+///
+/// If the description does not match any predefined value, it defaults to [LegalIdTypeEnum.cedula].
 LegalIdTypeEnum getEnumValueFromString(String description) {
   switch (description.toLowerCase()) {
     case 'registro civil':
@@ -67,6 +75,7 @@ LegalIdTypeEnum getEnumValueFromString(String description) {
   }
 }
 
+/// Enum representing the fields of a legal identification model.
 enum LegalIdEnum {
   id,
   idType,
@@ -76,6 +85,10 @@ enum LegalIdEnum {
   attributes,
 }
 
+/// A model representing a legal identification record.
+///
+/// The [LegalIdModel] class stores information about a person's legal identification,
+/// including the type of document, the individual's name, and additional attributes.
 @immutable
 class LegalIdModel implements Model {
   const LegalIdModel({
@@ -86,6 +99,8 @@ class LegalIdModel implements Model {
     this.id = '',
     this.attributes = const <String, AttributeModel<dynamic>>{},
   });
+
+  /// Factory method to create a [LegalIdModel] from a JSON object.
   factory LegalIdModel.fromJson(Map<String, dynamic> json) {
     return LegalIdModel(
       idType: getEnumValueFromString(json[LegalIdEnum.idType.name].toString()),
@@ -97,13 +112,25 @@ class LegalIdModel implements Model {
     );
   }
 
+  /// Unique identifier for the legal identification record.
   final String id;
+
+  /// The type of legal identification document.
   final LegalIdTypeEnum idType;
+
+  /// The first and middle names of the individual.
   final String names;
+
+  /// The last names of the individual.
   final String lastNames;
+
+  /// The legal identification number.
   final String legalIdNumber;
+
+  /// Additional attributes related to the legal identification, stored as a map.
   final Map<String, AttributeModel<dynamic>> attributes;
 
+  /// Creates a copy of this [LegalIdModel] with optional new values.
   @override
   LegalIdModel copyWith({
     String? id,
@@ -123,43 +150,40 @@ class LegalIdModel implements Model {
     );
   }
 
+  /// Converts this [LegalIdModel] to a JSON object.
   @override
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> mapTmp = <String, dynamic>{};
-    for (final MapEntry<String, AttributeModel<dynamic>> element
+    final Map<String, dynamic> attributesMap = <String, dynamic>{};
+    for (final MapEntry<String, AttributeModel<dynamic>> entry
         in attributes.entries) {
-      mapTmp.addAll(element.value.toJson());
+      attributesMap[entry.key] = entry.value.toJson();
     }
     return <String, dynamic>{
       LegalIdEnum.id.name: id,
       LegalIdEnum.idType.name: idType.description,
-      LegalIdEnum.lastNames.name: lastNames,
       LegalIdEnum.names.name: names,
+      LegalIdEnum.lastNames.name: lastNames,
       LegalIdEnum.legalIdNumber.name: legalIdNumber,
-      LegalIdEnum.attributes.name: mapTmp,
+      LegalIdEnum.attributes.name: attributesMap,
     };
   }
 
   @override
   int get hashCode =>
-      '$id$idType$names$lastNames$legalIdNumber${attributes.hashCode}'.hashCode;
+      Object.hash(id, idType, names, lastNames, legalIdNumber, attributes);
 
   @override
   bool operator ==(Object other) {
     return identical(other, this) ||
         other is LegalIdModel &&
-            other.runtimeType == runtimeType &&
+            other.id == id &&
+            other.idType == idType &&
             other.names == names &&
             other.lastNames == lastNames &&
             other.legalIdNumber == legalIdNumber &&
-            other.attributes == attributes &&
-            other.idType == idType &&
-            other.id == id &&
-            other.hashCode == hashCode;
+            other.attributes == attributes;
   }
 
   @override
-  String toString() {
-    return '${toJson()}';
-  }
+  String toString() => toJson().toString();
 }

@@ -5,6 +5,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:jocaagura_domain/jocaagura_domain.dart';
 
+import '../mock_entity_bloc.dart';
+
 void main() {
   group('RepeatLastValueExtension and Bloc', () {
     // Unit testing for RepeatLastValueExtension y Bloc
@@ -170,6 +172,115 @@ void main() {
       });
       blocGeneral.deleteFunctionToProcessTValueOnStream('test');
       expect(blocGeneral.containsKeyFunction('test'), equals(false));
+    });
+  });
+  group('EntityBloc Tests', () {
+    test('EntityBloc constructor works correctly', () {
+      final MockEntityBloc bloc = MockEntityBloc();
+      expect(bloc, isA<EntityBloc>());
+    });
+
+    test('dispose method is called', () {
+      final MockEntityBloc bloc = MockEntityBloc();
+      bloc.dispose();
+      expect(bloc.isDisposed, true);
+    });
+  });
+
+  group('RepeatLastValueExtension Tests', () {
+    test('Stream repeats lastValue and emits new values', () async {
+      final StreamController<int> controller = StreamController<int>();
+      const int lastValue = 42;
+      final Stream<int> repeatedStream = controller.stream.call(lastValue);
+
+      final List<int> emittedValues = <int>[];
+      final StreamSubscription<int> subscription =
+          repeatedStream.listen(emittedValues.add);
+
+      // Emit a new value
+      controller.add(1);
+
+      await Future<void>.delayed(const Duration(milliseconds: 50));
+
+      expect(emittedValues, <int>[42, 1]);
+
+      subscription.cancel();
+      controller.close();
+    });
+
+    test('Stream handles onError and propagates to listeners', () async {
+      final StreamController<int> controller = StreamController<int>();
+      final Stream<int> repeatedStream = controller.stream.call(42);
+
+      Object? capturedError;
+      StackTrace? capturedStack;
+      final StreamSubscription<int> subscription = repeatedStream.listen(
+        (_) {},
+        onError: (Object? error, StackTrace? stack) {
+          capturedError = error;
+          capturedStack = stack;
+        },
+      );
+
+      // Add an error to the original stream
+      final Exception testError = Exception('Test error');
+      final StackTrace testStack = StackTrace.current;
+      controller.addError(testError, testStack);
+
+      await Future<void>.delayed(const Duration(milliseconds: 50));
+
+      expect(capturedError, testError);
+      expect(capturedStack, testStack);
+
+      subscription.cancel();
+      controller.close();
+    });
+
+    test('Stream closes when done is true', () async {
+      final StreamController<int> controller = StreamController<int>();
+      final Stream<int> repeatedStream = controller.stream.call(42);
+
+      final List<int> emittedValues = <int>[];
+      final StreamSubscription<int> subscription =
+          repeatedStream.listen(emittedValues.add);
+
+      controller.close(); // Trigger onDone
+
+      await Future<void>.delayed(const Duration(milliseconds: 50));
+
+      expect(emittedValues, <int>[42]);
+      expect(subscription.isPaused, false);
+
+      subscription.cancel();
+    });
+
+    test('Stream closes when done is true and new subscription is made',
+        () async {
+      final StreamController<int> controller = StreamController<int>();
+      final Stream<int> repeatedStream = controller.stream.call(42);
+
+      // Close the original stream to trigger `onDone`
+      controller.close();
+
+      await Future<void>.delayed(
+        const Duration(milliseconds: 50),
+      ); // Allow time for `onDone`
+
+      // Create a new subscription after the original stream is done
+      final List<int> emittedValues = <int>[];
+      final StreamSubscription<int> subscription =
+          repeatedStream.listen(emittedValues.add);
+
+      await Future<void>.delayed(
+        const Duration(
+          milliseconds: 50,
+        ),
+      ); // Allow time for subscription handling
+
+      // Expect no new values as the stream should be closed
+      expect(emittedValues, isEmpty);
+
+      subscription.cancel();
     });
   });
 }

@@ -1,14 +1,31 @@
 part of '../../jocaagura_domain.dart';
 
+/// Enum representing the fields of the [MedicationModel].
+///
+/// Each value corresponds to a specific property of the [MedicationModel].
 enum MedicationEnum {
+  /// Unique identifier for the medication.
   id,
+
+  /// Name of the medication.
   name,
+
+  /// Dosage of the medication.
   dosage,
+
+  /// Frequency of administration.
   frequency,
+
+  /// Start date of the medication prescription.
   startDate,
+
+  /// End date of the medication prescription.
   endDate,
 }
 
+/// Default instance of [MedicationModel] used for testing or as a placeholder.
+///
+/// Provides predefined values for all fields.
 final MedicationModel defaultMedicationModel = MedicationModel(
   id: 'med001',
   name: 'Ibuprofeno',
@@ -20,8 +37,13 @@ final MedicationModel defaultMedicationModel = MedicationModel(
 
 /// Represents a medication prescribed to a patient within a healthcare management application.
 ///
-/// This model class encapsulates the details of a medication, including the name,
-/// dosage, frequency of administration, and the start and end dates of the prescription.
+/// This model class encapsulates the details of a medication, including:
+/// - [id]: A unique identifier for the medication.
+/// - [name]: The name of the medication.
+/// - [dosage]: The dosage of the medication (e.g., "200mg").
+/// - [frequency]: The frequency of administration (e.g., "Every 8 hours").
+/// - [startDate]: The start date of the medication prescription.
+/// - [endDate]: The end date of the medication prescription.
 ///
 /// Example of using [MedicationModel] in a practical application:
 ///
@@ -44,9 +66,6 @@ final MedicationModel defaultMedicationModel = MedicationModel(
 ///   print('End Date: ${medication.endDate}');
 /// }
 /// ```
-///
-/// This class is essential for managing and tracking the medications prescribed to a patient,
-/// ensuring that all relevant details are recorded and easily accessible.
 class MedicationModel extends Model {
   /// Constructs a new [MedicationModel] with the given details.
   const MedicationModel({
@@ -94,6 +113,8 @@ class MedicationModel extends Model {
   final DateTime endDate;
 
   /// Creates a copy of this [MedicationModel] with optional new values.
+  ///
+  /// This method supports immutability while allowing modifications to the model.
   @override
   MedicationModel copyWith({
     String? id,

@@ -1,19 +1,47 @@
 part of '../jocaagura_domain.dart';
 
+/// Enumerates the properties of a store in the [StoreModel].
+///
+/// These properties represent essential attributes of a store, including
+/// its ID, NIT, photo URLs, contact information, and address.
 enum StoreModelEnum {
+  /// Unique identifier for the store.
   id,
+
+  /// NIT (tax identification number) of the store.
   nit,
+
+  /// URL pointing to the photo of the store.
   photoUrl,
+
+  /// URL pointing to the cover photo of the store.
   coverPhotoUrl,
+
+  /// Email address of the store.
   email,
+
+  /// Email address of the store owner.
   ownerEmail,
+
+  /// Name of the store.
   name,
+
+  /// Alias or alternative name for the store.
   alias,
+
+  /// Address details of the store.
   address,
+
+  /// Primary phone number of the store.
   phoneNumber1,
+
+  /// Secondary phone number of the store.
   phoneNumber2,
 }
 
+/// A default instance of [StoreModel] for testing or fallback purposes.
+///
+/// This instance provides placeholder values for a typical store.
 const StoreModel defaultStoreModel = StoreModel(
   id: 'store_id',
   nit: 12345,
@@ -28,7 +56,37 @@ const StoreModel defaultStoreModel = StoreModel(
   phoneNumber2: 789012,
 );
 
+/// Represents a store within the application.
+///
+/// This model class encapsulates details about a store, including its
+/// identification, contact information, and address.
+///
+/// Example of using [StoreModel] in a practical application:
+///
+/// ```dart
+/// void main() {
+///   final StoreModel store = StoreModel(
+///     id: 'store_001',
+///     nit: 98765,
+///     photoUrl: 'https://example.com/photo.jpg',
+///     coverPhotoUrl: 'https://example.com/cover.jpg',
+///     email: 'store@example.com',
+///     ownerEmail: 'owner@example.com',
+///     name: 'Super Store',
+///     alias: 'SS',
+///     address: defaultAddressModel,
+///     phoneNumber1: 123456789,
+///     phoneNumber2: 987654321,
+///   );
+///
+///   print('Store ID: ${store.id}');
+///   print('Name: ${store.name}');
+///   print('NIT: ${store.nitNumber}');
+///   print('Formatted Phone 1: ${store.formatedPhoneNumber1}');
+/// }
+/// ```
 class StoreModel extends Model {
+  /// Constructs a new [StoreModel] with the given details.
   const StoreModel({
     required this.id,
     required this.nit,
@@ -43,6 +101,9 @@ class StoreModel extends Model {
     required this.phoneNumber2,
   });
 
+  /// Deserializes a JSON map into an instance of [StoreModel].
+  ///
+  /// The JSON map must contain keys corresponding to the [StoreModelEnum] values.
   factory StoreModel.fromJson(Map<String, dynamic> json) {
     return StoreModel(
       id: Utils.getStringFromDynamic(json[StoreModelEnum.id.name]),
@@ -65,18 +126,40 @@ class StoreModel extends Model {
     );
   }
 
+  /// Unique identifier for the store.
   final String id;
+
+  /// NIT (tax identification number) of the store.
   final int nit;
+
+  /// URL pointing to the photo of the store.
   final String photoUrl;
+
+  /// URL pointing to the cover photo of the store.
   final String coverPhotoUrl;
+
+  /// Email address of the store.
   final String email;
+
+  /// Email address of the store owner.
   final String ownerEmail;
+
+  /// Name of the store.
   final String name;
+
+  /// Alias or alternative name for the store.
   final String alias;
+
+  /// Address details of the store.
   final AddressModel address;
+
+  /// Primary phone number of the store.
   final int phoneNumber1;
+
+  /// Secondary phone number of the store.
   final int phoneNumber2;
 
+  /// Creates a copy of this [StoreModel] with optional new values.
   @override
   StoreModel copyWith({
     String? id,
@@ -107,6 +190,7 @@ class StoreModel extends Model {
     );
   }
 
+  /// Serializes this [StoreModel] into a JSON map.
   @override
   Map<String, dynamic> toJson() {
     return <String, dynamic>{
@@ -154,11 +238,17 @@ class StoreModel extends Model {
             hashCode == other.hashCode;
   }
 
+  /// Retrieves the NIT formatted with a verification number.
   String get nitNumber => '$nit - ${StoreModel.getVerificationNITNumber(nit)}';
+
+  /// Formats the primary phone number.
   String get formatedPhoneNumber1 => Utils.getFormatedPhoneNumber(phoneNumber1);
+
+  /// Formats the secondary phone number.
   String get formatedPhoneNumber2 =>
       Utils.getFormatedPhoneNumberAlt(phoneNumber2);
 
+  /// Calculates the verification number for a given NIT. in Colombia only 2024
   static int getVerificationNITNumber(int nitNumber) {
     final List<int> digitos = nitNumber
         .toString()
@@ -168,7 +258,6 @@ class StoreModel extends Model {
         .reversed
         .toList();
 
-    // Definir los pesos para cada posición del RUT
     final List<int> pesos = <int>[
       3,
       7,
@@ -187,16 +276,13 @@ class StoreModel extends Model {
       71,
     ];
 
-    // Calcular la suma de los productos de los dígitos por los pesos
     int suma = 0;
     for (int i = 0; i < digitos.length; i++) {
       suma += digitos[i] * pesos[i];
     }
 
-    // Calcular el residuo
     final int residuo = suma % 11;
 
-    // Calcular el dígito de verificación
     final int digitoVerificacion = 11 - residuo;
 
     // Manejar casos especiales

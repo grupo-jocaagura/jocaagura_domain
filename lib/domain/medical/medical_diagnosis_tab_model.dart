@@ -1,13 +1,28 @@
 part of '../../jocaagura_domain.dart';
 
+/// Enum representing the fields of the [MedicalDiagnosisTabModel].
+///
+/// Each value corresponds to a specific property of the [MedicalDiagnosisTabModel].
 enum MedicalDiagnosisTabModelEnum {
+  /// Unique identifier for the diagnosis record.
   id,
+
+  /// Description of the medical condition diagnosed.
   condition,
+
+  /// Quantitative measure of the diagnosis (e.g., severity or count).
   quantity,
+
+  /// Additional observations about the diagnosis.
   observation,
+
+  /// The date and time when the diagnosis was recorded.
   dateTimeOfRecord,
 }
 
+/// Default instance of [MedicalDiagnosisTabModel] used for testing or as a placeholder.
+///
+/// Provides predefined values for all fields.
 MedicalDiagnosisTabModel defaultMMedicalDiagnosisModel =
     MedicalDiagnosisTabModel(
   id: 'oxo',
@@ -41,6 +56,10 @@ MedicalDiagnosisTabModel defaultMMedicalDiagnosisModel =
 ///   );
 ///
 ///   print(diagnosis);
+///   print('Condition: ${diagnosis.condition}');
+///   print('Observation: ${diagnosis.observation}');
+///   print('Quantity: ${diagnosis.quantity}');
+///   print('Date of Record: ${diagnosis.dateTimeOfRecord}');
 /// }
 /// ```
 /// Each instance of this class encapsulates information about a specific

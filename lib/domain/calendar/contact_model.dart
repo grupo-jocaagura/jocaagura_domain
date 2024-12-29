@@ -1,13 +1,31 @@
 part of '../../jocaagura_domain.dart';
 
+/// Enum representing the fields of a contact in a healthcare management application.
+///
+/// Each value corresponds to a specific property of the [ContactModel].
 enum ContactEnum {
+  /// Unique identifier for the contact.
   id,
+
+  /// Name of the contact person.
   name,
+
+  /// Relationship of the contact person to the patient (e.g., Mother, Father).
   relationship,
+
+  /// Phone number of the contact person.
   phoneNumber,
+
+  /// Email address of the contact person.
   email,
 }
 
+/// A default instance of [ContactModel] used as a placeholder or for testing.
+///
+/// Example usage:
+/// ```dart
+/// print(defaultContactModel.toJson());
+/// ```
 const ContactModel defaultContactModel = ContactModel(
   id: 'contact001',
   name: 'Maria Garcia',

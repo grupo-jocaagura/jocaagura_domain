@@ -1,14 +1,34 @@
 part of '../../jocaagura_domain.dart';
 
+/// Enum representing the fields of an appointment in a healthcare management application.
+///
+/// Each value corresponds to a specific property of the [AppointmentModel].
 enum AppointmentEnum {
+  /// Unique identifier for the appointment.
   id,
+
+  /// Date and time of the appointment.
   date,
+
+  /// Name of the odontologist attending the appointment.
   odontologist,
+
+  /// Purpose of the appointment.
   purpose,
+
+  /// Current status of the appointment.
   status,
+
+  /// Additional notes related to the appointment.
   notes,
 }
 
+/// A default instance of [AppointmentModel] used as a placeholder or for testing.
+///
+/// Example usage:
+/// ```dart
+/// print(defaultAppointmentModel.toJson());
+/// ```
 final AppointmentModel defaultAppointmentModel = AppointmentModel(
   id: 'appt001',
   date: DateTime(2024, 07, 24),
@@ -46,9 +66,6 @@ final AppointmentModel defaultAppointmentModel = AppointmentModel(
 ///   print('Notes: ${appointment.notes}');
 /// }
 /// ```
-///
-/// This class is useful for managing and tracking dental appointments,
-/// ensuring that all relevant details are recorded and easily accessible.
 class AppointmentModel extends Model {
   /// Constructs a new [AppointmentModel] with the given details.
   const AppointmentModel({

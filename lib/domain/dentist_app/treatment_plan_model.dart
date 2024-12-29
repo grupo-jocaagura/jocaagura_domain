@@ -1,9 +1,25 @@
 part of '../../jocaagura_domain.dart';
 
+/// Enum representing the fields of the [TreatmentPlanModel].
+///
+/// Each value corresponds to a specific property of the [TreatmentPlanModel].
 enum TreatmentPlanEnum {
+  /// Unique identifier for the treatment plan.
   id,
+
+  /// A map of medical treatments included in the treatment plan.
   medicalTreatments,
 }
+
+/// Default instance of [TreatmentPlanModel] used as a placeholder or for testing.
+///
+/// Provides predefined values for all fields.
+TreatmentPlanModel defaultTreatmentPlanModel = TreatmentPlanModel(
+  id: 'dtpm',
+  medicalTreatments: <String, MedicalTreatmentModel>{
+    'oxo': defaultMedicalTreatmentModel,
+  },
+);
 
 /// Represents a comprehensive treatment plan within a healthcare management application.
 ///
@@ -46,13 +62,6 @@ enum TreatmentPlanEnum {
 ///
 /// This class supports creating, managing, and serializing treatment plans, which can include
 /// any number of individual treatments.
-TreatmentPlanModel defaultTreatmentPlanModel = TreatmentPlanModel(
-  id: 'dtpm',
-  medicalTreatments: <String, MedicalTreatmentModel>{
-    'oxo': defaultMedicalTreatmentModel,
-  },
-);
-
 class TreatmentPlanModel extends Model {
   /// Constructs a new [TreatmentPlanModel] with the given [id] and a map of [medicalTreatments].
   ///
@@ -65,7 +74,6 @@ class TreatmentPlanModel extends Model {
   /// Deserializes a JSON map into an instance of [TreatmentPlanModel].
   ///
   /// The JSON map must contain keys for 'id' and 'medicalTreatments' with a nested map of treatments.
-
   factory TreatmentPlanModel.fromJson(Map<String, dynamic> json) {
     final Map<String, dynamic> tmp =
         Utils.mapFromDynamic(json[TreatmentPlanEnum.medicalTreatments.name]);
@@ -120,7 +128,8 @@ class TreatmentPlanModel extends Model {
     return identical(other, this) ||
         other is TreatmentPlanModel &&
             other.runtimeType == runtimeType &&
-            other.hashCode == hashCode;
+            other.id == id &&
+            other.medicalTreatments == medicalTreatments;
   }
 
   /// Returns the hash code for this [TreatmentPlanModel].

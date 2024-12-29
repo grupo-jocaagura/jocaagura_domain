@@ -1,18 +1,39 @@
 part of '../jocaagura_domain.dart';
 
+/// Enum representing the fields of an obituary model.
 enum ObituaryEnum {
+  /// Unique identifier for the obituary.
   id,
+
+  /// URL to the photo associated with the obituary.
   photoUrl,
+
+  /// The person associated with the obituary.
   person,
+
+  /// The creation date of the obituary.
   creationDate,
+
+  /// Address of the vigil.
   vigilAddress,
+
+  /// Address of the burial.
   burialAddress,
+
+  /// Date and time of the vigil.
   vigilDate,
+
+  /// Date and time of the burial.
   burialDate,
+
+  /// A custom message associated with the obituary.
   message,
+
+  /// The death record associated with the obituary.
   deathRecord,
 }
 
+/// Default instance of [ObituaryModel] used for testing and initialization.
 final ObituaryModel defaultObituary = ObituaryModel(
   id: 'qwerty',
   person: defaultPersonModel,
@@ -25,6 +46,27 @@ final ObituaryModel defaultObituary = ObituaryModel(
       'Lamentamos profundamente tu perdida. Esperamos que tu memoria perdure como una fuente de inspiración y amor.',
 );
 
+/// Represents an obituary record within a memorial application.
+///
+/// This model class encapsulates the details of an obituary, including information
+/// about the person, the vigil and burial arrangements, and any associated messages or records.
+///
+/// Example usage:
+///
+/// ```dart
+/// final ObituaryModel obituary = ObituaryModel(
+///   id: 'abc123',
+///   person: defaultPersonModel,
+///   creationDate: DateTime.now(),
+///   vigilDate: DateTime(2024, 1, 15, 14, 0),
+///   burialDate: DateTime(2024, 1, 15, 16, 0),
+///   vigilAddress: defaultAddressModel,
+///   burialAddress: defaultAddressModel,
+///   message: 'Celebramos la vida de alguien especial.',
+///   photoUrl: 'https://example.com/photo.jpg',
+/// );
+/// print(obituary);
+/// ```
 @immutable
 class ObituaryModel extends Model {
   const ObituaryModel({
@@ -40,6 +82,7 @@ class ObituaryModel extends Model {
     this.deathRecord,
   });
 
+  /// Creates a new [ObituaryModel] instance from a JSON map.
   factory ObituaryModel.fromJson(Map<String, dynamic> json) {
     return ObituaryModel(
       id: Utils.getStringFromDynamic(json[ObituaryEnum.id.name]),
@@ -63,15 +106,34 @@ class ObituaryModel extends Model {
     );
   }
 
+  /// Unique identifier for the obituary.
   final String id;
+
+  /// URL to the photo associated with the obituary.
   final String photoUrl;
+
+  /// The person associated with the obituary.
   final PersonModel person;
+
+  /// The creation date of the obituary.
   final DateTime creationDate;
+
+  /// Date and time of the vigil.
   final DateTime vigilDate;
+
+  /// Date and time of the burial.
   final DateTime burialDate;
+
+  /// Address of the vigil.
   final AddressModel vigilAddress;
+
+  /// Address of the burial.
   final AddressModel burialAddress;
+
+  /// A custom message associated with the obituary.
   final String message;
+
+  /// The death record associated with the obituary.
   final DeathRecordModel? deathRecord;
 
   @override

@@ -1,11 +1,32 @@
 part of '../../jocaagura_domain.dart';
 
+/// Enum representing the fields of the [MedicalTreatmentModel].
+///
+/// Each value corresponds to a specific property of the [MedicalTreatmentModel].
 enum MedicalTreatmentEnum {
+  /// Unique identifier for the treatment record.
   id,
+
+  /// The concept or description of the treatment administered.
   concept,
+
+  /// The date and time when the treatment was recorded.
   dateTimeOfRecord,
+
+  /// The quantity of the treatment administered.
   quantity,
 }
+
+/// Default instance of [MedicalTreatmentModel] used as a placeholder or for testing.
+///
+/// Provides predefined values for all fields.
+final MedicalTreatmentModel defaultMedicalTreatmentModel =
+    MedicalTreatmentModel(
+  id: 'default_id',
+  concept: 'Tratamiento de ejemplo',
+  dateTimeOfRecord: DateTime(2024, 7, 28),
+  quantity: 1,
+);
 
 /// Represents a medical treatment record within an application that manages
 /// healthcare data.
@@ -33,20 +54,11 @@ enum MedicalTreatmentEnum {
 ///
 /// This class is essential for tracking the administration of various treatments within
 /// healthcare settings, ensuring accurate record-keeping and easy retrieval of treatment details.
-final MedicalTreatmentModel defaultMedicalTreatmentModel =
-    MedicalTreatmentModel(
-  id: 'default_id',
-  concept: 'Tratamiento de ejemplo',
-  dateTimeOfRecord: DateTime(2024, 7, 28),
-  quantity: 1,
-);
-
 class MedicalTreatmentModel extends Model {
   /// Constructs a new instance with the provided [id], [concept], [dateTimeOfRecord],
   /// and [quantity].
   ///
   /// These parameters are essential for describing a medical treatment comprehensively.
-
   const MedicalTreatmentModel({
     required this.id,
     required this.concept,
@@ -75,10 +87,10 @@ class MedicalTreatmentModel extends Model {
   final String id;
 
   /// The concept or description of the treatment administered.
-  final DateTime dateTimeOfRecord;
+  final String concept;
 
   /// The date and time when the treatment was recorded.
-  final String concept;
+  final DateTime dateTimeOfRecord;
 
   /// The quantity of the treatment administered.
   final int quantity;
@@ -89,8 +101,8 @@ class MedicalTreatmentModel extends Model {
   @override
   MedicalTreatmentModel copyWith({
     String? id,
-    DateTime? dateTimeOfRecord,
     String? concept,
+    DateTime? dateTimeOfRecord,
     int? quantity,
   }) {
     return MedicalTreatmentModel(
@@ -119,15 +131,20 @@ class MedicalTreatmentModel extends Model {
     return identical(this, other) ||
         other is MedicalTreatmentModel &&
             runtimeType == other.runtimeType &&
-            other.hashCode == hashCode;
+            id == other.id &&
+            concept == other.concept &&
+            dateTimeOfRecord == other.dateTimeOfRecord &&
+            quantity == other.quantity;
   }
 
   /// Returns the hash code for this [MedicalTreatmentModel].
+  ///
+  /// The hash code is based on all of the fields of the model.
   @override
   int get hashCode => Object.hash(
         id,
-        dateTimeOfRecord,
         concept,
+        dateTimeOfRecord,
         quantity,
       );
 }

@@ -1,6 +1,39 @@
 part of '../jocaagura_domain.dart';
 
+/// An abstract class representing a BLoC (Business Logic Component) for managing entities.
+///
+/// This class serves as a base for defining BLoCs that manage the state and business logic
+/// related to specific entities within the application. It provides a [dispose] method
+/// for cleaning up resources, such as streams or subscriptions, when the BLoC is no longer needed.
+///
+/// Example usage:
+///
+/// ```dart
+/// class UserBloc extends EntityBloc {
+///   final StreamController<User> _userController = StreamController<User>();
+///
+///   Stream<User> get userStream => _userController.stream;
+///
+///   void addUser(User user) {
+///     _userController.sink.add(user);
+///   }
+///
+///   @override
+///   void dispose() {
+///     _userController.close();
+///   }
+/// }
+/// ```
+///
+/// This class defines the contract for any BLoC implementation to ensure
+/// proper resource management.
 abstract class EntityBloc {
+  const EntityBloc();
+
+  /// Disposes of resources used by the BLoC.
+  ///
+  /// This method is intended to be overridden by subclasses to clean up
+  /// resources such as streams, controllers, or subscriptions.
   void dispose();
 }
 
@@ -24,22 +57,25 @@ extension RepeatLastValueExtension<T> on Stream<T> {
     listen(
       (T event) {
         for (final MultiStreamController<T> listener
-            in <MultiStreamController<T>>[...currentListeners]) {
+            in currentListeners.toList()) {
           listener.addSync(event);
         }
       },
       onError: (Object error, StackTrace stack) {
         for (final MultiStreamController<T> listener
-            in <MultiStreamController<T>>[...currentListeners]) {
+            in currentListeners.toList()) {
           listener.addErrorSync(error, stack);
         }
       },
       onDone: () {
         done = true;
-        for (final MultiStreamController<T> listener in currentListeners) {
+        final List<MultiStreamController<T>> listenersSnapshot =
+            currentListeners
+                .toList(); // Snapshot to avoid concurrent modification
+        for (final MultiStreamController<T> listener in listenersSnapshot) {
           listener.closeSync();
         }
-        currentListeners.clear();
+        currentListeners.clear(); // Clear after iterating
       },
     );
     return Stream<T>.multi((final MultiStreamController<T> controller) {

@@ -1,11 +1,22 @@
 part of '../../jocaagura_domain.dart';
 
+/// Enum representing the fields of the [DiagnosisModel].
+///
+/// Each value corresponds to a specific property of the [DiagnosisModel].
 enum DiagnosisModelEnum {
+  /// Unique identifier for the diagnosis.
   id,
+
+  /// Title or name of the diagnosis.
   title,
+
+  /// Detailed description of the diagnosis.
   description,
 }
 
+/// Default instance of [DiagnosisModel] used as a placeholder or for testing.
+///
+/// Provides predefined values for all fields.
 const DiagnosisModel defaultDiagnosisModel = DiagnosisModel(
   id: 'xox',
   title: 'diagnostico',
@@ -33,15 +44,18 @@ const DiagnosisModel defaultDiagnosisModel = DiagnosisModel(
 ///   print('Title: ${diagnosis.title}');
 ///   print('Description: ${diagnosis.description}');
 /// }
-/// ```.
-
+/// ```
 class DiagnosisModel implements Model {
+  /// Constructs a new [DiagnosisModel] with the given [id], [title], and [description].
   const DiagnosisModel({
     required this.id,
     required this.title,
     required this.description,
   });
 
+  /// Deserializes a JSON map into an instance of [DiagnosisModel].
+  ///
+  /// The JSON map must contain keys for 'id', 'title', and 'description' with appropriate values.
   factory DiagnosisModel.fromJson(Map<String, dynamic> json) {
     return DiagnosisModel(
       id: Utils.getStringFromDynamic(json[DiagnosisModelEnum.id.name]),
@@ -52,6 +66,7 @@ class DiagnosisModel implements Model {
     );
   }
 
+  /// A unique identifier for the diagnosis.
   final String id;
 
   /// The title or name of the medical condition diagnosed.
@@ -77,6 +92,9 @@ class DiagnosisModel implements Model {
   }
 
   /// Converts this [DiagnosisModel] into a JSON map.
+  ///
+  /// Useful for serializing the [DiagnosisModel] to JSON, for example when storing
+  /// the model in a database or sending it over a network.
   @override
   Map<String, dynamic> toJson() {
     return <String, dynamic>{
@@ -86,14 +104,23 @@ class DiagnosisModel implements Model {
     };
   }
 
+  /// Determines if two [DiagnosisModel] instances are equal.
+  ///
+  /// Returns true if the [other] object is an instance of [DiagnosisModel]
+  /// and all fields are equal.
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         other is DiagnosisModel &&
-            other.hashCode == hashCode &&
-            runtimeType == other.runtimeType;
+            runtimeType == other.runtimeType &&
+            id == other.id &&
+            title == other.title &&
+            description == other.description;
   }
 
+  /// Returns the hash code for this [DiagnosisModel].
+  ///
+  /// The hash code is based on all of the fields of the model.
   @override
   int get hashCode => Object.hash(
         id,

@@ -1,4 +1,5 @@
 # Jocaagura Domain
+![Coverage](https://img.shields.io/badge/coverage-99%25-brightgreen)
 
 ## Descripción
 El paquete Jocaagura Domain ofrece una serie de abstracciones de lógica de negocio diseñadas para mantener una coherencia arquitectónica en proyectos Flutter. Al proveer una base sólida y una arquitectura limpia y escalable, facilita la interrelación de desarrollos múltiples, permitiendo que las diferentes aplicaciones converjan en una misma estructura de diseño.

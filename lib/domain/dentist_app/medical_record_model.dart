@@ -1,20 +1,49 @@
 part of '../../jocaagura_domain.dart';
 
+/// Enum representing the fields of the [MedicalRecordModel].
+///
+/// Each value corresponds to a specific property of the [MedicalRecordModel].
 enum MedicalRecordEnum {
+  /// Unique identifier for the medical record.
   id,
+
+  /// The patient's personal details.
   patient,
+
+  /// A list of medical diagnoses for the patient.
   diagnoses,
+
+  /// A list of dental conditions for the patient.
   dentalConditions,
+
+  /// The treatment plan prescribed for the patient.
   treatmentPlan,
+
+  /// The acceptance clause, including signatures and other consent information.
   acceptanceClause,
+
+  /// The patient's address.
   address,
+
+  /// The patient's legal identification.
   legalId,
+
+  /// The user associated with this medical record.
   user,
+
+  /// A list of appointments scheduled for the patient.
   appointments,
+
+  /// A list of medications prescribed to the patient.
   medications,
+
+  /// A list of emergency contacts for the patient.
   contacts,
 }
 
+/// Default instance of [MedicalRecordModel] used as a placeholder or for testing.
+///
+/// Provides predefined values for all fields.
 final MedicalRecordModel defaultMedicalRecordModel = MedicalRecordModel(
   id: 'default',
   patient: defaultPersonModel,
@@ -66,7 +95,6 @@ final MedicalRecordModel defaultMedicalRecordModel = MedicalRecordModel(
 ///
 /// This class is used to create a unified record that contains all pertinent information about a patient,
 /// ensuring that their medical history is accurately tracked and easily accessible across different healthcare contexts.
-
 class MedicalRecordModel extends Model {
   /// Constructs a new [MedicalRecordModel] with the given details.
   const MedicalRecordModel({

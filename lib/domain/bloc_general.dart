@@ -17,7 +17,7 @@ class BlocGeneral<T> extends Bloc<T> {
     Function(T val) function, [
     bool executeNow = false,
   ]) {
-    _functionsMap[key.toLowerCase()] = function;
+    _functionsMap[key] = function;
     if (executeNow) {
       function(value);
     }

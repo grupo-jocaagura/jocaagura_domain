@@ -1,13 +1,29 @@
 part of '../jocaagura_domain.dart';
 
+/// Enumerates the properties of a person in the [PersonModel].
+///
+/// These properties define the structure of a person, including their unique
+/// identifier, names, photo URL, last names, and additional attributes.
 enum PersonEnum {
+  /// Unique identifier for the person.
   id,
+
+  /// The names of the person.
   names,
+
+  /// URL pointing to the photo of the person.
   photoUrl,
+
+  /// The last names of the person.
   lastNames,
+
+  /// Additional attributes related to the person, stored as key-value pairs.
   attributes,
 }
 
+/// A default instance of [PersonModel] for testing or fallback purposes.
+///
+/// This instance represents a person with basic placeholder values.
 const PersonModel defaultPersonModel = PersonModel(
   id: '',
   names: 'J.J.',
@@ -16,7 +32,34 @@ const PersonModel defaultPersonModel = PersonModel(
   attributes: <String, AttributeModel<dynamic>>{},
 );
 
+/// Represents a person within the application.
+///
+/// This model class encapsulates details about a person, including their ID,
+/// names, photo URL, last names, and additional attributes.
+///
+/// Example of using [PersonModel] in a practical application:
+///
+/// ```dart
+/// void main() {
+///   final PersonModel person = PersonModel(
+///     id: '123',
+///     names: 'John',
+///     photoUrl: 'https://example.com/photo.jpg',
+///     lastNames: 'Doe',
+///     attributes: {
+///       'age': AttributeModel<int>(value: 30, name: 'age'),
+///       'gender': AttributeModel<String>(value: 'Male', name: 'gender'),
+///     },
+///   );
+///
+///   print('Person ID: ${person.id}');
+///   print('Full Name: ${person.names} ${person.lastNames}');
+///   print('Photo URL: ${person.photoUrl}');
+///   print('Attributes: ${person.attributes}');
+/// }
+/// ```
 class PersonModel extends Model {
+  /// Constructs a new [PersonModel] with the given details.
   const PersonModel({
     required this.id,
     required this.names,
@@ -25,6 +68,9 @@ class PersonModel extends Model {
     required this.attributes,
   });
 
+  /// Deserializes a JSON map into an instance of [PersonModel].
+  ///
+  /// The JSON map must contain keys corresponding to the [PersonEnum] values.
   factory PersonModel.fromJson(Map<String, dynamic> json) {
     return PersonModel(
       id: Utils.getStringFromDynamic(json[PersonEnum.id.name]),
@@ -35,12 +81,22 @@ class PersonModel extends Model {
     );
   }
 
+  /// Unique identifier for the person.
   final String id;
+
+  /// The names of the person.
   final String names;
+
+  /// URL pointing to the person's photo.
   final String photoUrl;
+
+  /// The last names of the person.
   final String lastNames;
+
+  /// Additional attributes related to the person, stored as key-value pairs.
   final Map<String, AttributeModel<dynamic>> attributes;
 
+  /// Creates a copy of this [PersonModel] with optional new values.
   @override
   PersonModel copyWith({
     String? id,
@@ -57,6 +113,7 @@ class PersonModel extends Model {
         attributes: attributes ?? this.attributes,
       );
 
+  /// Serializes this [PersonModel] into a JSON map.
   @override
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> mapTmp = <String, dynamic>{};
@@ -74,6 +131,7 @@ class PersonModel extends Model {
     };
   }
 
+  /// Checks if two [PersonModel] instances are equal.
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -86,9 +144,11 @@ class PersonModel extends Model {
           lastNames == other.lastNames &&
           hashCode == other.hashCode;
 
+  /// Returns the hash code for this [PersonModel].
   @override
   int get hashCode => '$id$names$photoUrl$lastNames$attributes'.hashCode;
 
+  /// Converts the [PersonModel] to a string representation.
   @override
   String toString() {
     return '${toJson()}';

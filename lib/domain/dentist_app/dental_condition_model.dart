@@ -1,78 +1,120 @@
 part of '../../jocaagura_domain.dart';
 
+/// Enum representing the fields of a dental condition in the [DentalConditionModel].
+///
+/// Each value corresponds to a specific property of the [DentalConditionModel].
 enum DentalConditionEnum {
+  /// Unique identifier for the dental condition.
   id,
+
+  /// Identifier for the specific tooth or dental region affected.
   dentalId,
+
+  /// Region of the tooth affected by the condition.
   dentalRegion,
+
+  /// Specific condition diagnosed in the dental region.
   condition,
+
+  /// Date and time when the condition was recorded.
   dateTimeOfRecord,
 }
 
-/// [DentalRegionEnum] Enum DentalRegion: Define todas las regiones dentales posibles, incluyendo una opción none para manejar casos no coincidentes.
-/// Occlusal: La superficie masticatoria de los dientes posteriores.
-/// Vestibular: La superficie de los dientes que se encuentra cerca de las mejillas y labios.
-/// Mesial: La superficie del diente que está más cerca del centro de la línea dental.
-/// Distal: La superficie del diente que está más lejos del centro de la línea dental.
-/// Palatal: La superficie del diente que se encuentra cerca del paladar (generalmente usada para dientes superiores).
-/// Lingual: La superficie del diente que se encuentra cerca de la lengua.
-/// Buccal: La superficie de los dientes que se encuentra cerca de las mejillas.
-/// Labial: La superficie de los dientes que se encuentra cerca de los labios.
-/// Incisal: El borde cortante de los dientes anteriores.
-/// Gingival: Relacionado con las encías.
-/// Periodontal: Relacionado con los tejidos que rodean y soportan los dientes.
-/// Maxillary: Relacionado con el maxilar superior.
-/// Mandibular: Relacionado con la mandíbula inferior.
-/// None: Maneja un caso no cubierto o no especificado
-
+/// Enum representing the various regions of a tooth.
+///
+/// This enum defines all possible regions of a tooth, including an option `none`
+/// for cases where the region does not match any predefined value.
 enum DentalRegionEnum {
+  /// The masticatory surface of posterior teeth.
   occlusal,
+
+  /// The surface of teeth facing cheeks and lips.
   vestibular,
+
+  /// The surface of a tooth closest to the midline of the dental arch.
   mesial,
+
+  /// The surface of a tooth farthest from the midline of the dental arch.
   distal,
+
+  /// The surface of upper teeth facing the palate.
   palatal,
+
+  /// The surface of teeth facing the tongue.
   lingual,
+
+  /// The surface of teeth near the cheeks.
   buccal,
+
+  /// The surface of teeth near the lips.
   labial,
+
+  /// The cutting edge of anterior teeth.
   incisal,
+
+  /// Related to the gums.
   gingival,
+
+  /// Related to the supporting structures of the teeth.
   periodontal,
+
+  /// Related to the upper jaw.
   maxillary,
+
+  /// Related to the lower jaw.
   mandibular,
+
+  /// Default value for unspecified or unmatched regions.
   none,
 }
 
-/// [ToothConditionEnum] proporcionan una manera estructurada de referirse a las diferentes condiciones dentales en tu aplicación, lo que puede facilitar la implementación de funcionalidades específicas y mejorar la claridad del código.
-/// Descripción de las Condiciones Dentales
-/// Healthy: El diente está en buen estado.
-/// Cavity: El diente tiene caries.
-/// Filled: El diente ha sido rellenado.
-/// Missing: El diente está ausente.
-/// Broken: El diente está roto.
-/// Sensitive: El diente es sensible.
-/// Impacted: El diente está impactado.
-/// Decayed: El diente está deteriorado.
-/// Root Canal: El diente ha sido tratado con un canal radicular.
-/// Crown: El diente tiene una corona.
-/// Extraction Needed: El diente necesita ser extraído.
-/// Orthodontic Issue: El diente tiene problemas de ortodoncia.
-/// None: No hay una condición específica asignada.
-
+/// Enum representing various conditions of a tooth.
+///
+/// This structured representation helps define and manage tooth conditions.
 enum ToothConditionEnum {
+  /// The tooth is in good health.
   healthy,
+
+  /// The tooth has a cavity.
   cavity,
+
+  /// The tooth has been filled.
   filled,
+
+  /// The tooth is missing.
   missing,
+
+  /// The tooth is broken.
   broken,
+
+  /// The tooth is sensitive.
   sensitive,
+
+  /// The tooth is impacted.
   impacted,
+
+  /// The tooth is decayed.
   decayed,
+
+  /// The tooth has undergone root canal treatment.
   rootCanal,
+
+  /// The tooth has a crown.
   crown,
+
+  /// The tooth needs to be extracted.
   extractionNeeded,
+
+  /// The tooth has orthodontic issues.
   orthodonticIssue,
+
+  /// Default value for unspecified or unmatched conditions.
   none,
 }
 
+/// Enum representing unique identifiers for dental quadrants.
+///
+/// Each value corresponds to a specific tooth within a quadrant.
 enum DentalIDEnum {
   /// Quadrant 1 (Upper right)
   q11,
@@ -115,7 +157,9 @@ enum DentalIDEnum {
   q48,
 }
 
+/// Extension for [DentalIDEnum] to retrieve numerical IDs for dental quadrants.
 extension DentalIDExtension on DentalIDEnum {
+  /// Returns the numeric ID of a dental quadrant.
   int get id {
     switch (this) {
       case DentalIDEnum.q11:
@@ -186,6 +230,9 @@ extension DentalIDExtension on DentalIDEnum {
   }
 }
 
+/// Default instance of [DentalConditionModel] used as a placeholder or for testing.
+///
+/// Provides predefined values for all fields.
 final DentalConditionModel dentalConditionModelDefault = DentalConditionModel(
   id: 'xxiv',
   dentalId: 11,
@@ -218,10 +265,6 @@ final DentalConditionModel dentalConditionModelDefault = DentalConditionModel(
 ///   print('Recorded on: ${dentalCondition.dateTimeOfRecord}');
 /// }
 /// ```
-///
-/// This class serves as a comprehensive model to store and manage data regarding dental conditions
-/// in a structured and easily accessible manner.
-
 class DentalConditionModel extends Model {
   /// Constructs a new instance with the provided [id], [dentalId], [dentalRegion],
   /// [condition], and [dateTimeOfRecord].
@@ -234,9 +277,6 @@ class DentalConditionModel extends Model {
   });
 
   /// Deserializes a JSON map into an instance of [DentalConditionModel].
-  ///
-  /// The JSON map must contain keys for 'id', 'dentalId', 'dentalRegion', 'condition',
-  /// and 'dateTimeOfRecord' with appropriate values.
   factory DentalConditionModel.fromJson(Map<String, dynamic> json) {
     return DentalConditionModel(
       id: Utils.getStringFromDynamic(json[DentalConditionEnum.id.name]),
@@ -290,6 +330,7 @@ class DentalConditionModel extends Model {
     );
   }
 
+  /// Serializes this [DentalConditionModel] into a JSON map.
   @override
   Map<String, dynamic> toJson() {
     return <String, dynamic>{
@@ -302,6 +343,7 @@ class DentalConditionModel extends Model {
     };
   }
 
+  /// Converts a string into a [DentalRegionEnum].
   static DentalRegionEnum getDentalRegionFromString(String region) {
     switch (region.toLowerCase()) {
       case 'occlusal':
@@ -335,6 +377,7 @@ class DentalConditionModel extends Model {
     }
   }
 
+  /// Converts a string into a [ToothConditionEnum].
   static ToothConditionEnum getToothConditionFromString(String condition) {
     switch (condition.toLowerCase()) {
       case 'healthy':
@@ -366,6 +409,7 @@ class DentalConditionModel extends Model {
     }
   }
 
+  /// Converts a string into a [DentalIDEnum].
   static DentalIDEnum getDentalIDFromString(String id) {
     switch (id.toLowerCase()) {
       case '11':
@@ -437,10 +481,10 @@ class DentalConditionModel extends Model {
     }
   }
 
-  static int getDentalIDAsInt(String id) {
-    return getDentalIDFromString(id).id;
-  }
+  /// Converts a dental ID string into its integer representation.
+  static int getDentalIDAsInt(String id) => getDentalIDFromString(id).id;
 
+  /// Determines if two [DentalConditionModel] instances are equal.
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
@@ -449,6 +493,7 @@ class DentalConditionModel extends Model {
             hashCode == other.hashCode;
   }
 
+  /// Returns the hash code for this [DentalConditionModel].
   @override
   int get hashCode => Object.hash(
         id,

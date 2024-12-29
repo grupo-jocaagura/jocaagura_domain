@@ -1,5 +1,13 @@
 part of '../jocaagura_domain.dart';
 
+/// Enum [DeathRecordEnum] defines the keys for serializing and deserializing
+/// a [DeathRecordModel].
+///
+/// - **id**: Unique identifier for the record.
+/// - **notaria**: Information about the notary office.
+/// - **person**: Information about the deceased person.
+/// - **address**: Address where the death was recorded.
+/// - **recordId**: Official record identifier.
 enum DeathRecordEnum {
   id,
   notaria,
@@ -8,6 +16,7 @@ enum DeathRecordEnum {
   recordId,
 }
 
+/// A default instance of [DeathRecordModel] for testing or initialization.
 const DeathRecordModel defaultDeathRecord = DeathRecordModel(
   notaria: defaultStoreModel,
   person: defaultPersonModel,
@@ -16,6 +25,31 @@ const DeathRecordModel defaultDeathRecord = DeathRecordModel(
   id: 'gx86GyNM',
 );
 
+/// Represents a death record within a registry or healthcare management system.
+///
+/// This model encapsulates all details associated with a death record, including
+/// the notary office, the deceased person's information, the address, and an official
+/// record ID.
+///
+/// Example usage:
+///
+/// ```dart
+/// void main() {
+///   var deathRecord = DeathRecordModel(
+///     id: 'record001',
+///     notaria: defaultStoreModel,
+///     person: defaultPersonModel,
+///     address: defaultAddressModel,
+///     recordId: '123456789',
+///   );
+///
+///   print('Death Record ID: ${deathRecord.id}');
+///   print('Notary Office: ${deathRecord.notaria}');
+///   print('Deceased Person: ${deathRecord.person}');
+///   print('Address: ${deathRecord.address}');
+///   print('Record ID: ${deathRecord.recordId}');
+/// }
+/// ```
 @immutable
 class DeathRecordModel implements Model {
   const DeathRecordModel({
@@ -26,12 +60,22 @@ class DeathRecordModel implements Model {
     this.id = '',
   });
 
+  /// Unique identifier for the death record.
   final String id;
+
+  /// Official record identifier for the death.
   final String recordId;
+
+  /// Details about the notary office managing the record.
   final StoreModel notaria;
+
+  /// Information about the deceased person.
   final PersonModel person;
+
+  /// Address where the death was recorded.
   final AddressModel address;
 
+  /// Creates a copy of this [DeathRecordModel] with optional new values.
   @override
   DeathRecordModel copyWith({
     String? id,
@@ -49,6 +93,7 @@ class DeathRecordModel implements Model {
     );
   }
 
+  /// Serializes this [DeathRecordModel] into a JSON map.
   @override
   Map<String, dynamic> toJson() {
     return <String, dynamic>{
@@ -60,6 +105,7 @@ class DeathRecordModel implements Model {
     };
   }
 
+  /// Deserializes a JSON map into an instance of [DeathRecordModel].
   DeathRecordModel fromJson(Map<String, dynamic> json) {
     return DeathRecordModel(
       id: Utils.getStringFromDynamic(json[DeathRecordEnum.id.name]),
@@ -81,11 +127,13 @@ class DeathRecordModel implements Model {
       '$id${person.hashCode}${notaria.hashCode}${address.hashCode}$recordId'
           .hashCode;
 
+  /// Converts this [DeathRecordModel] to a string representation.
   @override
   String toString() {
     return '${toJson()}';
   }
 
+  /// Compares this [DeathRecordModel] to another object.
   @override
   bool operator ==(Object other) {
     return identical(other, this) ||

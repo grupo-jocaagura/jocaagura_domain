@@ -1,10 +1,22 @@
 part of '../../jocaagura_domain.dart';
 
+/// Enum representing the fields of an acceptance clause in the [AcceptanceClauseModel].
+///
+/// Each value corresponds to a specific property of the [AcceptanceClauseModel].
 enum AcceptanceClauseEnum {
+  /// Unique identifier for the acceptance clause.
   id,
+
+  /// Signature of the odontologist.
   odontologistSignature,
+
+  /// Printed name of the patient.
   patientPrint,
+
+  /// Signature of the patient.
   patientSignature,
+
+  /// Legal text or leyend acknowledged by the patient.
   stringAcceptanceLeyend,
 }
 
@@ -22,6 +34,9 @@ final SignatureModel defaultPatientSignature = SignatureModel(
   png64Image: 'base64EncodedImageStringForPatientSignature',
 );
 
+/// Default instance of [AcceptanceClauseModel] used as a placeholder or for testing.
+///
+/// Provides predefined values for all fields, including signatures and the acceptance leyend.
 final AcceptanceClauseModel defaultAcceptanceClauseModel =
     AcceptanceClauseModel(
   id: 'acm789',
