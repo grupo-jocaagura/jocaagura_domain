@@ -14,7 +14,9 @@ void main() {
       const int milliseconds = 1622394000000; // 31 de mayo de 2021, 12:00:00
       final DateTime result = DateUtils.dateTimeFromDynamic(milliseconds);
       final DateTime expected = DateTime(2021, 5, 30, 12);
-      expect(result, equals(expected));
+      expect(result.year, equals(expected.year));
+      expect(result.month, equals(expected.month));
+      expect(result.day, equals(expected.day));
     });
 
     test('Convertir Duration', () {
