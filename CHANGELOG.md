@@ -2,6 +2,14 @@
 
 This document follows the guidelines of [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+## [1.16.0] - 2025-01-25
+
+### Added
+- Configured GitHub Actions secrets to securely store sensitive data required for workflows.
+- Validated and updated the GitHub maintainers group to ensure proper repository access and management.
+
+### Updated
+- Enhanced the `README` file with updated repository details and instructions for contributors.
 
 ## [1.15.2] - 2024-12-29
 
