@@ -1,5 +1,7 @@
 # Jocaagura Domain
 ![Coverage](https://img.shields.io/badge/coverage-99%25-brightgreen)
+![Coverage](https://img.shields.io/badge/Author-@albertjjimenezp-brightgreen)
+-------------------------------![Author](https://avatars.githubusercontent.com/u/35118534?s=200&u=80708c1558e4e482d52d31490959442f618a2d62&v=4)----------🐱‍👤
 
 ## Descripción
 El paquete Jocaagura Domain ofrece una serie de abstracciones de lógica de negocio diseñadas para mantener una coherencia arquitectónica en proyectos Flutter. Al proveer una base sólida y una arquitectura limpia y escalable, facilita la interrelación de desarrollos múltiples, permitiendo que las diferentes aplicaciones converjan en una misma estructura de diseño.
@@ -50,6 +52,7 @@ Para utilizar el paquete, se requiere la instalación del SDK de Flutter. No hay
 - [ContactModel](lib/domain/calendar/contact_model.dart)
 - [MedicationModel](lib/domain/medical/medication_model.dart)
 - [MedicalRecordModel](lib/domain/dentist_app/medical_record_model.dart)
+- [FinancialMovement](lib/domain/financial/financial_movement.dart)
 
 Cada sección proporciona detalles sobre la implementación y el uso de las clases, ofreciendo ejemplos de código y explicaciones de cómo se integran dentro de tu arquitectura de dominio.
 
