@@ -50,6 +50,7 @@ Para utilizar el paquete, se requiere la instalación del SDK de Flutter. No hay
 - [ContactModel](lib/domain/calendar/contact_model.dart)
 - [MedicationModel](lib/domain/medical/medication_model.dart)
 - [MedicalRecordModel](lib/domain/dentist_app/medical_record_model.dart)
+- [FinancialMovement](lib/domain/financial/financial_movement.dart)
 
 Cada sección proporciona detalles sobre la implementación y el uso de las clases, ofreciendo ejemplos de código y explicaciones de cómo se integran dentro de tu arquitectura de dominio.
 
