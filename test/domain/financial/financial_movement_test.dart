@@ -3,6 +3,7 @@ import 'package:jocaagura_domain/jocaagura_domain.dart';
 
 final DateTime testDate = DateTime(2024, 07, 20);
 final DateTime createdAt = DateTime(2024, 07, 25);
+
 void main() {
   group('FinancialMovementModel Tests', () {
     test('Constructor sets values correctly', () {
