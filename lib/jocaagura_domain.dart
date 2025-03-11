@@ -31,6 +31,7 @@ part 'domain/entity_bloc.dart';
 part 'domain/entity_provider.dart';
 part 'domain/entity_service.dart';
 part 'domain/entity_util.dart';
+part 'domain/financial/financial_movement.dart';
 part 'domain/legal_id_model.dart';
 part 'domain/medical/medical_diagnosis_tab_model.dart';
 part 'domain/medical/medication_model.dart';
