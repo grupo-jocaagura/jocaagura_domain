@@ -68,7 +68,8 @@ class FinancialMovementModel extends Model {
     required this.category,
     required this.createdAt,
     this.detailedDescription = '',
-  });
+    this.mathPrecision = defaultMathPrecision,
+  }) : assert(amount >= 0, 'El monto no puede ser negativo');
 
   /// Crea una instancia de [FinancialMovementModel] a partir de un JSON.
   factory FinancialMovementModel.fromJson(Map<String, dynamic> json) {
@@ -92,11 +93,50 @@ class FinancialMovementModel extends Model {
     );
   }
 
+  /// Crea un movimiento desde un valor decimal.
+  factory FinancialMovementModel.fromDecimal({
+    required String id,
+    required double decimalAmount,
+    required DateTime date,
+    required String concept,
+    required String category,
+    required DateTime createdAt,
+    String detailedDescription = '',
+    int precision = defaultMathPrecision,
+  }) {
+    final int factor = _getFactor(precision);
+    final int amount = (decimalAmount * factor).round();
+
+    return FinancialMovementModel(
+      id: id,
+      amount: amount,
+      date: date,
+      concept: concept,
+      detailedDescription: detailedDescription,
+      category: category,
+      createdAt: createdAt,
+      mathPrecision: precision,
+    );
+  }
+
+  /// [defaultMathPrecision] provee una precision asegurada sin usar double para
+  /// el almacenamiento de las cantidades. Con una localización flexible
+  /// (Colombia, EU, Europa del este...)
+  static const int defaultMathPrecision = 4;
+
   /// Identificador único del movimiento financiero.
   final String id;
 
   /// Monto de la transacción (en centavos para evitar problemas de precisión).
   final int amount;
+
+  /// Precisión usada para convertir el monto decimal a entero.
+  final int mathPrecision;
+
+  /// Monto como valor decimal según la precisión definida.
+  double get decimalAmount => amount / _getFactor(mathPrecision);
+
+  static int _getFactor(int precision) => pow(10, precision).toInt();
 
   /// Fecha en la que se realizó la transacción.
   final DateTime date;
