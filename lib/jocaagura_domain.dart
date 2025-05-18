@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 part 'date_utils.dart';
@@ -18,6 +19,9 @@ part 'domain/bloc_module.dart';
 part 'domain/calendar/appointment_model.dart';
 part 'domain/calendar/contact_model.dart';
 part 'domain/citizen/signature_model.dart';
+part 'domain/common_errors/http_error_items.dart';
+part 'domain/common_errors/network_error_items.dart';
+part 'domain/common_errors/web_socket_error_items.dart';
 part 'domain/connectivity_model.dart';
 part 'domain/death_record_model.dart';
 part 'domain/debouncer.dart';
@@ -32,6 +36,7 @@ part 'domain/entity_bloc.dart';
 part 'domain/entity_provider.dart';
 part 'domain/entity_service.dart';
 part 'domain/entity_util.dart';
+part 'domain/error_item_model.dart';
 part 'domain/financial/financial_movement.dart';
 part 'domain/legal_id_model.dart';
 part 'domain/medical/medical_diagnosis_tab_model.dart';
