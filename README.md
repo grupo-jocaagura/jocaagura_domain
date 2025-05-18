@@ -36,6 +36,8 @@ Para utilizar el paquete, se requiere la instalación del SDK de Flutter. No hay
 - [Either, Left, and Right](#either-left-and-right)
 - [EntityBloc](#EntityBloc-and-RepeatLastValueExtension)
 - [EntityProvider, EntityService, and EntityUtil](#entityprovider-entityservice-and-entityutil)
+- [ErrorItemModel](lib/domain/error_item_model.dart)
+- [Errores estandar](lib/domain/common_errors)
 - [ConnectivityModel](#ConnectivityModel)
 - [ModelMainMenuModel](#modelmainmenumodel)
 - [Debouncer](#debouncer)

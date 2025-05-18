@@ -2,6 +2,40 @@
 
 This document follows the guidelines of [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [1.18.0] - 2025-05-18
+
+### Added
+- Nueva estructura estándar de errores:
+  - `HttpErrorItems`: Manejo de errores HTTP comunes como 404, 401, 500, con niveles de severidad (`danger`, `severe`, `warning`, `systemInfo`).
+  - `WebSocketErrorItems`: Representación de errores típicos de WebSocket como fallos de conexión, cierre inesperado o mensajes malformados.
+  - `NetworkErrorItems`: Para errores como sin conexión, timeout o servidor inaccesible.
+- Inclusión de métodos estáticos `fromCode()` y `fromStatusCode()` en las clases anteriores.
+- Clave estandarizada `meta['source']` y validadores para `meta['httpCode']` y similares.
+
+### Updated
+- `ErrorItem` ahora soporta un campo `errorLevel` de tipo `ErrorLevelEnum`.
+  - El valor por defecto es `ErrorLevelEnum.systemInfo` para obligar a definirlo explícitamente.
+  - Se agregó `toString()` actualizado para incluir el `errorLevel`.
+- Documentación de cada clase de error fue ampliada con enlaces a los estándares utilizados (MDN, Flutter API).
+
+### Tests
+- Se agregaron pruebas unitarias para `HttpErrorItems`, `WebSocketErrorItems`, y `NetworkErrorItems` incluyendo validación de `errorLevel`, `fromCode()` y fallback `unknown()`.
+- Se probaron los casos límite y el mapeo correcto desde códigos conocidos.
+
+### Docs
+- Actualizado el `README.md` para reflejar las nuevas capacidades de los modelos de error y sus usos sugeridos.
+
+
+## [1.17.1] - 2025-05-18
+
+### Updated
+- Enhanced the financial movement model to support up to 4 decimal places for mathematical precision and to prevent negative amounts at the model level.
+
+### Fixed
+- Minor patches in `analysis_options.yaml` to remove dependencies no longer used in the updated implementation.
+
+
 ## [1.17.0] - 2025-03-25
 
 ### Added
