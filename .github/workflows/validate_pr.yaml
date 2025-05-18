@@ -5,6 +5,10 @@ on:
     branches:
       - develop
       - master
+  push:
+    branches:
+      - develop
+      - master
 
 permissions:
   contents: write
@@ -62,6 +66,9 @@ jobs:
           git config --global user.signingkey ~/.ssh/commit_signing_key
           git config --global commit.gpgsign true
           git config --global gpg.format ssh
+
+      - name: Install jq
+        run: sudo apt-get update && sudo apt-get install -y jq
 
       - name: Increment Version Based on Label
         env:
