@@ -201,4 +201,78 @@ void main() {
       expect(movement.createdAt, isA<DateTime>());
     });
   });
+
+  group('FinancialMovementModel Precision Handling', () {
+    test('fromDecimal creates model with correct precision (4 decimales)', () {
+      final FinancialMovementModel model = FinancialMovementModel.fromDecimal(
+        id: 'tx001',
+        decimalAmount: 1250.2536,
+        date: DateTime(2024, 07, 20),
+        concept: 'Test',
+        category: 'Precision',
+        createdAt: DateTime(2024, 07, 25),
+      );
+
+      expect(model.amount, 12502536);
+      expect(model.mathPrecision, 4);
+      expect(model.decimalAmount, closeTo(1250.2536, 0.0001));
+    });
+
+    test('decimalAmount conversion is correct for precision 2', () {
+      final FinancialMovementModel model = FinancialMovementModel.fromDecimal(
+        id: 'tx002',
+        decimalAmount: 3000.25,
+        date: DateTime(2024, 07, 20),
+        concept: 'Test',
+        category: 'Precision',
+        createdAt: DateTime(2024, 07, 25),
+        precision: 2,
+      );
+
+      expect(model.amount, 300025);
+      expect(model.decimalAmount, 3000.25);
+    });
+
+    test('default precision is used if not specified', () {
+      final FinancialMovementModel model = FinancialMovementModel.fromDecimal(
+        id: 'tx003',
+        decimalAmount: 10.1234,
+        date: DateTime(2024, 07, 20),
+        concept: 'Test',
+        category: 'DefaultPrecision',
+        createdAt: DateTime(2024, 07, 25),
+      );
+
+      expect(model.amount, 101234);
+      expect(model.mathPrecision, FinancialMovementModel.defaultMathPrecision);
+    });
+
+    test('throws assertion error when decimalAmount is negative', () {
+      expect(
+        () => FinancialMovementModel.fromDecimal(
+          id: 'tx004',
+          decimalAmount: -5.0,
+          date: DateTime(2024, 07, 20),
+          concept: 'Invalid',
+          category: 'Negative',
+          createdAt: DateTime(2024, 07, 25),
+        ),
+        throwsA(isA<AssertionError>()),
+      );
+    });
+
+    test('handles double with 8 decimal places at precision 4', () {
+      final FinancialMovementModel model = FinancialMovementModel.fromDecimal(
+        id: 'tx005',
+        decimalAmount: 999.12345678,
+        date: DateTime(2024, 07, 20),
+        concept: 'HighPrecision',
+        category: 'PrecisionTest',
+        createdAt: DateTime(2024, 07, 25),
+      );
+
+      expect(model.amount, 9991235); // Rounded from 9991234.5678
+      expect(model.decimalAmount, closeTo(999.1235, 0.0001));
+    });
+  });
 }
