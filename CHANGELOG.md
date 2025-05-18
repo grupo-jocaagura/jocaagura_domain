@@ -2,6 +2,16 @@
 
 This document follows the guidelines of [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [1.17.1] - 2025-05-18
+
+### Updated
+- Enhanced the financial movement model to support up to 4 decimal places for mathematical precision and to prevent negative amounts at the model level.
+
+### Fixed
+- Minor patches in `analysis_options.yaml` to remove dependencies no longer used in the updated implementation.
+
+
 ## [1.17.0] - 2025-03-25
 
 ### Added
