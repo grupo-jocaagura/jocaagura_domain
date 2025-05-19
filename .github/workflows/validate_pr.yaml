@@ -1,4 +1,4 @@
-name: Validate and Update Version on PR to develop
+name: Validate and Update Version
 
 on:
   pull_request:
