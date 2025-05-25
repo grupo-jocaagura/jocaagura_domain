@@ -3,6 +3,28 @@
 This document follows the guidelines of [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.19.0] - 2025-05-25
+
+### Added
+- Nueva clase `LedgerModel` que representa un libro contable con ingresos y egresos separados, y permite el cálculo de saldo total y decimal.
+- Enum `LedgerEnum` para mantener uniformidad en las claves JSON utilizadas por `LedgerModel`.
+- Funcionalidades en `MoneyUtils` para:
+  - `totalAmount`, `totalDecimalAmount`
+  - `average`, `filterByCategory`
+  - `totalPerCategory`, `totalDecimalPerCategory`
+- Métodos adicionales útiles como:
+  - `getLatestMovement`, `containsMovement`
+  - `sortByDate`, `filterByDateRange`
+  - `totalByMonth`, `totalDecimalByMonth`
+
+### Added (Tests)
+- Pruebas unitarias para `LedgerModel`: serialización, igualdad, cálculo de saldos y `copyWith`.
+- Pruebas unitarias para `MoneyUtils`: validaciones de agregación, filtros y agrupaciones por categoría y mes.
+
+### Changed
+- Documentación enriquecida con ejemplos de uso en DartDoc para `MoneyUtils`.
+
+
 ## [1.18.1] - 2025-05-18
 chore(github): reestructura develop desde master y actualiza workflows
 
