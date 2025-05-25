@@ -38,6 +38,7 @@ part 'domain/entity_service.dart';
 part 'domain/entity_util.dart';
 part 'domain/error_item_model.dart';
 part 'domain/financial/financial_movement.dart';
+part 'domain/financial/ledger_model.dart';
 part 'domain/legal_id_model.dart';
 part 'domain/medical/medical_diagnosis_tab_model.dart';
 part 'domain/medical/medication_model.dart';
@@ -48,6 +49,7 @@ part 'domain/pet_app/animal_model.dart';
 part 'domain/store_model.dart';
 part 'domain/ui/model_main_menu_model.dart';
 part 'domain/user_model.dart';
+part 'domain/utils/money_utils.dart';
 part 'utils.dart';
 
 /// A base class for all domain data models.
