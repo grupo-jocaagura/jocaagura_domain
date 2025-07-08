@@ -3,6 +3,11 @@
 This document follows the guidelines of [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.20.1] - 2025-07-07
+
+### Fixed
+- Se documenta y agrega el archivo `README_STRUCTURE.md` con la guía recomendada de estructura de carpetas y arquitectura para proyectos basados en `jocaagura_domain`.
+
 ## [1.20.0] - 2025-07-06
 
 ### Changed
