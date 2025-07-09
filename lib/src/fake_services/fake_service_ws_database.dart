@@ -32,20 +32,28 @@ class FakeServiceWsDatabase implements ServiceWsDatabase<Map<String, dynamic>> {
   final BlocGeneral<Map<String, BlocGeneral<Map<String, dynamic>>>>
       _collectionControllers;
 
+  bool _disposed = false;
+
+  void _checkDisposed() {
+    if (_disposed) {
+      throw StateError('FakeServiceWsDatabase has been disposed');
+    }
+  }
+
   @override
   Future<void> saveDocument({
     required String collection,
     required String docId,
     required Map<String, dynamic> document,
   }) async {
+    _checkDisposed();
+    if (throwOnSave) {
+      throw StateError('Simulated save error');
+    }
     _validate(collection: collection, docId: docId);
     await Future<void>.delayed(latency);
     final BlocGeneral<Map<String, dynamic>> inner =
         _ensureCollection(collection);
-    if (throwOnSave) {
-      throw StateError('Simulated save error');
-    }
-
     final Map<String, dynamic> current = inner.value;
     inner.value = <String, dynamic>{...current, docId: document};
   }
@@ -55,6 +63,7 @@ class FakeServiceWsDatabase implements ServiceWsDatabase<Map<String, dynamic>> {
     required String collection,
     required String docId,
   }) async {
+    _checkDisposed();
     _validate(collection: collection, docId: docId);
     await Future<void>.delayed(latency);
     final BlocGeneral<Map<String, dynamic>> inner =
@@ -71,6 +80,7 @@ class FakeServiceWsDatabase implements ServiceWsDatabase<Map<String, dynamic>> {
     required String collection,
     required String docId,
   }) {
+    _checkDisposed();
     _validate(collection: collection, docId: docId);
     final BlocGeneral<Map<String, dynamic>> inner =
         _ensureCollection(collection);
@@ -84,6 +94,7 @@ class FakeServiceWsDatabase implements ServiceWsDatabase<Map<String, dynamic>> {
   Stream<List<Map<String, dynamic>>> collectionStream({
     required String collection,
   }) {
+    _checkDisposed();
     _validate(collection: collection);
     final BlocGeneral<Map<String, dynamic>> inner =
         _ensureCollection(collection);
@@ -102,15 +113,14 @@ class FakeServiceWsDatabase implements ServiceWsDatabase<Map<String, dynamic>> {
     required String collection,
     required String docId,
   }) async {
+    _checkDisposed();
+    if (throwOnSave) {
+      throw StateError('Simulated delete error');
+    }
     _validate(collection: collection, docId: docId);
     await Future<void>.delayed(latency);
     final BlocGeneral<Map<String, dynamic>> inner =
         _ensureCollection(collection);
-
-    if (throwOnSave) {
-      throw StateError('Simulated delete error');
-    }
-
     final Map<String, dynamic> current = inner.value;
     if (current.containsKey(docId)) {
       final Map<String, dynamic> updated = <String, dynamic>{...current}
@@ -126,6 +136,7 @@ class FakeServiceWsDatabase implements ServiceWsDatabase<Map<String, dynamic>> {
       controller.dispose();
     }
     _collectionControllers.dispose();
+    _disposed = true;
   }
 
   /// Ensures a controller exists for [collection], creating it if absent.
@@ -135,9 +146,6 @@ class FakeServiceWsDatabase implements ServiceWsDatabase<Map<String, dynamic>> {
     final Map<String, BlocGeneral<Map<String, dynamic>>> rootMap =
         _collectionControllers.value;
     if (!rootMap.containsKey(collection)) {
-      if (throwOnSave) {
-        throw StateError('Collection not found');
-      }
       // Create and register a new inner controller
       final BlocGeneral<Map<String, dynamic>> newInner =
           BlocGeneral<Map<String, dynamic>>(<String, dynamic>{});
