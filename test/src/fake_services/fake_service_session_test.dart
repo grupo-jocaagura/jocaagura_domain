@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:jocaagura_domain/jocaagura_domain.dart';
-import 'package:jocaagura_domain/src/fake_services/fake_service_session.dart';
 
 void main() {
   group('FakeServiceSession', () {
