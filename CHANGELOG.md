@@ -6,8 +6,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.20.2] - 2025-07-08
 - Se crea la clase `FakeServiceSesion` para simular el comportamiento de un servicio de sesión en pruebas unitarias.
 - Se crea la clase `FakeServiceWsDatabase` para simular el comportamiento de un servicio de base de datos WebSocket en pruebas unitarias.
-- Se crea la clase `FakeServiseGeolocation` para simular el comportamiento de un servicio de geolocalización en pruebas unitarias.
-- Se crea la clase `FakeGyroscopeService` para simular el comportamiento de un servicio de giroscopio en pruebas unitarias.
+- Se crea la clase `FakeServiceGeolocation` para simular el comportamiento de un servicio de geolocalización en pruebas unitarias.
+- Se crea la clase `FakeServiceGyroscope` para simular el comportamiento de un servicio de giroscopio en pruebas unitarias.
+- Se crea la clase `FakeServiceNotifications` para simular el comportamiento de un servicio de notificaciones en pruebas unitarias.
 
 
 ## [1.20.1] - 2025-07-07
