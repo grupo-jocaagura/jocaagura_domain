@@ -9,6 +9,8 @@ import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
+export 'src/fake_services/fake_service_ws_database.dart';
+
 part 'date_utils.dart';
 part 'domain/address_model.dart';
 part 'domain/attribute_model.dart';
