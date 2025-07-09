@@ -9,6 +9,7 @@ import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
+export 'src/fake_services/fake_service_connectivity.dart';
 export 'src/fake_services/fake_service_geolocation.dart';
 export 'src/fake_services/fake_service_gyroscope.dart';
 export 'src/fake_services/fake_service_notifications.dart';
@@ -52,6 +53,7 @@ part 'domain/model_vector.dart';
 part 'domain/obituary_model.dart';
 part 'domain/person_model.dart';
 part 'domain/pet_app/animal_model.dart';
+part 'domain/services/service_connectivity.dart';
 part 'domain/services/service_geolocation.dart';
 part 'domain/services/service_gyroscope.dart';
 part 'domain/services/service_notifications.dart';
