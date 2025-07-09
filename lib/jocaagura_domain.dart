@@ -10,6 +10,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 export 'src/fake_services/fake_service_geolocation.dart';
+export 'src/fake_services/fake_service_gyroscope.dart';
 export 'src/fake_services/fake_service_session.dart';
 export 'src/fake_services/fake_service_ws_database.dart';
 
@@ -51,6 +52,7 @@ part 'domain/obituary_model.dart';
 part 'domain/person_model.dart';
 part 'domain/pet_app/animal_model.dart';
 part 'domain/services/service_geolocation.dart';
+part 'domain/services/service_gyroscope.dart';
 part 'domain/services/service_session.dart';
 part 'domain/services/service_ws_database.dart';
 part 'domain/store_model.dart';

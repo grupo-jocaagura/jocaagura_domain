@@ -114,4 +114,36 @@ void main() {
     final FakeServiceGeolocation geo = FakeServiceGeolocation(throwOnGet: true);
     expect(() => geo.getCurrentLocation(), throwsStateError);
   });
+  // Añade este grupo al final de fake_service_geolocation_test.dart
+
+  group('Continuous simulateLocation emissions', () {
+    test('Multiple simulateLocation calls emit in correct order', () async {
+      final FakeServiceGeolocation geo = FakeServiceGeolocation();
+      final List<Map<String, double>> events = <Map<String, double>>[];
+      final StreamSubscription<Map<String, double>> sub =
+          geo.locationStream().listen(events.add);
+
+      // Definimos una serie de ubicaciones a simular
+      final List<Map<String, double>> locs = <Map<String, double>>[
+        <String, double>{'latitude': 1.0, 'longitude': 2.0},
+        <String, double>{'latitude': 3.0, 'longitude': 4.0},
+        <String, double>{'latitude': 5.0, 'longitude': 6.0},
+      ];
+
+      // Aplicamos simulateLocation secuencialmente, esperando un tick entre cada emisión
+      for (final Map<String, double> loc in locs) {
+        geo.simulateLocation(
+          latitude: loc['latitude']!,
+          longitude: loc['longitude']!,
+        );
+        await Future<void>.delayed(Duration.zero);
+      }
+
+      // La primera emisión es el valor inicial; las siguientes deben corresponder a locs
+      expect(events.first, FakeServiceGeolocation.initialValue);
+      expect(events.sublist(1), equals(locs));
+
+      await sub.cancel();
+    });
+  });
 }
