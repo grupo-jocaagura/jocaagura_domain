@@ -2,6 +2,9 @@
 
 This document follows the guidelines of [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+## [1.21.0] - 2025-07-09
+- Se crea la clase `FakeServiceHttp` para simular el comportamiento de un servicio HTTP en pruebas unitarias.
+- Se actualiza el readme para incluir ejemplos de uso de las clases `FakeServiceHttp`, `FakeServiceSesion`, `FakeServiceWsDatabase`, `FakeServiceGeolocation`, `FakeServiceGyroscope`, `FakeServiceNotifications`, `FakeServiceConnectivity` y `FakeServicePreferences`.
 
 ## [1.20.2] - 2025-07-08
 - Se crea la clase `FakeServiceSesion` para simular el comportamiento de un servicio de sesión en pruebas unitarias.
