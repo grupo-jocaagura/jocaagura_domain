@@ -1004,3 +1004,19 @@ Los diagramas UML de este proyecto utilizan colores para indicar el estado de im
 - **Naranja:** El modelo está revisión y/o proceso de transformación.
 
   Una legenda correspondiente se encuentra incluida en cada diagrama para facilitar la interpretación de estos colores.
+
+## 🧰 Servicios disponibles
+
+Seccion en la que se listan los servicios disponibles en el dominio de la aplicación. Cada servicio tiene su implementación abstracta y una versión fake para pruebas unitarias. Los nombres de los archivos siguen un patrón consistente para facilitar su identificación y uso.
+Esta seccion esta en evolución y se ira actualizando conforme se vayan implementando nuevos servicios o se modifiquen los existentes.
+
+| Servicio                  | Abstracto (`lib/domain/services/`) | Fake (`lib/src/fakes/`)           |
+|---------------------------|------------------------------------|-----------------------------------|
+| 🗄️ Base de datos NoSQL   | `service_ws_database.dart`         | `fake_service_ws_database.dart`   |
+| 🔐 Sesión / Autenticación | `service_session.dart`             | `fake_service_session.dart`       |
+| 📍 Geolocalización        | `service_location.dart`            | `fake_service_location.dart`      |
+| 🌀 Giroscopio             | `service_gyroscope.dart`           | `fake_service_gyroscope.dart`     |
+| 🔔 Notificaciones         | `service_notifications.dart`       | `fake_service_notifications.dart` |
+| 🧠 Preferencias locales   | `service_preferences.dart`         | `fake_service_preferences.dart`   |
+| 📡 Conectividad           | `service_connectivity.dart`        | `fake_service_connectivity.dart`  |
+| 🌐 HTTP genérico          | `service_http.dart`                | `fake_service_http.dart`          |
