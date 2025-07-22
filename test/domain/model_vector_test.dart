@@ -101,7 +101,7 @@ void main() {
     });
 
     test('toString should return the correct string representation', () {
-      // Comprobar que el método toString retorne la representación en cadena correcta
+      // Comprobar que toString retorne la representación en cadena correcta
       expect(vector.toString(), equals('($dx, $dy)'));
     });
   });
