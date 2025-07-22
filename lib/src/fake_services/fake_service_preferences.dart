@@ -4,7 +4,7 @@ import '../../jocaagura_domain.dart';
 
 /// Fake in-memory implementation of [ServicePreferences] for dev/testing.
 ///
-/// - Stores values in a [BlocGeneral] as a Map<String,dynamic>.
+/// - Stores values in a [BlocGeneral] as a Map typed String,dynamic.
 /// - Supports optional latency and error simulation.
 /// - Emits the full map on every change.
 class FakeServicePreferences implements ServicePreferences {
