@@ -3,6 +3,38 @@
 This document follows the guidelines of [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.21.2] - 2025-07-22
+- Corregido error de formateo en changelog al agregar la versión `1.21.1` (error de formato en el encabezado de la versión).
+
+## [1.21.1] - 2025-07-22
+- Revisados y resueltos los `TODO` pendientes en el código.
+- Sincronizada la rama `develop` con `master`.
+- Corregido el error de análisis estático (“Angle brackets will be interpreted as HTML”) en el comentario de `fake_service_preferences.dart` (ajuste de espacios en `Map<String, dynamic>`).
+
+## [1.21.0] - 2025-07-09
+- Se crea la clase `FakeServiceHttp` para simular el comportamiento de un servicio HTTP en pruebas unitarias.
+- Se actualiza el readme para incluir ejemplos de uso de las clases `FakeServiceHttp`, `FakeServiceSesion`, `FakeServiceWsDatabase`, `FakeServiceGeolocation`, `FakeServiceGyroscope`, `FakeServiceNotifications`, `FakeServiceConnectivity` y `FakeServicePreferences`.
+
+## [1.20.2] - 2025-07-08
+- Se crea la clase `FakeServiceSesion` para simular el comportamiento de un servicio de sesión en pruebas unitarias.
+- Se crea la clase `FakeServiceWsDatabase` para simular el comportamiento de un servicio de base de datos WebSocket en pruebas unitarias.
+- Se crea la clase `FakeServiceGeolocation` para simular el comportamiento de un servicio de geolocalización en pruebas unitarias.
+- Se crea la clase `FakeServiceGyroscope` para simular el comportamiento de un servicio de giroscopio en pruebas unitarias.
+- Se crea la clase `FakeServiceNotifications` para simular el comportamiento de un servicio de notificaciones en pruebas unitarias.
+- Se crea la clase `FakeServiceConnectivity` para simular el comportamiento de un servicio de conectividad en pruebas unitarias.
+- Se crea la clase `FakeServicePreferences` para simular el comportamiento de un servicio de preferencias en pruebas unitarias.
+
+
+## [1.20.1] - 2025-07-07
+
+### Fixed
+- Se documenta y agrega el archivo `README_STRUCTURE.md` con la guía recomendada de estructura de carpetas y arquitectura para proyectos basados en `jocaagura_domain`.
+
+## [1.20.0] - 2025-07-06
+
+### Changed
+- Documentación ampliada y mejorada para las clases `BlocGeneral` y `BlocModule`, incluyendo ejemplos de uso detallados en DartDoc y explicaciones sobre la gestión de listeners y el ciclo de vida de los BLoC.
+
 ## [1.19.0] - 2025-05-25
 
 ### Added

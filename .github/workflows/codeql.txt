@@ -1,5 +1,5 @@
 name: CodeQL
-
+DESACTIVADA POR PROBLEMAS CON EL ESCANEO DE coDEqL
 on:
   push:
     branches: [develop, master]

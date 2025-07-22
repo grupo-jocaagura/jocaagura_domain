@@ -41,7 +41,7 @@ void main() {
       expect(medication.endDate, endDate);
     });
 
-    // Test del método copyWith que actualiza valores
+    // Test de copyWith que actualiza valores
     test('copyWith updates values', () {
       final MedicationModel updatedMedication = defaultMedicationModel.copyWith(
         id: 'med002',
@@ -60,7 +60,7 @@ void main() {
       expect(updatedMedication.endDate, DateTime(2024, 07, 26));
     });
 
-    // Test del método copyWith sin argumentos que debería devolver el mismo objeto
+    // Test de copyWith sin argumentos que debería devolver el mismo objeto
     test('copyWith without arguments returns the same object', () {
       final MedicationModel copiedMedication =
           defaultMedicationModel.copyWith();
@@ -71,7 +71,7 @@ void main() {
       );
     });
 
-    // Test del método toJson
+    // Test de toJson
     test('toJson returns correct map', () {
       final MedicationModel medication = defaultMedicationModel;
       final Map<String, dynamic> json = medication.toJson();
@@ -91,7 +91,7 @@ void main() {
       );
     });
 
-    // Test del método fromJson
+    // Test de fromJson
     test('fromJson creates a new instance from json', () {
       final Map<String, String> json = <String, String>{
         MedicationEnum.id.name: 'med003',
