@@ -2,7 +2,11 @@
 
 This document follows the guidelines of [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
-### [1.21.1] - 2025-07-22
+
+## [1.21.2] - 2025-07-22
+- Corregido error de formateo en changelog al agregar la versión `1.21.1` (error de formato en el encabezado de la versión).
+
+## [1.21.1] - 2025-07-22
 - Revisados y resueltos los `TODO` pendientes en el código.
 - Sincronizada la rama `develop` con `master`.
 - Corregido el error de análisis estático (“Angle brackets will be interpreted as HTML”) en el comentario de `fake_service_preferences.dart` (ajuste de espacios en `Map<String, dynamic>`).
