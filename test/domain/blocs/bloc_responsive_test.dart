@@ -45,7 +45,7 @@ void main() {
       responsiveBloc.workAreaSize = size;
       expect(responsiveBloc.workAreaSize, workAreaSize);
       expect(responsiveBloc.columnsNumber, 12);
-      expect(responsiveBloc.columnWidth, greaterThanOrEqualTo(71.8));
+      expect(responsiveBloc.columnWidth, greaterThanOrEqualTo(71.0));
       expect(
         responsiveBloc.secondaryDrawerWidth,
         greaterThanOrEqualTo(71.0),
@@ -65,8 +65,8 @@ void main() {
       final double mg = responsiveBloc.marginWidth;
       final double mg2 = responsiveBloc.widthByColumns(3);
       expect(mg, 32);
-      expect(mg2, 383.5);
-      expect(responsiveBloc.columnWidth, 122.5);
+      expect(mg2, 382.0);
+      expect(responsiveBloc.columnWidth, 122.0);
       expect(responsiveBloc.gutterWidth, 8.0);
 
       responsiveBloc.showAppbar = false;

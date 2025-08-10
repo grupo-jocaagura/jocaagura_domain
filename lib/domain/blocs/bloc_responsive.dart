@@ -244,6 +244,7 @@ class BlocResponsive extends BlocModule {
       return;
     }
     _workAreaSize = sizeOfWorkArea;
+    _setColumnWidth();
   }
 
   /// Work area varies by device type. For desktop/tv a percentage is applied,

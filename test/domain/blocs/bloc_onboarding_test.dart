@@ -48,9 +48,9 @@ void main() {
 
     test('El assert de delay funciona', () {
       expect(
-          () =>
-              BlocOnboarding(<FutureOr<void> Function()>[], delayInSeconds: -1),
-          throwsA(isA<AssertionError>()));
+        () => BlocOnboarding(<FutureOr<void> Function()>[], delayInSeconds: -1),
+        throwsA(isA<AssertionError>()),
+      );
     });
   });
   group('msg y msgStream', () {
@@ -124,8 +124,8 @@ void main() {
     tearDown(() => bloc.dispose());
 
     test('Agrega tareas y retorna el tamaño actualizado', () {
-      int size1 = bloc.addFunction(() async {});
-      int size2 = bloc.addFunction(() async {});
+      final int size1 = bloc.addFunction(() async {});
+      final int size2 = bloc.addFunction(() async {});
       expect(size1, 1);
       expect(size2, 2);
     });
@@ -149,7 +149,7 @@ void main() {
       bloc.addFunction(() async {});
       bloc.addFunction(() async {});
       bloc.clearFunctions();
-      expect(() async => await bloc.execute(Duration.zero), returnsNormally);
+      expect(() async => bloc.execute(Duration.zero), returnsNormally);
     });
 
     test('No altera msg ni progress', () {
@@ -179,8 +179,9 @@ void main() {
     test('Maneja errores con onError', () async {
       Object? caught;
       bloc = BlocOnboarding(
-          <FutureOr<void> Function()>[() => throw Exception('fail')],
-          onError: (Object e, StackTrace s) => caught = e);
+        <FutureOr<void> Function()>[() => throw Exception('fail')],
+        onError: (Object e, StackTrace s) => caught = e,
+      );
       await bloc.execute(Duration.zero);
       expect(caught, isA<Exception>());
     });
