@@ -3,6 +3,16 @@
 This document follows the guidelines of [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.23.1] - 2025-08-11
+
+### Fixed
+- Correcciones menores y ajustes en la implementación de `GatewayAuth` y `RepositoryAuth` para mejorar la compatibilidad y robustez.
+- Documentación actualizada y ampliada en los nuevos archivos y clases agregadas.
+- Se resolvieron advertencias y errores menores detectados en pruebas unitarias y análisis estático.
+
+## [1.23.0] - 2025-08-11
+Actualización cambios de master
+
 ## [1.22.0] - 2025-08-10
 - Agregamos la clase BlocResponsive, BlocOnboarding y BlocLoading para mejorar la gestión de estados en aplicaciones con diferentes resoluciones y pantallas.
 

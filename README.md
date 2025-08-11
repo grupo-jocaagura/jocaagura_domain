@@ -1021,6 +1021,153 @@ Esta seccion esta en evolución y se ira actualizando conforme se vayan implemen
 | 📡 Conectividad           | `service_connectivity.dart`        | `fake_service_connectivity.dart`  |
 | 🌐 HTTP genérico          | `service_http.dart`                | `fake_service_http.dart`          |
 
+# Cómo integrar BlocSession (con FakeServiceSession para desarrollo)
+
+Este fragmento muestra el cableado completo **UI → AppManager → Bloc → UseCase → Repository → Gateway → Service**, usando `BlocSession` y un `FakeServiceSession` para ambientes de **desarrollo/test**. Ajusta nombres si tu proyecto usa implementaciones distintas.
+
+## 1) Infraestructura (Service → Gateway → Repository)
+
+```dart
+import 'package:jocaagura_domain/jocaagura_domain.dart';
+
+final ServiceSession service = FakeServiceSession(
+  latency: const Duration(milliseconds: 250), // simula red
+  // Opcional: arrancar ya autenticado
+  // initialUserJson: {
+  //   'id': 'seed',
+  //   'displayName': 'Seed',
+  //   'photoUrl': 'https://fake.com/photo.png',
+  //   'email': 'seed@x.com',
+  //   'jwt': {
+  //     'accessToken': 'seed-token',
+  //     'issuedAt': DateTime.now().toIso8601String(),
+  //     'expiresAt': DateTime.now().add(const Duration(hours: 1)).toIso8601String(),
+  //   },
+  // },
+  // Opcional: forzar fallos de login/signin/google
+  // throwOnSignIn: true,
+);
+
+// Implementación base sugerida (usa tu mapper y clases reales)
+final ErrorMapper errorMapper = DefaultErrorMapper();
+final GatewayAuth gateway = GatewayAuthBasic(
+  service: service,
+  errorMapper: errorMapper,
+);
+final RepositoryAuth repository = RepositoryAuthImpl(
+  gateway: gateway,
+  errorMapper: errorMapper,
+);
+```
+
+## 2) Use cases + watcher de auth
+
+```dart
+final SessionUsecases usecases = SessionUsecases(
+  logInUserAndPassword: LogInUserAndPasswordUsecase(repository),
+  logOutUsecase: LogOutUsecase(repository),
+  signInUserAndPassword: SignInUserAndPasswordUsecase(repository),
+  recoverPassword: RecoverPasswordUsecase(repository),
+  logInSilently: LogInSilentlyUsecase(repository),
+  loginWithGoogle: LoginWithGoogleUsecase(repository),
+  refreshSession: RefreshSessionUsecase(repository),
+  getCurrentUser: GetCurrentUserUsecase(repository),
+  watchAuthStateChangesUsecase: WatchAuthStateChangesUsecase(repository),
+);
+final WatchAuthStateChangesUsecase watchUC =
+    WatchAuthStateChangesUsecase(repository);
+```
+
+## 3) Crear el BlocSession
+
+```dart
+final BlocSession sessionBloc = BlocSession(
+  usecases: usecases,
+  watchAuthStateChanges: watchUC,
+  // Debouncers para prevenir doble tap (UI rápida)
+  authDebouncer: Debouncer(milliseconds: 250),
+  refreshDebouncer: Debouncer(milliseconds: 250),
+);
+
+// No fuerza silent-login: solo se suscribe a cambios del repo
+await sessionBloc.boot()
+```
+
+## 4) Usarlo en la UI
+
+```
+// Leer estado reactivo
+StreamBuilder<SessionState>(
+  stream: sessionBloc.sessionStream,
+  initialData: const Unauthenticated(),
+  builder: (_, snap) {
+    final s = snap.data ?? const Unauthenticated();
+    if (s is Authenticating) return const Text('Authenticating...');
+    if (s is Refreshing) return const Text('Refreshing...');
+    if (s is SessionError) return Text('Error: ${s.message.code}');
+    if (s is Authenticated) return Text('Hi ${s.user.email}');
+    return const Text('Signed out');
+  },
+);
+
+// Acciones
+final result = await sessionBloc.logIn(email: 'me@mail.com', password: 'secret');
+result.fold(
+  (err) => debugPrint('Login failed: ${err.code}'),
+  (user) => debugPrint('Welcome ${user.email}'),
+);
+
+// Helpers
+final bool isAuthed = sessionBloc.isAuthenticated;
+final UserModel me = sessionBloc.currentUser; // defaultUserModel si no hay sesión
+```
+
+## 5) Recomendaciones y matices
+
+* **Estado inicial:** `Unauthenticated`. `boot()` solo **escucha** `authStateChanges` del repo; no realiza `silent-login` automáticamente.
+* **Errores:** `Left(ErrorItem)` → `SessionError(err)`. La UI decide si reintentar, mostrar modal, etc.
+* **Silent/Refresh:** si no hay sesión previa, devuelven `null` y el BLoC permanece/queda en `Unauthenticated`.
+* **Debouncer:** evita doble tap en botones. Si necesitas *concurrencia estricta*, puedes reemplazar por flags “in-flight”.
+* **Secuencias rápidas:** para verificar `Refreshing → Authenticated` en tests, suscríbete **antes** de llamar a `refreshSession()` (los estados pueden emitirse muy seguido).
+* **Dispose:** llama `sessionBloc.dispose()` en `dispose()` de tu widget/app.
+
+## 6) FakeServiceSession (para desarrollo/test)
+
+El `FakeServiceSession` es un **service** de bajo nivel que:
+
+* Trabaja con `Map<String, dynamic>` (sin modelos del dominio).
+* Emite `authStateChanges()` con el payload de usuario o `null`.
+* Simula latencia (`latency`) y puede **arrancar logueado** (`initialUserJson`).
+* Puede forzar error en flujos de login (`throwOnSignIn: true`).
+* **Lanza** excepciones crudas (`ArgumentError`, `StateError`): el **Gateway** debe capturarlas y mapear a `ErrorItem`.
+
+### Ejemplos rápidos
+
+```dart
+// Arrancar logueado
+final svc = FakeServiceSession(
+  latency: const Duration(milliseconds: 150),
+  initialUserJson: {
+    'id': 'seed',
+    'displayName': 'Seed',
+    'photoUrl': 'https://fake.com/photo.png',
+    'email': 'seed@x.com',
+    'jwt': {
+      'accessToken': 'seed-token',
+      'issuedAt': DateTime.now().toIso8601String(),
+      'expiresAt': DateTime.now().add(const Duration(hours: 1)).toIso8601String(),
+    },
+  },
+);
+
+// Forzar fallo de login
+final svcFail = FakeServiceSession(throwOnSignIn: true);
+```
+
+> ⚠️ El fake es **solo** para desarrollo/pruebas. En producción, usa un `ServiceSession` real (SDK/REST), con su `GatewayAuth` mapeando errores a `ErrorItem` (apóyate en `SessionErrorItems`/`HttpErrorItems` para códigos estándar).
+
+---
+
 ## 🛠️ Publicación y Versionamiento
 
 ### Commit firmado
