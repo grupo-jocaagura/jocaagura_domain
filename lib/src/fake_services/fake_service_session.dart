@@ -37,7 +37,7 @@ class FakeServiceSession implements ServiceSession {
     this.latency = const Duration(seconds: 3),
     this.throwOnSignIn = false,
     Map<String, dynamic>? initialUserJson,
-  })  : _bloc = BlocGeneral<Map<String, dynamic>?>(initialUserJson) {
+  }) : _bloc = BlocGeneral<Map<String, dynamic>?>(initialUserJson) {
     _userJson = initialUserJson;
   }
 
