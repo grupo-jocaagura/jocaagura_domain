@@ -1,29 +1,42 @@
 import 'package:flutter/material.dart';
 import 'package:jocaagura_domain/jocaagura_domain.dart';
 
+import 'session_demo_page.dart';
+
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
+    return Scaffold(
       body: Column(
         children: <Widget>[
-          Text('Examples availables'),
-          SizedBox(
+          const Text('Examples availables'),
+          const SizedBox(
             height: 16,
           ),
-          _ListTile(
+          const _ListTile(
             label: 'UserModel',
             model: defaultUserModel,
           ),
-          _ListTile(
+          const _ListTile(
             label: 'AddressModel',
             model: defaultAddressModel,
           ),
-          _ListTile(
+          const _ListTile(
             label: 'StoreModel',
             model: defaultStoreModel,
+          ),
+          ListTile(
+            title: const Text('Bloc Session demo'),
+            leading: const Icon(Icons.arrow_forward_ios),
+            onTap: () {
+              Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) => const SessionDemoPage(),
+                ),
+              );
+            },
           ),
         ],
       ),

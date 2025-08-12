@@ -4,7 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:jocaagura_domain/jocaagura_domain.dart';
 
 void main() {
-  group('FakeServiceSession', () {
+  group('FakeServiceSession (Map-based ServiceSession)', () {
     late FakeServiceSession session;
 
     setUp(() {
@@ -15,59 +15,83 @@ void main() {
       session.dispose();
     });
 
-    test('signIn sets state to signed in', () async {
-      final List<bool> events = <bool>[];
-      final StreamSubscription<bool> sub =
-          session.authStateStream().listen(events.add);
-      await session.signIn(username: 'user', password: 'pass');
-      expect(await session.isSignedIn(), isTrue);
-      expect(events.last, isTrue);
+    test('logInUserAndPassword coloca estado en signed in y emite payload',
+        () async {
+      final List<Map<String, dynamic>?> events = <Map<String, dynamic>?>[];
+      final StreamSubscription<Map<String, dynamic>?> sub =
+          session.authStateChanges().listen(events.add);
+
+      await session.logInUserAndPassword(
+        email: 'user@fake.com',
+        password: 'pass',
+      );
+
+      final Map<String, dynamic> signedMap = await session.isSignedIn();
+      expect(signedMap['isSignedIn'], isTrue);
+      expect(events.isNotEmpty, isTrue);
+      expect(events.last, isA<Map<String, dynamic>>());
+      expect(events.last?['email'] ?? '', 'user@fake.com');
+
       await sub.cancel();
     });
 
-    test('signOut sets state to signed out', () async {
-      await session.signIn(username: 'user', password: 'pass');
-      final List<bool> events = <bool>[];
-      final StreamSubscription<bool> sub =
-          session.authStateStream().listen(events.add);
-      await session.signOut();
-      expect(await session.isSignedIn(), isFalse);
-      expect(events.last, isFalse);
+    test('logOutUser coloca estado en signed out y emite null', () async {
+      await session.logInUserAndPassword(
+        email: 'user@fake.com',
+        password: 'pass',
+      );
+
+      final List<Map<String, dynamic>?> events = <Map<String, dynamic>?>[];
+      final StreamSubscription<Map<String, dynamic>?> sub =
+          session.authStateChanges().listen(events.add);
+
+      final Map<String, dynamic> current = await session.getCurrentUser();
+      await session.logOutUser(current);
+
+      final Map<String, dynamic> signedMap = await session.isSignedIn();
+      expect(signedMap['isSignedIn'], isFalse);
+      expect(events.isNotEmpty, isTrue);
+      expect(events.last, isNull);
+
       await sub.cancel();
     });
 
-    test('signIn throws on empty username', () {
+    test('logInUserAndPassword lanza si email vacío', () {
       expect(
-        () => session.signIn(username: '', password: 'pass'),
+        () => session.logInUserAndPassword(email: '', password: 'pass'),
         throwsA(isA<ArgumentError>()),
       );
     });
 
-    test('signIn throws on empty password', () {
+    test('logInUserAndPassword lanza si password vacío', () {
       expect(
-        () => session.signIn(username: 'user', password: ''),
+        () =>
+            session.logInUserAndPassword(email: 'user@fake.com', password: ''),
         throwsA(isA<ArgumentError>()),
       );
     });
 
-    test('throws simulated error when throwOnSignIn is true', () {
+    test('lanza error simulado cuando throwOnSignIn = true', () {
       session.dispose();
       session = FakeServiceSession(throwOnSignIn: true);
       expect(
-        () => session.signIn(username: 'user', password: 'pass'),
+        () => session.logInUserAndPassword(
+          email: 'user@fake.com',
+          password: 'pass',
+        ),
         throwsA(isA<StateError>()),
       );
       session.dispose();
     });
 
-    test('methods throw after dispose', () async {
+    test('métodos lanzan después de dispose', () async {
       session.dispose();
       expect(
-        () => session.signIn(username: 'u', password: 'p'),
+        () => session.logInUserAndPassword(email: 'u@f.com', password: 'p'),
         throwsA(isA<StateError>()),
       );
       expect(
-        () => session.signOut(),
+        () => session.logOutUser(<String, dynamic>{'id': 'x'}),
         throwsA(isA<StateError>()),
       );
       expect(
@@ -75,103 +99,139 @@ void main() {
         throwsA(isA<StateError>()),
       );
       expect(
-        () => session.authStateStream(),
+        () => session.authStateChanges(),
+        throwsA(isA<StateError>()),
+      );
+      expect(
+        () => session.getCurrentUser(),
         throwsA(isA<StateError>()),
       );
     });
 
-    group('currentUser y userStream', () {
-      test('currentUser refleja el usuario tras signIn y null tras signOut',
+    group('getCurrentUser y authStateChanges', () {
+      test(
+          'getCurrentUser refleja el usuario tras login y lanza si no hay sesión',
           () async {
-        expect(session.currentUser, isNull);
-        await session.signIn(username: 'a', password: 'b');
-        expect(session.currentUser, isNotNull);
-        await session.signOut();
-        expect(session.currentUser, isNull);
+        await session.logInUserAndPassword(email: 'a@f.com', password: 'b');
+        final Map<String, dynamic> u1 = await session.getCurrentUser();
+        expect(u1['email'], 'a@f.com');
+
+        final Map<String, dynamic> current = await session.getCurrentUser();
+        await session.logOutUser(current);
+
+        expect(() => session.getCurrentUser(), throwsA(isA<StateError>()));
       });
 
-      test(
-          'userStream emite el usuario correcto tras signIn y null tras signOut',
+      test('authStateChanges emite payload tras login y null tras logout',
           () async {
-        final List<UserModel?> users = <UserModel?>[];
-        final StreamSubscription<UserModel?> sub =
-            session.userStream.listen(users.add);
-        await session.signIn(username: 'a', password: 'b');
-        await session.signOut();
+        final List<Map<String, dynamic>?> payloads = <Map<String, dynamic>?>[];
+        final StreamSubscription<Map<String, dynamic>?> sub =
+            session.authStateChanges().listen(payloads.add);
+
+        await session.logInUserAndPassword(email: 'a@f.com', password: 'b');
+        final Map<String, dynamic> cur = await session.getCurrentUser();
+        await session.logOutUser(cur);
+
         await Future<void>.delayed(const Duration(milliseconds: 10));
-        // Debe haber exactamente un valor no nulo (el usuario) y el último debe ser null
-        expect(users.where((UserModel? u) => u != null).length, 1);
-        expect(users.last, isNull);
-        expect(users.first, isNull); // El primer valor debe ser null (inicial)
+
+        // Debe existir al menos un valor no nulo y terminar en null
+        expect(payloads.any((Map<String, dynamic>? e) => e != null), isTrue);
+        expect(payloads.last, isNull);
+
         await sub.cancel();
       });
     });
 
-    group('signInWithGoogle', () {
-      test('signInWithGoogle funciona y actualiza el usuario', () async {
-        final UserModel? user = await session.signInWithGoogle();
-        expect(user, isNotNull);
-        expect(session.currentUser, isNotNull);
-        expect(await session.isSignedIn(), isTrue);
+    group('logInWithGoogle', () {
+      test('logInWithGoogle funciona y actualiza la sesión', () async {
+        final Map<String, dynamic> payload = await session.logInWithGoogle();
+        expect(payload['email'], isNotNull);
+
+        final Map<String, dynamic> signedMap = await session.isSignedIn();
+        expect(signedMap['isSignedIn'], isTrue);
       });
-      test('signInWithGoogle lanza error si throwOnSignIn', () async {
+
+      test('logInWithGoogle lanza error si throwOnSignIn', () async {
         session.dispose();
         session = FakeServiceSession(throwOnSignIn: true);
-        expect(() => session.signInWithGoogle(), throwsA(isA<StateError>()));
+        expect(() => session.logInWithGoogle(), throwsA(isA<StateError>()));
         session.dispose();
       });
     });
 
-    test('signIn sobrescribe el usuario anterior', () async {
-      await session.signIn(username: 'a', password: 'b');
-      final UserModel? user1 = session.currentUser;
-      await session.signIn(username: 'b', password: 'c');
-      final UserModel? user2 = session.currentUser;
-      expect(user1, isNot(equals(user2)));
-      expect(user2?.id, 'b');
+    test('nuevo login sobrescribe la sesión anterior', () async {
+      await session.logInUserAndPassword(email: 'a@f.com', password: 'b');
+      final Map<String, dynamic> u1 = await session.getCurrentUser();
+
+      await session.logInUserAndPassword(email: 'b@f.com', password: 'c');
+      final Map<String, dynamic> u2 = await session.getCurrentUser();
+
+      expect(u1['id'], isNot(equals(u2['id'])));
+      expect(u2['id'], 'b@f.com');
     });
 
     test('isSignedIn refleja el estado correctamente', () async {
-      expect(await session.isSignedIn(), isFalse);
-      await session.signIn(username: 'a', password: 'b');
-      expect(await session.isSignedIn(), isTrue);
-      await session.signOut();
-      expect(await session.isSignedIn(), isFalse);
+      expect((await session.isSignedIn())['isSignedIn'], isFalse);
+      await session.logInUserAndPassword(email: 'a@f.com', password: 'b');
+      expect((await session.isSignedIn())['isSignedIn'], isTrue);
+
+      final Map<String, dynamic> cur = await session.getCurrentUser();
+      await session.logOutUser(cur);
+      expect((await session.isSignedIn())['isSignedIn'], isFalse);
     });
 
-    test('authStateStream solo emite valores distintos', () async {
-      final List<bool> values = <bool>[];
-      final StreamSubscription<bool> sub =
-          session.authStateStream().listen(values.add);
-      await session.signIn(username: 'a', password: 'b');
-      await session.signIn(username: 'a', password: 'b');
-      await session.signOut();
-      await session.signOut();
+    test('authStateChanges: secuencia coherente de null/non-null', () async {
+      final List<Map<String, dynamic>?> values = <Map<String, dynamic>?>[];
+      final StreamSubscription<Map<String, dynamic>?> sub =
+          session.authStateChanges().listen(values.add);
+
+      await session.logInUserAndPassword(email: 'a@f.com', password: 'b');
+      await session.logInUserAndPassword(
+        email: 'a@f.com',
+        password: 'b',
+      ); // nuevo payload
+      final Map<String, dynamic> cur = await session.getCurrentUser();
+      await session.logOutUser(cur);
+      // segundo logout sobre estado ya vacío provocará otro null en este fake? No, porque lanza tras dispose.
+      // Aquí solo forzamos un wait para drenar eventos.
       await Future<void>.delayed(const Duration(milliseconds: 10));
-      // Solo debe emitir: true (al firmar), false (al salir)
-      expect(values.where((bool e) => e == true).length, 1);
-      expect(values.where((bool e) => e == false).length, 2);
+
+      // Debe haber al menos dos no-null por los dos logins y terminar en null
+      expect(
+        values.where((Map<String, dynamic>? e) => e != null).length >= 2,
+        isTrue,
+      );
+      expect(values.last, isNull);
+
       await sub.cancel();
     });
 
-    test('dispose cierra el stream y no emite más valores', () async {
-      final List<bool> values = <bool>[];
-      final StreamSubscription<bool> sub =
-          session.authStateStream().listen(values.add);
-      await session.signIn(username: 'a', password: 'b');
+    test('dispose cierra el stream; no se reciben más eventos luego', () async {
+      final List<Map<String, dynamic>?> values = <Map<String, dynamic>?>[];
+      final StreamSubscription<Map<String, dynamic>?> sub =
+          session.authStateChanges().listen(values.add);
+
+      await session.logInUserAndPassword(email: 'a@f.com', password: 'b');
       session.dispose();
-      // Intentar emitir tras dispose no debe cambiar el stream
+
+      // Intentar emitir tras dispose debe lanzar y no alterar la lista
       try {
-        await session.signOut();
+        final Map<String, dynamic> cur = <String, dynamic>{
+          'id': 'a@f.com',
+          'email': 'a@f.com',
+        };
+        await session.logOutUser(cur);
       } catch (_) {}
+
+      final int before = values.length;
       await Future<void>.delayed(const Duration(milliseconds: 10));
-      expect(values, contains(true));
+      expect(values.length, before); // sin nuevos eventos
+
       await sub.cancel();
     });
   });
-  // Añade este grupo al final de fake_service_session_test.dart
 
-  group('Additional FakeServiceSession behaviors', () {
+  group('Additional FakeServiceSession behaviors (Map-based)', () {
     late FakeServiceSession session;
 
     setUp(() {
@@ -181,81 +241,408 @@ void main() {
     tearDown(() {
       session.dispose();
     });
-    test('authStateStream emite false inicialmente', () async {
-      final List<bool> events = <bool>[];
-      final StreamSubscription<bool> sub =
-          session.authStateStream().listen(events.add);
-      // Esperamos al menos un tick para la emisión inicial
+
+    test('authStateChanges emite null inicialmente', () async {
+      final List<Map<String, dynamic>?> events = <Map<String, dynamic>?>[];
+      final StreamSubscription<Map<String, dynamic>?> sub =
+          session.authStateChanges().listen(events.add);
       await Future<void>.delayed(Duration.zero);
-      expect(events.first, isFalse);
+      expect(events.first, isNull);
       await sub.cancel();
     });
 
-    test('userStream emite null inicialmente', () async {
-      final List<UserModel?> users = <UserModel?>[];
-      final StreamSubscription<UserModel?> sub =
-          session.userStream.listen(users.add);
+    test('isSignedIn() indica false inicialmente', () async {
+      final Map<String, dynamic> signed = await session.isSignedIn();
+      expect(signed['isSignedIn'], isFalse);
+    });
+
+    test('authStateChanges emite payload tras logInWithGoogle()', () async {
+      final List<Map<String, dynamic>?> events = <Map<String, dynamic>?>[];
+      final StreamSubscription<Map<String, dynamic>?> sub =
+          session.authStateChanges().listen(events.add);
+      await session.logInWithGoogle();
       await Future<void>.delayed(Duration.zero);
-      expect(users.first, isNull);
+      expect(events.last, isA<Map<String, dynamic>>());
       await sub.cancel();
     });
 
-    test('authStateStream emite true tras signInWithGoogle()', () async {
-      final List<bool> events = <bool>[];
-      final StreamSubscription<bool> sub =
-          session.authStateStream().listen(events.add);
-      await session.signInWithGoogle();
-      // Espera un tick para que el stream emita el nuevo valor
-      await Future<void>.delayed(Duration.zero);
-      expect(events.last, isTrue);
-      await sub.cancel();
-    });
-
-    test('latencia configurable en signIn()', () async {
+    test('latencia configurable en logInUserAndPassword()', () async {
       final FakeServiceSession fake =
           FakeServiceSession(latency: const Duration(milliseconds: 50));
       final Stopwatch sw = Stopwatch()..start();
-      await fake.signIn(username: 'u', password: 'p');
+      await fake.logInUserAndPassword(email: 'u@f.com', password: 'p');
       sw.stop();
       expect(sw.elapsedMilliseconds >= 50, isTrue);
       fake.dispose();
     });
 
-    test('latencia configurable en signInWithGoogle()', () async {
+    test('latencia configurable en logInWithGoogle()', () async {
       final FakeServiceSession fake =
           FakeServiceSession(latency: const Duration(milliseconds: 50));
       final Stopwatch sw = Stopwatch()..start();
-      await fake.signInWithGoogle();
+      await fake.logInWithGoogle();
       sw.stop();
       expect(sw.elapsedMilliseconds >= 50, isTrue);
       fake.dispose();
     });
 
-    test('signOut tras signInWithGoogle resetea estado y emite false',
+    test('logOutUser tras logInWithGoogle resetea estado y emite null',
         () async {
-      final List<bool> events = <bool>[];
-      final StreamSubscription<bool> sub =
-          session.authStateStream().listen(events.add);
-      await session.signInWithGoogle();
-      expect(await session.isSignedIn(), isTrue);
-      await session.signOut();
-      expect(await session.isSignedIn(), isFalse);
-      expect(events.last, isFalse);
+      final List<Map<String, dynamic>?> events = <Map<String, dynamic>?>[];
+      final StreamSubscription<Map<String, dynamic>?> sub =
+          session.authStateChanges().listen(events.add);
+
+      final Map<String, dynamic> payload = await session.logInWithGoogle();
+      expect((await session.isSignedIn())['isSignedIn'], isTrue);
+
+      await session.logOutUser(payload);
+      expect((await session.isSignedIn())['isSignedIn'], isFalse);
+      expect(events.last, isNull);
+
       await sub.cancel();
     });
 
     test('múltiples listeners reciben los mismos eventos', () async {
-      final List<bool> events1 = <bool>[], events2 = <bool>[];
-      final StreamSubscription<bool> sub1 =
-          session.authStateStream().listen(events1.add);
-      final StreamSubscription<bool> sub2 =
-          session.authStateStream().listen(events2.add);
-      await session.signIn(username: 'a', password: 'b');
-      await session.signOut();
+      final List<Map<String, dynamic>?> events1 = <Map<String, dynamic>?>[];
+      final List<Map<String, dynamic>?> events2 = <Map<String, dynamic>?>[];
+      final StreamSubscription<Map<String, dynamic>?> sub1 =
+          session.authStateChanges().listen(events1.add);
+      final StreamSubscription<Map<String, dynamic>?> sub2 =
+          session.authStateChanges().listen(events2.add);
+
+      await session.logInUserAndPassword(email: 'a@f.com', password: 'b');
+      final Map<String, dynamic> cur = await session.getCurrentUser();
+      await session.logOutUser(cur);
       await Future<void>.delayed(Duration.zero);
-      expect(events1, equals(events2));
+
+      expect(events1.length, equals(events2.length));
+      for (int i = 0; i < events1.length; i++) {
+        final Map<String, dynamic>? a = events1[i];
+        final Map<String, dynamic>? b = events2[i];
+        if (a == null || b == null) {
+          expect(a, equals(b));
+        } else {
+          // Comparación superficial clave principal: 'email'
+          expect(a['email'], equals(b['email']));
+        }
+      }
+
       await sub1.cancel();
       await sub2.cancel();
+    });
+  });
+
+  group('FakeServiceSession', () {
+    late FakeServiceSession svc;
+
+    setUp(() {
+      svc = FakeServiceSession(latency: const Duration(milliseconds: 2));
+    });
+
+    tearDown(() {
+      svc.dispose();
+    });
+
+    test('authStateChanges emite null inicialmente', () async {
+      final List<Map<String, dynamic>?> events = <Map<String, dynamic>?>[];
+      final StreamSubscription<Map<String, dynamic>?> sub =
+          svc.authStateChanges().listen(events.add);
+      // da un tick
+      await Future<void>.delayed(Duration.zero);
+      expect(events.first, isNull);
+      await sub.cancel();
+    });
+
+    test('signInUserAndPassword → sesión activa y evento en stream', () async {
+      final List<Map<String, dynamic>?> subValues = <Map<String, dynamic>?>[];
+      final StreamSubscription<Map<String, dynamic>?> sub =
+          svc.authStateChanges().listen(subValues.add);
+
+      final Map<String, dynamic> user = await svc.signInUserAndPassword(
+        email: 'a@x.com',
+        password: '123',
+      );
+
+      expect(user['email'], 'a@x.com');
+      final Map<String, dynamic> isSigned = await svc.isSignedIn();
+      expect(isSigned['isSignedIn'], isTrue);
+
+      // último evento no nulo
+      await Future<void>.delayed(const Duration(milliseconds: 5));
+      expect(subValues.last, isNotNull);
+
+      final Map<String, dynamic> current = await svc.getCurrentUser();
+      expect(current['id'], 'a@x.com');
+
+      await sub.cancel();
+    });
+
+    test('logInUserAndPassword con campos vacíos lanza ArgumentError',
+        () async {
+      expectLater(
+        svc.logInUserAndPassword(email: '', password: 'x'),
+        throwsA(isA<ArgumentError>()),
+      );
+      expectLater(
+        svc.logInUserAndPassword(email: 'a@x.com', password: ''),
+        throwsA(isA<ArgumentError>()),
+      );
+    });
+
+    test('throwOnSignIn=true hace fallar login/signin/google con StateError',
+        () async {
+      svc.dispose();
+      svc = FakeServiceSession(
+        latency: const Duration(milliseconds: 1),
+        throwOnSignIn: true,
+      );
+
+      expectLater(
+        svc.signInUserAndPassword(email: 'a@x.com', password: '1'),
+        throwsA(isA<StateError>()),
+      );
+      expectLater(
+        svc.logInUserAndPassword(email: 'a@x.com', password: '1'),
+        throwsA(isA<StateError>()),
+      );
+      expectLater(
+        svc.logInWithGoogle(),
+        throwsA(isA<StateError>()),
+      );
+    });
+
+    test('logInWithGoogle → usuario fake@fake.com y stream actualizado',
+        () async {
+      final List<Map<String, dynamic>?> subVals = <Map<String, dynamic>?>[];
+      final StreamSubscription<Map<String, dynamic>?> sub =
+          svc.authStateChanges().listen(subVals.add);
+
+      final Map<String, dynamic> user = await svc.logInWithGoogle();
+      expect(user['email'], 'fake@fake.com');
+
+      await Future<void>.delayed(const Duration(milliseconds: 5));
+      expect(subVals.last?['email'], 'fake@fake.com');
+      await sub.cancel();
+    });
+
+    test('logInSilently lanza si sessionJson vacío; funciona si no', () async {
+      expectLater(
+        svc.logInSilently(<String, dynamic>{}),
+        throwsA(isA<StateError>()),
+      );
+
+      final Map<String, dynamic> payload = <String, dynamic>{
+        'id': 'seed',
+        'email': 'seed@x.com',
+        'jwt': <String, dynamic>{'accessToken': 't'},
+      };
+      final Map<String, dynamic> user = await svc.logInSilently(payload);
+      expect(user['email'], 'seed@x.com');
+    });
+
+    test('refreshSession renueva token/fechas y mantiene id/email', () async {
+      // Prepara una sesión
+      final Map<String, dynamic> base = await svc.signInUserAndPassword(
+        email: 'b@x.com',
+        password: 'p',
+      );
+      final Map<String, dynamic> beforeJwt =
+          Map<String, dynamic>.from(Utils.mapFromDynamic(base['jwt']));
+      final DateTime beforeExpires =
+          DateTime.parse(beforeJwt['expiresAt'] as String);
+
+      // Refresca
+      final Map<String, dynamic> refreshed = await svc.refreshSession(base);
+      final Map<String, dynamic> afterJwt =
+          Map<String, dynamic>.from(Utils.mapFromDynamic(refreshed['jwt']));
+
+      expect(afterJwt['accessToken'], startsWith('refreshed-token-'));
+      expect(afterJwt['refreshedAt'], isA<String>());
+      expect(
+        DateTime.parse(afterJwt['expiresAt'] as String).isAfter(beforeExpires),
+        isTrue,
+      );
+      expect(refreshed['email'], base['email']);
+      expect(refreshed['id'], base['id']);
+    });
+
+    test('recoverPassword devuelve ack con ok=true y el email', () async {
+      final Map<String, dynamic> ack =
+          await svc.recoverPassword(email: 'z@x.com');
+      expect(ack['ok'], isTrue);
+      expect(ack['email'], 'z@x.com');
+      expect(ack['message'], contains('Recovery'));
+    });
+
+    test(
+        'logOutUser limpia sesión, emite null y getCurrentUser vuelve a fallar',
+        () async {
+      final List<Map<String, dynamic>?> subVals = <Map<String, dynamic>?>[];
+      final StreamSubscription<Map<String, dynamic>?> sub =
+          svc.authStateChanges().listen(subVals.add);
+
+      final Map<String, dynamic> u =
+          await svc.signInUserAndPassword(email: 'out@x.com', password: 'p');
+      expect((await svc.isSignedIn())['isSignedIn'], isTrue);
+
+      final Map<String, dynamic> resp = await svc.logOutUser(u);
+      expect(resp['ok'], isTrue);
+
+      await Future<void>.delayed(const Duration(milliseconds: 5));
+      expect(subVals.last, isNull);
+      expect((await svc.isSignedIn())['isSignedIn'], isFalse);
+
+      expectLater(svc.getCurrentUser(), throwsA(isA<StateError>()));
+
+      await sub.cancel();
+    });
+
+    test('múltiples listeners reciben los mismos eventos', () async {
+      final List<Map<String, dynamic>?> a = <Map<String, dynamic>?>[];
+      final List<Map<String, dynamic>?> b = <Map<String, dynamic>?>[];
+      final StreamSubscription<Map<String, dynamic>?> sa =
+          svc.authStateChanges().listen(a.add);
+      final StreamSubscription<Map<String, dynamic>?> sb =
+          svc.authStateChanges().listen(b.add);
+
+      await svc.signInUserAndPassword(email: 'm@x.com', password: 'p');
+      await svc.logOutUser(<String, dynamic>{});
+
+      await Future<void>.delayed(const Duration(milliseconds: 5));
+      expect(
+        a.map((Map<String, dynamic>? e) => e?['email']).toList(),
+        b.map((Map<String, dynamic>? e) => e?['email']).toList(),
+      );
+
+      await sa.cancel();
+      await sb.cancel();
+    });
+
+    test('métodos lanzan tras dispose()', () async {
+      svc.dispose();
+      expect(() => svc.authStateChanges(), throwsA(isA<StateError>()));
+      expectLater(svc.isSignedIn(), throwsA(isA<StateError>()));
+      expectLater(
+        svc.signInUserAndPassword(email: 'a@x.com', password: '1'),
+        throwsA(isA<StateError>()),
+      );
+    });
+  });
+  group('FakeServiceSession with initial session', () {
+    test('arranca logueado cuando se pasa initialUserJson', () async {
+      final Map<String, dynamic> initial = <String, dynamic>{
+        'id': 'seed',
+        'displayName': 'Seed',
+        'photoUrl': 'https://fake.com/photo.png',
+        'email': 'seed@x.com',
+        'jwt': <String, dynamic>{
+          'accessToken': 'seed-token',
+          'issuedAt': DateTime.now().toIso8601String(),
+          'expiresAt':
+              DateTime.now().add(const Duration(hours: 1)).toIso8601String(),
+        },
+      };
+
+      final FakeServiceSession svc = FakeServiceSession(
+        latency: const Duration(milliseconds: 1),
+        initialUserJson: initial,
+      );
+
+      // El stream debe emitir initialUserJson de entrada
+      final Map<String, dynamic>? first = await svc.authStateChanges().first;
+      expect(first, isNotNull);
+      expect(first?['email'], 'seed@x.com');
+
+      // isSignedIn() debe ser true
+      final Map<String, dynamic> signed = await svc.isSignedIn();
+      expect(signed['isSignedIn'], isTrue);
+
+      // getCurrentUser() debe devolver el mismo usuario
+      final Map<String, dynamic> current = await svc.getCurrentUser();
+      final Map<String, dynamic> currentJwt =
+          Utils.mapFromDynamic(current['jwt']);
+      expect(current['id'], 'seed');
+      expect(
+        Utils.getStringFromDynamic(currentJwt['accessToken']),
+        'seed-token',
+      );
+
+      svc.dispose();
+    });
+
+    test(
+        'arranca logueado → refreshSession actualiza token y mantiene identidad',
+        () async {
+      final Map<String, dynamic> initial = <String, dynamic>{
+        'id': 'b@x.com',
+        'displayName': 'b',
+        'photoUrl': 'https://fake.com/photo.png',
+        'email': 'b@x.com',
+        'jwt': <String, dynamic>{
+          'accessToken': 'seed-token',
+          'issuedAt': DateTime.now().toIso8601String(),
+          'expiresAt':
+              DateTime.now().add(const Duration(minutes: 1)).toIso8601String(),
+        },
+      };
+
+      final FakeServiceSession svc = FakeServiceSession(
+        latency: const Duration(milliseconds: 1),
+        initialUserJson: initial,
+      );
+
+      final Map<String, dynamic> before = await svc.getCurrentUser();
+      final Map<String, dynamic> beforeJwt =
+          Utils.mapFromDynamic(before['jwt']);
+      final Map<String, dynamic> refreshed = await svc.refreshSession(before);
+      final Map<String, dynamic> refreshedJwt =
+          Utils.mapFromDynamic(refreshed['jwt']);
+      expect(refreshed['email'], 'b@x.com');
+      expect(refreshed['id'], 'b@x.com');
+      expect(refreshedJwt['accessToken'], startsWith('refreshed-token-'));
+
+      expect(
+        DateUtils.dateTimeFromDynamic(refreshedJwt['expiresAt'])
+            .isAfter(DateUtils.dateTimeFromDynamic(beforeJwt['expiresAt'])),
+        isTrue,
+      );
+
+      svc.dispose();
+    });
+
+    test('arranca logueado → logOutUser emite null y deja sin sesión',
+        () async {
+      final Map<String, dynamic> initial = <String, dynamic>{
+        'id': 'out@x.com',
+        'displayName': 'out',
+        'photoUrl': 'https://fake.com/photo.png',
+        'email': 'out@x.com',
+        'jwt': <String, dynamic>{
+          'accessToken': 'seed-token',
+          'issuedAt': DateTime.now().toIso8601String(),
+          'expiresAt':
+              DateTime.now().add(const Duration(minutes: 1)).toIso8601String(),
+        },
+      };
+
+      final FakeServiceSession svc = FakeServiceSession(
+        latency: const Duration(milliseconds: 1),
+        initialUserJson: initial,
+      );
+
+      final List<Map<String, dynamic>?> events = <Map<String, dynamic>?>[];
+      final StreamSubscription<Map<String, dynamic>?> sub =
+          svc.authStateChanges().listen(events.add);
+
+      final Map<String, dynamic> ack = await svc.logOutUser(initial);
+      expect(ack['ok'], isTrue);
+
+      await Future<void>.delayed(const Duration(milliseconds: 5));
+      expect(events.last, isNull);
+      expect((await svc.isSignedIn())['isSignedIn'], isFalse);
+
+      svc.dispose();
+      await sub.cancel();
     });
   });
 }

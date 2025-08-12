@@ -33,9 +33,7 @@ dependencies:
 
 
   jocaagura_domain:
-    git:
-      url: https://github.com/jocaagura/jocaagura_domain
-      ref: master
+    path: ../../jocaagura_domain
 
 dev_dependencies:
   flutter_test:
