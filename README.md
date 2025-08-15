@@ -56,6 +56,8 @@ Para utilizar el paquete, se requiere la instalación del SDK de Flutter. No hay
 - [MedicalRecordModel](lib/domain/dentist_app/medical_record_model.dart)
 - [FinancialMovement](lib/domain/financial/financial_movement.dart)
 - [LedgerModel](lib/domain/financial/ledger_model.dart)
+- [Unit](#Unit)
+- [PerKeyFifoExecutor](#PerKeyFifoExecutor)
 
 Cada sección proporciona detalles sobre la implementación y el uso de las clases, ofreciendo ejemplos de código y explicaciones de cómo se integran dentro de tu arquitectura de dominio.
 
@@ -1167,6 +1169,323 @@ final svcFail = FakeServiceSession(throwOnSignIn: true);
 > ⚠️ El fake es **solo** para desarrollo/pruebas. En producción, usa un `ServiceSession` real (SDK/REST), con su `GatewayAuth` mapeando errores a `ErrorItem` (apóyate en `SessionErrorItems`/`HttpErrorItems` para códigos estándar).
 
 ---
+## Cómo integrar `BlocWsDatabase` (con `FakeServiceWsDatabase` para desarrollo)
+
+Esta guía muestra el **cableado completo UI → BLoC → Facade → Repository → Gateway → Service** usando el **fake** de base de datos por WebSocket incluido en el paquete. Con esto puedes hacer **CRUD** y **watch (realtime)** sobre un documento sin depender aún de tu backend real.
+
+> Flujo de capas  
+> `UI` → `BlocWsDatabase<T>` → `FacadeWsDatabaseUsecases<T>` → `RepositoryWsDatabase<T>` → `GatewayWsDatabase` → `ServiceWsDatabase<Map<String,dynamic>>` *(Fake)*
+
+---
+
+### 1) Infraestructura (Service → Gateway → Repository → Facade → BLoC)
+
+```dart
+import 'package:jocaagura_domain/jocaagura_domain.dart';
+
+// 1) Transporte (fake en memoria con streams por doc/colección)
+final FakeServiceWsDatabase service = FakeServiceWsDatabase(
+  // Opcional: simula latencia de red
+  // latency: const Duration(milliseconds: 150),
+);
+
+// 2) Gateway (mapea errores, inyecta id, multiplexa watch por docId)
+final GatewayWsDatabaseImpl gateway = GatewayWsDatabaseImpl(
+  service: service,
+  collection: 'users', // <- tu tabla/colección
+);
+
+// 3) Repository (JSON <-> Model + serialización de writes opcional)
+final RepositoryWsDatabaseImpl<UserModel> repository =
+    RepositoryWsDatabaseImpl<UserModel>(
+  gateway: gateway,
+  fromJson: UserModel.fromJson,
+  serializeWrites: true, // evita solapes de escrituras por docId
+);
+
+// 4) Facade (agrupa todos los casos de uso: read/write/delete/watch/etc.)
+final FacadeWsDatabaseUsecases<UserModel> facade =
+    FacadeWsDatabaseUsecases<UserModel>.fromRepository(
+  repository: repository,
+  fromJson: UserModel.fromJson,
+);
+
+// 5) BLoC (publica WsDbState<T>: loading/error/doc/docId/isWatching)
+final BlocWsDatabase<UserModel> bloc = BlocWsDatabase<UserModel>(facade: facade);
+````
+
+---
+
+### 2) UI mínima (leer, escribir y observar un documento)
+
+```dart
+class UserDocPage extends StatefulWidget {
+  const UserDocPage({super.key});
+  @override
+  State<UserDocPage> createState() => _UserDocPageState();
+}
+
+class _UserDocPageState extends State<UserDocPage> {
+  final TextEditingController _id = TextEditingController(text: 'user_001');
+
+  @override
+  void dispose() {
+    bloc.dispose(); // cierra stream de estado del BLoC
+    _id.dispose();
+    super.dispose();
+  }
+
+  UserModel _buildUser(String id) => UserModel(
+        id: id,
+        displayName: 'John Doe',
+        photoUrl: 'https://example.com/profile.jpg',
+        email: 'john.doe@example.com',
+        jwt: const <String, dynamic>{},
+      );
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('WsDatabase — Demo')),
+      body: StreamBuilder<WsDbState<UserModel>>(
+        stream: bloc.stream,
+        initialData: bloc.value,
+        builder: (_, snap) {
+          final s = snap.data ?? WsDbState<UserModel>.idle();
+          return ListView(
+            padding: const EdgeInsets.all(16),
+            children: [
+              TextField(
+                controller: _id,
+                decoration: const InputDecoration(labelText: 'docId'),
+              ),
+              const SizedBox(height: 12),
+              if (s.loading) const LinearProgressIndicator(),
+              if (s.error != null) Text('Error: ${s.error!.code}'),
+              if (s.doc != null) ...[
+                Text('id: ${s.doc!.id}'),
+                Text('name: ${s.doc!.displayName}'),
+                Text('email: ${s.doc!.email}'),
+              ],
+              const SizedBox(height: 12),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  ElevatedButton(
+                    onPressed: () => bloc.readDoc(_id.text.trim()),
+                    child: const Text('Read'),
+                  ),
+                  ElevatedButton(
+                    onPressed: () {
+                      final id = _id.text.trim();
+                      bloc.writeDoc(id, _buildUser(id));
+                    },
+                    child: const Text('Write / Upsert'),
+                  ),
+                  ElevatedButton(
+                    onPressed: () => bloc.startWatch(_id.text.trim()),
+                    child: const Text('Watch'),
+                  ),
+                  ElevatedButton(
+                    onPressed: () => bloc.stopWatch(_id.text.trim()),
+                    child: const Text('Stop watch'),
+                  ),
+                ],
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+}
+```
+
+---
+
+### 3) (Opcional) Smoke test de realtime sin backend
+
+Para “ver” el `watch` en vivo, puedes simular que el servidor actualiza el documento cada segundo con el **ticker** (usa el *Service* directamente, como si fuese el backend):
+
+```
+// Simula cambios del servidor incrementando un contador en jwt.countRef
+final WsDocTicker ticker = WsDocTicker(
+  service: service,
+  collection: 'users',
+  docId: 'user_001',
+  seedMode: SeedMode.minimalCountOnly, // crea si falta
+);
+
+// Arranca (y detén) el motor cuando quieras
+await ticker.start();       // incrementa cada segundo
+// await ticker.stop();
+```
+
+---
+
+### 4) Buenas prácticas y matices
+
+* **Colecciones:** el `GatewayWsDatabaseImpl` está **anclado a una colección** (`collection: 'users'`). Si necesitas otra tabla, crea **otro gateway** (y normalmente su repo/facade/bloc).
+* **Watch eficiente:** el gateway **multiplexa** por `docId` (un solo canal compartido). Tras cancelar un watch, el BLoC llama a `detach()` para liberar recursos.
+* **Errores coherentes:** todo devuelve `Either<ErrorItem, …>`. En UI, si llega `Left`, muestra `error.code/title/description`.
+* **Serialización de escrituras:** `serializeWrites: true` evita condiciones de carrera si la UI dispara varios writes rápidos al mismo doc.
+* **Dispose:** llama `bloc.dispose()` al cerrar la pantalla. Si **eres dueño** de toda la pila, puedes además invocar `facade.disposeAll()` en un punto global (p. ej., logout).
+* **Migración a backend real:** reemplaza `FakeServiceWsDatabase` por tu `ServiceWsDatabase` real (WS/SDK), manteniendo Gateway/Repository/Facade/BLoC **idénticos**.
+* **REST sin realtime:** si tu backend es sincrónico, usa la `FacadeCrudDatabaseUsecases<T>` (sin `watch`) con tu propio repositorio/servicio.
+
+> Con este patrón mantienes UI limpia, capas testeables y un camino directo de “**fake en desarrollo** → **backend real en producción**” sin reescribir la app.
+
+----
+# Unit
+## `Unit`: éxito sin carga útil (type-safe)
+
+`Unit` representa *la ausencia de un valor significativo* de forma **segura para tipos**.  
+Úsalo cuando una operación **sucede** pero **no tiene nada que devolver**. Es equivalente al “`void` con valor”, ideal para *genéricos* (`Either`, `Future`, `Stream`, `UseCase`, etc.).
+
+### ¿Por qué no `void`, `Null` o `bool`?
+- **`void`** no puede ser usado como valor (no cabe en `Either`, `Future.value`, colecciones, etc.).
+- **`Null`** introduce ambigüedad con null-safety y no expresa éxito.
+- **`bool`** confunde éxito/fracaso con *estado lógico*; los errores deberían viajar en un `Left(ErrorItem)` y no como `false`.
+
+`Unit` evita esos problemas y mantiene la semántica clara:  
+**Right(unit) = éxito sin datos**.
+
+---
+
+### API
+```dart
+@immutable
+class Unit {
+  const Unit._();
+  static const Unit value = Unit._();
+  @override String toString() => 'unit';
+  @override bool operator ==(Object other) => other is Unit;
+  @override int get hashCode => 0;
+}
+const Unit unit = Unit.value;
+````
+
+---
+
+### Casos de uso comunes
+
+1. **Comandos** (crear/actualizar/eliminar) que no retornan entidad
+
+```dart
+Future<Either<ErrorItem, Unit>> deleteUser(String id) async {
+  try {
+    await api.delete('/users/$id');
+    return Right(unit); // éxito sin payload
+  } catch (e, s) {
+    return Left(mapper.fromException(e, s));
+  }
+}
+```
+
+2. **Use cases** sin retorno
+
+```dart
+class DetachWatchUseCase<T> implements UseCase<Either<ErrorItem, Unit>, DeleteParams> {
+  DetachWatchUseCase(this.repo);
+  final RepositoryWsDatabase<T> repo;
+
+  @override
+  Future<Either<ErrorItem, Unit>> call(DeleteParams p) async {
+    repo.detachWatch(p.docId);
+    return Right(unit);
+  }
+}
+```
+
+3. **Batch/operaciones por id** (map de resultados)
+
+```dart
+Future<Either<ErrorItem, Map<String, Either<ErrorItem, Unit>>>> deleteMany(List<String> ids) async {
+  final Map<String, Either<ErrorItem, Unit>> out = {};
+  for (final id in ids) {
+    out[id] = await deleteUser(id);
+  }
+  return Right(out);
+}
+```
+
+4. **Streams/eventos** donde solo importa la *señal*
+
+```
+final StreamController<Unit> tick = StreamController<Unit>.broadcast();
+// emitir una señal
+tick.add(unit);
+// escuchar señales
+tick.stream.listen((_) => print('tick!'));
+```
+
+5. **Adaptar APIs** para composición
+
+```
+// convertir Future<void> -> Future<Either<ErrorItem, Unit>>
+Future<Either<ErrorItem, Unit>> wrap(Future<void> f) async {
+  try { await f; return Right(unit); }
+  catch (e, s) { return Left(mapper.fromException(e, s)); }
+}
+```
+
+---
+
+### Patrones con `Either`
+
+```
+final Either<ErrorItem, Unit> res = await deleteUser('u1');
+
+res.fold(
+  (err) => logger.error(err.code),
+  (_)   => logger.info('Deleted!'),
+);
+
+// map / flatMap siguen funcionando (el valor es estable)
+final Either<ErrorItem, Unit> chained = res.map((_) => unit);
+```
+
+---
+
+### En BLoC
+
+```dart
+Future<void> onStopWatch(String id) async {
+  value = value.copyWith(loading: true);
+  final result = await facade.detach(id); // Either<ErrorItem, Unit>
+  result.fold(
+    (err) => value = value.copyWith(error: err),
+    (_)    => value = value.copyWith(isWatching: false, error: null),
+  );
+  value = value.copyWith(loading: false);
+}
+```
+
+---
+
+### Testing con `Unit`
+
+```
+test('delete returns Right(unit)', () async {
+  final r = await deleteUser('u1');
+  expect(r, isA<Right<ErrorItem, Unit>>());
+  // o más explícito:
+  r.fold(
+    (_) => fail('expected Right'),
+    (u) => expect(u, unit),
+  );
+});
+```
+
+---
+
+### Recomendaciones
+
+* Devuelve `Either<ErrorItem, Unit>` en **comandos**; usa `Either<ErrorItem, T>` en **queries**.
+* Evita mezclar `Unit` con significados como “sin cambios” o “cancelado”; si necesitas distinguirlos, crea **tipos específicos** (`CommandResult` con variantes, por ejemplo).
+* Prefiere el alias `unit` para escribir menos y mantener consistencia.
+
 
 ## 🛠️ Publicación y Versionamiento
 
@@ -1273,3 +1592,241 @@ Añade en el encabezado del README:
 ![Pub](https://img.shields.io/pub/v/jocaagura_domain)
 ```
 
+# PerKeyFifoExecutor
+## `PerKeyFifoExecutor`: serializa tareas asíncronas **por clave** (FIFO)
+
+Ejecutor liviano para garantizar **orden y exclusión** por *clave lógica* (p. ej. `docId`, `userId`, `cartId`).  
+Las acciones con **la misma clave** se ejecutan **una detrás de otra** (FIFO). Acciones con **claves distintas** pueden correr **en paralelo**.
+
+> Útil cuando debes **evitar carreras** de `write/update/delete` sobre el mismo recurso sin bloquear toda la app.
+
+---
+
+### TL;DR
+
+- **FIFO por clave**: `A(k1) → B(k1) → C(k1)` se ejecutan en ese orden; `A(k1)` y `X(k2)` pueden solaparse.
+- **No reentrante por clave**: no llames `withLock(k)` *desde dentro* de otra acción `withLock(k)` (crea espera circular).
+- **Errores no rompen la cola**: se propagan al caller y la cola sigue con el siguiente item.
+- **Dispose no cancela**: limpia colas futuras; lo que esté en vuelo termina normalmente.
+
+---
+
+### API (resumen)
+
+```dart
+class PerKeyFifoExecutor<K extends Object> {
+  Future<R> withLock<R>(K key, Future<R> Function() action);
+  void dispose();
+}
+````
+
+---
+
+### Ejemplo básico
+
+```dart
+final PerKeyFifoExecutor<String> exec = PerKeyFifoExecutor<String>();
+
+Future<void> saveUser(String userId, Future<void> Function() ioSave) {
+  return exec.withLock<void>(userId, () async {
+    await ioSave(); // ¡serializado por userId!
+  });
+}
+```
+
+---
+
+### Devuelve valores y propaga errores
+
+```dart
+final res = await exec.withLock<int>('u1', () async {
+  // ... I/O ...
+  return 42;
+});
+// res == 42
+
+try {
+  await exec.withLock('u1', () async => throw StateError('boom'));
+} catch (e) {
+  // recibes el error tal cual; la cola 'u1' sigue funcionando
+}
+```
+
+---
+
+### Paralelismo entre claves
+
+```dart
+Future.wait([
+  exec.withLock('doc:1', () => writeDoc('1')), // A
+  exec.withLock('doc:1', () => writeDoc('1')), // B (espera A)
+  exec.withLock('doc:2', () => writeDoc('2')), // C (corre en paralelo con A)
+]);
+```
+
+---
+
+### Caso de uso: **Repository** con escrituras serializadas por `docId`
+
+Si tu repo ya expone un flag como `serializeWrites`, reemplaza la lógica manual de colas por `PerKeyFifoExecutor`:
+
+```dart
+class RepositoryWsDatabaseImpl<T extends Model> implements RepositoryWsDatabase<T> {
+  RepositoryWsDatabaseImpl({
+    required this.gateway,
+    required this.fromJson,
+    bool serializeWrites = false,
+  }) : _exec = serializeWrites ? PerKeyFifoExecutor<String>() : null;
+
+  final GatewayWsDatabase gateway;
+  final T Function(Map<String, dynamic>) fromJson;
+  final PerKeyFifoExecutor<String>? _exec;
+
+  @override
+  Future<Either<ErrorItem, T>> write(String docId, T entity) {
+    Future<Either<ErrorItem, T>> task() async {
+      final res = await gateway.write(docId, entity.toJson());
+      return res.fold(Left.new, (json) => Right(fromJson(json)));
+    }
+    return _exec == null ? task() : _exec!.withLock(docId, task);
+  }
+
+  @override
+  Future<Either<ErrorItem, Unit>> delete(String docId) {
+    Future<Either<ErrorItem, Unit>> task() => gateway.delete(docId);
+    return _exec == null ? task() : _exec!.withLock(docId, task);
+  }
+
+  void dispose() => _exec?.dispose();
+}
+```
+
+**Ventajas**:
+
+* Código más legible.
+* Aísla la política de concurrencia (puedes cambiarla o desactivarla).
+* Menos riesgo de fugas al manejar `Completer`s/`Future` en mapas.
+
+---
+
+### Patrón de *mutación segura* (read–modify–write)
+
+```dart
+Future<Either<ErrorItem, T>> mutate(String docId, Future<T> Function(T) f) {
+  return exec.withLock(docId, () async {
+    final cur = await repo.read(docId);            // 1) read
+    final next = await f(cur.getOrElse(defaultT)); // 2) pure transform
+    return repo.write(docId, next);                // 3) write
+  });
+}
+```
+
+Evitas que dos mutaciones competitivas sobre el mismo `docId` se pisen entre sí.
+
+---
+
+### Anti-patrones y buenas prácticas
+
+* ❌ **Reentrancia por misma clave**:
+
+  ```dart
+  await exec.withLock('k', () async {
+    // NO llames exec.withLock('k') aquí dentro
+  });
+  ```
+
+  ✅ En su lugar: compón los pasos dentro **de la misma acción** o dispara otra acción **fuera**.
+
+* ❌ **Usar `bool` para “estado de en vuelo”** como “lock manual” por clave → frágil ante errores.
+  ✅ Usa `PerKeyFifoExecutor`: libera el lock en `finally` siempre.
+
+* ✅ **Claves estables**: garantiza `==`/`hashCode` correctos (p. ej. usa `String`/`int` o value-objects bien definidos).
+
+* ✅ **Time-outs** (si un backend puede bloquear): aplica un wrapper:
+
+  ```dart
+  await exec.withLock('k', () => action().timeout(const Duration(seconds: 8)));
+  ```
+
+* ✅ **Observabilidad**: si necesitas métricas, envuelve `withLock`:
+
+  ```dart
+  Future<R> instrumented<R>(String k, Future<R> Function() f) {
+    final t0 = DateTime.now();
+    return exec.withLock(k, () async {
+      try { return await f(); }
+      finally { log('$k took ${DateTime.now().difference(t0)}'); }
+    });
+  }
+  ```
+
+---
+
+### Comparación rápida
+
+| Problema                       | Sin executor                      | Con `PerKeyFifoExecutor`           |
+|--------------------------------|-----------------------------------|------------------------------------|
+| Dos `write(docId)` simultáneas | Posible **race** (última gana)    | **Orden garantizado** por `docId`  |
+| Manejo de errores              | Fácil romper la cola              | `try/finally` embebido             |
+| Complejidad                    | Mapas de `Completer`s, edge-cases | API única (`withLock`)             |
+| Paralelismo entre claves       | Difícil de orquestar              | **Natural** (colas independientes) |
+
+---
+
+### Testing sugerido
+
+```dart
+test('serializa por clave y permite paralelo entre claves', () async {
+  final exec = PerKeyFifoExecutor<String>();
+  final List<String> log = [];
+
+  Future<void> job(String k, String tag, int ms) async {
+    await exec.withLock(k, () async {
+      log.add('start $tag');
+      await Future<void>.delayed(Duration(milliseconds: ms));
+      log.add('end $tag');
+    });
+  }
+
+  await Future.wait([
+    job('A', 'A1', 50),
+    job('A', 'A2', 10),
+    job('B', 'B1', 30),
+  ]);
+
+  // A1 debe terminar antes que A2 (FIFO por A)
+  final a1End = log.indexOf('end A1');
+  final a2End = log.indexOf('end A2');
+  expect(a1End, lessThan(a2End));
+
+  // B1 puede intercalar con A1/A2 (paralelo por clave)
+  expect(log.contains('end B1'), isTrue);
+});
+```
+
+---
+
+### Integración con BLoCs
+
+* **Repository** serializa `write/delete`; el **BLoC** permanece simple (no necesita locks).
+* En **streams realtime**, la serialización evita “rebote” de lecturas/escrituras sobre el mismo `docId`.
+
+---
+
+### Limpieza
+
+* `dispose()` limpia las colas registradas.
+  **Nota**: no cancela lo que ya corre; se usa para liberar memoria/referencias y que nuevas acciones no encadenen con anteriores.
+
+---
+
+### Caso extra: *per-user throttling* (misma idea, otra semántica)
+
+```dart
+final exec = PerKeyFifoExecutor<int>(); // userId
+
+Future<void> updateSettings(int userId, Settings s) =>
+    exec.withLock(userId, () => api.saveSettings(userId, s));
+```
+
+> Mismo patrón, diferente dominio: *evitas saturar el backend y garantizas orden por entidad*.
