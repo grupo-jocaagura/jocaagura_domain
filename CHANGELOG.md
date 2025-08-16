@@ -3,6 +3,58 @@
 This document follows the guidelines of [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.24.0] - 2025-08-15
+
+> Release centrado en **persistencia WebSocket**, capa de **Repositorio genérico**, **BLoC** reactivo por documento y utilidades transversales para concurrencia/semántica de `void`.
+
+#### ✅ Added
+- **Stack WS Database (end-to-end)**
+  - `GatewayWsDatabaseImpl` (ref-count por `docId`, multiplexing con `BlocGeneral`, `detachWatch`/`releaseDoc`/`dispose`).
+  - `RepositoryWsDatabaseImpl<T extends Model>` (mapeo `fromJson/toJson`, opcional serialización de `write/delete` por `docId`).
+  - **Usecases CRUD & WS**:
+    - `databases_crud_usecases.dart`
+    - `facade_crud_database.dart`
+    - `facade_ws_database_usecases.dart`
+  - **Estado y config**:
+    - `ws_db_state.dart` (estado inmutable `WsDbState<T>`)
+    - `ws_db_config.dart` (valores por defecto / helpers)
+  - **BLoC**:
+    - `bloc_ws_database.dart` (orquestación thin; sin streams ad-hoc; mira/actualiza `WsDbState`)
+- **Infra fake para desarrollo/pruebas**
+  - `fake_service_ws_database.dart` con `documentStream`/`collectionStream`, lectura/escritura y borrado por colección+id.
+  - `ws_database_user_demo_page.dart` (example) con ticker opcional que incrementa `jwt.countRef` en vivo.
+  - `home_page.dart` (example) como entrada de demo.
+- **Utilidades transversales**
+  - `Unit` (tipo “valor nulo” seguro para `Either` y comandos sin payload).
+  - `PerKeyFifoExecutor<K>` (ejecutor FIFO por clave para serializar tareas por `docId`).
+- **Tests**
+  - `bloc_ws_database_test.dart`
+  - `gateway_ws_database_impl.test.dart`
+  - `repository_ws_database_impl.test.dart`
+  - `fake_service_ws_database.test.dart`
+  - `per_key_fifo_executor_test.dart`
+  - `unit_test.dart`
+  - `fake_db_repo.dart` (mocks & fakes auxiliares)
+
+#### 🔄 Changed
+- Contratos de gateway/repositorio **document-centricos** y transport-agnostic:
+  - `GatewayWsDatabase`: énfasis en *watch por documento* con canal compartido y manejo explícito de ciclo de vida (`detachWatch`/`releaseDoc`).
+  - `RepositoryWsDatabase<T>`: agrega helpers de ciclo de vida y opción de **serializar escrituras por `docId`**.
+- Mapeo de errores unificado mediante `DefaultErrorMapper` en todas las capas.
+
+#### 🩹 Fixed
+- Posibles **leaks** de suscripción cuando varios watchers observaban el mismo `docId`: ahora se hace **ref-count** y se libera la suscripción real al llegar a cero referencias.
+
+#### 🧭 Migration notes
+- Si usas `watch(docId)`, **después de cancelar tu `StreamSubscription` llama siempre a `detachWatch(docId)`** para liberar el canal subyacente.
+- Para comandos sin retorno, retorna `Right(unit)` en lugar de `void`.
+- Para evitar carreras al escribir/borrar la misma entidad, usa el `RepositoryWsDatabaseImpl` con `serializeWrites: true` o el utilitario `PerKeyFifoExecutor`.
+
+#### 📚 Docs
+- README actualizado con:
+  - **“Cómo integrar BlocWsDatabase (con FakeServiceWsDatabase)”**
+  - Snippets dedicados de **`Unit`** y **`PerKeyFifoExecutor`** (casos de uso comunes).
+
 ## [1.23.1] - 2025-08-11
 
 ### Fixed
