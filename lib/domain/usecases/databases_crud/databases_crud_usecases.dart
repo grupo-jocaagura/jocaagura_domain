@@ -177,7 +177,7 @@ class ExistsDocUseCase<T extends Model>
     final Either<ErrorItem, T> r = await _repo.read(params.docId);
     return r.fold((ErrorItem err) {
       if (err.code == DatabaseErrorItems.notFound.code) {
-        return  Right<ErrorItem, bool>(false);
+        return Right<ErrorItem, bool>(false);
       }
       return Left<ErrorItem, bool>(err);
     }, (_) {
@@ -280,24 +280,30 @@ class WatchDocUntilUseCase<T extends Model>
     final Completer<Either<ErrorItem, T>> done =
         Completer<Either<ErrorItem, T>>();
 
-    sub = _repo.watch(params.docId).listen((Either<ErrorItem, T> e) {
-      e.fold((ErrorItem err) {
-        // surface stream errors immediately
+    sub = _repo.watch(params.docId).listen(
+      (Either<ErrorItem, T> e) {
+        e.fold((ErrorItem err) {
+          // surface stream errors immediately
+          if (!done.isCompleted) {
+            done.complete(Left<ErrorItem, T>(err));
+          }
+        }, (T entity) {
+          if (_predicate(entity) && !done.isCompleted) {
+            done.complete(Right<ErrorItem, T>(entity));
+          }
+        });
+      },
+      onError: (Object error, StackTrace st) {
         if (!done.isCompleted) {
-          done.complete(Left<ErrorItem, T>(err));
+          final ErrorItem mapped = DefaultErrorMapper().fromException(
+            error,
+            st,
+            location: 'WatchDocUntilUseCase.onError',
+          );
+          done.complete(Left<ErrorItem, T>(mapped));
         }
-      }, (T entity) {
-        if (_predicate(entity) && !done.isCompleted) {
-          done.complete(Right<ErrorItem, T>(entity));
-        }
-      });
-    }, onError: (Object error, StackTrace st) {
-      if (!done.isCompleted) {
-        final ErrorItem mapped = DefaultErrorMapper()
-            .fromException(error, st, location: 'WatchDocUntilUseCase.onError');
-        done.complete(Left<ErrorItem, T>(mapped));
-      }
-    },);
+      },
+    );
 
     final Either<ErrorItem, T> result = await done.future;
     await sub.cancel();
