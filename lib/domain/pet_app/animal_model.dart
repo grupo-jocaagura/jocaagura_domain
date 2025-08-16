@@ -18,7 +18,7 @@ enum SexEnum {
 /// Abstract class representing the model for an animal.
 /// This class serves as a blueprint for creating various animal models,
 /// encompassing attributes like energy, weight, intelligence, and more.
-abstract class AnimalModel implements Model {
+abstract class AnimalModel extends Model {
   /// Creates an instance of [AnimalModel].
   ///
   /// All properties are required and must be initialized.
