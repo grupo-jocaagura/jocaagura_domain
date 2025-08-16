@@ -90,7 +90,7 @@ enum LegalIdEnum {
 /// The [LegalIdModel] class stores information about a person's legal identification,
 /// including the type of document, the individual's name, and additional attributes.
 @immutable
-class LegalIdModel implements Model {
+class LegalIdModel extends Model {
   const LegalIdModel({
     required this.idType,
     required this.names,

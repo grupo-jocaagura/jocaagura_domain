@@ -29,8 +29,7 @@ enum ErrorItemEnum { title, code, description, meta, errorLevel }
 /// A model representing a structured error in the application domain.
 ///
 /// Includes a title, a code, a human-readable description, and optional metadata.
-@immutable
-class ErrorItem implements Model {
+class ErrorItem extends Model {
   /// Creates a new immutable [ErrorItem] instance.
   const ErrorItem({
     required this.title,

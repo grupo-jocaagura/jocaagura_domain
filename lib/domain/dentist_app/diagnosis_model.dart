@@ -45,7 +45,7 @@ const DiagnosisModel defaultDiagnosisModel = DiagnosisModel(
 ///   print('Description: ${diagnosis.description}');
 /// }
 /// ```
-class DiagnosisModel implements Model {
+class DiagnosisModel extends Model {
   /// Constructs a new [DiagnosisModel] with the given [id], [title], and [description].
   const DiagnosisModel({
     required this.id,

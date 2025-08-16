@@ -144,4 +144,6 @@ class SignatureModel extends Model {
         appId,
         png64Image,
       );
+
+  Model fromJson(Map<String, dynamic> json) => SignatureModel.fromJson(json);
 }

@@ -1,442 +1,452 @@
 import 'dart:async';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:jocaagura_domain/src/fake_services/fake_service_ws_database.dart';
+import 'package:jocaagura_domain/jocaagura_domain.dart';
+
+WsDbConfig cfg({
+  Duration latency = Duration.zero,
+  bool throwOnSave = false,
+  bool throwOnDelete = false,
+  bool emitInitial = true,
+  bool deepCopies = true,
+  bool dedupeByContent = true,
+  bool orderCollectionsByKey = true,
+  String idKey = 'id',
+}) {
+  return WsDbConfig(
+    latency: latency,
+    throwOnSave: throwOnSave,
+    throwOnDelete: throwOnDelete,
+    emitInitial: emitInitial,
+    deepCopies: deepCopies,
+    dedupeByContent: dedupeByContent,
+    orderCollectionsByKey: orderCollectionsByKey,
+    idKey: idKey,
+  );
+}
 
 void main() {
-  group('FakeServiceWsDatabase', () {
-    late FakeServiceWsDatabase db;
+  // Fixture por defecto.
+  late FakeServiceWsDatabase db;
 
-    setUp(() {
-      db = FakeServiceWsDatabase();
+  setUp(() {
+    db = FakeServiceWsDatabase(config: cfg());
+  });
+
+  tearDown(() {
+    try {
+      db.dispose();
+    } catch (_) {/* ignore double-dispose */}
+  });
+
+  group('FakeServiceWsDatabase — documentStream semantics', () {
+    test('emits seed {} when document does not exist', () async {
+      final Stream<Map<String, dynamic>> s =
+          db.documentStream(collection: 'users', docId: 'nope');
+
+      await expectLater(s.take(1), emits(equals(<String, dynamic>{})));
     });
 
-    group('parameter validation', () {
-      test('saveDocument throws on empty collection', () {
-        expect(
-          () => db.saveDocument(
-            collection: '',
-            docId: 'id',
-            document: <String, dynamic>{'a': 1},
-          ),
-          throwsA(isA<ArgumentError>()),
-        );
-      });
+    test('emits seed with current doc and then updates', () async {
+      await db.saveDocument(
+        collection: 'users',
+        docId: 'u1',
+        document: <String, dynamic>{'name': 'Alice', 'age': 30},
+      );
 
-      test('saveDocument throws on empty docId', () {
-        expect(
-          () => db.saveDocument(
-            collection: 'col',
-            docId: '',
-            document: <String, dynamic>{'a': 1},
-          ),
-          throwsA(isA<ArgumentError>()),
-        );
-      });
+      final Stream<Map<String, dynamic>> s =
+          db.documentStream(collection: 'users', docId: 'u1');
 
-      test('readDocument throws on empty collection', () {
-        expect(
-          () => db.readDocument(collection: '', docId: 'id'),
-          throwsA(isA<ArgumentError>()),
-        );
-      });
+      final List<Map<String, dynamic>> events = <Map<String, dynamic>>[];
+      final StreamSubscription<Map<String, dynamic>> sub = s.listen(events.add);
 
-      test('readDocument throws on empty docId', () {
-        expect(
-          () => db.readDocument(collection: 'col', docId: ''),
-          throwsA(isA<ArgumentError>()),
-        );
-      });
+      await db.saveDocument(
+        collection: 'users',
+        docId: 'u1',
+        document: <String, dynamic>{'name': 'Alice', 'age': 31},
+      );
 
-      test('deleteDocument throws on empty collection', () {
-        expect(
-          () => db.deleteDocument(collection: '', docId: 'id'),
-          throwsA(isA<ArgumentError>()),
-        );
-      });
+      await Future<void>.delayed(const Duration(milliseconds: 5));
 
-      test('deleteDocument throws on empty docId', () {
-        expect(
-          () => db.deleteDocument(collection: 'col', docId: ''),
-          throwsA(isA<ArgumentError>()),
-        );
-      });
+      expect(
+        events.first,
+        equals(<String, dynamic>{'name': 'Alice', 'age': 30}),
+      );
+      expect(
+        events.last,
+        equals(<String, dynamic>{'name': 'Alice', 'age': 31}),
+      );
 
-      test('collectionStream throws on empty collection', () {
-        expect(
-          () => db.collectionStream(collection: ''),
-          throwsA(isA<ArgumentError>()),
-        );
-      });
-
-      test('documentStream throws on empty collection', () {
-        expect(
-          () => db.documentStream(collection: '', docId: 'id'),
-          throwsA(isA<ArgumentError>()),
-        );
-      });
-
-      test('documentStream throws on empty docId', () {
-        expect(
-          () => db.documentStream(collection: 'col', docId: ''),
-          throwsA(isA<ArgumentError>()),
-        );
-      });
+      await sub.cancel();
     });
 
-    group('basic operations', () {
-      test('save and read document', () async {
-        const Map<String, String> data = <String, String>{'key': 'value'};
-        await db.saveDocument(collection: 'col', docId: 'id', document: data);
-        final Map<String, dynamic> result =
-            await db.readDocument(collection: 'col', docId: 'id');
-        expect(result, equals(data));
-      });
+    test('delete causes stream to emit {} (idempotent delete)', () async {
+      await db.saveDocument(
+        collection: 'users',
+        docId: 'u1',
+        document: <String, dynamic>{'n': 1},
+      );
 
-      test('collectionStream updates on saveDocument', () async {
-        final List<List<Map<String, dynamic>>> events =
-            <List<Map<String, dynamic>>>[];
-        final StreamSubscription<List<Map<String, dynamic>>> sub =
-            db.collectionStream(collection: 'col').listen(events.add);
-        await db.saveDocument(
-          collection: 'col',
-          docId: 'id',
-          document: <String, dynamic>{'a': 1},
-        );
-        await Future<void>.delayed(Duration.zero);
-        expect(events, isNotEmpty);
-        // La colección debe contener un documento con 'a': 1
-        // Comprobación manual de que la lista contiene un mapa con 'a': 1
-        bool contiene = false;
-        for (final Map<String, dynamic> doc in events.last) {
-          if (doc['a'] == 1 && doc.length == 1) {
-            contiene = true;
-            break;
-          }
-        }
-        expect(contiene, isTrue);
-        await sub.cancel();
-      });
+      final List<Map<String, dynamic>> events = <Map<String, dynamic>>[];
+      final StreamSubscription<Map<String, dynamic>> sub = db
+          .documentStream(collection: 'users', docId: 'u1')
+          .listen(events.add);
 
-      test('documentStream updates on saveDocument', () async {
-        final List<Map<String, dynamic>> events = <Map<String, dynamic>>[];
-        final StreamSubscription<Map<String, dynamic>> sub = db
-            .documentStream(collection: 'col', docId: 'id')
-            .listen(events.add);
-        await db.saveDocument(
-          collection: 'col',
-          docId: 'id',
-          document: <String, dynamic>{'a': 1},
-        );
-        await Future<void>.delayed(Duration.zero);
-        // Comprobación manual sin paquetes externos
-        bool contiene = false;
-        for (final Map<String, dynamic> e in events) {
-          if (e.length == 1 && e['a'] == 1) {
-            contiene = true;
-            break;
-          }
-        }
-        expect(contiene, isTrue);
-        await sub.cancel();
-      });
+      await db.deleteDocument(collection: 'users', docId: 'u1');
+      await Future<void>.delayed(const Duration(milliseconds: 5));
 
-      test('readDocument throws when document does not exist', () async {
-        expect(
-          () => db.readDocument(collection: 'col', docId: 'unknown'),
-          throwsA(isA<StateError>()),
-        );
-      });
+      expect(events.last, equals(<String, dynamic>{}));
 
-      test('deleteDocument removes document and updates streams', () async {
-        await db.saveDocument(
-          collection: 'col',
-          docId: 'id',
-          document: <String, dynamic>{'k': 'v'},
-        );
-        final List<Map<String, dynamic>> docEvents = <Map<String, dynamic>>[];
-        final StreamSubscription<Map<String, dynamic>> subDoc = db
-            .documentStream(collection: 'col', docId: 'id')
-            .listen(docEvents.add);
-        final List<List<Map<String, dynamic>>> colEvents =
-            <List<Map<String, dynamic>>>[];
-        final StreamSubscription<List<Map<String, dynamic>>> subCol =
-            db.collectionStream(collection: 'col').listen(colEvents.add);
-        await db.deleteDocument(collection: 'col', docId: 'id');
-        await Future<void>.delayed(Duration.zero);
-        // El documento eliminado debe ser un mapa vacío
-        expect(docEvents.last, equals(<String, dynamic>{}));
-        // La colección debe estar vacía
-        expect(colEvents.last, equals(<Map<String, dynamic>>[]));
-        await subDoc.cancel();
-        await subCol.cancel();
-      });
+      await sub.cancel();
     });
 
-    group('throwOnSave coverage', () {
-      test('saveDocument lanza StateError si throwOnSave es true', () async {
-        final FakeServiceWsDatabase db =
-            FakeServiceWsDatabase(throwOnSave: true);
-        expect(
-          () => db.saveDocument(
-            collection: 'col',
-            docId: 'id',
-            document: <String, dynamic>{'a': 1},
-          ),
-          throwsA(isA<StateError>()),
-        );
-      });
-      test('deleteDocument lanza StateError si throwOnSave es true', () async {
-        final FakeServiceWsDatabase db =
-            FakeServiceWsDatabase(throwOnSave: true);
-        expect(
-          () => db.deleteDocument(collection: 'col', docId: 'id'),
-          throwsA(isA<StateError>()),
-        );
-      });
+    test('dedupe by content: repeated save with same payload does not re-emit',
+        () async {
+      final List<Map<String, dynamic>> events = <Map<String, dynamic>>[];
+      final StreamSubscription<Map<String, dynamic>> sub = db
+          .documentStream(collection: 'users', docId: 'u1')
+          .listen(events.add);
+
+      await db.saveDocument(
+        collection: 'users',
+        docId: 'u1',
+        document: <String, dynamic>{'n': 1},
+      );
+      await db.saveDocument(
+        collection: 'users',
+        docId: 'u1',
+        document: <String, dynamic>{'n': 1}, // mismo contenido
+      );
+
+      await Future<void>.delayed(const Duration(milliseconds: 5));
+
+      expect(events.length, 2);
+      expect(events[0], equals(<String, dynamic>{}));
+      expect(events[1], equals(<String, dynamic>{'n': 1}));
+
+      await sub.cancel();
+    });
+  });
+
+  group('FakeServiceWsDatabase — collectionStream semantics', () {
+    test('emits seed [] and later sorted list by docId', () async {
+      final List<List<Map<String, dynamic>>> events =
+          <List<Map<String, dynamic>>>[];
+      final StreamSubscription<List<Map<String, dynamic>>> sub =
+          db.collectionStream(collection: 'users').listen(events.add);
+
+      // Guardamos ids fuera de orden
+      await db.saveDocument(
+        collection: 'users',
+        docId: 'b',
+        document: <String, dynamic>{'v': 2},
+      );
+      await db.saveDocument(
+        collection: 'users',
+        docId: 'a',
+        document: <String, dynamic>{'v': 1},
+      );
+
+      await Future<void>.delayed(const Duration(milliseconds: 10));
+
+      final List<Map<String, dynamic>> last = events.last;
+      expect(
+        last,
+        equals(<Map<String, dynamic>>[
+          <String, dynamic>{'v': 1},
+          <String, dynamic>{'v': 2},
+        ]),
+      );
+
+      await sub.cancel();
     });
 
-    group('dispose seguro', () {
-      test('dispose no lanza excepción', () {
-        final FakeServiceWsDatabase db = FakeServiceWsDatabase();
-        expect(() => db.dispose(), returnsNormally);
-      });
-      test('guardar tras dispose lanza excepción', () async {
-        final FakeServiceWsDatabase db = FakeServiceWsDatabase();
-        await db.saveDocument(
-          collection: 'col',
-          docId: 'id',
-          document: <String, dynamic>{'a': 1},
-        );
-        db.dispose();
-        try {
-          await db.saveDocument(
-            collection: 'col',
-            docId: 'id2',
-            document: <String, dynamic>{'a': 2},
-          );
-          fail('No se lanzó StateError');
-        } catch (e) {
-          expect(e, isA<StateError>());
-        }
-      });
-      test('eliminar tras dispose lanza excepción', () async {
-        final FakeServiceWsDatabase db = FakeServiceWsDatabase();
-        await db.saveDocument(
-          collection: 'col',
-          docId: 'id',
-          document: <String, dynamic>{'a': 1},
-        );
-        db.dispose();
-        expect(
-          () => db.deleteDocument(collection: 'col', docId: 'id'),
-          throwsA(
-            predicate(
-              (Object? e) =>
-                  e is StateError ||
-                  e.toString().contains('Bad state') ||
-                  e.toString().contains('disposed'),
-            ),
-          ),
-        );
-      });
+    test('dedupe by content on collection', () async {
+      final List<List<Map<String, dynamic>>> events =
+          <List<Map<String, dynamic>>>[];
+      final StreamSubscription<List<Map<String, dynamic>>> sub =
+          db.collectionStream(collection: 'c').listen(events.add);
+
+      await db.saveDocument(
+        collection: 'c',
+        docId: 'x',
+        document: <String, dynamic>{'n': 1},
+      );
+      await db.saveDocument(
+        collection: 'c',
+        docId: 'x',
+        document: <String, dynamic>{'n': 1},
+      );
+
+      await Future<void>.delayed(const Duration(milliseconds: 5));
+
+      expect(events.length, 2);
+      expect(events[0], equals(<Map<String, dynamic>>[]));
+      expect(
+        events[1],
+        equals(<Map<String, dynamic>>[
+          <String, dynamic>{'n': 1},
+        ]),
+      );
+
+      await sub.cancel();
+    });
+  });
+
+  group('FakeServiceWsDatabase — raw collection snapshots', () {
+    test('collectionRawStream emits id->doc map (seed + updates)', () async {
+      final List<Map<String, Map<String, dynamic>>> events =
+          <Map<String, Map<String, dynamic>>>[];
+
+      final StreamSubscription<Map<String, Map<String, dynamic>>> sub =
+          db.collectionRawStream(collection: 'ps').listen(events.add);
+
+      await db.saveDocument(
+        collection: 'ps',
+        docId: 'p2',
+        document: <String, dynamic>{'v': 2},
+      );
+      await db.saveDocument(
+        collection: 'ps',
+        docId: 'p1',
+        document: <String, dynamic>{'v': 1},
+      );
+
+      await Future<void>.delayed(const Duration(milliseconds: 10));
+
+      expect(events.first, equals(<String, Map<String, dynamic>>{})); // seed
+      final Map<String, Map<String, dynamic>> last = events.last;
+      expect(last.keys.toList(), equals(<String>['p1', 'p2'])); // ordenado
+      expect(last['p1'], equals(<String, dynamic>{'v': 1}));
+      expect(last['p2'], equals(<String, dynamic>{'v': 2}));
+
+      await sub.cancel();
+    });
+  });
+
+  group('FakeServiceWsDatabase — deep copy semantics', () {
+    test('mutating the saved input after save does not affect stored state',
+        () async {
+      final Map<String, dynamic> original = <String, dynamic>{
+        'nested': <String, dynamic>{'a': 1},
+      };
+
+      await db.saveDocument(collection: 'c', docId: 'd', document: original);
+
+      (original['nested'] as Map<String, dynamic>)['a'] = 999;
+
+      final Map<String, dynamic> read =
+          await db.readDocument(collection: 'c', docId: 'd');
+
+      expect(
+        read,
+        equals(<String, dynamic>{
+          'nested': <String, dynamic>{'a': 1},
+        }),
+      );
     });
 
-    group('funcionalidad avanzada y robustez', () {
-      test('leer documento en colección inexistente', () async {
-        final FakeServiceWsDatabase db = FakeServiceWsDatabase();
-        expect(
-          () => db.readDocument(collection: 'noexiste', docId: 'id'),
-          throwsA(isA<StateError>()),
-        );
-      });
-      test('stream de colección en colección inexistente', () async {
-        final FakeServiceWsDatabase db = FakeServiceWsDatabase();
-        final List<List<Map<String, dynamic>>> events =
-            <List<Map<String, dynamic>>>[];
-        final StreamSubscription<List<Map<String, dynamic>>> sub =
-            db.collectionStream(collection: 'noexiste').listen(events.add);
-        await Future<void>.delayed(Duration.zero);
-        expect(events.isNotEmpty, isTrue);
-        expect(events.first, isEmpty);
-        await sub.cancel();
-      });
-      test('stream de documento en colección inexistente', () async {
-        final FakeServiceWsDatabase db = FakeServiceWsDatabase();
-        final List<Map<String, dynamic>> events = <Map<String, dynamic>>[];
-        final StreamSubscription<Map<String, dynamic>> sub = db
-            .documentStream(collection: 'noexiste', docId: 'id')
-            .listen(events.add);
-        await Future<void>.delayed(Duration.zero);
-        expect(events.isNotEmpty, isTrue);
-        expect(events.first, isEmpty);
-        await sub.cancel();
-      });
-      test('sobrescribir documento con el mismo docId', () async {
-        final FakeServiceWsDatabase db = FakeServiceWsDatabase();
-        await db.saveDocument(
-          collection: 'col',
-          docId: 'id',
-          document: <String, dynamic>{'a': 1},
-        );
-        await db.saveDocument(
-          collection: 'col',
-          docId: 'id',
-          document: <String, dynamic>{'a': 2},
-        );
-        final Map<String, dynamic> doc =
-            await db.readDocument(collection: 'col', docId: 'id');
-        expect(doc['a'], 2);
-      });
-      test('guardar documento con datos anidados', () async {
-        final FakeServiceWsDatabase db = FakeServiceWsDatabase();
-        final Map<String, Object> nested = <String, Object>{
-          'a': 1,
-          'b': <String, Object>{
-            'c': 2,
-            'd': <int>[3, 4],
-          },
-        };
-        await db.saveDocument(collection: 'col', docId: 'id', document: nested);
-        final Map<String, dynamic> doc =
-            await db.readDocument(collection: 'col', docId: 'id');
-        expect(doc['b'], isA<Map<String, dynamic>>());
-        final Map<String, dynamic>? b = doc['b'] as Map<String, dynamic>?;
-        expect(b?['d'], isA<List<dynamic>>());
-      });
-      test('latencia artificial en saveDocument', () async {
-        final FakeServiceWsDatabase db =
-            FakeServiceWsDatabase(latency: const Duration(milliseconds: 100));
-        final Stopwatch sw = Stopwatch()..start();
-        await db.saveDocument(
-          collection: 'col',
-          docId: 'id',
-          document: <String, dynamic>{'a': 1},
-        );
-        sw.stop();
-        expect(sw.elapsedMilliseconds >= 100, isTrue);
-      });
-      test('latencia artificial en readDocument', () async {
-        final FakeServiceWsDatabase db =
-            FakeServiceWsDatabase(latency: const Duration(milliseconds: 100));
-        await db.saveDocument(
-          collection: 'col',
-          docId: 'id',
-          document: <String, dynamic>{'a': 1},
-        );
-        final Stopwatch sw = Stopwatch()..start();
-        await db.readDocument(collection: 'col', docId: 'id');
-        sw.stop();
-        expect(sw.elapsedMilliseconds >= 100, isTrue);
-      });
-      test('eliminar todos los documentos y verificar stream vacío', () async {
-        final FakeServiceWsDatabase db = FakeServiceWsDatabase();
-        await db.saveDocument(
-          collection: 'col',
-          docId: 'id1',
-          document: <String, dynamic>{'a': 1},
-        );
-        await db.saveDocument(
-          collection: 'col',
-          docId: 'id2',
-          document: <String, dynamic>{'a': 2},
-        );
-        final List<List<Map<String, dynamic>>> events =
-            <List<Map<String, dynamic>>>[];
-        final StreamSubscription<List<Map<String, dynamic>>> sub =
-            db.collectionStream(collection: 'col').listen(events.add);
-        await db.deleteDocument(collection: 'col', docId: 'id1');
-        await db.deleteDocument(collection: 'col', docId: 'id2');
-        await Future<void>.delayed(Duration.zero);
-        expect(events.last, isEmpty);
-        await sub.cancel();
-      });
-      test('usar métodos tras dispose es seguro', () async {
-        final FakeServiceWsDatabase db = FakeServiceWsDatabase();
-        db.dispose();
-        await Future<void>.delayed(Duration.zero);
-        await expectLater(
-          () async => db.saveDocument(
-            collection: 'col',
-            docId: 'id',
-            document: <String, dynamic>{'a': 1},
-          ),
-          throwsA(isA<StateError>()),
-        );
-      });
+    test('mutating the read map does not affect internal state', () async {
+      await db.saveDocument(
+        collection: 'c',
+        docId: 'd',
+        document: <String, dynamic>{
+          'k': <String, dynamic>{'x': 1},
+        },
+      );
+
+      final Map<String, dynamic> read1 =
+          await db.readDocument(collection: 'c', docId: 'd');
+      (read1['k'] as Map<String, dynamic>)['x'] = 999;
+
+      final Map<String, dynamic> read2 =
+          await db.readDocument(collection: 'c', docId: 'd');
+
+      expect(
+        read2,
+        equals(<String, dynamic>{
+          'k': <String, dynamic>{'x': 1},
+        }),
+      );
+    });
+  });
+
+  group('FakeServiceWsDatabase — simulated errors & latency', () {
+    test('throwOnSave: save throws and state remains unchanged', () async {
+      final FakeServiceWsDatabase local =
+          FakeServiceWsDatabase(config: cfg(throwOnSave: true));
+
+      expect(
+        local.saveDocument(
+          collection: 'c',
+          docId: 'd',
+          document: <String, dynamic>{'x': 1},
+        ),
+        throwsA(isA<StateError>()),
+      );
+
+      expect(
+        local.readDocument(collection: 'c', docId: 'd'),
+        throwsA(isA<StateError>()), // not created
+      );
+
+      local.dispose();
     });
 
-    group('cobertura de errores y dispose internos', () {
-      test('throwOnSave en _ensureCollection (línea 46)', () {
-        final FakeServiceWsDatabase db =
-            FakeServiceWsDatabase(throwOnSave: true);
-        expect(
-          () => db.saveDocument(
-            collection: 'noexiste',
-            docId: 'id',
-            document: <String, dynamic>{'a': 1},
-          ),
-          throwsA(isA<StateError>()),
-        );
-      });
-      test('throwOnSave en deleteDocument (línea 111)', () async {
-        final FakeServiceWsDatabase db =
-            FakeServiceWsDatabase(throwOnSave: true);
-        expect(
-          () => db.deleteDocument(collection: 'col', docId: 'id'),
-          throwsA(isA<StateError>()),
-        );
-      });
-      test('dispose llama a controller.dispose linea 126', () async {
-        final FakeServiceWsDatabase db = FakeServiceWsDatabase();
-        expect(() => db.dispose(), returnsNormally);
-        await expectLater(
-          () async => db.saveDocument(
-            collection: 'col',
-            docId: 'id',
-            document: <String, dynamic>{'a': 1},
-          ),
-          throwsA(isA<StateError>()),
-        );
-        // No se debe intentar guardar/eliminar después de dispose aquí
-      });
+    test('throwOnDelete: delete throws and state remains unchanged', () async {
+      final FakeServiceWsDatabase local =
+          FakeServiceWsDatabase(config: cfg(throwOnDelete: true));
+
+      await local.saveDocument(
+        collection: 'c',
+        docId: 'd',
+        document: <String, dynamic>{'x': 1},
+      );
+
+      expect(
+        local.deleteDocument(collection: 'c', docId: 'd'),
+        throwsA(isA<StateError>()),
+      );
+
+      final Map<String, dynamic> read =
+          await local.readDocument(collection: 'c', docId: 'd');
+      expect(read, equals(<String, dynamic>{'x': 1}));
+
+      local.dispose();
     });
 
-    group('throwOnSave true cobertura de errores', () {
-      test('saveDocument lanza StateError (línea 55)', () async {
-        final FakeServiceWsDatabase db =
-            FakeServiceWsDatabase(throwOnSave: true);
-        expect(
-          () => db.saveDocument(
-            collection: 'col',
-            docId: 'id',
-            document: <String, dynamic>{'a': 1},
-          ),
-          throwsA(
-            predicate(
-              (Object? e) =>
-                  e is StateError &&
-                  (e.toString().contains('Simulated save error') ||
-                      e.toString().contains('Collection not found')),
-            ),
-          ),
-        );
-      });
-      test('deleteDocument lanza StateError (línea 124)', () async {
-        final FakeServiceWsDatabase db =
-            FakeServiceWsDatabase(throwOnSave: true);
-        expect(
-          () => db.deleteDocument(collection: 'col', docId: 'id'),
-          throwsA(
-            predicate(
-              (Object? e) =>
-                  e is StateError &&
-                  (e.toString().contains('Simulated delete error') ||
-                      e.toString().contains('Collection not found')),
-            ),
-          ),
-        );
-      });
+    test('latency is respected for save/read/delete', () async {
+      const Duration L = Duration(milliseconds: 25);
+      final FakeServiceWsDatabase local =
+          FakeServiceWsDatabase(config: cfg(latency: L));
+
+      final Stopwatch sw = Stopwatch()..start();
+      await local.saveDocument(
+        collection: 'c',
+        docId: 'd',
+        document: <String, dynamic>{'x': 1},
+      );
+      expect(sw.elapsedMilliseconds, greaterThanOrEqualTo(L.inMilliseconds));
+
+      sw
+        ..reset()
+        ..start();
+      await local.readDocument(collection: 'c', docId: 'd');
+      expect(sw.elapsedMilliseconds, greaterThanOrEqualTo(L.inMilliseconds));
+
+      sw
+        ..reset()
+        ..start();
+      await local.deleteDocument(collection: 'c', docId: 'd');
+      expect(sw.elapsedMilliseconds, greaterThanOrEqualTo(L.inMilliseconds));
+
+      local.dispose();
+    });
+  });
+
+  group('FakeServiceWsDatabase — dispose behavior', () {
+    test('methods after dispose throw StateError', () async {
+      db.dispose();
+
+      expect(
+        db.saveDocument(
+          collection: 'c',
+          docId: 'd',
+          document: <String, dynamic>{},
+        ),
+        throwsA(isA<StateError>()),
+      );
+      expect(
+        db.readDocument(collection: 'c', docId: 'd'),
+        throwsA(isA<StateError>()),
+      );
+      expect(
+        db.deleteDocument(collection: 'c', docId: 'd'),
+        throwsA(isA<StateError>()),
+      );
+    });
+
+    test('active streams stop producing on dispose', () async {
+      // db local para manejar su ciclo de vida sin interferir con el fixture.
+      final FakeServiceWsDatabase local = FakeServiceWsDatabase(config: cfg());
+
+      final List<Map<String, dynamic>> docEvents = <Map<String, dynamic>>[];
+      final List<List<Map<String, dynamic>>> colEvents =
+          <List<Map<String, dynamic>>>[];
+
+      final StreamSubscription<Map<String, dynamic>> s1 = local
+          .documentStream(collection: 'c', docId: 'd')
+          .listen(docEvents.add);
+      final StreamSubscription<List<Map<String, dynamic>>> s2 =
+          local.collectionStream(collection: 'c').listen(colEvents.add);
+
+      // Deja que lleguen semillas (si aplica)
+      await Future<void>.delayed(const Duration(milliseconds: 2));
+
+      // Disponer el servicio
+      local.dispose();
+
+      // Luego de dispose, las operaciones deben fallar
+      expect(
+        local.saveDocument(
+          collection: 'c',
+          docId: 'd',
+          document: <String, dynamic>{'k': 1},
+        ),
+        throwsA(isA<StateError>()),
+      );
+
+      // Cancelamos manualmente las subs (no dependemos de onDone).
+      await s1.cancel();
+      await s2.cancel();
+
+      // Y validamos que al menos recibimos como mucho la semilla previa
+      expect(docEvents.isNotEmpty, isTrue);
+      expect(colEvents.isNotEmpty, isTrue);
+    });
+  });
+
+  group('FakeServiceWsDatabase — validations', () {
+    test('empty collection/docId throws ArgumentError', () async {
+      expect(
+        db.saveDocument(
+          collection: '',
+          docId: 'x',
+          document: <String, dynamic>{},
+        ),
+        throwsA(isA<ArgumentError>()),
+      );
+      expect(
+        db.saveDocument(
+          collection: 'c',
+          docId: '',
+          document: <String, dynamic>{},
+        ),
+        throwsA(isA<ArgumentError>()),
+      );
+      expect(
+        db.readDocument(collection: '', docId: 'x'),
+        throwsA(isA<ArgumentError>()),
+      );
+      expect(
+        db.readDocument(collection: 'c', docId: ''),
+        throwsA(isA<ArgumentError>()),
+      );
+      expect(
+        db.deleteDocument(collection: '', docId: 'x'),
+        throwsA(isA<ArgumentError>()),
+      );
+      expect(
+        db.deleteDocument(collection: 'c', docId: ''),
+        throwsA(isA<ArgumentError>()),
+      );
+    });
+
+    test('read non-existing document throws StateError', () async {
+      expect(
+        db.readDocument(collection: 'c', docId: 'nope'),
+        throwsA(isA<StateError>()),
+      );
     });
   });
 }

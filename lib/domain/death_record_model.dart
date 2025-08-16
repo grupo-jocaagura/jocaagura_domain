@@ -50,8 +50,7 @@ const DeathRecordModel defaultDeathRecord = DeathRecordModel(
 ///   print('Record ID: ${deathRecord.recordId}');
 /// }
 /// ```
-@immutable
-class DeathRecordModel implements Model {
+class DeathRecordModel extends Model {
   const DeathRecordModel({
     required this.notaria,
     required this.person,

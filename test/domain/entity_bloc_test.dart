@@ -13,7 +13,7 @@ void main() {
     late Bloc<int> bloc;
     late StreamController<int> controller;
     setUp(() {
-      bloc = MockBloc<int>(0);
+      bloc = MockBloc(0);
       controller = StreamController<int>();
     });
 
@@ -285,7 +285,7 @@ void main() {
   });
 }
 
-class MockBloc<int> extends Bloc<int> {
+class MockBloc extends Bloc<int> {
   MockBloc(super.initialValue);
 }
 

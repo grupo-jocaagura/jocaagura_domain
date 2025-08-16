@@ -2,44 +2,67 @@ import 'package:flutter/material.dart';
 import 'package:jocaagura_domain/jocaagura_domain.dart';
 
 import 'session_demo_page.dart';
+import 'ws_database_user_demo_page.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return const Scaffold(
       body: Column(
         children: <Widget>[
-          const Text('Examples availables'),
-          const SizedBox(
+          Text('Examples availables'),
+          SizedBox(
             height: 16,
           ),
-          const _ListTile(
+          _ListTile(
             label: 'UserModel',
             model: defaultUserModel,
           ),
-          const _ListTile(
+          _ListTile(
             label: 'AddressModel',
             model: defaultAddressModel,
           ),
-          const _ListTile(
+          _ListTile(
             label: 'StoreModel',
             model: defaultStoreModel,
           ),
-          ListTile(
-            title: const Text('Bloc Session demo'),
-            leading: const Icon(Icons.arrow_forward_ios),
-            onTap: () {
-              Navigator.of(context).push(
-                MaterialPageRoute<void>(
-                  builder: (_) => const SessionDemoPage(),
-                ),
-              );
-            },
+          _NavigatorListTile(
+            label: 'BlocSession demo',
+            page: SessionDemoPage(),
+          ),
+          _NavigatorListTile(
+            label: 'BlocWsDatabase demo',
+            page: WsDatabaseUserDemoPage(),
           ),
         ],
       ),
+    );
+  }
+}
+
+class _NavigatorListTile extends StatelessWidget {
+  const _NavigatorListTile({
+    required this.label,
+    required this.page,
+  });
+
+  final String label;
+  final Widget page;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      title: Text(label),
+      leading: const Icon(Icons.arrow_forward_ios),
+      onTap: () {
+        Navigator.of(context).push(
+          MaterialPageRoute<void>(
+            builder: (_) => page,
+          ),
+        );
+      },
     );
   }
 }
