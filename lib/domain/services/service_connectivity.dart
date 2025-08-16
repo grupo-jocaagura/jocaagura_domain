@@ -1,17 +1,41 @@
 part of '../../jocaagura_domain.dart';
 
-/// Abstract service for network connectivity status.
+/// Provides low-level access to connectivity information.
 ///
-/// - [isConnected] devuelve el estado actual (online/offline).
-/// - [connectivityStream] emite cambios de estado en tiempo real.
-/// - [dispose] libera recursos internos.
+/// This service abstracts platform/network details and exposes:
+/// - Current connection type
+/// - Measured internet speed (Mbps)
+/// - A stream of [ConnectivityModel] updates
+///
+/// It is intentionally **imperative** and low-level. Higher layers
+/// (Gateway/Repository/UseCases) add mapping, error handling and
+/// domain-friendly APIs.
+///
+/// ### Example
+/// ```dart
+/// final ServiceConnectivity service = FakeServiceConnectivity();
+/// final ConnectionTypeEnum type = await service.checkConnectivity();
+/// final double speed = await service.checkInternetSpeed();
+/// final StreamSubscription sub = service.connectivityStream().listen(print);
+/// // ... later
+/// await sub.cancel();
+/// service.dispose();
+/// ```
 abstract class ServiceConnectivity {
-  /// Retorna `true` si hay conexión de red.
-  Future<bool> isConnected();
+  /// Returns the current [ConnectionTypeEnum].
+  Future<ConnectionTypeEnum> checkConnectivity();
 
-  /// Stream que emite `true`/`false` al cambiar el estado de conexión.
-  Stream<bool> connectivityStream();
+  /// Measures current internet speed (in Mbps). Implementations may use
+  /// heuristics, synthetic downloads or cached values.
+  Future<double> checkInternetSpeed();
 
-  /// Libera recursos internos.
+  /// Emits a fresh [ConnectivityModel] whenever type or speed meaningfully
+  /// changes.
+  Stream<ConnectivityModel> connectivityStream();
+
+  /// Returns the most recent snapshot known by the service.
+  ConnectivityModel get current;
+
+  /// Frees internal resources.
   void dispose();
 }
