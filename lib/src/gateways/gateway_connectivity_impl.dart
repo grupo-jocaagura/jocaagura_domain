@@ -1,6 +1,23 @@
 import '../../jocaagura_domain.dart';
 
-/// Default implementation of [GatewayConnectivity].
+/// Concrete gateway that converts [ServiceConnectivity] into **raw payloads**
+/// (JSON-like `Map<String, dynamic>`), deferring domain mapping to the
+/// repository layer.
+///
+/// ### Error contract
+/// - Any exception thrown by the underlying service is mapped to an [ErrorItem]
+///   using the provided [ErrorMapper].
+/// - The gateway **never throws**; it always returns `Either<ErrorItem, Map>`.
+///
+/// ### Example
+/// ```dart
+/// final gateway = GatewayConnectivityImpl(service, DefaultErrorMapper());
+/// final either = await gateway.snapshot();
+/// either.fold(
+///   (err) => print('Gateway error: ${err.code} -> ${err.description}'),
+///   (map) => print('Payload: $map'),
+/// );
+/// ```
 class GatewayConnectivityImpl extends GatewayConnectivity {
   GatewayConnectivityImpl(this._service, this._errorMapper);
 

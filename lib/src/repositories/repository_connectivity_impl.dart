@@ -1,5 +1,24 @@
 import '../../jocaagura_domain.dart';
 
+/// Default repository that **maps raw payloads to domain** ([ConnectivityModel])
+/// and enforces error semantics using an [ErrorMapper].
+///
+/// ### Error contract
+/// - `fromPayload(...)` detects business errors *encoded in payloads* and
+///   returns `Left(ErrorItem)`.
+/// - If mapping fails (`fromJson` throws), the repository converts it into
+///   `Left(ErrorItem)` via `fromException(...)`.
+/// - Repository **never throws**; it always returns `Either<ErrorItem, ConnectivityModel>`.
+///
+/// ### Example
+/// ```dart
+/// final repo = RepositoryConnectivityImpl(gateway, errorMapper: DefaultErrorMapper());
+/// final res = await repo.snapshot();
+/// res.fold(
+///   (err) => print('Repo error: ${err.code}'),
+///   (model) => print('Speed: ${model.internetSpeed}'),
+/// );
+/// ```
 class RepositoryConnectivityImpl extends RepositoryConnectivity {
   RepositoryConnectivityImpl(
     GatewayConnectivity gateway, {

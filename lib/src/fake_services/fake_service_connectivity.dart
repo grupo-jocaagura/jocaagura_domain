@@ -56,6 +56,42 @@ import '../../jocaagura_domain.dart';
 /// await sub.cancel();
 /// svc.dispose();
 /// ```
+/// Fake in-memory [ServiceConnectivity] for development and tests.
+///
+/// Features:
+/// - Manually simulate connection type and speed.
+/// - Optional latency and error injection on checks.
+/// - Continuous stream of [ConnectivityModel] via an internal [BlocGeneral].
+/// - Optional speed jitter (periodic randomization) to test UI reactivity.
+///
+/// No external packages are used.
+///
+/// ### Example
+/// ```dart
+/// final FakeServiceConnectivity svc = FakeServiceConnectivity(
+///   latencyConnectivity: const Duration(milliseconds: 120),
+///   latencySpeed: const Duration(milliseconds: 220),
+/// );
+/// await svc.checkConnectivity(); // uses current simulated type
+/// await svc.checkInternetSpeed();
+/// svc.simulateConnection(ConnectionTypeEnum.wifi);
+/// svc.simulateSpeed(85.3);
+/// final StreamSubscription sub = svc.connectivityStream().listen((m) {
+///   debugPrint('Connectivity => ${m.connectionType} @ ${m.internetSpeed} Mbps');
+/// });
+/// // ...
+/// await sub.cancel();
+/// svc.dispose();
+/// ```
+/// Fake in-memory [ServiceConnectivity] for development and tests.
+///
+/// In addition to simulating connectivity and speed values, this fake can
+/// also **emit errors** in two ways so the UI can exercise its error handling:
+/// 1) Throw on `checkConnectivity()` / `checkInternetSpeed()` (one-shot or persistent).
+/// 2) Inject an **error event in the stream** returned by [connectivityStream].
+///
+/// Use `simulateErrorOnCheckConnectivityOnce()`, `simulateErrorOnCheckSpeedOnce()`
+/// or `simulateStreamErrorOnce()` to trigger errors deterministically.
 class FakeServiceConnectivity implements ServiceConnectivity {
   FakeServiceConnectivity({
     this.latencyConnectivity = Duration.zero,
@@ -73,16 +109,24 @@ class FakeServiceConnectivity implements ServiceConnectivity {
   /// Artificial latency for [checkInternetSpeed].
   final Duration latencySpeed;
 
-  /// If `true`, [checkConnectivity] throws a [StateError].
+  /// If `true`, [checkConnectivity] throws a [StateError] on **every call**.
   final bool throwOnCheckConnectivity;
 
-  /// If `true`, [checkInternetSpeed] throws a [StateError].
+  /// If `true`, [checkInternetSpeed] throws a [StateError] on **every call**.
   final bool throwOnCheckSpeed;
 
   final BlocGeneral<ConnectivityModel> _bloc;
   ConnectivityModel _snapshot = defaultConnectivityModel;
   bool _disposed = false;
-  Timer? _jitterTimer;
+
+  // Error injection flags (one-shot)
+  bool _throwOnceConnectivity = false;
+  bool _throwOnceSpeed = false;
+  bool _errorOnNextStreamEvent = false;
+
+  // Proxy stream controller to allow addError without depending on BlocGeneral internals.
+  StreamController<ConnectivityModel>? _proxy;
+  StreamSubscription<ConnectivityModel>? _bridgeSub;
 
   void _ensureAlive() {
     if (_disposed) {
@@ -96,13 +140,29 @@ class FakeServiceConnectivity implements ServiceConnectivity {
   @override
   Stream<ConnectivityModel> connectivityStream() {
     _ensureAlive();
-    return _bloc.stream;
+    _proxy ??= StreamController<ConnectivityModel>.broadcast();
+    // Bridge underlying bloc stream → proxy, injecting error if requested.
+    _bridgeSub ??= _bloc.stream.listen(
+      (ConnectivityModel m) {
+        if (_errorOnNextStreamEvent) {
+          _errorOnNextStreamEvent = false;
+          _proxy!.addError(StateError('Simulated connectivity stream error'));
+        } else {
+          _proxy!.add(m);
+        }
+      },
+      onError: (Object e, StackTrace s) {
+        _proxy!.addError(e, s);
+      },
+    );
+    return _proxy!.stream;
   }
 
   @override
   Future<ConnectionTypeEnum> checkConnectivity() async {
     _ensureAlive();
-    if (throwOnCheckConnectivity) {
+    if (throwOnCheckConnectivity || _throwOnceConnectivity) {
+      _throwOnceConnectivity = false;
       throw StateError('Simulated connectivity check failure');
     }
     await Future<void>.delayed(latencyConnectivity);
@@ -112,7 +172,8 @@ class FakeServiceConnectivity implements ServiceConnectivity {
   @override
   Future<double> checkInternetSpeed() async {
     _ensureAlive();
-    if (throwOnCheckSpeed) {
+    if (throwOnCheckSpeed || _throwOnceSpeed) {
+      _throwOnceSpeed = false;
       throw StateError('Simulated speed check failure');
     }
     await Future<void>.delayed(latencySpeed);
@@ -132,6 +193,24 @@ class FakeServiceConnectivity implements ServiceConnectivity {
     final double v = mbps < 0 ? 0 : mbps;
     _snapshot = _snapshot.copyWith(internetSpeed: v);
     _bloc.value = _snapshot;
+  }
+
+  /// Triggers a one-shot error on the **next** [checkConnectivity] call.
+  void simulateErrorOnCheckConnectivityOnce() {
+    _ensureAlive();
+    _throwOnceConnectivity = true;
+  }
+
+  /// Triggers a one-shot error on the **next** [checkInternetSpeed] call.
+  void simulateErrorOnCheckSpeedOnce() {
+    _ensureAlive();
+    _throwOnceSpeed = true;
+  }
+
+  /// Triggers an error event on the **next** stream emission.
+  void simulateStreamErrorOnce() {
+    _ensureAlive();
+    _errorOnNextStreamEvent = true;
   }
 
   /// Convenience to set offline.
@@ -163,6 +242,8 @@ class FakeServiceConnectivity implements ServiceConnectivity {
     });
   }
 
+  Timer? _jitterTimer;
+
   /// Stops the speed jitter if running.
   void stopSpeedJitter() {
     _jitterTimer?.cancel();
@@ -173,6 +254,10 @@ class FakeServiceConnectivity implements ServiceConnectivity {
   void dispose() {
     _jitterTimer?.cancel();
     _jitterTimer = null;
+    _bridgeSub?.cancel();
+    _bridgeSub = null;
+    _proxy?.close();
+    _proxy = null;
     _disposed = true;
     _bloc.dispose();
   }
