@@ -59,6 +59,8 @@ Para utilizar el paquete, se requiere la instalación del SDK de Flutter. No hay
 - [Unit](#Unit)
 - [PerKeyFifoExecutor](#PerKeyFifoExecutor)
 - [Connectivity](#Connectivity)
+- [BlocOnboarding](#BlocOnboarding)
+- [BlocResponsive](#BlocResponsive)
 
 Cada sección proporciona detalles sobre la implementación y el uso de las clases, ofreciendo ejemplos de código y explicaciones de cómo se integran dentro de tu arquitectura de dominio.
 
@@ -2023,3 +2025,289 @@ flutter test
   [https://github.com/grupo-jocaagura/jocaagura\_domain/raw/refs/heads/develop/analysis\_options.yaml](https://github.com/grupo-jocaagura/jocaagura_domain/raw/refs/heads/develop/analysis_options.yaml)
 
 ---
+
+# BlocOnboarding
+## Propósito y flujo
+
+`BlocOnboarding` orquesta un **flujo de onboarding por pasos** (tour inicial, permisos, configuración mínima). Cada paso puede ejecutar un **side-effect al entrar** (`onEnter`) que retorna `FutureOr<Either<ErrorItem, Unit>>`.
+
+* Si `onEnter` retorna `Right(Unit)`, el paso es válido y puede **auto-avanzar** usando `autoAdvanceAfter`.
+* Si `onEnter` retorna `Left(ErrorItem)` **o lanza una excepción**, el BLoC **no avanza** y expone el error en `state.error`. Las excepciones se mapean a `ErrorItem` usando `ErrorMapper` (por defecto `DefaultErrorMapper`).
+
+**Flujo propuesto (Clean Architecture):**
+
+```
+UI → AppManager → BlocOnboarding
+```
+
+> Onboarding es **orquestación de UI**; típicamente no requiere Repository/Gateway/Service. Si necesitas I/O (p.ej. guardar bandera “onboardingDone”), hazlo dentro de `onEnter` del paso o en un UseCase invocado desde allí.
+
+---
+
+### Escenarios principales a implementar
+
+* **Tour inicial de la app** (3–5 pantallas con mensajes).
+* **Solicitud de permisos** (ubicación, notificaciones) con validación por paso.
+* **Configuración mínima** (selección de idioma/tema, aceptación de T\&C).
+* **Chequeos previos** (descarga de configuración remota, migraciones locales).
+
+---
+
+### Semántica de errores
+
+* `onEnter` → `Either<ErrorItem, Unit>`
+
+    * `Right(Unit)`: paso OK → si `autoAdvanceAfter` > 0, **programa avance**.
+    * `Left(ErrorItem)`: **permanece** en el paso y setea `state.error`.
+    * **Throw**: se mapea con `ErrorMapper` → `state.error`.
+* La UI puede llamar `clearError()` y luego `retryOnEnter()` para reintentar el paso actual.
+
+---
+
+### Concurrencia y temporizadores
+
+* **Solo un timer activo** a la vez (para `autoAdvanceAfter`).
+* Cualquier comando (`start/next/back/skip/complete/retryOnEnter`) **cancela** el timer en curso.
+* Protección contra **completions obsoletos**: el BLoC usa un “epoch” interno para **ignorar** resultados tardíos de `onEnter` si el usuario ya navegó a otro paso.
+
+---
+
+## API en breve
+
+* `configure(List<OnboardingStep>)` — define los pasos.
+* `start()` — entra a `stepIndex=0` (o `completed` si no hay pasos).
+* `next() / back()` — navegación manual.
+* `skip()` / `complete()` — termina el flujo (saltado o completado).
+* `clearError()` — borra `state.error` sin cambiar paso.
+* `retryOnEnter()` — re-ejecuta el `onEnter` del paso actual.
+* `stateStream` / `state` — acceso reactivo y snapshot del estado.
+
+`OnboardingStep`:
+
+* `title`, `description` (opcionales).
+* `autoAdvanceAfter?: Duration` — auto-avance tras éxito de `onEnter`.
+* `onEnter?: FutureOr<Either<ErrorItem, Unit>> Function()` — side-effect al entrar.
+
+---
+
+## Ejemplo rápido
+
+```dart
+import 'package:jocaagura_domain/jocaagura_domain.dart';
+import 'package:flutter/material.dart';
+
+class OnboardingExample extends StatefulWidget {
+  const OnboardingExample({super.key});
+
+  @override
+  State<OnboardingExample> createState() => _OnboardingExampleState();
+}
+
+class _OnboardingExampleState extends State<OnboardingExample> {
+  late final BlocOnboarding bloc;
+
+  @override
+  void initState() {
+    super.initState();
+    bloc = BlocOnboarding(); // o inyéctalo vía AppManager
+
+    Either<ErrorItem, Unit> ok() => Right<ErrorItem, Unit>(Unit.value);
+    Either<ErrorItem, Unit> err(String msg) => Left<ErrorItem, Unit>(
+      ErrorItem(message: msg, code: 'ONB-STEP', severity: ErrorSeverity.blocking),
+    );
+
+    FutureOr<Either<ErrorItem, Unit>> requestNotifications() async {
+      // Simula pedir permisos…
+      final bool granted = true; // reemplaza con lógica real
+      await Future<void>.delayed(const Duration(milliseconds: 200));
+      return granted ? ok() : err('Notifications are required');
+    }
+
+    FutureOr<Either<ErrorItem, Unit>> seedRemoteConfig() async {
+      // Simula I/O (descarga de configuración)
+      await Future<void>.delayed(const Duration(milliseconds: 250));
+      return ok();
+    }
+
+    bloc.configure(<OnboardingStep>[
+      OnboardingStep(
+        title: 'Welcome',
+        description: 'Quick tour',
+        onEnter: () => ok(),
+        autoAdvanceAfter: const Duration(milliseconds: 700),
+      ),
+      OnboardingStep(
+        title: 'Notifications',
+        description: 'We will ask permission to keep you informed',
+        onEnter: requestNotifications, // puede devolver Left(ErrorItem)
+        autoAdvanceAfter: const Duration(milliseconds: 600),
+      ),
+      OnboardingStep(
+        title: 'Setup',
+        description: 'Loading remote config',
+        onEnter: seedRemoteConfig,
+        // sin autoAdvance: el usuario verá "Next"
+      ),
+    ]);
+
+    // Arranca el flujo
+    WidgetsBinding.instance.addPostFrameCallback((_) => bloc.start());
+  }
+
+  @override
+  void dispose() {
+    bloc.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<OnboardingState>(
+      stream: bloc.stateStream,
+      initialData: bloc.state,
+      builder: (BuildContext context, AsyncSnapshot<OnboardingState> snap) {
+        final OnboardingState s = snap.data ?? OnboardingState.idle();
+
+        // Muestra error bloqueante (si lo hay)
+        final Widget errorBanner = (s.error != null)
+            ? MaterialBanner(
+                content: Text(s.error!.message),
+                actions: <Widget>[
+                  TextButton(
+                    onPressed: () {
+                      bloc.clearError();
+                      bloc.retryOnEnter(); // reintenta el paso
+                    },
+                    child: const Text('Retry'),
+                  ),
+                ],
+              )
+            : const SizedBox.shrink();
+
+        return Scaffold(
+          appBar: AppBar(title: const Text('Onboarding')),
+          body: Column(
+            children: <Widget>[
+              errorBanner,
+              Expanded(
+                child: Center(
+                  child: Text(
+                    'Step ${s.stepIndex + 1} / ${s.totalSteps}\n'
+                    'Status: ${s.status}',
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(12),
+                child: Row(
+                  children: <Widget>[
+                    Expanded(child: OutlinedButton(onPressed: bloc.back, child: const Text('Back'))),
+                    const SizedBox(width: 8),
+                    Expanded(child: OutlinedButton(onPressed: bloc.next, child: const Text('Next'))),
+                    const SizedBox(width: 8),
+                    Expanded(child: OutlinedButton(onPressed: bloc.skip, child: const Text('Skip'))),
+                    const SizedBox(width: 8),
+                    Expanded(child: FilledButton(onPressed: bloc.complete, child: const Text('Complete'))),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+```
+
+**Notas del ejemplo**
+
+* El segundo paso simula pedir permisos y puede fallar → la UI muestra el `MaterialBanner` con “Retry”.
+* `autoAdvanceAfter` solo se agenda cuando `onEnter` finaliza con `Right(Unit)`.
+* Los botones manuales siempre **cancelan timers** activos antes de navegar.
+
+---
+
+### Buenas prácticas
+
+* Mantén `onEnter` **rápido**; si requiere I/O, muestra feedback de carga en la UI (por ejemplo, con tu `BlocLoading`) mientras esperas el `Either`.
+* Usa `ErrorMapper` custom si deseas enriquecer `location`, `code` o `severity`.
+* Prueba el flujo con **pasos que fallan** y valida `retryOnEnter()` en la UI.
+
+---
+
+### Pruebas (incluidas en el paquete)
+
+* **Core**: estados iniciales, `configure/start/next/back/skip/complete`.
+* **Timers**: auto-avance condicionado por éxito, cancelación y reprogramación en navegación.
+* **onEnter (async & errors)**: lanzamientos mapeados a `ErrorItem`, `clearError + retryOnEnter`, y protección contra completions obsoletos (epoch guard).
+
+---
+# BlocResponsive
+
+## BlocResponsive — validación visual de breakpoints (microsección)
+
+**Objetivo.** Verificar y documentar cómo la app adapta layout (márgenes, gutters, columnas, área de trabajo y tipo de dispositivo) según el ancho del viewport, usando `BlocResponsive` y su demo.
+
+### Cómo usar la Demo
+
+1. Registra y abre `BlocResponsiveDemoPage` (incluida en `example/`).
+2. Usa los **switches**:
+
+    * **Show grid overlay**: muestra/oculta columnas y gutters.
+    * **Simulate size (sliders)**: mueve `Width/Height` para probar distintos anchos sin cambiar de dispositivo.
+    * **Show AppBar** (en la AppBar): alterna la política y observa `screenHeightWithoutAppbar`.
+3. Observa en **Metrics**:
+
+    * `Device` cambia entre **MOBILE / TABLET / DESKTOP / TV** según los umbrales de `ScreenSizeConfig`.
+    * `Columns`, `Margin`, `Gutter`, `Column width`, `Work area` y `Drawer` se actualizan en vivo.
+    * En **DESKTOP/TV** el `Work area` aplica el porcentaje configurado (no ocupa el 100% del viewport).
+
+### Checklist de QA (aceptación)
+
+* [ ] Al cruzar los breakpoints de `ScreenSizeConfig` cambia `Device` y `Columns` correctamente.
+* [ ] `marginWidth` y `gutterWidth` se recalculan al variar el ancho; la grilla se mantiene alineada.
+* [ ] `columnWidth` = `(workArea − márgenes − gutters) / columns` (sin valores negativos).
+* [ ] En **DESKTOP/TV**, `workArea.width` respeta el **porcentaje** configurado; en **MOBILE/TABLET** usa el ancho total.
+* [ ] `widthByColumns(n)` incluye gutters entre columnas y nunca supera `workArea.width`.
+* [ ] Con “Show AppBar” desactivado, `screenHeightWithoutAppbar` = `size.height`.
+* [ ] No hay “parpadeos”: al mover sliders, métricas y grilla cambian de forma estable.
+
+### Integración recomendada (app real)
+
+```dart
+class MyLayout extends StatelessWidget {
+  const MyLayout({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final BlocResponsive responsive = AppManager.of(context).config.blocResponsive;
+
+    // Mantén sincronizado el tamaño del viewport con el bloc.
+    responsive.setSizeFromContext(context);
+
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: responsive.marginWidth),
+      child: SizedBox(
+        width: responsive.widthByColumns(4).clamp(0, responsive.workAreaSize.width),
+        child: Text('Device: ${responsive.deviceType} • Cols: ${responsive.columnsNumber}'),
+      ),
+    );
+  }
+}
+```
+
+### Pruebas sin Flutter (headless)
+
+```dart
+final bloc = BlocResponsive();
+bloc.setSizeForTesting(const Size(1280, 800));
+expect(bloc.isDesktop, isTrue);
+expect(bloc.columnsNumber, bloc.sizeConfig.desktopColumnsNumber);
+expect(bloc.widthByColumns(3) <= bloc.workAreaSize.width, isTrue);
+bloc.dispose();
+```
+
+> 🧭 Arquitectura: **UI → AppManager → BlocResponsive** (infra de presentación, sin I/O).
+> 🔧 Configuración: todos los umbrales y porcentajes provienen de `ScreenSizeConfig` (config-driven, sin “magic numbers”).

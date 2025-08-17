@@ -219,6 +219,8 @@ class BlocResponsive extends BlocModule {
       _blocSizeGeneral.value = sizeTmp;
     }
     workAreaSize = sizeTmp;
+    _setDrawerWidth();
+    _setColumnWidth();
   }
 
   /// Headless/testing helper that proxies to [setSize].
@@ -234,6 +236,7 @@ class BlocResponsive extends BlocModule {
         sizeOfWorkArea.width * sizeConfig.percentilOfWorkAreaSize,
         sizeOfWorkArea.height,
       );
+      _setColumnWidth();
       return;
     }
     if (isTv) {
@@ -241,6 +244,7 @@ class BlocResponsive extends BlocModule {
         sizeOfWorkArea.width * sizeConfig.percentilOfBigWorkAreaSize,
         sizeOfWorkArea.height,
       );
+      _setColumnWidth();
       return;
     }
     _workAreaSize = sizeOfWorkArea;

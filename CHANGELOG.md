@@ -3,6 +3,14 @@
 This document follows the guidelines of [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.24.2] - 2025-08-17
+
+### Added
+- Actualización menor en `BlocLoading` para soportar FiFo en la cola de tareas.
+- Se agrega demo para `BlocLoading` en `bloc_loading_demo_page.dart`.
+- Se agrega `BlocOnboarding` para gestionar estados de onboarding en aplicaciones.
+- Se agrega `BlocResponsive` para manejar estados de UI responsiva en aplicaciones con diferentes resoluciones y pantallas.
+
 ## [1.24.1] - 2025-08-17
 
 ### Fixed
