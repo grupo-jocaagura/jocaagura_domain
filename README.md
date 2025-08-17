@@ -1913,7 +1913,6 @@ final snapshot  = GetConnectivitySnapshotUseCase(repo);
 final checkType = CheckConnectivityTypeUseCase(repo);
 final checkSpeed= CheckInternetSpeedUseCase(repo);
 ```
-
 ### 5) Bloc (reactivo y **puro**)
 
 El BLoC **no conoce la UI**. Emite `Either<ErrorItem, ConnectivityModel>`.
@@ -2024,4 +2023,3 @@ flutter test
   [https://github.com/grupo-jocaagura/jocaagura\_domain/raw/refs/heads/develop/analysis\_options.yaml](https://github.com/grupo-jocaagura/jocaagura_domain/raw/refs/heads/develop/analysis_options.yaml)
 
 ---
-

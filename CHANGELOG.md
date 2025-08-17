@@ -13,8 +13,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.24.0] - 2025-08-15
 
-> Release centrado en **persistencia WebSocket**, capa de **Repositorio genérico**, **BLoC** reactivo por documento y utilidades transversales para concurrencia/semántica de `void`.
-
 #### ✅ Added
 - **Stack WS Database (end-to-end)**
   - `GatewayWsDatabaseImpl` (ref-count por `docId`, multiplexing con `BlocGeneral`, `detachWatch`/`releaseDoc`/`dispose`).
