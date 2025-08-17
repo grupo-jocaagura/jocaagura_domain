@@ -3,6 +3,37 @@
 This document follows the guidelines of [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.25.0] - 2025-08-17
+
+### Fixed
+- `BlocLoading`: evita `StateError` al invocar `hide()` tras `dispose()` y corrige emisiones duplicadas en operaciones rápidas encadenadas.
+- `BlocResponsive`: corrige la clasificación inicial de `ScreenSize` en el primer frame y en cambios de tamaño (web/desktop), garantizando una emisión consistente.
+- `BlocOnboarding`: maneja correctamente listas vacías de pasos (`[]`) y asegura que `onComplete` se dispare **una sola vez**. Cierre seguro de streams en `dispose()`.
+- Demos: rutas e imports ajustados para compilar en `stable` sin advertencias; correcciones menores de tipografía y estilos.
+
+### Changed
+- Mejora no funcional del rendimiento en `BlocLoading` al consolidar colas internas para mostrar/ocultar estados de carga (sin cambios de API).
+- Ajustes menores a los breakpoints documentados de `BlocResponsive` para reflejar con mayor claridad los límites recomendados (sin cambios de API).
+
+### Docs
+- DartDoc en **inglés** para `BlocLoading`, `BlocResponsive` y `BlocOnboarding`, incluyendo ejemplos de uso en Markdown y descripción de parámetros/enums.
+- Comentarios explicativos añadidos en cada **demo page** para guiar la implementación paso a paso.
+- Sección breve en el README principal enlazando a las demos y a la guía de adopción rápida de cada BLoC.
+
+### Tests
+- Grupos de pruebas con `flutter_test` por BLoC; casos agregados para:
+  - Inicialización y `dispose()`.
+  - Cambios de tamaño en `BlocResponsive`.
+  - Flujos felices y escenarios borde en `BlocOnboarding`.
+  - Condiciones de carrera en `BlocLoading`.
+
+### CI
+- Endurecimiento de validaciones de PR (análisis, formato y cobertura) y verificación de actualización del `CHANGELOG.md`.
+- Mantención: workflows revisados para compatibilidad con `stable` actual.
+
+> **Notas:** No hay cambios incompatibles. No se requiere migración.
+
+
 ## [1.24.2] - 2025-08-17
 
 ### Added
