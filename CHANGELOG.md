@@ -3,6 +3,14 @@
 This document follows the guidelines of [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.24.1] - 2025-08-17
+
+### Fixed
+- Corrección de advertencias menores en la implementación de conectividad y manejo de streams.
+- Ajustes en la documentación de los nuevos módulos y ejemplos agregados.
+- Mejoras menores en la robustez de los tests unitarios para los servicios de conectividad y WebSocket.
+- Actualización de dependencias para mantener la compatibilidad con las últimas versiones de Flutter y Dart.
+
 ## [1.24.0] - 2025-08-15
 
 > Release centrado en **persistencia WebSocket**, capa de **Repositorio genérico**, **BLoC** reactivo por documento y utilidades transversales para concurrencia/semántica de `void`.
