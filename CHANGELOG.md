@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Actualización menor en `BlocLoading` para soportar FiFo en la cola de tareas.
 - Se agrega demo para `BlocLoading` en `bloc_loading_demo_page.dart`.
+- Se agrega `BlocOnboarding` para gestionar estados de onboarding en aplicaciones.
 
 ## [1.24.1] - 2025-08-17
 

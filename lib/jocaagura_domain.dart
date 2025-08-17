@@ -85,6 +85,8 @@ part 'domain/services/service_notifications.dart';
 part 'domain/services/service_preferences.dart';
 part 'domain/services/service_session.dart';
 part 'domain/services/service_ws_database.dart';
+part 'domain/states/onboarding_state.dart';
+part 'domain/states/onboarding_step.dart';
 part 'domain/states/session_state.dart';
 part 'domain/states/ws_db_state.dart';
 part 'domain/store_model.dart';

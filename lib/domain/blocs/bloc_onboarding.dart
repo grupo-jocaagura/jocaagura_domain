@@ -1,171 +1,233 @@
 part of '../../jocaagura_domain.dart';
 
-/// A BLoC (Business Logic Component) for managing onboarding processes.
+/// BLoC to orchestrate an onboarding flow (sequence of steps).
 ///
-/// The `BlocOnboarding` class handles a sequence of asynchronous initialization
-/// functions during the onboarding phase of an application. It provides
-/// progress updates through a stream and allows dynamically adding new
-/// functions to the onboarding process.
+/// - Each step may run an async side-effect on enter returning
+///   `FutureOr<Either<ErrorItem, Unit>>`.
+/// - If `onEnter` returns `Left(ErrorItem)`, the flow stays on the step and
+///   exposes `state.error`.
+/// - If `onEnter` throws, the exception is mapped to `ErrorItem` using the
+///   injected [ErrorMapper] (defaults to [DefaultErrorMapper]).
 ///
-/// ## Example
-///
-/// ```dart
-/// import 'package:jocaaguraarchetype/bloc_onboarding.dart';
-/// import 'dart:async';
-///
-/// void main() async {
-///   final blocOnboarding = BlocOnboarding([
-///     () async {
-///       print('Task 1 started');
-///       await Future.delayed(Duration(seconds: 1));
-///       print('Task 1 completed');
-///     },
-///     () async {
-///       print('Task 2 started');
-///       await Future.delayed(Duration(seconds: 1));
-///       print('Task 2 completed');
-///     },
-///   ]);
-///
-///   // Listen to progress messages
-///   blocOnboarding.msgStream.listen((message) {
-///     print('Onboarding Message: $message');
-///   });
-///
-///   // Start the onboarding process
-///   await blocOnboarding.execute(Duration(seconds: 2));
-/// }
-/// ```
+/// Auto-advance is scheduled **only** when `onEnter` succeeds (Right).
 class BlocOnboarding extends BlocModule {
-  /// Creates an instance of `BlocOnboarding` with the provided list of onboarding functions.
+  /// Create a BlocOnboarding with an optional [ErrorMapper].
   ///
-  /// The [delayInSeconds] parameter specifies an initial delay before the
-  /// onboarding execution starts.
-  BlocOnboarding(
-    List<FutureOr<void> Function()> initialList, {
-    this.delayInSeconds = 1,
-    this.onError,
-    this.startingMsg = initialMsg,
-    this.workingMsg = completingMsg,
-    this.finishedMsg = completedMsg,
-  })  : assert(delayInSeconds >= 0, 'Delay must be non-negative'),
-        _progress = BlocGeneral<double>(0.0) {
-    _blocOnboardingList.addAll(initialList);
+  /// If none is provided, a [DefaultErrorMapper] instance is used.
+  BlocOnboarding({ErrorMapper? errorMapper})
+      : _errorMapper = errorMapper ?? DefaultErrorMapper();
+  final BlocGeneral<OnboardingState> _state =
+      BlocGeneral<OnboardingState>(OnboardingState.idle());
+
+  static const String name = 'blocOnboarding';
+
+  /// Error mapper for unexpected thrown exceptions in `onEnter`.
+  final ErrorMapper _errorMapper;
+
+  List<OnboardingStep> _steps = <OnboardingStep>[];
+  Timer? _timer;
+  bool _disposed = false;
+
+  // Guards to ignore stale async completions when the step changes.
+  int _epoch = 0;
+
+  /// Reactive state access.
+  Stream<OnboardingState> get stateStream => _state.stream;
+  OnboardingState get state => _state.value;
+  bool get isRunning => state.status == OnboardingStatus.running;
+
+  void configure(List<OnboardingStep> steps) {
+    assert(!_disposed, 'BlocOnboarding has been disposed.');
+    _cancelTimer();
+    _steps = List<OnboardingStep>.unmodifiable(steps);
+    _emit(
+      OnboardingState.idle().copyWith(totalSteps: _steps.length, error: null),
+    );
   }
 
-  final int delayInSeconds;
-  final String startingMsg;
-  final String workingMsg;
-  final String finishedMsg;
-
-  static const String initialMsg = 'Starting';
-  static const String completingMsg = 'working';
-  static const String completedMsg = 'Completed';
-
-  /// The name identifier for the BLoC, used for tracking or debugging.
-  static const String name = 'onboardingBloc';
-
-  /// A list of asynchronous functions to execute during onboarding.
-  final List<FutureOr<void> Function()> _blocOnboardingList =
-      <FutureOr<void> Function()>[];
-
-  /// Optional error callback for handling task failures.
-  final void Function(Object error, StackTrace stack)? onError;
-
-  /// Internal controller for progress messages.
-  final BlocGeneral<String> _blocMsg = BlocGeneral<String>('');
-
-  /// Controller for numeric progress (0.0 to 1.0).
-  final BlocGeneral<double> _progress;
-
-  /// Clears all onboarding tasks.
-  ///
-  /// Use this to reset the onboarding flow for reuse.
-  void clearFunctions() {
-    _blocOnboardingList.clear();
-  }
-
-  /// A stream of progress messages.
-  ///
-  /// This stream emits updates as the onboarding process progresses.
-  ///
-  /// ## Example
-  ///
-  /// ```dart
-  /// blocOnboarding.msgStream.listen((message) {
-  ///   print('Onboarding Message: $message');
-  /// });
-  /// ```
-  Stream<String> get msgStream => _blocMsg.stream;
-
-  /// Stream of progress as a double between 0.0 and 1.0.
-  Stream<double> get progressStream => _progress.stream;
-
-  /// Current message.
-  String get msg => _blocMsg.value;
-
-  /// Current progress.
-  double get progress => _progress.value;
-
-  /// Adds a new function to the onboarding process.
-  ///
-  /// The [function] is a `FutureOr` task to be executed as part of onboarding.
-  /// Returns the updated length of the onboarding function list.
-  ///
-  /// ## Example
-  ///
-  /// ```dart
-  /// blocOnboarding.addFunction(() async {
-  ///   await Future.delayed(Duration(seconds: 1));
-  ///   print('New Task Completed');
-  /// });
-  /// ```
-  int addFunction(FutureOr<void> Function() function) {
-    _blocOnboardingList.add(function);
-    return _blocOnboardingList.length;
-  }
-
-  /// Executes onboarding functions with optional delay.
-  ///
-  /// Each task runs sequentially. Progress is updated after each step.
-  Future<void> execute(Duration delay) async {
-    final int total = _blocOnboardingList.length;
-    if (total == 0) {
+  void start() {
+    assert(!_disposed, 'BlocOnboarding has been disposed.');
+    if (_steps.isEmpty) {
+      _emit(
+        state.copyWith(
+          status: OnboardingStatus.completed,
+          totalSteps: 0,
+          error: null,
+        ),
+      );
       return;
     }
-    _blocMsg.value = startingMsg;
-    await Future<void>.delayed(delay);
-    int completed = 0;
-
-    for (final FutureOr<void> Function() task in _blocOnboardingList) {
-      try {
-        await task();
-      } catch (e, s) {
-        onError?.call(e, s);
-      } finally {
-        completed++;
-        _progress.value = completed / total;
-        _blocMsg.value = '${total - completed} $workingMsg';
-      }
-    }
-    _blocMsg.value = finishedMsg;
-    await Future<void>.delayed(delay);
-    _blocMsg.value = '';
+    _cancelTimer();
+    _epoch++;
+    _emit(
+      state.copyWith(
+        status: OnboardingStatus.running,
+        stepIndex: 0,
+        totalSteps: _steps.length,
+        error: null,
+      ),
+    );
+    _runOnEnterAndMaybeSchedule(_epoch);
   }
 
-  /// Releases resources held by the BLoC.
-  ///
-  /// This method must be called when the BLoC is no longer needed to prevent
-  /// memory leaks.
-  ///
-  /// ## Example
-  ///
-  /// ```dart
-  /// blocOnboarding.dispose();
-  /// ```
+  void next() {
+    assert(!_disposed, 'BlocOnboarding has been disposed.');
+    if (!isRunning) {
+      return;
+    }
+    _cancelTimer();
+    if (state.stepIndex + 1 < state.totalSteps) {
+      _epoch++;
+      _emit(state.copyWith(stepIndex: state.stepIndex + 1, error: null));
+      _runOnEnterAndMaybeSchedule(_epoch);
+    } else {
+      complete();
+    }
+  }
+
+  void back() {
+    assert(!_disposed, 'BlocOnboarding has been disposed.');
+    if (!isRunning) {
+      return;
+    }
+    _cancelTimer();
+    if (state.stepIndex > 0) {
+      _epoch++;
+      _emit(state.copyWith(stepIndex: state.stepIndex - 1, error: null));
+      _runOnEnterAndMaybeSchedule(_epoch);
+    }
+  }
+
+  void skip() {
+    assert(!_disposed, 'BlocOnboarding has been disposed.');
+    _cancelTimer();
+    _emit(state.copyWith(status: OnboardingStatus.skipped));
+  }
+
+  void complete() {
+    assert(!_disposed, 'BlocOnboarding has been disposed.');
+    _cancelTimer();
+    _emit(state.copyWith(status: OnboardingStatus.completed));
+  }
+
+  /// Clears the error without changing the current step/status.
+  void clearError() {
+    if (_disposed) {
+      return;
+    }
+    _emit(state.copyWith(error: null));
+  }
+
+  /// Re-runs `onEnter` for the current step (useful after showing an error).
+  void retryOnEnter() {
+    // No-op si el bloc ya no está vivo o si no está en ejecución.
+    if (_disposed || !isRunning) {
+      return;
+    }
+
+    _cancelTimer();
+    _epoch++;
+    // Evita assert de clearError; _emit ya protege contra _disposed.
+    _emit(state.copyWith(error: null));
+    _runOnEnterAndMaybeSchedule(_epoch);
+  }
+
+  OnboardingStep? get currentStep {
+    if (!isRunning) {
+      return null;
+    }
+    if (state.stepIndex < 0 || state.stepIndex >= _steps.length) {
+      return null;
+    }
+    return _steps[state.stepIndex];
+  }
+
+  void _emit(OnboardingState newState) {
+    if (!_disposed) {
+      _state.value = newState;
+    }
+  }
+
+  Future<void> _runOnEnterAndMaybeSchedule(int epochAtCall) async {
+    final OnboardingStep? step = currentStep;
+    if (step == null) {
+      return;
+    }
+
+    // 1) Ejecuta onEnter si está definido
+    if (step.onEnter != null) {
+      Either<ErrorItem, Unit> result;
+
+      try {
+        result =
+            await step.onEnter?.call() ?? Right<ErrorItem, Unit>(Unit.value);
+      } catch (e, s) {
+        if (_disposed ||
+            epochAtCall != _epoch ||
+            !identical(step, currentStep)) {
+          return;
+        }
+        final ErrorItem mapped = _errorMapper.fromException(
+          e,
+          s,
+          location:
+              'BlocOnboarding.onEnter(step=${state.stepIndex}, title=${step.title})',
+        );
+        _emit(state.copyWith(error: mapped));
+        return;
+      }
+
+      // Si cambió de paso mientras esperábamos, ignorar.
+      if (_disposed || epochAtCall != _epoch || !identical(step, currentStep)) {
+        return;
+      }
+
+      // 2) Maneja Either con `when`
+      result.when(
+        (ErrorItem err) {
+          _emit(state.copyWith(error: err));
+          // No auto-advance si hay error.
+        },
+        (Unit _) {
+          _scheduleAutoAdvanceIfAny();
+        },
+      );
+      return;
+    }
+
+    // 3) Sin onEnter → solo auto-advance si aplica
+    if (_disposed || epochAtCall != _epoch || !identical(step, currentStep)) {
+      return;
+    }
+    _scheduleAutoAdvanceIfAny();
+  }
+
+  void _scheduleAutoAdvanceIfAny() {
+    final OnboardingStep? step = currentStep;
+    if (step == null) {
+      return;
+    }
+    final Duration? d = step.autoAdvanceAfter;
+    if (d == null || d <= Duration.zero) {
+      return;
+    }
+
+    _timer = Timer(d, () {
+      if (!_disposed && isRunning && identical(step, currentStep)) {
+        next();
+      }
+    });
+  }
+
+  void _cancelTimer() {
+    _timer?.cancel();
+    _timer = null;
+  }
+
   @override
-  FutureOr<void> dispose() {
-    _blocMsg.dispose();
-    _progress.dispose();
+  void dispose() {
+    _disposed = true;
+    _cancelTimer();
+    _state.dispose();
   }
 }
