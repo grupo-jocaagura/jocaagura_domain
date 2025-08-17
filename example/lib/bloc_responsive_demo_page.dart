@@ -3,15 +3,27 @@ import 'package:jocaagura_domain/jocaagura_domain.dart';
 
 /// Demo page for `BlocResponsive`.
 ///
-/// ## What you will see
-/// - Visual grid overlay (columns + gutters) driven by `BlocResponsive`.
-/// - Switches to toggle: grid overlay, simulated size (sliders), and app bar visibility.
-/// - Live metrics: device type, margins, gutters, column width, work area, drawer width.
+/// ▶️ Objetivo
+/// Esta página ilustra **cómo consumir** `BlocResponsive` desde la UI para:
+/// - Mantener sincronizado el tamaño del viewport (con o sin `BuildContext`).
+/// - Obtener métricas reactivas de layout: `deviceType`, `columnsNumber`,
+///   `marginWidth`, `gutterWidth`, `columnWidth`, `workAreaSize`, etc.
+/// - Visualizar una grilla de columnas y entender cómo se calculan.
 ///
-/// ## Wiring
-/// - Preferred: inject the bloc from your AppManager: `AppManager.of(context).config.blocResponsive`.
-/// - Alternative: let this page create/dispose its own instance (default path).
+/// 🧭 Flujo (Clean Architecture)
+/// UI → AppManager → BlocResponsive (infra de presentación; sin I/O)
+///
+/// 💡 Recomendación de uso en apps reales
+/// - Llama `setSizeFromContext(context)` en `build`, `didChangeDependencies`
+///   o dentro de un `LayoutBuilder`, para mantener el bloc sincronizado con
+///   el tamaño real de la vista.
+/// - En tests/headless, usa `setSize(Size)` o `setSizeForTesting(Size)`.
+///
+/// 🔧 Esta demo también incluye un modo “simular tamaño” con sliders para
+/// ver cómo cambian las métricas sin depender del dispositivo real.
 class BlocResponsiveDemoPage extends StatefulWidget {
+  /// Permite inyectar una instancia existente (p. ej. desde AppManager).
+  /// Si viene null, la página crea y dispone su propio bloc.
   const BlocResponsiveDemoPage({super.key, this.injected});
   static const String name = 'BlocResponsiveDemoPage';
 
@@ -23,33 +35,38 @@ class BlocResponsiveDemoPage extends StatefulWidget {
 
 class _BlocResponsiveDemoPageState extends State<BlocResponsiveDemoPage> {
   late final BlocResponsive _bloc;
-  late final bool _ownsBloc;
+  late final bool _ownsBloc; // ¿Quién es dueño del ciclo de vida?
 
-  bool _showGrid = true;
-  bool _simulateSize = false;
-  double _simWidth = 1024;
-  double _simHeight = 720;
+  bool _showGrid = true; // Muestra/oculta la superposición de columnas
+  bool _simulateSize = false; // Activa el modo “simular tamaño”
+  double _simWidth = 1024; // Ancho simulado
+  double _simHeight = 720; // Alto simulado
 
   @override
   void initState() {
     super.initState();
+    // 📦 Inyección opcional desde AppManager/configuración externa.
     if (widget.injected != null) {
       _bloc = widget.injected!;
-      _ownsBloc = false;
+      _ownsBloc = false; // No lo disponemos nosotros.
     } else {
-      _bloc = BlocResponsive();
-      _ownsBloc = true;
+      _bloc = BlocResponsive(); // Uso “standalone” para la demo.
+      _ownsBloc = true; // Lo disponemos en dispose().
     }
   }
 
   @override
   void dispose() {
+    // Si la UI creó el bloc, también debe disponerlo.
     if (_ownsBloc) {
       _bloc.dispose();
     }
     super.dispose();
   }
 
+  /// Mantiene el bloc sincronizado con el tamaño actual.
+  /// - En modo normal, usa `MediaQuery` a través de `setSizeFromContext`.
+  /// - En modo simulado, empuja valores manuales con `setSizeForTesting`.
   void _syncSize(BuildContext context) {
     if (_simulateSize) {
       _bloc.setSizeForTesting(Size(_simWidth, _simHeight));
@@ -60,14 +77,16 @@ class _BlocResponsiveDemoPageState extends State<BlocResponsiveDemoPage> {
 
   @override
   Widget build(BuildContext context) {
-    // Mantén sincronizado el bloc con el contexto o el tamaño simulado.
+    // 📌 Importante: Sincroniza el tamaño DESPUÉS del frame para evitar
+    // loops de rebuild (especialmente útil si llamas desde `build`).
     WidgetsBinding.instance.addPostFrameCallback((_) => _syncSize(context));
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('BlocResponsive Demo'),
         actions: <Widget>[
-          // Toggle AppBar visibility policy in the bloc
+          // Política de AppBar encapsulada en el bloc (presentación).
+          // Si tu layout oculta la AppBar, `screenHeightWithoutAppbar` lo refleja.
           Row(
             children: <Widget>[
               const Text('Show AppBar', style: TextStyle(fontSize: 12)),
@@ -82,13 +101,16 @@ class _BlocResponsiveDemoPageState extends State<BlocResponsiveDemoPage> {
           ),
         ],
       ),
+
+      // Nos suscribimos al stream de tamaño de pantalla para actualizar métricas.
       body: StreamBuilder<Size>(
         stream: _bloc.appScreenSizeStream,
         initialData: _bloc.value,
         builder: (BuildContext context, AsyncSnapshot<Size> _) {
-          // Re-sincroniza cada rebuild significativo
+          // Re-sincroniza en cada rebuild significativo
           _syncSize(context);
 
+          // 📐 Lee todas las métricas derivadas del bloc.
           final Size size = _bloc.size;
           final Size work = _bloc.workAreaSize;
           final int cols = _bloc.columnsNumber;
@@ -101,8 +123,10 @@ class _BlocResponsiveDemoPageState extends State<BlocResponsiveDemoPage> {
           return ListView(
             padding: const EdgeInsets.all(16),
             children: <Widget>[
-              _DocCard(),
+              _DocCard(), // Guía en pantalla (qué hace y cómo se usa)
               const SizedBox(height: 12),
+
+              // Controles de demo: grid overlay, simulación de tamaño (sliders)
               _ControlsCard(
                 showGrid: _showGrid,
                 simulateSize: _simulateSize,
@@ -129,6 +153,8 @@ class _BlocResponsiveDemoPageState extends State<BlocResponsiveDemoPage> {
                 },
               ),
               const SizedBox(height: 12),
+
+              // Métricas “en vivo” para entender los cálculos de layout.
               _MetricsCard(
                 device: device,
                 size: size,
@@ -142,6 +168,8 @@ class _BlocResponsiveDemoPageState extends State<BlocResponsiveDemoPage> {
                 heightWithoutAppBar: _bloc.screenHeightWithoutAppbar,
               ),
               const SizedBox(height: 12),
+
+              // Vista previa de la grilla (columnas + gutters) respetando márgenes.
               _GridPreview(
                 showGrid: _showGrid,
                 cols: cols,
@@ -158,6 +186,8 @@ class _BlocResponsiveDemoPageState extends State<BlocResponsiveDemoPage> {
   }
 }
 
+/// Tarjeta con documentación en pantalla para el implementador.
+/// Explica el propósito, el flujo y la forma recomendada de integración.
 class _DocCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -176,21 +206,21 @@ class _DocCard extends StatelessWidget {
               ),
               SizedBox(height: 8),
               Text(
-                '1) UI updates the bloc size from context (or simulated sliders).',
+                '1) The UI keeps the bloc in sync with the current viewport size.',
               ),
               Text(
                 '   Use `setSizeFromContext(context)` in widgets, or `setSize(Size)` in headless tests.',
               ),
               SizedBox(height: 6),
               Text(
-                '2) BlocResponsive computes layout: device type, margins, gutters, columns and work area.',
+                '2) BlocResponsive computes device type, margins, gutters, columns and work area from the size and config.',
               ),
               Text(
                 '   For desktop/TV it uses a percentage of the viewport as work area (config-driven).',
               ),
               SizedBox(height: 6),
               Text(
-                '3) The grid preview draws columns respecting margins and gutters.',
+                '3) The grid preview draws columns respecting margins and gutters; useful to validate breakpoints.',
               ),
               SizedBox(height: 12),
               Text(
@@ -205,6 +235,9 @@ class _DocCard extends StatelessWidget {
   }
 }
 
+/// Tarjeta de controles de la demo.
+/// - Muestra/oculta la grilla.
+/// - Activa sliders para simular tamaños sin depender del dispositivo real.
 class _ControlsCard extends StatelessWidget {
   const _ControlsCard({
     required this.showGrid,
@@ -263,13 +296,15 @@ class _ControlsCard extends StatelessWidget {
                   ),
                 ],
               ),
+
+              // Sliders visibles solo si activamos el modo de simulación.
               if (simulateSize) ...<Widget>[
                 const SizedBox(height: 8),
                 const Text('Width'),
                 Slider(
                   min: 320,
                   max: 2560,
-                  divisions: 224, // paso de ~10px
+                  divisions: 224, // paso ~10 px
                   label: simWidth.toStringAsFixed(0),
                   value: simWidth.clamp(320, 2560),
                   onChanged: onWidthChanged,
@@ -292,6 +327,8 @@ class _ControlsCard extends StatelessWidget {
   }
 }
 
+/// Tarjeta de métricas: muestra en vivo todos los cálculos que hace el bloc.
+/// Útil para validar breakpoints y coherencia de grilla en QA/manual testing.
 class _MetricsCard extends StatelessWidget {
   const _MetricsCard({
     required this.device,
@@ -357,6 +394,9 @@ class _MetricsCard extends StatelessWidget {
   }
 }
 
+/// Vista previa de la grilla basada en las métricas del bloc.
+/// Dibuja columnas y gutters respetando los márgenes; no usa LayoutBuilder
+/// porque queremos que las medidas provengan del bloc (fuente de verdad).
 class _GridPreview extends StatelessWidget {
   const _GridPreview({
     required this.showGrid,
@@ -376,10 +416,10 @@ class _GridPreview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Altura del preview (constante) para visualizar la grilla
+    // Altura fija para visualizar sin depender del alto real del viewport.
     const double previewHeight = 180;
 
-    // Construye hijos: [col, gutter, col, gutter, ...]
+    // Construimos la fila: col, gutter, col, gutter, ...
     final List<Widget> rowChildren = <Widget>[];
     for (int i = 0; i < cols; i++) {
       rowChildren.add(
@@ -411,30 +451,32 @@ class _GridPreview extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 12),
-            // El contenedor lateral respeta margen y work area
+
+            // Contenedor ancho = workArea + márgenes a cada lado.
+            // Esto permite ver claramente cómo influyen los márgenes globales.
             Container(
               width: workArea.width + margin * 2,
-              // Altura limitada para que se vea completo
               constraints: const BoxConstraints(minHeight: previewHeight + 24),
               decoration: BoxDecoration(
-                color: Colors.black12.withValues(alpha: 0.96),
+                color: Colors.black12.withValues(alpha: 0.04),
                 borderRadius: BorderRadius.circular(6),
               ),
               child: Padding(
                 padding: EdgeInsets.symmetric(horizontal: margin),
                 child: Stack(
                   children: <Widget>[
-                    // Línea base de trabajo (fondo)
+                    // Fondo “área de trabajo” para distinguir del viewport.
                     Positioned.fill(
                       child: Container(
                         margin: const EdgeInsets.symmetric(vertical: 12),
                         decoration: BoxDecoration(
-                          color: Colors.teal.withValues(alpha: 0.94),
+                          color: Colors.teal.withValues(alpha: 0.06),
                           borderRadius: BorderRadius.circular(4),
                         ),
                       ),
                     ),
-                    // Fila de columnas + gutters
+
+                    // Fila de columnas + gutters (scroll horizontal por si el ancho no alcanza).
                     if (showGrid)
                       SingleChildScrollView(
                         scrollDirection: Axis.horizontal,
@@ -443,6 +485,8 @@ class _GridPreview extends StatelessWidget {
                           child: Row(children: rowChildren),
                         ),
                       ),
+
+                    // Mensaje cuando se oculta la grilla.
                     if (!showGrid)
                       const Positioned.fill(
                         child: Center(

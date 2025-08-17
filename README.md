@@ -60,6 +60,7 @@ Para utilizar el paquete, se requiere la instalación del SDK de Flutter. No hay
 - [PerKeyFifoExecutor](#PerKeyFifoExecutor)
 - [Connectivity](#Connectivity)
 - [BlocOnboarding](#BlocOnboarding)
+- [BlocResponsive](#BlocResponsive)
 
 Cada sección proporciona detalles sobre la implementación y el uso de las clases, ofreciendo ejemplos de código y explicaciones de cómo se integran dentro de tu arquitectura de dominio.
 
@@ -2243,3 +2244,70 @@ class _OnboardingExampleState extends State<OnboardingExample> {
 * **onEnter (async & errors)**: lanzamientos mapeados a `ErrorItem`, `clearError + retryOnEnter`, y protección contra completions obsoletos (epoch guard).
 
 ---
+# BlocResponsive
+
+## BlocResponsive — validación visual de breakpoints (microsección)
+
+**Objetivo.** Verificar y documentar cómo la app adapta layout (márgenes, gutters, columnas, área de trabajo y tipo de dispositivo) según el ancho del viewport, usando `BlocResponsive` y su demo.
+
+### Cómo usar la Demo
+
+1. Registra y abre `BlocResponsiveDemoPage` (incluida en `example/`).
+2. Usa los **switches**:
+
+    * **Show grid overlay**: muestra/oculta columnas y gutters.
+    * **Simulate size (sliders)**: mueve `Width/Height` para probar distintos anchos sin cambiar de dispositivo.
+    * **Show AppBar** (en la AppBar): alterna la política y observa `screenHeightWithoutAppbar`.
+3. Observa en **Metrics**:
+
+    * `Device` cambia entre **MOBILE / TABLET / DESKTOP / TV** según los umbrales de `ScreenSizeConfig`.
+    * `Columns`, `Margin`, `Gutter`, `Column width`, `Work area` y `Drawer` se actualizan en vivo.
+    * En **DESKTOP/TV** el `Work area` aplica el porcentaje configurado (no ocupa el 100% del viewport).
+
+### Checklist de QA (aceptación)
+
+* [ ] Al cruzar los breakpoints de `ScreenSizeConfig` cambia `Device` y `Columns` correctamente.
+* [ ] `marginWidth` y `gutterWidth` se recalculan al variar el ancho; la grilla se mantiene alineada.
+* [ ] `columnWidth` = `(workArea − márgenes − gutters) / columns` (sin valores negativos).
+* [ ] En **DESKTOP/TV**, `workArea.width` respeta el **porcentaje** configurado; en **MOBILE/TABLET** usa el ancho total.
+* [ ] `widthByColumns(n)` incluye gutters entre columnas y nunca supera `workArea.width`.
+* [ ] Con “Show AppBar” desactivado, `screenHeightWithoutAppbar` = `size.height`.
+* [ ] No hay “parpadeos”: al mover sliders, métricas y grilla cambian de forma estable.
+
+### Integración recomendada (app real)
+
+```dart
+class MyLayout extends StatelessWidget {
+  const MyLayout({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final BlocResponsive responsive = AppManager.of(context).config.blocResponsive;
+
+    // Mantén sincronizado el tamaño del viewport con el bloc.
+    responsive.setSizeFromContext(context);
+
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: responsive.marginWidth),
+      child: SizedBox(
+        width: responsive.widthByColumns(4).clamp(0, responsive.workAreaSize.width),
+        child: Text('Device: ${responsive.deviceType} • Cols: ${responsive.columnsNumber}'),
+      ),
+    );
+  }
+}
+```
+
+### Pruebas sin Flutter (headless)
+
+```dart
+final bloc = BlocResponsive();
+bloc.setSizeForTesting(const Size(1280, 800));
+expect(bloc.isDesktop, isTrue);
+expect(bloc.columnsNumber, bloc.sizeConfig.desktopColumnsNumber);
+expect(bloc.widthByColumns(3) <= bloc.workAreaSize.width, isTrue);
+bloc.dispose();
+```
+
+> 🧭 Arquitectura: **UI → AppManager → BlocResponsive** (infra de presentación, sin I/O).
+> 🔧 Configuración: todos los umbrales y porcentajes provienen de `ScreenSizeConfig` (config-driven, sin “magic numbers”).
