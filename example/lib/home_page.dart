@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:jocaagura_domain/jocaagura_domain.dart';
 
+import 'bloc_loading_demo_page.dart';
 import 'connectivity_demo_page.dart';
 import 'session_demo_page.dart';
 import 'ws_database_user_demo_page.dart';
@@ -40,6 +41,10 @@ class HomePage extends StatelessWidget {
           _NavigatorListTile(
             label: 'BlocConnectivity demo',
             page: ConnectivityDemoPage(),
+          ),
+          _NavigatorListTile(
+            label: 'BlocLoading demo',
+            page: BlocLoadingDemoPage(),
           ),
         ],
       ),
