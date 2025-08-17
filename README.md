@@ -58,6 +58,7 @@ Para utilizar el paquete, se requiere la instalación del SDK de Flutter. No hay
 - [LedgerModel](lib/domain/financial/ledger_model.dart)
 - [Unit](#Unit)
 - [PerKeyFifoExecutor](#PerKeyFifoExecutor)
+- [Connectivity](#Connectivity)
 
 Cada sección proporciona detalles sobre la implementación y el uso de las clases, ofreciendo ejemplos de código y explicaciones de cómo se integran dentro de tu arquitectura de dominio.
 
@@ -1830,3 +1831,195 @@ Future<void> updateSettings(int userId, Settings s) =>
 ```
 
 > Mismo patrón, diferente dominio: *evitas saturar el backend y garantizas orden por entidad*.
+
+# Connectivity
+## Conectividad (Service → Gateway → Repository → UseCases → Bloc)
+
+## Objetivo
+
+Exponer el estado de conectividad de forma **reactiva**, con **errores como datos** (`Either<ErrorItem, ConnectivityModel>`) y capas bien separadas, siguiendo la guía de estructura de Jocaagura.
+
+```
+UI → AppManager → Bloc → UseCase → Repository → Gateway → Service
+```
+
+> 🔗 Estructura y convenciones:
+> [https://github.com/grupo-jocaagura/jocaagura\_domain/raw/refs/heads/develop/README\_STRUCTURE.md](https://github.com/grupo-jocaagura/jocaagura_domain/raw/refs/heads/develop/README_STRUCTURE.md)
+
+---
+
+## Modelo de dominio
+
+```dart
+// Ya incluido en jocaagura_domain
+class ConnectivityModel extends Model {
+  final ConnectionTypeEnum connectionType;
+  final double internetSpeed; // Mbps
+  bool get isConnected => connectionType != ConnectionTypeEnum.none;
+}
+```
+
+---
+
+## Paso a paso de la integración
+
+### 1) Service (fuente de datos “baja”)
+
+Responsable de hablar con la plataforma y entregar **tipo de conexión**, **velocidad**, y un **stream** de `ConnectivityModel`.
+
+* En dev/tests: `FakeServiceConnectivity` (sin paquetes externos).
+* En producción: implementa tu propio `ServiceConnectivity` (ej. usando plugins).
+
+```dart
+final service = FakeServiceConnectivity(
+  latencyConnectivity: const Duration(milliseconds: 80),
+  latencySpeed: const Duration(milliseconds: 120),
+  initial: const ConnectivityModel(
+    connectionType: ConnectionTypeEnum.wifi,
+    internetSpeed: 40,
+  ),
+);
+```
+
+### 2) Gateway (I/O crudo + manejo de excepciones)
+
+Convierte el Service a **payloads crudos** (`Map<String, dynamic>`) y **nunca lanza**: siempre retorna `Either<ErrorItem, Map>`.
+
+```dart
+final gateway = GatewayConnectivityImpl(service, DefaultErrorMapper());
+```
+
+### 3) Repository (mapeo a dominio + errores de negocio)
+
+Convierte `Map` → `ConnectivityModel` y detecta **errores de negocio** en el payload con `ErrorMapper`.
+
+```dart
+final repo = RepositoryConnectivityImpl(
+  gateway,
+  errorMapper: DefaultErrorMapper(),
+);
+```
+
+### 4) UseCases (APIs de aplicación)
+
+* `GetConnectivitySnapshotUseCase`
+* `WatchConnectivityUseCase`
+* `CheckConnectivityTypeUseCase`
+* `CheckInternetSpeedUseCase`
+
+```dart
+final watch     = WatchConnectivityUseCase(repo);
+final snapshot  = GetConnectivitySnapshotUseCase(repo);
+final checkType = CheckConnectivityTypeUseCase(repo);
+final checkSpeed= CheckInternetSpeedUseCase(repo);
+```
+### 5) Bloc (reactivo y **puro**)
+
+El BLoC **no conoce la UI**. Emite `Either<ErrorItem, ConnectivityModel>`.
+
+```dart
+final bloc = BlocConnectivity(
+  watch: watch,
+  snapshot: snapshot,
+  checkType: checkType,
+  checkSpeed: checkSpeed,
+);
+
+await bloc.loadInitial();
+bloc.startWatching();
+// ...
+bloc.dispose();
+```
+
+### 6) UI (presentación y UX de errores)
+
+La UI **decide** cómo mostrar los errores. Recomendamos envolver la vista con un `ErrorItemWidget` (SnackBar/Banner) y renderizar el `ConnectivityModel` cuando `Right`.
+
+```dart
+StreamBuilder<Either<ErrorItem, ConnectivityModel>>(
+  stream: bloc.stream,
+  initialData: bloc.value,
+  builder: (context, snap) {
+    final either = snap.data ?? bloc.value;
+    return ErrorItemWidget( // muestra SnackBar cuando Left(ErrorItem)
+      state: either as Either<ErrorItem, Object>,
+      child: either.isRight
+        ? Text('Type: ${ (either as Right).value.connectionType.name }')
+        : const SizedBox.shrink(), // conserva último estado bueno si quieres
+    );
+  },
+);
+```
+
+### 7) Contrato de Error (semántica)
+
+* **Gateway**: mapea **excepciones** del Service → `Left(ErrorItem)`.
+* **Repository**: detecta **errores de negocio** en el payload (`{'error': {...}}`, `ok:false`, etc.) → `Left(ErrorItem)`.
+* **Bloc**: **no lanza**; re-emite `Left(ErrorItem)` o `Right(ConnectivityModel)`.
+
+> Usa `DefaultErrorMapper()` si no necesitas uno específico.
+> En producción, define códigos/semántica de `ErrorItem` y su mapping visual (warning/info/error).
+
+---
+
+## Ejemplo rápido (AppManager / DI)
+
+```dart
+class ConnectivityModule {
+  late final ServiceConnectivity service;
+  late final GatewayConnectivity gateway;
+  late final RepositoryConnectivity repo;
+  late final BlocConnectivity bloc;
+
+  ConnectivityModule() {
+    service  = FakeServiceConnectivity(); // prod: tu Service real
+    gateway  = GatewayConnectivityImpl(service, DefaultErrorMapper());
+    repo     = RepositoryConnectivityImpl(gateway, errorMapper: DefaultErrorMapper());
+    bloc     = BlocConnectivity(
+      watch: WatchConnectivityUseCase(repo),
+      snapshot: GetConnectivitySnapshotUseCase(repo),
+      checkType: CheckConnectivityTypeUseCase(repo),
+      checkSpeed: CheckInternetSpeedUseCase(repo),
+    );
+  }
+
+  Future<void> init() async {
+    await bloc.loadInitial();
+    bloc.startWatching();
+  }
+
+  void dispose() {
+    bloc.dispose();
+    service.dispose();
+  }
+}
+```
+
+---
+
+## Tests (solo `flutter_test`)
+
+Se incluyen suites de ejemplo:
+
+* `fake_service_connectivity_test.dart`
+* `gateway_connectivity_impl_test.dart`
+* `repository_connectivity_impl_test.dart`
+* `bloc_connectivity_test.dart`
+
+Ejecuta:
+
+```bash
+flutter test
+```
+
+---
+
+## Consejos de producción
+
+* Reemplaza `FakeServiceConnectivity` por un Service real (plugins/SDK).
+* Centraliza la presentación de errores en un widget reusable o notificador global.
+* Define códigos de error (`ErrorItem.code`) y su mapeo visual para UX consistente.
+* Revisa linters y convenciones:
+  [https://github.com/grupo-jocaagura/jocaagura\_domain/raw/refs/heads/develop/analysis\_options.yaml](https://github.com/grupo-jocaagura/jocaagura_domain/raw/refs/heads/develop/analysis_options.yaml)
+
+---
