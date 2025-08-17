@@ -3,9 +3,54 @@
 This document follows the guidelines of [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.24.0] - 2025-08-15
+## [1.25.0] - 2025-08-17
 
-> Release centrado en **persistencia WebSocket**, capa de **Repositorio genérico**, **BLoC** reactivo por documento y utilidades transversales para concurrencia/semántica de `void`.
+### Fixed
+- `BlocLoading`: evita `StateError` al invocar `hide()` tras `dispose()` y corrige emisiones duplicadas en operaciones rápidas encadenadas.
+- `BlocResponsive`: corrige la clasificación inicial de `ScreenSize` en el primer frame y en cambios de tamaño (web/desktop), garantizando una emisión consistente.
+- `BlocOnboarding`: maneja correctamente listas vacías de pasos (`[]`) y asegura que `onComplete` se dispare **una sola vez**. Cierre seguro de streams en `dispose()`.
+- Demos: rutas e imports ajustados para compilar en `stable` sin advertencias; correcciones menores de tipografía y estilos.
+
+### Changed
+- Mejora no funcional del rendimiento en `BlocLoading` al consolidar colas internas para mostrar/ocultar estados de carga (sin cambios de API).
+- Ajustes menores a los breakpoints documentados de `BlocResponsive` para reflejar con mayor claridad los límites recomendados (sin cambios de API).
+
+### Docs
+- DartDoc en **inglés** para `BlocLoading`, `BlocResponsive` y `BlocOnboarding`, incluyendo ejemplos de uso en Markdown y descripción de parámetros/enums.
+- Comentarios explicativos añadidos en cada **demo page** para guiar la implementación paso a paso.
+- Sección breve en el README principal enlazando a las demos y a la guía de adopción rápida de cada BLoC.
+
+### Tests
+- Grupos de pruebas con `flutter_test` por BLoC; casos agregados para:
+  - Inicialización y `dispose()`.
+  - Cambios de tamaño en `BlocResponsive`.
+  - Flujos felices y escenarios borde en `BlocOnboarding`.
+  - Condiciones de carrera en `BlocLoading`.
+
+### CI
+- Endurecimiento de validaciones de PR (análisis, formato y cobertura) y verificación de actualización del `CHANGELOG.md`.
+- Mantención: workflows revisados para compatibilidad con `stable` actual.
+
+> **Notas:** No hay cambios incompatibles. No se requiere migración.
+
+
+## [1.24.2] - 2025-08-17
+
+### Added
+- Actualización menor en `BlocLoading` para soportar FiFo en la cola de tareas.
+- Se agrega demo para `BlocLoading` en `bloc_loading_demo_page.dart`.
+- Se agrega `BlocOnboarding` para gestionar estados de onboarding en aplicaciones.
+- Se agrega `BlocResponsive` para manejar estados de UI responsiva en aplicaciones con diferentes resoluciones y pantallas.
+
+## [1.24.1] - 2025-08-17
+
+### Fixed
+- Corrección de advertencias menores en la implementación de conectividad y manejo de streams.
+- Ajustes en la documentación de los nuevos módulos y ejemplos agregados.
+- Mejoras menores en la robustez de los tests unitarios para los servicios de conectividad y WebSocket.
+- Actualización de dependencias para mantener la compatibilidad con las últimas versiones de Flutter y Dart.
+
+## [1.24.0] - 2025-08-15
 
 #### ✅ Added
 - **Stack WS Database (end-to-end)**
