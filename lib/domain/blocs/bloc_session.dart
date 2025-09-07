@@ -341,6 +341,20 @@ class BlocSession {
     return right;
   }
 
+  /// Canonical alias so consumers can use `session.stream`.
+  Stream<SessionState> get stream => sessionStream;
+
+  /// Synchronous best-effort snapshot.
+  ///
+  /// Until the core exposes a true snapshot getter, we map the
+  /// public read-only helpers to a reasonable default.
+  SessionState get stateOrDefault {
+    if (isAuthenticated) {
+      return Authenticated(currentUser);
+    }
+    return const Unauthenticated();
+  }
+
   /// Disposes internal resources.
   void dispose() {
     if (_disposed) {
