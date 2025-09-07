@@ -6,6 +6,12 @@ enum ModelVectorEnum { dx, dy }
 /// Default instance of [ModelVector] with both components set to 1.0.
 const ModelVector defaultModelVector = ModelVector(1.0, 1.0);
 
+/// Unit vector on X axis (1, 0).
+const ModelVector unitX = ModelVector(1.0, 0.0);
+
+/// Unit vector on Y axis (0, 1).
+const ModelVector unitY = ModelVector(0.0, 1.0);
+
 /// A model representing a 2D vector, encapsulating its X (`dx`) and Y (`dy`) components.
 ///
 /// This class is useful for mathematical and graphical operations that require vector manipulation.
@@ -86,6 +92,91 @@ class ModelVector extends Model {
   /// original `dx/dy` values.
   String get key => '$x,$y';
 
+  /// Zero vector (0, 0) for convenience.
+  static const ModelVector zero = ModelVector(0.0, 0.0);
+
+  /// Approximate equality using absolute tolerance [eps] per axis.
+  ///
+  /// Returns `true` when `|dx - other.dx| <= eps` **and** `|dy - other.dy| <= eps`.
+  /// Defaults to `eps=1e-9`.
+  ///
+  /// ### Example
+  /// ```dart
+  /// const ModelVector a = ModelVector(1.000000001, 2.0);
+  /// const ModelVector b = ModelVector(1.0, 2.0);
+  /// assert(a.equalsApprox(b)); // true with default eps
+  /// ```
+  bool equalsApprox(ModelVector other, {double eps = 1e-9}) =>
+      (dx - other.dx).abs() <= eps && (dy - other.dy).abs() <= eps;
+
+  /// Whether both components are exactly aligned to integers (no fractional part).
+  ///
+  /// This uses `roundToDouble()` to avoid pitfalls with negative zero.
+  bool get isIntegerAligned =>
+      dx == dx.roundToDouble() && dy == dy.roundToDouble();
+
+  /// Whether this vector is close to zero under absolute tolerance [eps] on both axes.
+  ///
+  /// Defaults to `eps=1e-12`.
+  bool isZero({double eps = 1e-12}) => dx.abs() <= eps && dy.abs() <= eps;
+
+  /// True if both components are finite (`isFinite`), i.e., not `NaN` or `Infinity`.
+  bool get isFiniteVector => dx.isFinite && dy.isFinite;
+
+  /// True if components are not `NaN` **and** are finite.
+  ///
+  /// Equivalent to: `!dx.isNaN && !dy.isNaN && dx.isFinite && dy.isFinite`.
+  bool get isValidVector => !dx.isNaN && !dy.isNaN && isFiniteVector;
+
+  /// Squared Euclidean length (dx*dx + dy*dy).
+  ///
+  /// Prefer this when comparing magnitudes to avoid the cost of a square root.
+  double get squaredMagnitude => dx * dx + dy * dy;
+
+  /// Euclidean length (L2 norm), computed as sqrt(dx*dx + dy*dy);
+  double get magnitude => sqrt(squaredMagnitude);
+
+  /// Returns a copy where non-finite components are replaced by [fallback] (default: 0.0).
+  ///
+  /// Useful to sanitize values coming from untrusted calculations or IO.
+  ModelVector sanitized({double fallback = 0.0}) => ModelVector(
+        dx.isFinite ? dx : fallback,
+        dy.isFinite ? dy : fallback,
+      );
+
+  /// Clamps the integer view of this vector into the inclusive range
+  /// `[minX, maxX] x [minY, maxY]`, returning a **new** vector with clamped ints
+  /// stored as doubles.
+  ///
+  /// ### Example
+  /// ```dart
+  /// const ModelVector v = ModelVector(10.9, -3.1); // x=11, y=-3
+  /// final ModelVector c = v.clampInt(minX: 0, minY: 0, maxX: 5, maxY: 5);
+  /// // c == (5.0, 0.0)
+  /// ```
+  ModelVector clampInt({
+    required int minX,
+    required int minY,
+    required int maxX,
+    required int maxY,
+  }) {
+    final int xi = x.clamp(minX, maxX);
+    final int yi = y.clamp(minY, maxY);
+    return ModelVector(xi.toDouble(), yi.toDouble());
+  }
+
+  /// Exact (double-preserving) key with fixed [fractionDigits] for reproducible caches.
+  ///
+  /// Default `fractionDigits=6`.
+  ///
+  /// ### Example
+  /// ```dart
+  /// const ModelVector v = ModelVector(1.23456789, -2.0);
+  /// final String k = v.keyExact(); // "1.234568,-2.000000"
+  /// ```
+  String keyExact({int fractionDigits = 6}) =>
+      '${dx.toStringAsFixed(fractionDigits)},${dy.toStringAsFixed(fractionDigits)}';
+
   /// Creates a copy using integer overrides; only provided axes are changed.
   ///
   /// The resulting doubles are assigned using `toDouble()` on the provided ints.
@@ -98,8 +189,6 @@ class ModelVector extends Model {
   /// ```
   ModelVector copyWithInts({int? x, int? y}) =>
       ModelVector((x ?? this.x).toDouble(), (y ?? this.y).toDouble());
-
-  // ---- Existing API (unchanged) ----
 
   /// Returns a copy of this [ModelVector] with optional new values for its components.
   @override
