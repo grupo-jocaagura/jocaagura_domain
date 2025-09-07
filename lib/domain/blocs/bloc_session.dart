@@ -1,5 +1,38 @@
 part of '../../jocaagura_domain.dart';
 
+/// Policy to define how getters behave **after** this BLoC has been disposed.
+///
+/// By default, we prefer a strict behavior (`throwStateError`) to surface
+/// lifecycle issues early in development and testing. You can opt into more
+/// tolerant behaviors to keep backward compatibility in legacy flows.
+enum PostDisposePolicy {
+  /// Strict: accessing any getter after `dispose()` throws a `StateError`.
+  throwStateError,
+
+  /// Lenient: getters return the **last cached** value (no new updates).
+  ///
+  /// - `state` returns the last `SessionState`.
+  /// - `stateOrDefault` keeps its binary collapse behavior based on the
+  ///   last cached state.
+  /// - `currentUser` returns the last cached user or `defaultUserModel`.
+  /// - `isAuthenticated` returns `false` if the last cached state was not
+  ///   `Authenticated`.
+  /// - `sessionStream`/`stream` return the same (now closed) Stream; callers
+  ///   will typically receive an immediate replay of the last value and then
+  ///   completion.
+  returnLastSnapshot,
+
+  /// Lenient: `state` returns `SessionError` with a standard `ErrorItem`.
+  ///
+  /// Helpers remain safe and backward compatible:
+  /// - `stateOrDefault` returns `Unauthenticated`.
+  /// - `currentUser` returns `defaultUserModel`.
+  /// - `isAuthenticated` returns `false`.
+  ///
+  /// Streams behave like in `returnLastSnapshot` (closed, replaying last value).
+  returnSessionError,
+}
+
 /// Centralized BLoC for session flows using [SessionState] and `BlocGeneral`.
 ///
 /// - Starts in [Unauthenticated].
@@ -23,6 +56,8 @@ part of '../../jocaagura_domain.dart';
 ///     getCurrentUser: getCurrentUC,
 ///   ),
 ///   watchAuthStateChanges: WatchAuthStateChangesUsecase(repositoryAuth),
+///   // Optional: choose a lenient post-dispose policy if you need it:
+///   // postDisposePolicy: PostDisposePolicy.returnLastSnapshot,
 /// );
 ///
 /// // Start listening to backend-driven auth changes (no silent login here):
@@ -39,60 +74,210 @@ part of '../../jocaagura_domain.dart';
 /// final bool signed = session.isAuthenticated;
 /// final UserModel me = session.currentUser; // defaultUserModel if not signed
 ///
+/// // Exact state vs. best-effort snapshot:
+/// final SessionState exact = session.state;          // e.g. Authenticating/Refreshing/SessionError
+/// final SessionState simple = session.stateOrDefault; // Authenticated or Unauthenticated
+///
 /// // Clean up:
 /// session.dispose();
 /// ```
 class BlocSession {
+  /// Creates a [BlocSession].
+  ///
+  /// The default [postDisposePolicy] is [PostDisposePolicy.throwStateError],
+  /// which is recommended to surface lifecycle issues early. For legacy
+  /// code paths that access getters after `dispose()`, you can opt into a
+  /// lenient policy.
   BlocSession({
     required SessionUsecases usecases,
     required WatchAuthStateChangesUsecase watchAuthStateChanges,
     Debouncer? authDebouncer,
     Debouncer? refreshDebouncer,
+    this.postDisposePolicy = PostDisposePolicy.throwStateError,
   })  : _usecases = usecases,
         _watch = watchAuthStateChanges,
         _authDebouncer = authDebouncer ?? Debouncer(),
         _refreshDebouncer = refreshDebouncer ?? Debouncer(),
         _states = BlocGeneral<SessionState>(const Unauthenticated());
 
-  // Facade de casos de uso (tu clase existente)
+  // ---- Dependencies & holders ------------------------------------------------
+
+  // Facade of use cases.
   final SessionUsecases _usecases;
+
+  // Source for auth state changes.
   final WatchAuthStateChangesUsecase _watch;
 
-  // Stream principal de estado
+  // Main state holder.
   final BlocGeneral<SessionState> _states;
 
-  // Debouncers para evitar dobles taps
+  // Debouncers to avoid double taps.
   final Debouncer _authDebouncer;
   final Debouncer _refreshDebouncer;
 
+  // Post-dispose behavior policy.
+  final PostDisposePolicy postDisposePolicy;
+
+  // Subscription to auth changes.
   StreamSubscription<Either<ErrorItem, UserModel?>>? _authSub;
 
-  Future<void> cancelAuthSubscription() async {
-    if (_authSub != null) {
-      await _authSub!.cancel();
-      _authSub = null;
-    }
-  }
-
+  // Disposal flag.
   bool _disposed = false;
 
-  Stream<SessionState> get sessionStream => _states.stream;
+  // Standard error when accessing getters after dispose under lenient policy.
+  static const ErrorItem _disposedError = ErrorItem(
+    title: 'Bloc disposed',
+    code: 'BLOC_DISPOSED',
+    description: 'BlocSession has been disposed and cannot be accessed.',
+  );
 
-  /// Current user (never null). Returns [defaultUserModel] if not authenticated.
-  UserModel get currentUser {
-    final SessionState state = _states.value;
-    if (state is Authenticated) {
-      return state.user;
+  /// Centralizes the post-dispose behavior according to [postDisposePolicy].
+  T _guard<T>({
+    required T Function() body,
+    required T Function() lastSnapshot,
+    required T Function() sessionErrorFallback,
+  }) {
+    if (!_disposed) {
+      return body();
     }
-    return defaultUserModel;
+
+    switch (postDisposePolicy) {
+      case PostDisposePolicy.throwStateError:
+        throw StateError('BlocSession has been disposed');
+      case PostDisposePolicy.returnLastSnapshot:
+        return lastSnapshot();
+      case PostDisposePolicy.returnSessionError:
+        return sessionErrorFallback();
+    }
   }
 
+  /// Canonical session stream (prefer `session.stream` in consumers).
+  ///
+  /// **Post-dispose behavior**:
+  /// - Default: throws `StateError`.
+  /// - `returnLastSnapshot` / `returnSessionError`: returns the same (closed)
+  ///   stream; a late subscriber may receive the last replayed value and then
+  ///   completion, but no further updates.
+  Stream<SessionState> get sessionStream => _guard<Stream<SessionState>>(
+        body: () => _states.stream,
+        lastSnapshot: () => _states.stream,
+        sessionErrorFallback: () => _states.stream,
+      );
+
+  /// Canonical alias so consumers can use `session.stream`.
+  ///
+  /// See [sessionStream] for post-dispose behavior.
+  Stream<SessionState> get stream => sessionStream;
+
+  /// Exact snapshot of the latest published [SessionState].
+  ///
+  /// This getter **reflects the internal state verbatim** without any mapping
+  /// or fallback. It is suitable when the UI or tests must reason about
+  /// intermediate states such as [Authenticating], [Refreshing], or [SessionError].
+  ///
+  /// Prefer this getter over [stateOrDefault] when you need full-fidelity
+  /// transitions (e.g. progress indicators or error banners).
+  ///
+  /// **Post-dispose behavior**:
+  /// - Default: throws `StateError`.
+  /// - `returnLastSnapshot`: returns the last cached [SessionState].
+  /// - `returnSessionError`: returns `SessionError(_disposedError)`.
+  ///
+  /// ### Example
+  /// ```dart
+  /// final SessionState s = session.state;
+  /// if (s is SessionError) {
+  ///   showError(s.message);
+  /// }
+  /// ```
+  SessionState get state => _guard<SessionState>(
+        body: () => _states.value,
+        lastSnapshot: () => _states.value,
+        sessionErrorFallback: () => const SessionError(_disposedError),
+      );
+
+  /// Synchronous **best-effort** snapshot for consumers that only care about
+  /// “am I signed in or not?” without dealing with intermediate states.
+  ///
+  /// For **backward compatibility** with previous implementations, this getter
+  /// collapses the internal state into:
+  /// - [Authenticated] → returns the **current** `Authenticated` instance
+  ///   (no new allocation).
+  /// - Any other state (`Unauthenticated`, `Authenticating`, `Refreshing`,
+  ///   `SessionError`) → returns `const Unauthenticated()`.
+  ///
+  /// Use [state] if you need the exact internal state; use this getter for
+  /// simple binary checks in legacy code paths.
+  ///
+  /// **Post-dispose behavior**:
+  /// - Default: throws `StateError`.
+  /// - `returnLastSnapshot`: collapses based on the **last cached** state.
+  /// - `returnSessionError`: returns `Unauthenticated` to keep binary helpers
+  ///   harmless in legacy flows.
+  ///
+  /// ### Example
+  /// ```dart
+  /// // Binary reading without dealing with intermediate states:
+  /// final bool signedIn = session.stateOrDefault is Authenticated;
+  /// ```
+  SessionState get stateOrDefault => _guard<SessionState>(
+        body: () {
+          final SessionState state = _states.value;
+          if (state is Authenticated) {
+            return state; // no allocation if already authed
+          }
+          return const Unauthenticated();
+        },
+        lastSnapshot: () {
+          final SessionState s = _states.value;
+          return s is Authenticated ? s : const Unauthenticated();
+        },
+        sessionErrorFallback: () => const Unauthenticated(),
+      );
+
+  /// Current user (never null). Returns [defaultUserModel] if not authenticated.
+  ///
+  /// **Post-dispose behavior**:
+  /// - Default: throws `StateError`.
+  /// - `returnLastSnapshot`: returns the last cached user or [defaultUserModel].
+  /// - `returnSessionError`: returns [defaultUserModel] (safe helper).
+  UserModel get currentUser => _guard<UserModel>(
+        body: () {
+          final SessionState s = _states.value;
+          return s is Authenticated ? s.user : defaultUserModel;
+        },
+        lastSnapshot: () {
+          final SessionState s = _states.value;
+          return s is Authenticated ? s.user : defaultUserModel;
+        },
+        sessionErrorFallback: () => defaultUserModel,
+      );
+
   /// True if state is [Authenticated].
-  bool get isAuthenticated => _states.value is Authenticated;
+  ///
+  /// **Post-dispose behavior**:
+  /// - Default: throws `StateError`.
+  /// - `returnLastSnapshot`: returns the last cached truth value.
+  /// - `returnSessionError`: returns `false` (safe helper).
+  bool get isAuthenticated => _guard<bool>(
+        body: () => _states.value is Authenticated,
+        lastSnapshot: () => _states.value is Authenticated,
+        sessionErrorFallback: () => false,
+      );
+
+  // ---- Lifecycle -------------------------------------------------------------
 
   void _ensureNotDisposed() {
     if (_disposed) {
       throw StateError('BlocSession has been disposed');
+    }
+  }
+
+  /// Cancels the internal auth subscription if present.
+  Future<void> cancelAuthSubscription() async {
+    if (_authSub != null) {
+      await _authSub!.cancel();
+      _authSub = null;
     }
   }
 
@@ -120,6 +305,16 @@ class BlocSession {
     });
   }
 
+  /// Disposes internal resources.
+  void dispose() {
+    if (_disposed) {
+      return;
+    }
+    cancelAuthSubscription();
+    _states.dispose();
+    _disposed = true;
+  }
+
   /// Builds a minimal [UserModel] using email/password to satisfy usecases that
   /// read `jwt[LogInUserAndPasswordUsecase.passwordKey]` for credentials.
   UserModel _buildUserForCredentials({
@@ -136,8 +331,6 @@ class BlocSession {
       },
     );
   }
-
-  // ---------- Public API ----------
 
   /// Performs **email+password login**.
   ///
@@ -339,29 +532,5 @@ class BlocSession {
       (_) => _states.value = const Unauthenticated(),
     );
     return right;
-  }
-
-  /// Canonical alias so consumers can use `session.stream`.
-  Stream<SessionState> get stream => sessionStream;
-
-  /// Synchronous best-effort snapshot.
-  ///
-  /// Until the core exposes a true snapshot getter, we map the
-  /// public read-only helpers to a reasonable default.
-  SessionState get stateOrDefault {
-    if (isAuthenticated) {
-      return Authenticated(currentUser);
-    }
-    return const Unauthenticated();
-  }
-
-  /// Disposes internal resources.
-  void dispose() {
-    if (_disposed) {
-      return;
-    }
-    cancelAuthSubscription();
-    _states.dispose();
-    _disposed = true;
   }
 }
