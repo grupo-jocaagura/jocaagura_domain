@@ -79,7 +79,7 @@ class FacadeWsDatabaseUsecases<T extends Model> {
     required T Function(Map<String, dynamic>) fromJson,
     ErrorMapper? myMapper,
   }) {
-    final ErrorMapper mapper = myMapper ?? DefaultErrorMapper();
+    final ErrorMapper mapper = myMapper ?? const DefaultErrorMapper();
 
     final ReadDocUseCase<T> read = ReadDocUseCase<T>(repository);
     final WriteDocUseCase<T> write = WriteDocUseCase<T>(repository);

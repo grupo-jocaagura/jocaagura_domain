@@ -295,7 +295,7 @@ class WatchDocUntilUseCase<T extends Model>
       },
       onError: (Object error, StackTrace st) {
         if (!done.isCompleted) {
-          final ErrorItem mapped = DefaultErrorMapper().fromException(
+          final ErrorItem mapped = const DefaultErrorMapper().fromException(
             error,
             st,
             location: 'WatchDocUntilUseCase.onError',
@@ -444,7 +444,7 @@ class ReadManyDocsUseCase<T extends Model>
         UseCase<Either<ErrorItem, Map<String, Either<ErrorItem, T>>>,
             ReadManyParams> {
   ReadManyDocsUseCase(this._repo, {ErrorMapper? mapper})
-      : _mapper = mapper ?? DefaultErrorMapper();
+      : _mapper = mapper ?? const DefaultErrorMapper();
 
   final RepositoryWsDatabase<T> _repo;
   final ErrorMapper _mapper;
@@ -487,7 +487,7 @@ class WriteManyDocsUseCase<T extends Model>
         UseCase<Either<ErrorItem, Map<String, Either<ErrorItem, T>>>,
             WriteManyParams<T>> {
   WriteManyDocsUseCase(this._repo, {ErrorMapper? mapper})
-      : _mapper = mapper ?? DefaultErrorMapper();
+      : _mapper = mapper ?? const DefaultErrorMapper();
 
   final RepositoryWsDatabase<T> _repo;
   final ErrorMapper _mapper;
@@ -528,7 +528,7 @@ class DeleteManyDocsUseCase<T extends Model>
         UseCase<Either<ErrorItem, Map<String, Either<ErrorItem, Unit>>>,
             DeleteManyParams> {
   DeleteManyDocsUseCase(this._repo, {ErrorMapper? mapper})
-      : _mapper = mapper ?? DefaultErrorMapper();
+      : _mapper = mapper ?? const DefaultErrorMapper();
 
   final RepositoryWsDatabase<T> _repo;
   final ErrorMapper _mapper;
@@ -578,7 +578,7 @@ class DetachWatchUseCase<T extends Model>
       return Right<ErrorItem, Unit>(Unit.value);
     } catch (e, s) {
       return Left<ErrorItem, Unit>(
-        DefaultErrorMapper().fromException(
+        const DefaultErrorMapper().fromException(
           e,
           s,
           location: 'DetachWatchUseCase.call',
@@ -610,7 +610,7 @@ class ReleaseDocUseCase<T extends Model>
       return Right<ErrorItem, Unit>(Unit.value);
     } catch (e, s) {
       return Left<ErrorItem, Unit>(
-        DefaultErrorMapper().fromException(
+        const DefaultErrorMapper().fromException(
           e,
           s,
           location: 'ReleaseDocUseCase.call',
@@ -643,7 +643,7 @@ class DisposeWsDatabaseUseCase<T extends Model>
       return Right<ErrorItem, Unit>(Unit.value);
     } catch (e, s) {
       return Left<ErrorItem, Unit>(
-        DefaultErrorMapper().fromException(
+        const DefaultErrorMapper().fromException(
           e,
           s,
           location: 'DisposeWsDatabaseUseCase.call',

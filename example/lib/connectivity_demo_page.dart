@@ -121,11 +121,11 @@ class _ConnectivityDemoPageState extends State<ConnectivityDemoPage> {
       ),
     );
     // 2) Gateway: converts Service → raw payload (Map) and wraps exceptions as ErrorItem
-    _gateway = GatewayConnectivityImpl(_service, DefaultErrorMapper());
+    _gateway = GatewayConnectivityImpl(_service, const DefaultErrorMapper());
     // 3) Repository: maps payload → ConnectivityModel, detects business errors via ErrorMapper
     _repo = RepositoryConnectivityImpl(
       _gateway,
-      errorMapper: DefaultErrorMapper(),
+      errorMapper: const DefaultErrorMapper(),
     );
     // 4) Bloc: exposes Stream<Either<ErrorItem, ConnectivityModel>> to the UI (pure, no UI side-effects)
     _bloc = BlocConnectivity(

@@ -24,7 +24,7 @@ class RepositoryConnectivityImpl extends RepositoryConnectivity {
     GatewayConnectivity gateway, {
     ErrorMapper? errorMapper,
   })  : _gateway = gateway,
-        _err = errorMapper ?? DefaultErrorMapper();
+        _err = errorMapper ?? const DefaultErrorMapper();
 
   final GatewayConnectivity _gateway;
   final ErrorMapper _err;

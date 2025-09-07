@@ -77,7 +77,7 @@ class GatewayWsDatabaseImpl implements GatewayWsDatabase {
     bool treatEmptyAsMissing = false,
   })  : _service = service,
         _collection = collection,
-        _mapper = mapper ?? DefaultErrorMapper(),
+        _mapper = mapper ?? const DefaultErrorMapper(),
         _idKey = idKey,
         _readAfterWrite = readAfterWrite,
         _treatEmptyAsMissing = treatEmptyAsMissing;

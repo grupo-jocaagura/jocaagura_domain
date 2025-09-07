@@ -30,7 +30,7 @@ abstract class ErrorMapper {
 /// - Top-level `{'code': ..., 'message': ...}` or `{'errorCode': ..., 'errorMessage': ...}`.
 /// - Top-level flags `ok:false` or `success:false`.
 class DefaultErrorMapper implements ErrorMapper {
-  DefaultErrorMapper({
+  const DefaultErrorMapper({
     this.errorKey = 'error',
     this.codeKey = 'code',
     this.titleKey = 'title',

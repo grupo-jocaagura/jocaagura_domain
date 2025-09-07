@@ -35,7 +35,7 @@ class _SessionDemoPageState extends State<SessionDemoPage> {
     );
 
     // Ajusta estos nombres si en tu paquete son distintos
-    _errorMapper = DefaultErrorMapper();
+    _errorMapper = const DefaultErrorMapper();
     _gateway = GatewayAuthImpl(_service, errorMapper: _errorMapper);
     _repo = RepositoryAuthImpl(gateway: _gateway, errorMapper: _errorMapper);
 
