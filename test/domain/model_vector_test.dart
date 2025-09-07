@@ -170,4 +170,41 @@ void main() {
       expect(vector.isCorrectVector, isFalse);
     });
   });
+
+  group('ModelVector integer-oriented view', () {
+    test('round policy for positive decimals', () {
+      const ModelVector v = ModelVector(1.4, 2.5);
+      expect(v.x, 1);
+      expect(v.y, 3); // .5 away from zero
+    });
+
+    test('round policy for negative decimals', () {
+      const ModelVector v = ModelVector(-1.4, -2.5);
+      expect(v.x, -1);
+      expect(v.y, -3); // .5 away from zero
+    });
+
+    test('key stability', () {
+      const ModelVector v = ModelVector(10.49, -3.51);
+      expect(v.key, '10,-4');
+    });
+
+    test('copyWithInts overrides only provided axes', () {
+      const ModelVector v = ModelVector(7.2, 8.8);
+
+      final ModelVector c1 = v.copyWithInts(x: -1);
+      expect(c1.dx, -1.0);
+      expect(c1.dy, v.y.toDouble());
+
+      final ModelVector c2 = v.copyWithInts(y: 5);
+      expect(c2.dx, v.x.toDouble());
+      expect(c2.dy, 5.0);
+    });
+
+    test('fromXY builds from integers', () {
+      final ModelVector v = ModelVector.fromXY(3, -2);
+      expect(v.dx, 3.0);
+      expect(v.dy, -2.0);
+    });
+  });
 }

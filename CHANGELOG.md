@@ -3,6 +3,24 @@
 This document follows the guidelines of [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.25.3] - 2025-09-07
+### Added
+- `ModelVector.fromXY(int x, int y)` factory constructor for convenient creation from integer coordinates.
+- Integer-oriented getters `x` and `y` (using `.round()`, policy: .5 away from zero).
+- `key` property providing a canonical `"x,y"` representation for map/set usage.
+- `copyWithInts({int? x, int? y})` method to create safe copies overriding integer axes.
+
+### Docs
+- Extended DartDoc with examples for new methods and clarified rounding policy.
+- Documented reversibility limitations when the original `dx`/`dy` are non-integers.
+
+### Tests
+- Added unit tests to validate:
+  - Rounding policy for positive/negative decimals.
+  - Stability of `key` and reversibility via `fromXY`.
+  - `copyWithInts` behavior with partial overrides.
+  - Factory `fromXY` producing expected doubles.
+
 ## [1.25.2] - 2025-09-07
 
 ### Added
