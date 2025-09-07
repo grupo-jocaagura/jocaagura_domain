@@ -66,8 +66,10 @@ void main() {
           internetSpeed: 40,
         ),
       );
-      final RepositoryConnectivityImpl repo = RepositoryConnectivityImpl(gw,
-          errorMapper: const DefaultErrorMapper());
+      final RepositoryConnectivityImpl repo = RepositoryConnectivityImpl(
+        gw,
+        errorMapper: const DefaultErrorMapper(),
+      );
       final Either<ErrorItem, ConnectivityModel> res = await repo.snapshot();
       expect(res.isRight, isTrue);
       final ConnectivityModel model =
@@ -83,8 +85,10 @@ void main() {
           internetSpeed: 10,
         ),
       );
-      final RepositoryConnectivityImpl repo = RepositoryConnectivityImpl(gw,
-          errorMapper: const DefaultErrorMapper());
+      final RepositoryConnectivityImpl repo = RepositoryConnectivityImpl(
+        gw,
+        errorMapper: const DefaultErrorMapper(),
+      );
       final Either<ErrorItem, ConnectivityModel> res = await repo.snapshot();
       expect(res.isLeft, isTrue);
       final ErrorItem err = (res as Left<ErrorItem, ConnectivityModel>).value;
@@ -97,8 +101,10 @@ void main() {
         internetSpeed: 80,
       );
       final _StubGatewayOk gw = _StubGatewayOk(curr);
-      final RepositoryConnectivityImpl repo = RepositoryConnectivityImpl(gw,
-          errorMapper: const DefaultErrorMapper());
+      final RepositoryConnectivityImpl repo = RepositoryConnectivityImpl(
+        gw,
+        errorMapper: const DefaultErrorMapper(),
+      );
       final Either<ErrorItem, ConnectivityModel> first =
           await repo.watch().first;
       expect(first.isRight, isTrue);
