@@ -3,6 +3,94 @@
 This document follows the guidelines of [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.25.1] - 2025-09-07
+
+## Added
+
+* **Documentación exhaustiva de estados de sesión**
+
+  * `SessionState`, `Unauthenticated`, `Authenticating`, `Authenticated`, `Refreshing`, `SessionError` ahora tienen DartDoc claro sobre propósito, transiciones y expectativas de UI.
+* **Getter `state` en `BlocSession`**
+
+  * Exposición fiel del último `SessionState` publicado (útil para UI que necesita distinguir `Authenticating`, `Refreshing` o `SessionError`).
+* **Páginas demo ampliadas en el example**
+
+  * `SessionDemoPage` (flujo completo de sesión con `Either`).
+  * `WsDatabaseUserDemoPage` (CRUD + watch en tiempo real con motor de cambios).
+  * `ConnectivityDemoPage` (flujo puro de conectividad con `Either`).
+  * `BlocLoadingDemoPage` (acción única con anti-flicker y cola FIFO).
+  * `BlocResponsiveDemoPage` (grid responsivo, simulación de tamaño, métricas).
+  * `BlocOnboardingDemoPage` (pasos con `onEnter` que retorna `Either`, auto-avance y manejo de errores).
+
+## Changed
+
+* **`BlocSession.stateOrDefault`**
+
+  * Mantiene retrocompatibilidad simplificando a binario “autenticado / no autenticado”.
+  * Si el estado es `Authenticated`, **devuelve la misma instancia** (sin reasignar).
+  * Para cualquier otro estado, devuelve `const Unauthenticated()`.
+* **Getters validados**
+
+  * `stream`, `sessionStream`, `state`, `stateOrDefault`, `currentUser`, `isAuthenticated` verifican ciclo de vida.
+  * Tras `dispose()`, el acceso lanza `StateError` con mensaje claro (contrato más seguro).
+* **Alias canónico**
+
+  * `stream` es el alias recomendado; `sessionStream` se mantiene para compatibilidad.
+
+## Fixed
+
+* **`refreshSession()` en fallo**
+
+  * Si el repo retorna `Left`, el BLoC pasa a `SessionError` y **no permanece** en `Refreshing`.
+* **Idempotencia de `boot()`**
+
+  * Múltiples llamadas re-adjuntan la suscripción sin pérdidas de eventos.
+* **`cancelAuthSubscription()`**
+
+  * Al cancelar manualmente, el stream deja de reflejar cambios hasta volver a llamar a `boot()` (documentado y cubierto en tests).
+
+## Tests
+
+* **Suite de dispose y getters**
+
+  * Acceso a getters tras `dispose()` → `StateError` esperado.
+  * `stream`/`sessionStream` no emiten tras `dispose()`.
+  * `stateOrDefault` es un **snapshot** y no provoca emisiones.
+* **Cobertura de secuencias clave**
+
+  * `refreshSession()` con `Left` → `SessionError`.
+  * `boot()` idempotente y `cancelAuthSubscription()` en medio de sesión.
+  * Debouncer en `logIn()` (múltiples llamadas rápidas → 1 hit a repo).
+
+## Migration notes
+
+* **Acceso tras `dispose()`**
+  * Evita leer `bloc.state`, `bloc.currentUser`, `bloc.isAuthenticated` o `bloc.stream` después de disponer.
+  * Si existe código heredado que pudiera acceder tras `dispose()`, rodéalo con `mounted` (en UI) o reordena el ciclo de vida.
+  * Opción de compatibilidad temporal:
+    ```dart
+    SessionState safeState(BlocSession b) {
+      try { return b.state; } catch (_) { return const Unauthenticated(); }
+    }
+    ```
+* **Snapshots**
+
+  * Para lógicas binarias, usa `stateOrDefault`.
+  * Para lógicas de progreso/errores, usa `state`.
+
+## Dev notes
+
+* Si necesitas soportar versiones de Flutter sin `Color.withValues`, cambia a:
+
+  ```dart
+  void main(){
+  color.withOpacity(0.75); // en lugar de withValues(alpha: 0.75)
+  }
+  ```
+
+— Fin de 1.25.1 —
+
+
 ## [1.25.0] - 2025-08-17
 
 ### Fixed

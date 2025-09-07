@@ -20,7 +20,6 @@ void main() {
     late BlocSession bloc;
     late WatchAuthStateChangesUsecase watchUC;
 
-    // Debouncers cortos para pruebas rápidas
     final Debouncer tinyAuthDebouncer = Debouncer(milliseconds: 1);
     final Debouncer tinyRefreshDebouncer = Debouncer(milliseconds: 1);
 
@@ -193,6 +192,34 @@ void main() {
         bloc.sessionStream,
         (SessionState s) => s is Unauthenticated,
       );
+    });
+    test('refreshSession() → Left ⇒ SessionError y no permanece en Refreshing',
+        () async {
+      await bloc.boot();
+      const UserModel base = UserModel(
+        id: 'idR',
+        displayName: 'r',
+        photoUrl: '',
+        email: 'r@x.com',
+        jwt: <String, dynamic>{'t': 1},
+      );
+      repo.emitAuth(Right<ErrorItem, UserModel?>(base));
+      await waitForState(bloc.stream, (SessionState s) => s is Authenticated);
+
+      // Forzamos fallo en refresh
+      repo.nextRefreshResult = Left<ErrorItem, UserModel>(
+        const ErrorItem(title: 'x', code: 'ERR_REFRESH', description: 'fail'),
+      );
+
+      final Either<ErrorItem, UserModel>? r = await bloc.refreshSession();
+      expect(r, isNotNull);
+      expect(r!.isLeft, isTrue);
+
+      final SessionState s = await waitForState(
+        bloc.stream,
+        (SessionState st) => st is SessionError,
+      );
+      expect((s as SessionError).message.code, 'ERR_REFRESH');
     });
 
     test('recoverPassword() éxito → no cambia estado (usamos getters)',
@@ -415,6 +442,511 @@ void main() {
 
       expect(finalUser?.email, base.email);
       expect(finalUser?.jwt['t'], 99); // ✅ ya no es 1
+    });
+  });
+  group('BlocSession getters: stream & stateOrDefault', () {
+    late FakeRepositoryAuth repo;
+    late SessionUsecases usecases;
+    late BlocSession bloc;
+    late WatchAuthStateChangesUsecase watchUC;
+
+    // Debouncers ultrarrápidos para no ralentizar los tests.
+    final Debouncer tinyAuthDebouncer = Debouncer(milliseconds: 1);
+    final Debouncer tinyRefreshDebouncer = Debouncer(milliseconds: 1);
+
+    setUp(() {
+      repo = FakeRepositoryAuth();
+      usecases = SessionUsecases(
+        logInUserAndPassword: LogInUserAndPasswordUsecase(repo),
+        logOutUsecase: LogOutUsecase(repo),
+        signInUserAndPassword: SignInUserAndPasswordUsecase(repo),
+        recoverPassword: RecoverPasswordUsecase(repo),
+        logInSilently: LogInSilentlyUsecase(repo),
+        loginWithGoogle: LoginWithGoogleUsecase(repo),
+        refreshSession: RefreshSessionUsecase(repo),
+        getCurrentUser: GetCurrentUserUsecase(repo),
+        watchAuthStateChangesUsecase: WatchAuthStateChangesUsecase(repo),
+      );
+      watchUC = WatchAuthStateChangesUsecase(repo);
+      bloc = BlocSession(
+        usecases: usecases,
+        watchAuthStateChanges: watchUC,
+        authDebouncer: tinyAuthDebouncer,
+        refreshDebouncer: tinyRefreshDebouncer,
+      );
+    });
+
+    tearDown(() {
+      bloc.dispose();
+    });
+
+    test(
+        'stream y sessionStream reciben misma traza de estados (4 transiciones)',
+        () async {
+      final List<Type> a = <Type>[];
+      final List<Type> b = <Type>[];
+
+      final StreamSubscription<SessionState> subA =
+          bloc.stream.listen((SessionState s) => a.add(s.runtimeType));
+      final StreamSubscription<SessionState> subB =
+          bloc.sessionStream.listen((SessionState s) => b.add(s.runtimeType));
+
+      await bloc.boot();
+
+      // 1) Right(null) -> Unauthenticated (explícito, aunque ya recibimos uno por replay)
+      repo.emitAuth(Right<ErrorItem, UserModel?>(null));
+      await waitForState(bloc.stream, (SessionState s) => s is Unauthenticated);
+
+      // 2) Right(user1) -> Authenticated
+      const UserModel user1 = UserModel(
+        id: 'u1',
+        displayName: 'u1',
+        photoUrl: '',
+        email: 'u1@x.com',
+        jwt: <String, dynamic>{'v': 1},
+      );
+      repo.emitAuth(Right<ErrorItem, UserModel?>(user1));
+      await waitForState(bloc.stream, (SessionState s) => s is Authenticated);
+
+      // 3) Right(null) -> Unauthenticated
+      repo.emitAuth(Right<ErrorItem, UserModel?>(null));
+      await waitForState(bloc.stream, (SessionState s) => s is Unauthenticated);
+
+      // 4) Right(user2) -> Authenticated (cambiar el payload para evitar colisiones de igualdad)
+      const UserModel user2 = UserModel(
+        id: 'u1', // puede ser el mismo id
+        displayName: 'u1',
+        photoUrl: '',
+        email: 'u1@x.com',
+        jwt: <String, dynamic>{
+          'v': 2,
+        }, // <-- cambia algo (ej. jwt) para asegurar nueva emisión
+      );
+      repo.emitAuth(Right<ErrorItem, UserModel?>(user2));
+      await waitForState(bloc.stream, (SessionState s) => s is Authenticated);
+
+      // Dar un tick para drenar microtasks
+      await Future<void>.delayed(const Duration(milliseconds: 5));
+
+      await subA.cancel();
+      await subB.cancel();
+
+      // Normalizamos: nos quedamos con las 4 últimas (puede haber 1 replay inicial)
+      List<Type> norm(List<Type> xs) =>
+          xs.length <= 4 ? xs : xs.sublist(xs.length - 4);
+
+      expect(
+        norm(a),
+        <Type>[Unauthenticated, Authenticated, Unauthenticated, Authenticated],
+      );
+      expect(
+        norm(b),
+        <Type>[Unauthenticated, Authenticated, Unauthenticated, Authenticated],
+      );
+    });
+
+    test('stateOrDefault → Unauthenticated cuando no hay sesión', () {
+      // Estado inicial del BlocSession es Unauthenticated.
+      final SessionState s = bloc.stateOrDefault;
+      expect(s, isA<Unauthenticated>());
+    });
+
+    test('stateOrDefault → Authenticated(currentUser) cuando hay sesión',
+        () async {
+      await bloc.boot();
+      const UserModel u = UserModel(
+        id: 'id-auth',
+        displayName: 'auth',
+        photoUrl: '',
+        email: 'auth@x.com',
+        jwt: <String, dynamic>{'k': 1},
+      );
+
+      repo.emitAuth(Right<ErrorItem, UserModel?>(u));
+      await waitForState(
+        bloc.sessionStream,
+        (SessionState s) => s is Authenticated && s.user.email == u.email,
+      );
+
+      final SessionState snapshot = bloc.stateOrDefault;
+      expect(snapshot, isA<Authenticated>());
+      final Authenticated a = snapshot as Authenticated;
+      // Debe reflejar el mismo usuario expuesto por currentUser.
+      expect(a.user.email, bloc.currentUser.email);
+      expect(a.user.jwt['k'], 1);
+    });
+
+    test('stateOrDefault no emite nuevos estados (es snapshot sin efectos)',
+        () async {
+      // Suscripción para contar emisiones.
+      int emissions = 0;
+      final StreamSubscription<SessionState> sub =
+          bloc.sessionStream.listen((_) => emissions++);
+
+      // 1) Llamar a stateOrDefault en frío no debe emitir nada.
+      final int before = emissions;
+      final SessionState snap1 = bloc.stateOrDefault;
+      expect(snap1, isA<Unauthenticated>());
+      expect(emissions, before);
+
+      // 2) Autenticar y volver a consultar snapshot tampoco debe emitir.
+      await bloc.boot();
+      const UserModel u = UserModel(
+        id: 'idZ',
+        displayName: 'z',
+        photoUrl: '',
+        email: 'z@x.com',
+        jwt: <String, dynamic>{},
+      );
+      repo.emitAuth(Right<ErrorItem, UserModel?>(u));
+      await waitForState(
+        bloc.sessionStream,
+        (SessionState s) => s is Authenticated,
+      );
+
+      final int before2 = emissions;
+      final SessionState snap2 = bloc.stateOrDefault;
+      expect(snap2, isA<Authenticated>());
+      expect(
+        emissions,
+        before2,
+        reason: 'stateOrDefault no debe provocar emisiones',
+      );
+
+      await sub.cancel();
+    });
+
+    test('stream se puede escuchar normalmente (sanity check)', () async {
+      final List<SessionState> seen = <SessionState>[];
+      final StreamSubscription<SessionState> sub = bloc.stream.listen(seen.add);
+
+      await bloc.boot();
+      repo.emitAuth(Right<ErrorItem, UserModel?>(null));
+      await waitForState(bloc.stream, (SessionState s) => s is Unauthenticated);
+
+      expect(seen.last, isA<Unauthenticated>());
+      await sub.cancel();
+    });
+    test('boot() es idempotente: re-adjunta la suscripción sin pérdidas',
+        () async {
+      await bloc.boot();
+      await bloc.boot(); // segunda llamada
+
+      final List<Type> seen = <Type>[];
+      final StreamSubscription<SessionState> sub =
+          bloc.stream.listen((SessionState s) => seen.add(s.runtimeType));
+
+      // 1) Unauthenticated
+      repo.emitAuth(Right<ErrorItem, UserModel?>(null));
+      await waitForState(bloc.stream, (SessionState s) => s is Unauthenticated);
+
+      // 2) Authenticated
+      repo.emitAuth(
+        Right<ErrorItem, UserModel?>(
+          const UserModel(
+            id: 'a',
+            displayName: 'a',
+            photoUrl: '',
+            email: 'a@x.com',
+            jwt: <String, dynamic>{},
+          ),
+        ),
+      );
+      await waitForState(bloc.stream, (SessionState s) => s is Authenticated);
+
+      await sub.cancel();
+
+      // Debe haber reflejado los cambios: Unauthenticated -> Authenticated
+      // (permitimos un primer replay inicial en seen[0])
+      expect(
+        seen.map((Type t) => t.toString()).toList().contains('Unauthenticated'),
+        isTrue,
+      );
+      expect(
+        seen.map((Type t) => t.toString()).toList().contains('Authenticated'),
+        isTrue,
+      );
+    });
+
+    test('stateOrDefault es snapshot y NO emite por sí mismo', () async {
+      int emissions = 0;
+      final StreamSubscription<SessionState> sub =
+          bloc.stream.listen((_) => emissions++);
+
+      final int before = emissions;
+      final SessionState snap = bloc.stateOrDefault;
+      expect(snap, isA<Unauthenticated>());
+      expect(emissions, before);
+
+      await sub.cancel();
+    });
+  });
+  group('BlocSession: dispose & postDisposePolicy', () {
+    late FakeRepositoryAuth repo;
+    late SessionUsecases usecases;
+    late WatchAuthStateChangesUsecase watchUC;
+
+    final Debouncer tinyAuthDebouncer = Debouncer(milliseconds: 1);
+    final Debouncer tinyRefreshDebouncer = Debouncer(milliseconds: 1);
+
+    setUp(() {
+      repo = FakeRepositoryAuth();
+      usecases = SessionUsecases(
+        logInUserAndPassword: LogInUserAndPasswordUsecase(repo),
+        logOutUsecase: LogOutUsecase(repo),
+        signInUserAndPassword: SignInUserAndPasswordUsecase(repo),
+        recoverPassword: RecoverPasswordUsecase(repo),
+        logInSilently: LogInSilentlyUsecase(repo),
+        loginWithGoogle: LoginWithGoogleUsecase(repo),
+        refreshSession: RefreshSessionUsecase(repo),
+        getCurrentUser: GetCurrentUserUsecase(repo),
+        watchAuthStateChangesUsecase: WatchAuthStateChangesUsecase(repo),
+      );
+      watchUC = WatchAuthStateChangesUsecase(repo);
+    });
+
+    group('Default policy = throwStateError', () {
+      late BlocSession bloc;
+
+      setUp(() {
+        bloc = BlocSession(
+          usecases: usecases,
+          watchAuthStateChanges: watchUC,
+          authDebouncer: tinyAuthDebouncer,
+          refreshDebouncer: tinyRefreshDebouncer,
+          // default es throwStateError
+        );
+      });
+
+      tearDown(() {
+        // doble dispose no debe lanzar
+        bloc.dispose();
+        bloc.dispose();
+      });
+
+      test('getters lanzan StateError tras dispose()', () async {
+        bloc.dispose();
+        expect(() => bloc.state, throwsStateError);
+        expect(() => bloc.stateOrDefault, throwsStateError);
+        expect(() => bloc.currentUser, throwsStateError);
+        expect(() => bloc.isAuthenticated, throwsStateError);
+        expect(() => bloc.sessionStream, throwsStateError);
+        expect(() => bloc.stream, throwsStateError);
+      });
+
+      test('métodos públicos lanzan tras dispose()', () async {
+        bloc.dispose();
+        expect(
+          () => bloc.logIn(email: 'a@x.com', password: '1'),
+          throwsStateError,
+        );
+        expect(
+          () => bloc.signIn(email: 'a@x.com', password: '1'),
+          throwsStateError,
+        );
+        expect(() => bloc.logInWithGoogle(), throwsStateError);
+        expect(() => bloc.logInSilently(), throwsStateError);
+        expect(() => bloc.refreshSession(), throwsStateError);
+        expect(() => bloc.recoverPassword(email: 'a@x.com'), throwsStateError);
+        expect(() => bloc.logOut(), throwsStateError);
+        expect(() => bloc.boot(), throwsStateError);
+      });
+
+      test('no refleja cambios del repo tras dispose()', () async {
+        await bloc.boot();
+
+        const UserModel u = UserModel(
+          id: 'idX',
+          displayName: 'x',
+          photoUrl: '',
+          email: 'x@x.com',
+          jwt: <String, dynamic>{},
+        );
+        repo.emitAuth(Right<ErrorItem, UserModel?>(u));
+        await waitForState(bloc.stream, (SessionState s) => s is Authenticated);
+
+        bloc.dispose();
+
+        // Cambios ya no deben reflejarse
+        repo.emitAuth(Right<ErrorItem, UserModel?>(null));
+        // No podemos leer getters (lanzan). Validamos que el stream tampoco es accesible.
+        expect(() => bloc.sessionStream, throwsStateError);
+      });
+    });
+
+    group('Policy = returnLastSnapshot', () {
+      late BlocSession bloc;
+
+      setUp(() {
+        bloc = BlocSession(
+          usecases: usecases,
+          watchAuthStateChanges: watchUC,
+          authDebouncer: tinyAuthDebouncer,
+          refreshDebouncer: tinyRefreshDebouncer,
+          postDisposePolicy: PostDisposePolicy.returnLastSnapshot,
+        );
+      });
+
+      tearDown(() {
+        // idempotente
+        bloc.dispose();
+        bloc.dispose();
+      });
+
+      test('getters devuelven último snapshot tras dispose()', () async {
+        // Autenticamos para tener snapshot != Unauthenticated
+        await bloc.boot();
+        const UserModel u = UserModel(
+          id: 'idL',
+          displayName: 'L',
+          photoUrl: '',
+          email: 'l@x.com',
+          jwt: <String, dynamic>{'k': 7},
+        );
+        repo.emitAuth(Right<ErrorItem, UserModel?>(u));
+        await waitForState(bloc.stream, (SessionState s) => s is Authenticated);
+
+        bloc.dispose();
+
+        // Getters NO lanzan; devuelven último snapshot
+        expect(bloc.state, isA<Authenticated>());
+        expect(bloc.stateOrDefault, isA<Authenticated>());
+        expect(bloc.currentUser.email, 'l@x.com');
+        expect(bloc.isAuthenticated, isTrue);
+      });
+
+      test('sessionStream tras dispose: reemite último valor y luego cierra',
+          () async {
+        // Preparamos último valor == Authenticated
+        await bloc.boot();
+        const UserModel u = UserModel(
+          id: 'idL2',
+          displayName: 'L2',
+          photoUrl: '',
+          email: 'l2@x.com',
+          jwt: <String, dynamic>{},
+        );
+        repo.emitAuth(Right<ErrorItem, UserModel?>(u));
+        await waitForState(bloc.stream, (SessionState s) => s is Authenticated);
+
+        bloc.dispose();
+
+        final List<SessionState> seen = <SessionState>[];
+        bool done = false;
+
+        final StreamSubscription<SessionState> sub = bloc.sessionStream.listen(
+          seen.add,
+          onDone: () => done = true,
+          onError: (_) {},
+        );
+
+        await Future<void>.delayed(const Duration(milliseconds: 10));
+        await sub.cancel();
+
+        // Esperamos 1 reemisión del último valor y cierre
+        expect(seen.length, 1);
+        expect(seen.first, isA<Authenticated>());
+        expect(done, isTrue);
+      });
+
+      test(
+          'métodos siguen lanzando tras dispose() aunque getters sean tolerantes',
+          () async {
+        bloc.dispose();
+        expect(
+          () => bloc.logIn(email: 'a@x.com', password: '1'),
+          throwsStateError,
+        );
+        expect(() => bloc.boot(), throwsStateError);
+      });
+
+      test('no refleja nuevos cambios del repo tras dispose()', () async {
+        await bloc.boot();
+        repo.emitAuth(
+          Right<ErrorItem, UserModel?>(
+            const UserModel(
+              id: 'idLS',
+              displayName: 'LS',
+              photoUrl: '',
+              email: 'ls@x.com',
+              jwt: <String, dynamic>{},
+            ),
+          ),
+        );
+        await waitForState(bloc.stream, (SessionState s) => s is Authenticated);
+
+        bloc.dispose();
+
+        // El repo cambia a Unauthenticated, pero el snapshot se mantiene.
+        repo.emitAuth(Right<ErrorItem, UserModel?>(null));
+        await Future<void>.delayed(const Duration(milliseconds: 20));
+
+        expect(bloc.state, isA<Authenticated>());
+        expect(bloc.isAuthenticated, isTrue);
+      });
+    });
+
+    group('Policy = returnSessionError', () {
+      late BlocSession bloc;
+
+      setUp(() {
+        bloc = BlocSession(
+          usecases: usecases,
+          watchAuthStateChanges: watchUC,
+          authDebouncer: tinyAuthDebouncer,
+          refreshDebouncer: tinyRefreshDebouncer,
+          postDisposePolicy: PostDisposePolicy.returnSessionError,
+        );
+      });
+
+      tearDown(() {
+        bloc.dispose();
+        bloc.dispose();
+      });
+
+      test(
+          'state devuelve SessionError(BLOC_DISPOSED) tras dispose(); helpers son seguros',
+          () async {
+        bloc.dispose();
+
+        final SessionState s = bloc.state;
+        expect(s, isA<SessionError>());
+        final SessionError err = s as SessionError;
+        expect(err.message.code, 'BLOC_DISPOSED');
+
+        // Helpers conservan compatibilidad (no lanzan)
+        expect(bloc.stateOrDefault, isA<Unauthenticated>());
+        expect(bloc.currentUser, defaultUserModel);
+        expect(bloc.isAuthenticated, isFalse);
+      });
+
+      test('sessionStream tras dispose: reemite último valor y cierra',
+          () async {
+        // Dejamos último valor en Unauthenticated (inicial)
+        bloc.dispose();
+
+        final List<SessionState> seen = <SessionState>[];
+        bool done = false;
+
+        final StreamSubscription<SessionState> sub = bloc.stream.listen(
+          seen.add,
+          onDone: () => done = true,
+          onError: (_) {},
+        );
+
+        await Future<void>.delayed(const Duration(milliseconds: 10));
+        await sub.cancel();
+
+        expect(seen.length, 1);
+        expect(seen.first, isA<Unauthenticated>());
+        expect(done, isTrue);
+      });
+
+      test('métodos siguen lanzando tras dispose()', () {
+        bloc.dispose();
+        expect(() => bloc.refreshSession(), throwsStateError);
+        expect(() => bloc.recoverPassword(email: 'z@x.com'), throwsStateError);
+      });
     });
   });
 }

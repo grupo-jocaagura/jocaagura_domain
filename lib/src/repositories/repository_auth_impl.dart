@@ -5,7 +5,7 @@ class RepositoryAuthImpl implements RepositoryAuth {
     required GatewayAuth gateway,
     ErrorMapper? errorMapper,
   })  : _gateway = gateway,
-        _err = errorMapper ?? DefaultErrorMapper();
+        _err = errorMapper ?? const DefaultErrorMapper();
 
   final GatewayAuth _gateway;
   final ErrorMapper _err;
