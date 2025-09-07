@@ -102,7 +102,7 @@ jobs:
       - name: Setup Flutter
         uses: flutter-actions/setup-flutter@v4
         with:
-          version: stable
+          channel: stable
           cache: true
           cache-sdk: true
 
