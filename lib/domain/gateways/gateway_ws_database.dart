@@ -2,7 +2,7 @@ part of '../../../jocaagura_domain.dart';
 
 /// Abstraction to access a JSON-like WebSocket database (canvas domain).
 ///
-/// - Uses Either<ErrorItem, ...> for success/failure.
+/// - Uses Either con ErrorItem, ... for success/failure.
 /// - Embeds the [docId] into the returned JSON under [idKey] (default: 'id').
 /// - Maps thrown exceptions using [ErrorMapper].
 abstract class GatewayWsDatabase {
