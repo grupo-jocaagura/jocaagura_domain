@@ -8,6 +8,7 @@ on:
 
 permissions:
   contents: read
+  actions: write
 
 concurrency:
   group: validate-${{ github.ref }}
@@ -24,8 +25,8 @@ jobs:
         with:
           fetch-depth: 0
 
-      # 1) Firmas de todos los commits del evento
-      - name: Check commit signatures (all commits in event)
+      # 1) Firmas de todos los commits (push y PR)
+      - name: Check commit signatures (all commits)
         shell: bash
         run: |
           set -euo pipefail
@@ -36,48 +37,64 @@ jobs:
 
           OWNER="${{ github.repository_owner }}"
           REPO="${{ github.event.repository.name }}"
+          EVENT="${{ github.event_name }}"
 
-          # Funciona tanto para push como para pull_request (usa payload si hay commits)
-          COMMITS_JSON="$(cat "$GITHUB_EVENT_PATH" | jq -r '.commits // [] | .[].id')"
-          if [ -z "$COMMITS_JSON" ] && [ -n "${{ github.event.pull_request.head.sha }}" ]; then
-            COMMITS_JSON="${{ github.event.pull_request.head.sha }}"
+          get_commit_shas_push() {
+            local before="${{ github.event.before }}"
+            local after="${{ github.event.after }}"
+            if [[ -n "$before" && -n "$after" ]]; then
+              curl -sSf -H "Authorization: Bearer ${GH_TOKEN}" \
+                -H "Accept: application/vnd.github+json" \
+                "https://api.github.com/repos/${OWNER}/${REPO}/compare/${before}...${after}" \
+                | jq -r '.commits[].sha'
+            fi
+          }
+
+          get_commit_shas_pr() {
+            local pr="${{ github.event.pull_request.number }}"
+            if [[ -n "$pr" ]]; then
+              curl -sSf -H "Authorization: Bearer ${GH_TOKEN}" \
+                -H "Accept: application/vnd.github+json" \
+                "https://api.github.com/repos/${OWNER}/${REPO}/pulls/${pr}/commits" \
+                | jq -r '.[].sha'
+            fi
+          }
+
+          SHAS=""
+          if [[ "$EVENT" == "pull_request" ]]; then
+            SHAS="$(get_commit_shas_pr || true)"
+          else
+            SHAS="$(get_commit_shas_push || true)"
           fi
 
-          mapfile -t SHAS < <(printf "%s\n" "$COMMITS_JSON" | sed '/^$/d')
-
-          if [ "${#SHAS[@]}" -eq 0 ]; then
-            echo "No commits found in event payload. Failing for safety."
+          if [[ -z "${SHAS//[$'\t\r\n ']/}" ]]; then
+            echo "::error title=No commits found::No se identificaron commits para verificar."
             exit 1
           fi
 
           fail=false
           failed_count=0
-
-          for SHA in "${SHAS[@]}"; do
+          while read -r SHA; do
+            [[ -z "$SHA" ]] && continue
             RESP="$(curl -sSf \
               -H "Authorization: Bearer ${GH_TOKEN}" \
               -H "Accept: application/vnd.github+json" \
               "https://api.github.com/repos/${OWNER}/${REPO}/commits/${SHA}")" || {
                 echo "::error title=API error::Failed to fetch commit ${SHA}"
-                fail=true
-                ((failed_count++)) || true
-                continue
+                fail=true; ((failed_count++)) || true; continue;
               }
-
             VERIFIED="$(echo "$RESP" | jq -r '.commit.verification.verified')"
             REASON="$(echo "$RESP" | jq -r '.commit.verification.reason')"
-
-            if [ "$VERIFIED" != "true" ]; then
+            if [[ "$VERIFIED" != "true" ]]; then
               echo "::error title=Unsigned/Unverified commit::${SHA} verified=false (reason=${REASON})"
-              fail=true
-              ((failed_count++)) || true
+              fail=true; ((failed_count++)) || true
             else
               echo "✓ ${SHA} verified (signed)"
             fi
-          done
+          done <<< "$SHAS"
 
-          if [ "$fail" = true ]; then
-            echo "::error title=Commit signature check failed::${failed_count} commit(s) are unsigned/unverified."
+          if [[ "$fail" == "true" ]]; then
+            echo "::error title=Commit signature check failed::${failed_count} commit(s) unsigned/unverified."
             exit 1
           fi
 
@@ -95,7 +112,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.pub-cache
-          key: ${{ runner.os }}-pub-${{ hashFiles('**/pubspec.lock') }}
+          key: ${{ runner.os }}-pub-${{ hashFiles('**/pubspec.lock', '**/pubspec.yaml') }}
           restore-keys: ${{ runner.os }}-pub-
 
       # 3) Pub get (monorepo o single package)
@@ -103,7 +120,8 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          mapfile -t PUBS < <(git ls-files | grep -E '/?pubspec\.yaml$' | grep -vE '^build/')
+          # todos los pubspec.yaml versionados, excluyendo rutas generadas
+          mapfile -t PUBS < <(git ls-files | grep -E '/?pubspec\.yaml$' | grep -Ev '(^|/)(build|\.dart_tool)/')
           for f in "${PUBS[@]}"; do
             d="$(dirname "$f")"
             echo ">> flutter pub get in $d"
