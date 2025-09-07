@@ -3,6 +3,24 @@
 This document follows the guidelines of [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.25.2] - 2025-09-07
+
+### Added
+- Nueva **GitHub Action ligera** para validar commits antes de merge:
+  - Verificación de que **todos los commits estén firmados y verificados**.
+  - Ejecución de **`flutter analyze`** para asegurar el cumplimiento de linters.
+  - Validación de **`dart format`** en modo estricto.
+  - Bloqueo de `dependency_overrides` en `pubspec.yaml`.
+
+### Changed
+- Ajustes en reglas de protección de ramas:
+  - `develop` y `master` ahora requieren commits firmados, revisiones por PR y checks de estado obligatorios (incluyendo CodeQL).
+  - Publicación automática a pub.dev únicamente desde `master` tras un merge exitoso.
+
+### Security
+- Integración con **CodeQL** en ramas `develop` y `master` para análisis de calidad y seguridad.
+- Configuración de **bot con firmas SSH** para asegurar que los commits generados por automatizaciones tengan estado *Verified*.
+
 ## [1.25.1] - 2025-09-07
 
 ## Added
