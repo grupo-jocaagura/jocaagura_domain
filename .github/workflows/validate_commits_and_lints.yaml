@@ -3,8 +3,6 @@ name: Validate commits (signed) & linters
 on:
   push:
     branches: ['**']
-  pull_request:
-    branches: ['**']
 
 permissions:
   contents: read
@@ -43,12 +41,31 @@ jobs:
           get_commit_shas_push() {
             local before="${{ github.event.before }}"
             local after="${{ github.event.after }}"
-            if [[ -n "$before" && -n "$after" ]]; then
+
+            # 1) Caso normal: compare entre before y after (cuando before != 0000...)
+            if [[ -n "$before" && -n "$after" && ! "$before" =~ ^0+$ ]]; then
               curl -sSf -H "Authorization: Bearer ${GH_TOKEN}" \
                 -H "Accept: application/vnd.github+json" \
                 "https://api.github.com/repos/${OWNER}/${REPO}/compare/${before}...${after}" \
                 | jq -r '.commits[].sha'
+              return 0
             fi
+
+            # 2) Primer push a la rama (before = 0000…): usar commits del payload
+            local payload_commits
+            payload_commits="$(jq -r '.commits // [] | .[].id' "$GITHUB_EVENT_PATH" | sed '/^$/d')"
+            if [[ -n "${payload_commits//[$'\t\r\n ']/}" ]]; then
+              printf "%s\n" "$payload_commits"
+              return 0
+            fi
+
+            # 3) Último recurso: usar el SHA de after
+            if [[ -n "$after" ]]; then
+              printf "%s\n" "$after"
+              return 0
+            fi
+
+            return 1
           }
 
           get_commit_shas_pr() {
