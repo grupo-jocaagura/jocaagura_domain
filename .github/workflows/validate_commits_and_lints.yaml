@@ -103,6 +103,8 @@ jobs:
         uses: flutter-actions/setup-flutter@v4
         with:
           version: stable
+          cache: true
+          cache-sdk: true
 
 
       - name: Flutter doctor (sanity)
