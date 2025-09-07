@@ -3,6 +3,19 @@
 This document follows the guidelines of [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.26.0] - 2025-09-07
+
+### Added
+
+- **Pruebas robustas para `Utils`**  
+  Cobertura extendida en `getDouble` y `getIntegerFromDynamic`:
+  - Manejo de nulos, `NaN`, infinitos y valores no numéricos.
+  - Parsing de números en notación científica (`3e2`, `-3e-2`, etc.).
+  - Soporte para formatos internacionales (coma o punto como separador decimal, moneda, separadores
+    de miles).
+  - Garantía de fallback seguro (`0` para enteros, `NaN` o `defaultValue` para dobles).
+  - Se incluyen los cambios tipo fix detallados en el changelog desde la version 1.25.0.
+
 ## [1.25.3] - 2025-09-07
 ### Added
 - `ModelVector.fromXY(int x, int y)` factory constructor for convenient creation from integer coordinates.

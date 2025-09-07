@@ -121,14 +121,6 @@ class Utils extends EntityUtil {
     return value?.toString() ?? '';
   }
 
-  /// Converts a dynamic value to an integer.
-  ///
-  /// - [value]: The dynamic value to convert.
-  /// - Returns: An integer value, or `0` if the conversion fails.
-  static int getIntegerFromDynamic(dynamic value) {
-    return int.tryParse(value.toString()) ?? 0;
-  }
-
   /// Converts a map to a JSON string.
   ///
   /// - [map]: The map to convert.
@@ -167,15 +159,6 @@ class Utils extends EntityUtil {
     return '${numeroString.substring(0, 3)} ${numeroString.substring(3, 6)} ${numeroString.substring(6)}';
   }
 
-  /// Converts a dynamic value to a double.
-  ///
-  /// - [json]: The dynamic value to convert.
-  /// - [defaultValue]: The default value if conversion fails.
-  /// - Returns: A double value, or `defaultValue` if the conversion fails.
-  static double getDouble(dynamic json, [double defaultValue = double.nan]) {
-    return double.tryParse(json.toString()) ?? defaultValue;
-  }
-
   /// Converts a dynamic value to a boolean.
   ///
   /// - [json]: The dynamic value to convert.
@@ -196,5 +179,233 @@ class Utils extends EntityUtil {
           .toList();
     }
     return <Map<String, dynamic>>[];
+  }
+
+  /// Converts a dynamic value to an integer.
+  ///
+  /// Behavior:
+  /// - `null` → `0`
+  /// - `int`  → value as-is
+  /// - `double` → truncated toward zero (e.g. `3.9` → `3`, `-3.9` → `-3`)
+  /// - `String` → robust cleaning for currency symbols, thousand separators,
+  ///   non-breaking spaces, and locale decimal (`,` vs `.`). Also supports
+  ///   scientific notation like `"3e2"`.
+  /// - Non-parsable / NaN / Infinity → `0`
+  ///
+  /// Examples:
+  /// ```dart
+  /// Utils.getIntegerFromDynamic('  1.234,56 COP '); // 1234
+  /// Utils.getIntegerFromDynamic('3e2');             // 300
+  /// Utils.getIntegerFromDynamic(42.9);              // 42
+  /// Utils.getIntegerFromDynamic(null);              // 0
+  /// ```
+  static int getIntegerFromDynamic(dynamic value) {
+    if (value == null) {
+      return 0;
+    }
+    if (value is int) {
+      return value;
+    }
+    if (value is double) {
+      if (value.isNaN || value.isInfinite) {
+        return 0;
+      }
+      return value.truncate();
+    }
+
+    final String? cleaned = _normalizeNumberString(value);
+    if (cleaned == null || cleaned.isEmpty) {
+      return 0;
+    }
+
+    // Try int directly first.
+    final int? i = int.tryParse(cleaned);
+    if (i != null) {
+      return i;
+    }
+
+    // Fallback: parse as double, then truncate.
+    final double? d = double.tryParse(cleaned);
+    if (d == null || d.isNaN || d.isInfinite) {
+      return 0;
+    }
+    return d.truncate();
+  }
+
+  /// Converts a dynamic value to a double.
+  ///
+  /// Keep the same signature. If parsing fails, returns [defaultValue].
+  ///
+  /// Behavior:
+  /// - `null` → [defaultValue]
+  /// - `num`  → `toDouble()` (unless NaN/Infinity → [defaultValue])
+  /// - `String` → robust cleaning for currency symbols, thousand separators,
+  ///   non-breaking spaces, and locale decimal (`,` vs `.`). Also supports
+  ///   scientific notation like `"3e-2"`.
+  /// - Non-parsable / NaN / Infinity → [defaultValue]
+  ///
+  /// Examples:
+  /// ```dart
+  /// Utils.getDouble('  $1,234.56  ');        // 1234.56
+  /// Utils.getDouble('1.234,56');             // 1234.56
+  /// Utils.getDouble('3e-2');                 // 0.03
+  /// Utils.getDouble('invalid', 0.0);         // 0.0
+  /// Utils.getDouble(double.nan, 0.0);        // 0.0
+  /// ```
+  static double getDouble(dynamic json, [double defaultValue = double.nan]) {
+    if (json == null) {
+      return defaultValue;
+    }
+
+    if (json is num) {
+      final double v = json.toDouble();
+      if (v.isNaN || v.isInfinite) {
+        return defaultValue;
+      }
+      return v;
+    }
+
+    final String? cleaned = _normalizeNumberString(json);
+    if (cleaned == null || cleaned.isEmpty) {
+      return defaultValue;
+    }
+
+    final double? parsed = double.tryParse(cleaned);
+    if (parsed == null || parsed.isNaN || parsed.isInfinite) {
+      return defaultValue;
+    }
+    return parsed;
+  }
+
+  /// Normalizes a dynamic numeric-ish input into a canonical parseable string.
+  ///
+  /// Rules:
+  /// - Trims and removes non-breaking spaces.
+  /// - If `String` has both `,` and `.`, the **last** separator is treated as
+  ///   the decimal separator; the other char is removed as thousand separator.
+  /// - If only one of `,` or `.` is present:
+  ///   - If it appears multiple times → treat as thousands separator (remove all).
+  ///   - Otherwise → treat as decimal separator.
+  /// - Removes currency and non-numeric symbols (keeps digits, sign, decimal dot,
+  ///   exponent `e/E`, and a single decimal point).
+  /// - Converts the decimal separator to dot `.`.
+  ///
+  /// Returns a string suitable for `double.tryParse` / `int.tryParse`, or `null`
+  /// if nothing meaningful remains.
+  static String? _normalizeNumberString(dynamic input) {
+    String s = input.toString().trim();
+    if (s.isEmpty) {
+      return null;
+    }
+
+    // Replace non-breaking spaces and thin spaces commonly used as thousands separators.
+    s = s
+        .replaceAll('\u00A0', ' ')
+        .replaceAll('\u202F', ' ')
+        .replaceAll('\u2009', ' ')
+        .trim();
+
+    // Early parse for plain scientific notation or clean numbers.
+    // If this succeeds, prefer the fast path.
+    if (double.tryParse(s) != null || int.tryParse(s) != null) {
+      return s;
+    }
+
+    // Remove currency/exotic symbols but keep digits, signs, separators, exponent chars, and spaces.
+    // We'll decide later which separator is decimal.
+    const String keptCharsPattern = r'[0-9eE\+\-\,\.\s]';
+    final String stripped = s.split('').where((String ch) {
+      return RegExp(keptCharsPattern).hasMatch(ch);
+    }).join();
+
+    String t = stripped.trim();
+    if (t.isEmpty) {
+      return null;
+    }
+
+    // Collapse multiple spaces.
+    t = t.replaceAll(RegExp(r'\s+'), '');
+
+    // If still trivially parseable, return.
+    if (double.tryParse(t) != null || int.tryParse(t) != null) {
+      return t;
+    }
+
+    // Decide decimal separator when both are present.
+    final int lastDot = t.lastIndexOf('.');
+    final int lastComma = t.lastIndexOf(',');
+
+    if (lastDot >= 0 && lastComma >= 0) {
+      // Use the last one as decimal; drop the other as thousands.
+      final bool commaIsDecimal = lastComma > lastDot;
+      if (commaIsDecimal) {
+        // Remove all dots (thousands), then convert comma to dot.
+        t = t.replaceAll('.', '');
+        t = t.replaceAll(',', '.');
+      } else {
+        // Remove all commas (thousands), keep dots as decimal.
+        t = t.replaceAll(',', '');
+      }
+    } else if (lastComma >= 0) {
+      // Only comma present. If multiple commas → thousands; else decimal.
+      final int count = RegExp(',').allMatches(t).length;
+      if (count > 1) {
+        t = t.replaceAll(',', ''); // likely thousands separators
+      } else {
+        t = t.replaceAll(',', '.'); // decimal comma → dot
+      }
+    } else if (lastDot >= 0) {
+      // Only dot present. If multiple dots → thousands; else decimal.
+      final int count = RegExp(r'\.').allMatches(t).length;
+      if (count > 1) {
+        t = t.replaceAll('.', ''); // likely thousands
+      }
+      // else: leave single dot as decimal
+    }
+
+    // Final safety pass: keep only one leading sign, digits, one dot for decimal,
+    // and exponent part if any.
+    // Split exponent if present to prevent multiple dots in mantissa+exponent.
+    String mantissa = t;
+    String exponent = '';
+    final Match? expMatch =
+        RegExp(r'([eE][\+\-]?\d+)$').firstMatch(t); // exponent at end
+    if (expMatch != null) {
+      exponent = expMatch.group(1)!; // like e-3
+      mantissa = t.substring(0, expMatch.start);
+    }
+
+    // Remove all but digits, sign, and dot in mantissa.
+    // Keep only the first sign (if at start) and the first dot.
+    String sign = '';
+    if (mantissa.startsWith('+') || mantissa.startsWith('-')) {
+      sign = mantissa[0];
+      mantissa = mantissa.substring(1);
+    }
+    // Remove everything not digit or dot
+    mantissa = mantissa.replaceAll(RegExp(r'[^0-9\.]'), '');
+
+    // Keep only first dot
+    final int firstDotIdx = mantissa.indexOf('.');
+    if (firstDotIdx >= 0) {
+      final String before = mantissa.substring(0, firstDotIdx + 1);
+      final String after =
+          mantissa.substring(firstDotIdx + 1).replaceAll('.', '');
+      mantissa = before + after;
+    }
+
+    final String candidate = '$sign$mantissa$exponent'.trim();
+
+    // Edge: "." or "-" or empty → invalid
+    if (candidate.isEmpty ||
+        candidate == '-' ||
+        candidate == '+' ||
+        candidate == '.' ||
+        candidate == '-.' ||
+        candidate == '+.') {
+      return null;
+    }
+
+    return candidate;
   }
 }

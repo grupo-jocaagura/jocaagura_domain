@@ -370,4 +370,94 @@ void main() {
       );
     });
   });
+
+  group('Utils - robust numeric parsing (no regressions)', () {
+    group('getIntegerFromDynamic', () {
+      test('null, NaN e infinitos degradan a 0', () {
+        expect(Utils.getIntegerFromDynamic(null), 0);
+        expect(Utils.getIntegerFromDynamic(double.nan), 0);
+        expect(Utils.getIntegerFromDynamic(double.infinity), 0);
+        expect(Utils.getIntegerFromDynamic(double.negativeInfinity), 0);
+      });
+
+      test('int y double (truncate toward zero) se manejan correctamente', () {
+        expect(Utils.getIntegerFromDynamic(42), 42);
+        expect(Utils.getIntegerFromDynamic(42.9), 42);
+        expect(Utils.getIntegerFromDynamic(-42.9), -42);
+      });
+
+      test('strings limpias y notación científica', () {
+        expect(Utils.getIntegerFromDynamic('300'), 300);
+        expect(Utils.getIntegerFromDynamic('3e2'), 300);
+        expect(Utils.getIntegerFromDynamic('+3e2'), 300);
+        expect(Utils.getIntegerFromDynamic('-3e2'), -300);
+        expect(Utils.getIntegerFromDynamic('12.5'), 12); // trunca
+        expect(Utils.getIntegerFromDynamic('12,5'), 12); // trunca
+      });
+
+      test('moneda, miles y locales mezclados', () {
+        expect(Utils.getIntegerFromDynamic(r'  $1,234.56  '), 1234);
+        expect(Utils.getIntegerFromDynamic('1.234,56'), 1234);
+        expect(Utils.getIntegerFromDynamic('1,234,567'), 1234567);
+        expect(Utils.getIntegerFromDynamic('1.234.567'), 1234567);
+        expect(
+          Utils.getIntegerFromDynamic('1,234.5'),
+          1234,
+        ); // último sep. como decimal
+        expect(
+          Utils.getIntegerFromDynamic('1.234,5'),
+          1234,
+        ); // último sep. como decimal
+        expect(Utils.getIntegerFromDynamic('1\u00A0234,5'), 1234); // NBSP
+        expect(Utils.getIntegerFromDynamic('-1,234.5'), -1234);
+      });
+
+      test('no numéricos degradan a 0', () {
+        expect(Utils.getIntegerFromDynamic('—'), 0);
+        expect(Utils.getIntegerFromDynamic('abc'), 0);
+        expect(Utils.getIntegerFromDynamic('.'), 0);
+        expect(Utils.getIntegerFromDynamic('-'), 0);
+      });
+    });
+
+    group('getDouble', () {
+      test(
+          'null y valores no parseables respetan defaultValue (NaN por defecto)',
+          () {
+        expect(Utils.getDouble(null).isNaN, isTrue);
+        expect(Utils.getDouble('not_a_double').isNaN, isTrue);
+        expect(Utils.getDouble('.', 0.0), 0.0);
+        expect(Utils.getDouble('-', 0.0), 0.0);
+      });
+
+      test('NaN e infinitos se degradan al defaultValue', () {
+        expect(Utils.getDouble(double.nan, 0.0), 0.0);
+        expect(Utils.getDouble(double.infinity, 0.0), 0.0);
+        expect(Utils.getDouble(double.negativeInfinity, 0.0), 0.0);
+      });
+
+      test('num y strings numéricos se parsean correctamente', () {
+        expect(Utils.getDouble(10), 10.0);
+        expect(Utils.getDouble(10.5), 10.5);
+        expect(Utils.getDouble('123.45'), 123.45);
+        expect(Utils.getDouble('12,5'), 12.5); // coma decimal
+        expect(Utils.getDouble('3e-2'), closeTo(0.03, 1e-12));
+        expect(Utils.getDouble('+3e2'), 300.0);
+        expect(Utils.getDouble('-3e2'), -300.0);
+      });
+
+      test('moneda, miles y espacios no convencionales', () {
+        expect(Utils.getDouble(r'  $1,234.56  '), 1234.56);
+        expect(Utils.getDouble('1.234,56'), 1234.56);
+        expect(Utils.getDouble('1,234.56'), 1234.56);
+        expect(Utils.getDouble('1\u00A0234,56'), 1234.56); // NBSP
+        expect(Utils.getDouble('-1,234.5'), -1234.5);
+      });
+
+      test('cuando hay coma y punto, el último actúa como decimal', () {
+        expect(Utils.getDouble('1,234.5'), 1234.5); // último: punto
+        expect(Utils.getDouble('1.234,5'), 1234.5); // último: coma
+      });
+    });
+  });
 }
