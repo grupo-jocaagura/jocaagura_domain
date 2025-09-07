@@ -102,8 +102,8 @@ jobs:
       - name: Setup Flutter
         uses: flutter-actions/setup-flutter@v4
         with:
-          flutter-version: stable
-          channel: stable
+          version: stable
+
 
       - name: Flutter doctor (sanity)
         run: flutter doctor -v
