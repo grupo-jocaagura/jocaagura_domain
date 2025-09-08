@@ -15,7 +15,7 @@ class BlocOnboarding extends BlocModule {
   ///
   /// If none is provided, a [DefaultErrorMapper] instance is used.
   BlocOnboarding({ErrorMapper? errorMapper})
-      : _errorMapper = errorMapper ?? DefaultErrorMapper();
+      : _errorMapper = errorMapper ?? const DefaultErrorMapper();
   final BlocGeneral<OnboardingState> _state =
       BlocGeneral<OnboardingState>(OnboardingState.idle());
 

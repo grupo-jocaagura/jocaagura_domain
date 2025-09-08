@@ -1,7 +1,7 @@
 part of '../../../jocaagura_domain.dart';
 
 /// Low-level connectivity gateway. It exposes **raw JSON-like payloads**
-/// (Map<String, dynamic>) and wraps failures as [ErrorItem].
+/// json and wraps failures as [ErrorItem].
 ///
 /// Mapping to domain models is **NOT** this layer's responsibility.
 abstract class GatewayConnectivity {

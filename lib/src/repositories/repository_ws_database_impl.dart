@@ -37,7 +37,7 @@ class RepositoryWsDatabaseImpl<T extends Model>
     ErrorMapper? mapper,
     bool serializeWrites = false,
   })  : _gateway = gateway,
-        _mapper = mapper ?? DefaultErrorMapper(),
+        _mapper = mapper ?? const DefaultErrorMapper(),
         _serializeWrites = serializeWrites;
 
   final GatewayWsDatabase _gateway;

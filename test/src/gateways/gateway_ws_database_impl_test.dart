@@ -13,7 +13,7 @@ void main() {
       gateway = GatewayWsDatabaseImpl(
         service: service,
         collection: 'canvases',
-        mapper: DefaultErrorMapper(),
+        mapper: const DefaultErrorMapper(),
       );
     });
 
@@ -76,7 +76,7 @@ void main() {
         gateway = GatewayWsDatabaseImpl(
           service: service,
           collection: 'canvases',
-          mapper: DefaultErrorMapper(),
+          mapper: const DefaultErrorMapper(),
         );
 
         final Either<ErrorItem, Map<String, dynamic>> res =
@@ -97,7 +97,7 @@ void main() {
         gateway = GatewayWsDatabaseImpl(
           service: service,
           collection: 'canvases',
-          mapper: DefaultErrorMapper(),
+          mapper: const DefaultErrorMapper(),
           readAfterWrite: true,
         );
 
@@ -133,7 +133,7 @@ void main() {
         gateway = GatewayWsDatabaseImpl(
           service: service,
           collection: 'canvases',
-          mapper: DefaultErrorMapper(),
+          mapper: const DefaultErrorMapper(),
         );
 
         final Either<ErrorItem, Map<String, dynamic>> res =
@@ -161,7 +161,7 @@ void main() {
         gateway = GatewayWsDatabaseImpl(
           service: service,
           collection: 'canvases',
-          mapper: DefaultErrorMapper(),
+          mapper: const DefaultErrorMapper(),
         );
 
         final Either<ErrorItem, Unit> res = await gateway.delete('y');
@@ -219,7 +219,7 @@ void main() {
         gateway = GatewayWsDatabaseImpl(
           service: service,
           collection: 'canvases',
-          mapper: DefaultErrorMapper(),
+          mapper: const DefaultErrorMapper(),
           treatEmptyAsMissing: true,
         );
 

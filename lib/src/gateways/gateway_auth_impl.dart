@@ -4,7 +4,7 @@ class GatewayAuthImpl implements GatewayAuth {
   GatewayAuthImpl(
     this._service, {
     ErrorMapper? errorMapper,
-  }) : _err = errorMapper ?? DefaultErrorMapper();
+  }) : _err = errorMapper ?? const DefaultErrorMapper();
 
   final ServiceSession _service;
   final ErrorMapper _err;
