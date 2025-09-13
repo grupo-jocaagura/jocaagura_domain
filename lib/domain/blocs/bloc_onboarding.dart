@@ -1,5 +1,7 @@
 part of '../../jocaagura_domain.dart';
 
+typedef BlocStepper = BlocOnboarding;
+
 /// BLoC to orchestrate an onboarding flow (sequence of steps).
 ///
 /// ### Purpose
