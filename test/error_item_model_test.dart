@@ -1,3 +1,6 @@
+import 'dart:convert';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:jocaagura_domain/jocaagura_domain.dart';
 
@@ -189,6 +192,182 @@ void main() {
       expect(original.errorLevel, ErrorLevelEnum.severe);
       expect(updated == original, false);
       expect(updated.hashCode != original.hashCode, true);
+    });
+  });
+  group('ErrorItem Model', () {
+    test(
+        'Given valid fields When toJson->fromJson Then round-trip yields equal instance',
+        () {
+      // Arrange
+      final Map<String, Object?> meta = <String, Object?>{'a': 1, 'b': true};
+      final ErrorItem original = ErrorItem(
+        title: 'Network timeout',
+        code: 'NET_TIMEOUT',
+        description: 'Request took too long.',
+        meta: meta,
+        errorLevel: ErrorLevelEnum.severe,
+      );
+
+      // Act
+      final String encoded = jsonEncode(original.toJson());
+      final ErrorItem decoded =
+          ErrorItem.fromJson(jsonDecode(encoded) as Map<String, dynamic>);
+
+      // Assert
+      expect(decoded, original);
+      expect(decoded.hashCode, original.hashCode);
+      expect(decoded.errorLevel, ErrorLevelEnum.severe);
+      expect(mapEquals(decoded.meta, meta), isTrue);
+    });
+
+    test(
+        'Given unknown errorLevel string When fromJson Then defaults to systemInfo',
+        () {
+      // Arrange
+      final Map<String, dynamic> json = <String, dynamic>{
+        ErrorItemEnum.title.name: 'Strange',
+        ErrorItemEnum.code.name: 'X',
+        ErrorItemEnum.description.name: 'Unknown level',
+        ErrorItemEnum.meta.name: <String, Object?>{},
+        ErrorItemEnum.errorLevel.name: 'notARealLevel',
+      };
+
+      // Act
+      final ErrorItem item = ErrorItem.fromJson(json);
+
+      // Assert
+      expect(item.errorLevel, ErrorLevelEnum.systemInfo);
+    });
+
+    test(
+        'Given copyWith overrides When applied Then only provided fields change',
+        () {
+      // Arrange
+      const ErrorItem base = ErrorItem(
+        title: 'A',
+        code: 'C',
+        description: 'D',
+        meta: <String, Object?>{'k': 1},
+        errorLevel: ErrorLevelEnum.warning,
+      );
+
+      // Act
+      final ErrorItem modified = base.copyWith(
+        title: 'A2',
+        meta: <String, Object?>{'k': 1, 'x': 'y'},
+      );
+
+      // Assert
+      expect(modified.title, 'A2');
+      expect(modified.code, 'C');
+      expect(modified.description, 'D');
+      expect(modified.errorLevel, ErrorLevelEnum.warning);
+      expect(
+        mapEquals(modified.meta, <String, Object?>{'k': 1, 'x': 'y'}),
+        isTrue,
+      );
+    });
+
+    test(
+        'Given two meta maps with different insertion orders Then equality and hashCode match',
+        () {
+      // Arrange
+      const ErrorItem i1 = ErrorItem(
+        title: 'Order',
+        code: 'EQ',
+        description: 'Order-insensitive meta',
+        meta: <String, Object?>{'a': 1, 'b': 2},
+      );
+      const ErrorItem i2 = ErrorItem(
+        title: 'Order',
+        code: 'EQ',
+        description: 'Order-insensitive meta',
+        meta: <String, Object?>{'b': 2, 'a': 1},
+      );
+
+      // Assert
+      expect(i1, i2);
+      expect(i1.hashCode, i2.hashCode);
+    });
+
+    test(
+        'Given toString When called Then includes title, code, description, level and meta if present',
+        () {
+      // Arrange
+      const ErrorItem item = ErrorItem(
+        title: 'Oops',
+        code: 'X1',
+        description: 'Something happened',
+        meta: <String, Object?>{'ctx': 'flowA'},
+        errorLevel: ErrorLevelEnum.warning,
+      );
+
+      // Act
+      final String s = item.toString();
+
+      // Assert
+      expect(s, contains('Oops (X1): Something happened'));
+      expect(s, contains('Meta: {ctx: flowA}'));
+      expect(s, contains('Level: warning'));
+    });
+
+    test(
+        'Given mutated meta map After constructing ErrorItem Then equality/hash may change (documenting risk)',
+        () {
+      // ⚠️ Este test documenta el riesgo actual (pre-refactor).
+      // No falla el pipeline; sólo evidencia el comportamiento.
+      // Arrange
+      final Map<String, Object?> meta = <String, Object?>{'x': 1};
+      final ErrorItem a = ErrorItem(
+        title: 'Mut',
+        code: 'M',
+        description: 'test',
+        meta: meta,
+      );
+      final ErrorItem b = a.copyWith();
+
+      expect(a, b); // aún iguales
+
+      // Act: mutamos el mapa original (compartido por referencia)
+      meta['x'] = 2;
+
+      // Assert: pueden dejar de ser iguales por efecto lateral
+      expect(
+        a == b,
+        isFalse,
+        reason:
+            'Meta is mutable and shared by reference; prefer Map.unmodifiable in ctor/fromJson/copyWith.',
+      );
+    });
+
+    test(
+        'Given defaultErrorItem When inspected Then fields match expected defaults',
+        () {
+      // Assert
+      expect(defaultErrorItem.title, 'Unknown Error');
+      expect(defaultErrorItem.code, 'ERR_UNKNOWN');
+      expect(
+        defaultErrorItem.description,
+        'An unspecified error has occurred.',
+      );
+      expect(defaultErrorItem.errorLevel, ErrorLevelEnum.systemInfo);
+      expect(defaultErrorItem.meta['severity'], 'low');
+    });
+  });
+
+  group('ErrorLevelEnum parsing', () {
+    test('Given valid names When parsed Then matches enum values', () {
+      for (final ErrorLevelEnum level in ErrorLevelEnum.values) {
+        expect(ErrorItem.getErrorLevelFromString(level.name), level);
+      }
+    });
+
+    test('Given null/empty When parsed Then defaults to systemInfo', () {
+      expect(
+        ErrorItem.getErrorLevelFromString(null),
+        ErrorLevelEnum.systemInfo,
+      );
+      expect(ErrorItem.getErrorLevelFromString(''), ErrorLevelEnum.systemInfo);
     });
   });
 }
