@@ -28,8 +28,14 @@ class BlocOnboarding extends BlocModule {
   Timer? _timer;
   bool _disposed = false;
 
+  Timer? get timer => _timer;
+
+  bool get isDisposed => _disposed;
+
   // Guards to ignore stale async completions when the step changes.
   int _epoch = 0;
+
+  int get epoch => _epoch;
 
   /// Reactive state access.
   Stream<OnboardingState> get stateStream => _state.stream;
@@ -37,7 +43,7 @@ class BlocOnboarding extends BlocModule {
   bool get isRunning => state.status == OnboardingStatus.running;
 
   void configure(List<OnboardingStep> steps) {
-    assert(!_disposed, 'BlocOnboarding has been disposed.');
+    assert(!isDisposed, 'BlocOnboarding has been disposed.');
     _cancelTimer();
     _steps = List<OnboardingStep>.unmodifiable(steps);
     _emit(
@@ -46,7 +52,7 @@ class BlocOnboarding extends BlocModule {
   }
 
   void start() {
-    assert(!_disposed, 'BlocOnboarding has been disposed.');
+    assert(!isDisposed, 'BlocOnboarding has been disposed.');
     if (_steps.isEmpty) {
       _emit(
         state.copyWith(
@@ -67,11 +73,11 @@ class BlocOnboarding extends BlocModule {
         error: null,
       ),
     );
-    _runOnEnterAndMaybeSchedule(_epoch);
+    _runOnEnterAndMaybeSchedule(epoch);
   }
 
   void next() {
-    assert(!_disposed, 'BlocOnboarding has been disposed.');
+    assert(!isDisposed, 'BlocOnboarding has been disposed.');
     if (!isRunning) {
       return;
     }
@@ -79,14 +85,14 @@ class BlocOnboarding extends BlocModule {
     if (state.stepIndex + 1 < state.totalSteps) {
       _epoch++;
       _emit(state.copyWith(stepIndex: state.stepIndex + 1, error: null));
-      _runOnEnterAndMaybeSchedule(_epoch);
+      _runOnEnterAndMaybeSchedule(epoch);
     } else {
       complete();
     }
   }
 
   void back() {
-    assert(!_disposed, 'BlocOnboarding has been disposed.');
+    assert(!isDisposed, 'BlocOnboarding has been disposed.');
     if (!isRunning) {
       return;
     }
@@ -94,25 +100,25 @@ class BlocOnboarding extends BlocModule {
     if (state.stepIndex > 0) {
       _epoch++;
       _emit(state.copyWith(stepIndex: state.stepIndex - 1, error: null));
-      _runOnEnterAndMaybeSchedule(_epoch);
+      _runOnEnterAndMaybeSchedule(epoch);
     }
   }
 
   void skip() {
-    assert(!_disposed, 'BlocOnboarding has been disposed.');
+    assert(!isDisposed, 'BlocOnboarding has been disposed.');
     _cancelTimer();
     _emit(state.copyWith(status: OnboardingStatus.skipped));
   }
 
   void complete() {
-    assert(!_disposed, 'BlocOnboarding has been disposed.');
+    assert(!isDisposed, 'BlocOnboarding has been disposed.');
     _cancelTimer();
     _emit(state.copyWith(status: OnboardingStatus.completed));
   }
 
   /// Clears the error without changing the current step/status.
   void clearError() {
-    if (_disposed) {
+    if (isDisposed) {
       return;
     }
     _emit(state.copyWith(error: null));
@@ -121,15 +127,15 @@ class BlocOnboarding extends BlocModule {
   /// Re-runs `onEnter` for the current step (useful after showing an error).
   void retryOnEnter() {
     // No-op si el bloc ya no está vivo o si no está en ejecución.
-    if (_disposed || !isRunning) {
+    if (isDisposed || !isRunning) {
       return;
     }
 
     _cancelTimer();
     _epoch++;
-    // Evita assert de clearError; _emit ya protege contra _disposed.
+    // Evita assert de clearError; _emit ya protege contra isDisposed.
     _emit(state.copyWith(error: null));
-    _runOnEnterAndMaybeSchedule(_epoch);
+    _runOnEnterAndMaybeSchedule(epoch);
   }
 
   OnboardingStep? get currentStep {
@@ -143,7 +149,7 @@ class BlocOnboarding extends BlocModule {
   }
 
   void _emit(OnboardingState newState) {
-    if (!_disposed) {
+    if (!isDisposed) {
       _state.value = newState;
     }
   }
@@ -162,8 +168,8 @@ class BlocOnboarding extends BlocModule {
         result =
             await step.onEnter?.call() ?? Right<ErrorItem, Unit>(Unit.value);
       } catch (e, s) {
-        if (_disposed ||
-            epochAtCall != _epoch ||
+        if (isDisposed ||
+            epochAtCall != epoch ||
             !identical(step, currentStep)) {
           return;
         }
@@ -178,7 +184,7 @@ class BlocOnboarding extends BlocModule {
       }
 
       // Si cambió de paso mientras esperábamos, ignorar.
-      if (_disposed || epochAtCall != _epoch || !identical(step, currentStep)) {
+      if (isDisposed || epochAtCall != epoch || !identical(step, currentStep)) {
         return;
       }
 
@@ -196,7 +202,7 @@ class BlocOnboarding extends BlocModule {
     }
 
     // 3) Sin onEnter → solo auto-advance si aplica
-    if (_disposed || epochAtCall != _epoch || !identical(step, currentStep)) {
+    if (isDisposed || epochAtCall != epoch || !identical(step, currentStep)) {
       return;
     }
     _scheduleAutoAdvanceIfAny();
@@ -213,7 +219,7 @@ class BlocOnboarding extends BlocModule {
     }
 
     _timer = Timer(d, () {
-      if (!_disposed && isRunning && identical(step, currentStep)) {
+      if (!isDisposed && isRunning && identical(step, currentStep)) {
         next();
       }
     });
@@ -226,8 +232,10 @@ class BlocOnboarding extends BlocModule {
 
   @override
   void dispose() {
-    _disposed = true;
-    _cancelTimer();
-    _state.dispose();
+    if (!isDisposed) {
+      _disposed = true;
+      _cancelTimer();
+      _state.dispose();
+    }
   }
 }
