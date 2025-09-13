@@ -3,6 +3,48 @@
 This document follows the guidelines of [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.27.0] - 2025-09-13
+
+### Added
+
+- **BlocOnboarding:** `AutoAdvancePolicy` para controlar con mayor granularidad cuándo el flujo
+  avanza automáticamente al siguiente paso.
+
+### Changed
+
+- **BlocOnboarding – Navegación y contratos:**
+  - `back()` evita el auto-avance incluso si el paso define `autoAdvanceAfter`, mejorando la
+    previsibilidad de la UX; se ejecuta el `onEnter` del paso previo.
+  - Se refinó el contrato de `onEnter`: no debe lanzar; devolver `Left(ErrorItem)` para permanecer
+    en el paso; debe ser rápido (el trabajo pesado va a *use cases*); `null` implica éxito
+    inmediato.
+  - `autoAdvanceAfter` solo aplica tras un `onEnter` exitoso.
+
+- **ErrorItem:**
+  - Serialización/deserialización más robusta: niveles desconocidos hacen *fallback* a
+    `ErrorLevelEnum.systemInfo`.
+  - `copyWith(meta:)` retorna un mapa **inmodificable** para prevenir mutaciones accidentales.
+
+### Docs
+
+- DartDoc ampliado para `OnboardingStep`, `OnEnterResult`, `ErrorItem`, `ErrorLevelEnum` y
+  `ErrorItemEnum`, incluyendo ejemplos de uso y pautas de UI.
+
+### Tests
+
+- **Onboarding:** suite completa que cubre configuración/arranque (pasos vacíos/no vacíos),
+  `onEnter` (éxito, `Left(ErrorItem)`, excepción), `retryOnEnter`, `clearError`, `next/back` con
+  cancelación de temporizadores, `currentStep` en múltiples estados, guardas de *race conditions*
+  vía *epoch*, y preservación de errores en estados terminales (`skip`, `complete`).
+- **Theme/Repository:** casos adicionales para robustez del *gateway* y verificación de
+  normalización HEX en JSON (sin cambios de API).
+- **ErrorItem:** *round-trip* JSON, *fallback* de niveles desconocidos, e inmutabilidad de `meta` en
+  `copyWith`.
+
+> **Notas:** No hay cambios incompatibles.
+> - Si tus pruebas asumían auto-avance al usar `back()`, actualízalas al nuevo comportamiento.
+> - Si tu código modificaba el mapa devuelto por `copyWith(meta: ...)`, clónalo antes de mutarlo.
+
 ## [1.26.2] - 2025-09-13
 
 ### Added
