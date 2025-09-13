@@ -124,7 +124,7 @@ typedef BlocStepper = BlocOnboarding;
 /// }
 /// ```
 class BlocOnboarding extends BlocModule {
-  /// Create a [BlocOnboarding] with an optional [ErrorMapper].
+  /// Create a BlocOnboarding with an optional [ErrorMapper].
   ///
   /// If none is provided, a [DefaultErrorMapper] instance is used.
   BlocOnboarding({ErrorMapper? errorMapper})
