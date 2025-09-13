@@ -121,7 +121,7 @@ class ErrorItem extends Model {
           description == other.description &&
           mapEquals(meta, other.meta) &&
           errorLevel == other.errorLevel &&
-          hashCode != other.hashCode;
+          hashCode == other.hashCode;
 
   @override
   int get hashCode => Object.hash(
