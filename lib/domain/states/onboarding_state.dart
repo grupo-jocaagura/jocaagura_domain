@@ -56,23 +56,46 @@ class OnboardingState extends Model {
 
   /// Creates an [OnboardingState] from JSON.
   factory OnboardingState.fromJson(Map<String, dynamic> json) {
-    return OnboardingState._(
-      status: _statusFromString(
-        Utils.getStringFromDynamic(
-          json[OnboardingStateEnum.status.name],
+    final OnboardingStatus status = _statusFromString(
+      Utils.getStringFromDynamic(json[OnboardingStateEnum.status.name]),
+    );
+
+    final int stepIndex = Utils.getIntegerFromDynamic(
+      json[OnboardingStateEnum.stepIndex.name],
+    );
+
+    final int totalSteps = Utils.getIntegerFromDynamic(
+      json[OnboardingStateEnum.totalSteps.name],
+    );
+
+    ErrorItem? restoredError;
+    final Object? rawError = json[OnboardingStateEnum.error.name];
+    if (rawError == null) {
+      restoredError = null;
+    } else if (rawError is Map<String, dynamic>) {
+      restoredError = ErrorItem.fromJson(rawError);
+    } else if (rawError is Map) {
+      restoredError = ErrorItem.fromJson(
+        rawError.map(
+          (dynamic k, dynamic v) => MapEntry<String, dynamic>(k.toString(), v),
         ),
-      ),
-      stepIndex: Utils.getIntegerFromDynamic(
-        json[OnboardingStateEnum.stepIndex.name],
-      ),
-      totalSteps: Utils.getIntegerFromDynamic(
-        json[OnboardingStateEnum.totalSteps.name],
-      ),
-      error: json[OnboardingStateEnum.error.name] == null
-          ? null
-          : ErrorItem.fromJson(
-              Utils.mapFromDynamic(json[OnboardingStateEnum.error.name]),
-            ),
+      );
+    } else if (rawError is String) {
+      try {
+        final Map<String, dynamic> m = Utils.mapFromDynamic(rawError);
+        restoredError = m.isEmpty ? defaultErrorItem : ErrorItem.fromJson(m);
+      } catch (_) {
+        restoredError = defaultErrorItem;
+      }
+    } else {
+      restoredError = defaultErrorItem;
+    }
+
+    return OnboardingState._(
+      status: status,
+      stepIndex: stepIndex,
+      totalSteps: totalSteps,
+      error: restoredError,
     );
   }
 

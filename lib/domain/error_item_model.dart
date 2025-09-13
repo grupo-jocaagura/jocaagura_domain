@@ -120,17 +120,21 @@ class ErrorItem extends Model {
           code == other.code &&
           description == other.description &&
           mapEquals(meta, other.meta) &&
-          errorLevel == other.errorLevel &&
-          hashCode == other.hashCode;
+          errorLevel == other.errorLevel;
 
   @override
-  int get hashCode => Object.hash(
-        title,
-        code,
-        description,
-        Object.hashAll(meta.entries),
-        errorLevel,
-      );
+  int get hashCode {
+    final Iterable<int> metaEntryHashes = meta.entries.map(
+      (MapEntry<String, dynamic> e) => Object.hash(e.key, e.value),
+    );
+    return Object.hash(
+      title,
+      code,
+      description,
+      Object.hashAllUnordered(metaEntryHashes),
+      errorLevel,
+    );
+  }
 
   /// Returns the corresponding [ErrorLevelEnum] from a string.
   ///
