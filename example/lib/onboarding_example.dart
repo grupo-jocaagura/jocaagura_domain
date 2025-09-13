@@ -68,7 +68,7 @@ class _OnboardingSquareAreaValidationPageState
         title: 'Explicación',
         description:
             'El área de un cuadrado es lado × lado. Ingresarás un valor y lo validaremos.',
-        autoAdvanceAfter: Duration(milliseconds: 2000),
+        autoAdvanceAfter: Duration(milliseconds: 3000),
       ),
       OnboardingStep(
         title: 'Ingresa el lado',
@@ -277,7 +277,6 @@ class _OnboardingSquareAreaValidationPageState
   }
 
   Widget _buildValidationStep(OnboardingState state) {
-    // En este paso, onEnter ya corrió: si hubo error, state.error != null
     final bool hasError = state.error != null;
 
     return Center(
@@ -305,27 +304,30 @@ class _OnboardingSquareAreaValidationPageState
                 runSpacing: 8,
                 alignment: WrapAlignment.center,
                 children: <Widget>[
-                  // Si hay error: permitir corregir (back) o reintentar (retryOnEnter)
                   if (hasError)
                     ElevatedButton.icon(
+                      // Corregir: limpia error y vuelve al input.
                       onPressed: () {
-                        // Volver al input para corregir
-                        bloc.back();
+                        bloc.clearError();
+                        bloc.back(); // <- NO auto-advance tras volver
                       },
                       icon: const Icon(Icons.edit),
                       label: const Text('Corregir'),
                     ),
                   if (hasError)
                     OutlinedButton.icon(
+                      // Reintentar: feedback visual + reintento
                       onPressed: () {
-                        // Si ya corregiste el valor (por ejemplo volviste, cambiaste y regresaste),
-                        // puedes reintentar la validación
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Reintentando validación…'),
+                          ),
+                        );
                         bloc.retryOnEnter();
                       },
                       icon: const Icon(Icons.refresh),
                       label: const Text('Reintentar validación'),
                     ),
-                  // Si NO hay error, no mostramos botón: auto-advance se encargará
                 ],
               ),
             ],
@@ -410,6 +412,7 @@ class _OnboardingSquareAreaValidationPageState
     if (err == null) {
       return const SizedBox.shrink();
     }
+
     return MaterialBanner(
       backgroundColor: Colors.red.shade50,
       content: Text(
@@ -417,9 +420,25 @@ class _OnboardingSquareAreaValidationPageState
         style: TextStyle(color: Colors.red.shade900),
       ),
       actions: <Widget>[
-        TextButton(
-          onPressed: bloc.clearError,
-          child: const Text('Cerrar'),
+        TextButton.icon(
+          // Corregir: limpiar error + volver al input
+          onPressed: () {
+            bloc.clearError();
+            bloc.back(); // <- evita que “al cerrar” siga avanzando y pierda auto-advance
+          },
+          icon: const Icon(Icons.edit),
+          label: const Text('Corregir'),
+        ),
+        TextButton.icon(
+          // Reintentar con feedback
+          onPressed: () {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Reintentando validación…')),
+            );
+            bloc.retryOnEnter();
+          },
+          icon: const Icon(Icons.refresh),
+          label: const Text('Reintentar'),
         ),
       ],
     );
