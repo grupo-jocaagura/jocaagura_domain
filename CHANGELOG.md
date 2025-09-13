@@ -3,6 +3,37 @@
 This document follows the guidelines of [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.26.2] - 2025-09-13
+
+### Added
+
+- **BlocOnboarding:** se introduce `AutoAdvancePolicy` para controlar con mayor granularidad cuándo
+  el flujo avanza automáticamente al siguiente paso.
+
+### Changed
+
+- **ErrorItem:**
+  - Serialización/deserialización más robusta: niveles de error desconocidos ahora hacen *fallback*
+    a `ErrorLevelEnum.systemInfo`.
+  - `copyWith(meta:)` devuelve un mapa **inmodificable** para evitar mutaciones accidentales.
+
+### Docs
+
+- DartDoc ampliado para `ErrorItem`, `ErrorLevelEnum` y `ErrorItemEnum`, con ejemplos de uso y
+  pautas para UI.
+
+### Tests
+
+- Cobertura añadida para:
+  - *Fallback* de niveles desconocidos en `errorLevel`.
+  - *Round-trip* JSON de `ErrorItem`.
+  - Inmutabilidad de `meta` en `copyWith`.
+  - Casos básicos de `AutoAdvancePolicy` en `BlocOnboarding`.
+
+> **Notas:** No hay cambios incompatibles. Si tu código mutaba el mapa retornado por
+`copyWith(meta: ...)`, clónalo explícitamente antes de modificarlo. `AutoAdvancePolicy` mantiene el
+> comportamiento por defecto previo salvo que definas una política específica.
+
 ## [1.26.1] - 2025-09-13
 
 ### Added

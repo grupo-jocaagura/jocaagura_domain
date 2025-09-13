@@ -2,6 +2,21 @@ part of '../../jocaagura_domain.dart';
 
 typedef BlocStepper = BlocOnboarding;
 
+enum NavCause { start, next, back, retry }
+
+typedef AutoAdvancePolicy = bool Function(NavCause cause, OnboardingStep step);
+
+bool defaultAutoAdvancePolicy(NavCause cause, OnboardingStep step) {
+  switch (cause) {
+    case NavCause.start:
+    case NavCause.next:
+    case NavCause.retry:
+      return true;
+    case NavCause.back:
+      return false;
+  }
+}
+
 /// BLoC to orchestrate an onboarding flow (sequence of steps).
 ///
 /// ### Purpose
@@ -127,8 +142,13 @@ class BlocOnboarding extends BlocModule {
   /// Create a BlocOnboarding with an optional [ErrorMapper].
   ///
   /// If none is provided, a [DefaultErrorMapper] instance is used.
-  BlocOnboarding({ErrorMapper? errorMapper})
-      : _errorMapper = errorMapper ?? const DefaultErrorMapper();
+  BlocOnboarding({
+    ErrorMapper? errorMapper,
+    AutoAdvancePolicy? autoAdvancePolicy,
+  })  : _errorMapper = errorMapper ?? const DefaultErrorMapper(),
+        _autoAdvancePolicy = autoAdvancePolicy ?? defaultAutoAdvancePolicy;
+
+  final AutoAdvancePolicy _autoAdvancePolicy;
 
   /// Reactive state holder. Starts from [OnboardingState.idle].
   final BlocGeneral<OnboardingState> _state =
@@ -211,7 +231,7 @@ class BlocOnboarding extends BlocModule {
         error: null,
       ),
     );
-    _runOnEnterAndMaybeSchedule(epoch);
+    _runOnEnterAndMaybeSchedule(epoch, cause: NavCause.start);
   }
 
   /// Move to the next step or `complete()` if already at the last step.
@@ -224,7 +244,7 @@ class BlocOnboarding extends BlocModule {
     if (state.stepIndex + 1 < state.totalSteps) {
       _epoch++;
       _emit(state.copyWith(stepIndex: state.stepIndex + 1, error: null));
-      _runOnEnterAndMaybeSchedule(epoch);
+      _runOnEnterAndMaybeSchedule(epoch, cause: NavCause.next);
     } else {
       complete();
     }
@@ -247,7 +267,7 @@ class BlocOnboarding extends BlocModule {
     if (state.stepIndex > 0) {
       _epoch++;
       _emit(state.copyWith(stepIndex: state.stepIndex - 1, error: null));
-      _runOnEnterAndMaybeSchedule(epoch, allowAutoAdvance: false);
+      _runOnEnterAndMaybeSchedule(epoch, cause: NavCause.back);
     }
   }
 
@@ -287,7 +307,7 @@ class BlocOnboarding extends BlocModule {
     _cancelTimer();
     _epoch++;
     _emit(state.copyWith(error: null));
-    _runOnEnterAndMaybeSchedule(epoch);
+    _runOnEnterAndMaybeSchedule(epoch, cause: NavCause.retry);
   }
 
   /// Current step or `null` when not running/out-of-range.
@@ -313,20 +333,22 @@ class BlocOnboarding extends BlocModule {
   /// - Guards with [epochAtCall] and identity checks to ignore stale completions.
   Future<void> _runOnEnterAndMaybeSchedule(
     int epochAtCall, {
-    bool allowAutoAdvance = true,
+    required NavCause cause,
   }) async {
     final OnboardingStep? step = currentStep;
     if (step == null) {
       return;
     }
 
-    // 1) Execute onEnter if present
+    // Decidir si se permite scheduling para esta causa/paso
+    final bool allowAutoAdvance = _autoAdvancePolicy(cause, step);
+
+    // 1) onEnter si existe
     if (step.onEnter != null) {
       Either<ErrorItem, Unit> result;
-
       try {
         result =
-            await step.onEnter?.call() ?? Right<ErrorItem, Unit>(Unit.value);
+            await (step.onEnter?.call() ?? Right<ErrorItem, Unit>(Unit.value));
       } catch (e, s) {
         if (isDisposed ||
             epochAtCall != epoch ||
@@ -343,16 +365,13 @@ class BlocOnboarding extends BlocModule {
         return;
       }
 
-      // Step changed while awaiting? Ignore stale completion.
       if (isDisposed || epochAtCall != epoch || !identical(step, currentStep)) {
         return;
       }
 
-      // 2) Handle Either
       result.when(
         (ErrorItem err) {
           _emit(state.copyWith(error: err));
-          // No auto-advance on error.
         },
         (Unit _) {
           if (allowAutoAdvance) {
@@ -363,7 +382,7 @@ class BlocOnboarding extends BlocModule {
       return;
     }
 
-    // 3) No onEnter → only schedule auto-advance if defined
+    // 2) sin onEnter → solo schedule si la policy lo permite
     if (isDisposed || epochAtCall != epoch || !identical(step, currentStep)) {
       return;
     }
