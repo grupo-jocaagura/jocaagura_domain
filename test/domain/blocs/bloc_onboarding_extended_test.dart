@@ -422,4 +422,139 @@ void main() {
       expect(bloc.state.stepIndex, prevIndex);
     });
   });
+
+  group('BlocOnboarding – back() NO auto-advance', () {
+    late BlocOnboarding bloc;
+
+    setUp(() {
+      bloc = BlocOnboarding();
+    });
+
+    tearDown(() {
+      bloc.dispose();
+    });
+
+    test(
+      'Given step con autoAdvance (sin onEnter) '
+      'When start -> avanza; back() '
+      'Then NO auto-advance tras volver y esperar > delay',
+      () async {
+        // Arrange
+        const OnboardingStep a = OnboardingStep(
+          title: 'A',
+          // Este delay auto-avanzaría normalmente, pero tras back() NO debe ocurrir.
+          autoAdvanceAfter: Duration(milliseconds: 40),
+        );
+        const OnboardingStep b = OnboardingStep(title: 'B');
+
+        bloc.configure(<OnboardingStep>[a, b]);
+
+        // Act: start -> A, esperar auto-advance a B
+        bloc.start();
+        await Future<void>.delayed(const Duration(milliseconds: 70));
+        expect(bloc.state.stepIndex, 1, reason: 'Debe haber avanzado a B');
+
+        // back() -> vuelve a A
+        bloc.back();
+        expect(bloc.state.stepIndex, 0, reason: 'Volvió a A');
+
+        // Esperar más que el delay de A; NO debe auto-avanzar
+        await Future<void>.delayed(const Duration(milliseconds: 80));
+
+        // Assert
+        expect(
+          bloc.state.stepIndex,
+          0,
+          reason:
+              'Tras back() no debe auto-avanzar aunque A tenga autoAdvanceAfter',
+        );
+        expect(bloc.state.error, isNull);
+      },
+    );
+
+    test(
+      'Given step con onEnter Right + autoAdvance '
+      'When start -> avanza; back() '
+      'Then NO auto-advance tras volver aunque onEnter sea exitoso',
+      () async {
+        // Arrange
+        final OnboardingStep a = OnboardingStep(
+          title: 'A',
+          onEnter: () async {
+            await Future<void>.delayed(const Duration(milliseconds: 10));
+            return Right<ErrorItem, Unit>(Unit.value);
+          },
+          autoAdvanceAfter: const Duration(milliseconds: 40),
+        );
+        const OnboardingStep b = OnboardingStep(title: 'B');
+
+        bloc.configure(<OnboardingStep>[a, b]);
+
+        // Act: start -> A, esperar auto-advance a B
+        bloc.start();
+        await Future<void>.delayed(const Duration(milliseconds: 80));
+        expect(bloc.state.stepIndex, 1);
+
+        // back() -> A
+        bloc.back();
+        expect(bloc.state.stepIndex, 0);
+
+        // Esperamos > autoAdvanceAfter; NO debe avanzar
+        await Future<void>.delayed(const Duration(milliseconds: 80));
+
+        // Assert
+        expect(
+          bloc.state.stepIndex,
+          0,
+          reason:
+              'Tras back(), el auto-advance está deshabilitado por política del BLoC',
+        );
+        expect(bloc.state.error, isNull);
+      },
+    );
+
+    test(
+      'Given back() deshabilita auto-advance '
+      'When retryOnEnter() explícito '
+      'Then vuelve a habilitarse el auto-advance y avanza',
+      () async {
+        // Arrange
+        final OnboardingStep a = OnboardingStep(
+          title: 'A',
+          onEnter: () async => Right<ErrorItem, Unit>(Unit.value),
+          autoAdvanceAfter: const Duration(milliseconds: 40),
+        );
+        const OnboardingStep b = OnboardingStep(title: 'B');
+
+        bloc.configure(<OnboardingStep>[a, b]);
+
+        // start -> auto-advance a B
+        bloc.start();
+        await Future<void>.delayed(const Duration(milliseconds: 70));
+        expect(bloc.state.stepIndex, 1);
+
+        // back() -> A, NO auto-advance
+        bloc.back();
+        expect(bloc.state.stepIndex, 0);
+        await Future<void>.delayed(const Duration(milliseconds: 70));
+        expect(
+          bloc.state.stepIndex,
+          0,
+          reason: 'Sigue en A: back() deshabilitó el auto-advance',
+        );
+
+        // Act: retryOnEnter() (habilita de nuevo auto-advance si hay éxito)
+        bloc.retryOnEnter();
+        await Future<void>.delayed(const Duration(milliseconds: 70));
+
+        // Assert: avanzó a B gracias al retry explícito
+        expect(
+          bloc.state.stepIndex,
+          1,
+          reason:
+              'retryOnEnter() corre onEnter y vuelve a permitir auto-advance',
+        );
+      },
+    );
+  });
 }

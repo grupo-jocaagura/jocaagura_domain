@@ -9,7 +9,7 @@ part of '../../jocaagura_domain.dart';
 /// enters successfully.
 ///
 /// ### Error handling contract
-/// - `onEnter` must **not throw** (should return `Left(ErrorItem)` on failure).
+/// - `onEnter` must **not throw** (return `Left(ErrorItem)` on failure).
 /// - If `onEnter` **throws** unexpectedly, the exception is mapped to an
 ///   [ErrorItem] through the injected [ErrorMapper] (defaults to
 ///   [DefaultErrorMapper]) and stored in `state.error`.
@@ -27,6 +27,10 @@ part of '../../jocaagura_domain.dart';
 ///   `autoAdvanceAfter`.
 /// - Steps without `onEnter` are treated as **immediate success** for the
 ///   purpose of auto-advance: the delay is scheduled if present.
+/// - **After `back()`** the orchestrator **does not auto-advance**, even if the
+///   step defines `autoAdvanceAfter`. This prevents surprising jumps right
+///   after a manual back action. Callers can still navigate forward explicitly
+///   or re-run logic via [retryOnEnter].
 ///
 /// ### State invariants (responsibility split)
 /// - This BLoC relies on [OnboardingState] invariants being ensured by the
@@ -39,7 +43,7 @@ part of '../../jocaagura_domain.dart';
 ///   higher layers if required.
 ///
 /// ### Error persistence on terminal states
-/// - `complete()` and `skip()` do **not** clear `error` automatically. If the UI
+/// - [complete] and [skip] do **not** clear `error` automatically. If the UI
 ///   must present terminal screens without previous errors, call [clearError]
 ///   before or after these transitions.
 ///
@@ -49,6 +53,73 @@ part of '../../jocaagura_domain.dart';
 /// bloc.configure(<OnboardingStep>[/* steps */]);
 /// bloc.start(); // emits running + executes onEnter for step 0
 /// // listen on bloc.stateStream for updates
+/// ```
+///
+/// ### Copy-paste runnable example (pure Dart)
+/// ```dart
+/// import 'dart:async';
+/// import 'package:jocaagura_domain/jocaagura_domain.dart';
+///
+/// Future<void> main() async {
+///   final BlocOnboarding bloc = BlocOnboarding();
+///
+///   final List<OnboardingStep> steps = <OnboardingStep>[
+///     OnboardingStep(
+///       title: 'Welcome',
+///       description: 'Shows a welcome message',
+///       autoAdvanceAfter: const Duration(milliseconds: 100),
+///       // No onEnter: treated as immediate success for auto-advance.
+///     ),
+///     OnboardingStep(
+///       title: 'Permissions',
+///       description: 'Request critical permissions',
+///       onEnter: () async {
+///         // Simulate async work
+///         await Future<void>.delayed(const Duration(milliseconds: 50));
+///         final bool granted = true;
+///         return granted
+///             ? Right<ErrorItem, Unit>(Unit.value)
+///             : Left<ErrorItem, Unit>(ErrorItem(
+///                 title: 'Permission Denied',
+///                 code: 'ERR_PERM',
+///                 description: 'User did not grant permissions',
+///               ));
+///       },
+///       autoAdvanceAfter: const Duration(milliseconds: 100),
+///     ),
+///     OnboardingStep(
+///       title: 'Finalize',
+///       description: 'Finishes the setup',
+///       onEnter: () async => Right<ErrorItem, Unit>(Unit.value),
+///     ),
+///   ];
+///
+///   // Observe state changes
+///   final StreamSubscription<OnboardingState> sub =
+///       bloc.stateStream.listen((OnboardingState s) {
+///     print('[STATE] $s');
+///   });
+///
+///   bloc.configure(steps);
+///   bloc.start();
+///
+///   // Wait enough for first auto-advance (Welcome -> Permissions)
+///   await Future<void>.delayed(const Duration(milliseconds: 200));
+///
+///   // Demonstrate back(): it will NOT auto-advance after going back
+///   bloc.back(); // Go back from Permissions to Welcome
+///   await Future<void>.delayed(const Duration(milliseconds: 200));
+///
+///   // Move forward explicitly
+///   bloc.next(); // Welcome -> Permissions
+///   await Future<void>.delayed(const Duration(milliseconds: 200));
+///
+///   // Complete flow
+///   bloc.complete();
+///
+///   await sub.cancel();
+///   bloc.dispose();
+/// }
 /// ```
 class BlocOnboarding extends BlocModule {
   /// Create a [BlocOnboarding] with an optional [ErrorMapper].
@@ -158,14 +229,13 @@ class BlocOnboarding extends BlocModule {
   }
 
   /// Move to the previous step if possible.
-  /// Move to the previous step if possible.
   ///
   /// Policy:
   /// - Cancels any pending timer.
   /// - Executes `onEnter` of the previous step, but **does not** auto-schedule
   ///   an advance (even if `autoAdvanceAfter` is set). This prevents surprising
   ///   jumps right after a manual back action. Callers can still navigate forward
-  ///   explicitly or re-run logic via `retryOnEnter()`.
+  ///   explicitly or re-run logic via [retryOnEnter].
   void back() {
     assert(!isDisposed, 'BlocOnboarding has been disposed.');
     if (!isRunning) {
