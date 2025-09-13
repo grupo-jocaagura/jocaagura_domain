@@ -158,6 +158,14 @@ class BlocOnboarding extends BlocModule {
   }
 
   /// Move to the previous step if possible.
+  /// Move to the previous step if possible.
+  ///
+  /// Policy:
+  /// - Cancels any pending timer.
+  /// - Executes `onEnter` of the previous step, but **does not** auto-schedule
+  ///   an advance (even if `autoAdvanceAfter` is set). This prevents surprising
+  ///   jumps right after a manual back action. Callers can still navigate forward
+  ///   explicitly or re-run logic via `retryOnEnter()`.
   void back() {
     assert(!isDisposed, 'BlocOnboarding has been disposed.');
     if (!isRunning) {
@@ -167,7 +175,7 @@ class BlocOnboarding extends BlocModule {
     if (state.stepIndex > 0) {
       _epoch++;
       _emit(state.copyWith(stepIndex: state.stepIndex - 1, error: null));
-      _runOnEnterAndMaybeSchedule(epoch);
+      _runOnEnterAndMaybeSchedule(epoch, allowAutoAdvance: false);
     }
   }
 
@@ -231,7 +239,10 @@ class BlocOnboarding extends BlocModule {
   ///
   /// Race-safety:
   /// - Guards with [epochAtCall] and identity checks to ignore stale completions.
-  Future<void> _runOnEnterAndMaybeSchedule(int epochAtCall) async {
+  Future<void> _runOnEnterAndMaybeSchedule(
+    int epochAtCall, {
+    bool allowAutoAdvance = true,
+  }) async {
     final OnboardingStep? step = currentStep;
     if (step == null) {
       return;
@@ -272,7 +283,9 @@ class BlocOnboarding extends BlocModule {
           // No auto-advance on error.
         },
         (Unit _) {
-          _scheduleAutoAdvanceIfAny();
+          if (allowAutoAdvance) {
+            _scheduleAutoAdvanceIfAny();
+          }
         },
       );
       return;
@@ -282,7 +295,9 @@ class BlocOnboarding extends BlocModule {
     if (isDisposed || epochAtCall != epoch || !identical(step, currentStep)) {
       return;
     }
-    _scheduleAutoAdvanceIfAny();
+    if (allowAutoAdvance) {
+      _scheduleAutoAdvanceIfAny();
+    }
   }
 
   /// Schedules auto-advance if the current step defines a positive delay.
