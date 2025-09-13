@@ -3,6 +3,122 @@
 This document follows the guidelines of [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.27.0] - 2025-09-13
+
+### Added
+
+- **BlocOnboarding:** `AutoAdvancePolicy` para controlar con mayor granularidad cuándo el flujo
+  avanza automáticamente al siguiente paso.
+
+### Changed
+
+- **BlocOnboarding – Navegación y contratos:**
+  - `back()` evita el auto-avance incluso si el paso define `autoAdvanceAfter`, mejorando la
+    previsibilidad de la UX; se ejecuta el `onEnter` del paso previo.
+  - Se refinó el contrato de `onEnter`: no debe lanzar; devolver `Left(ErrorItem)` para permanecer
+    en el paso; debe ser rápido (el trabajo pesado va a *use cases*); `null` implica éxito
+    inmediato.
+  - `autoAdvanceAfter` solo aplica tras un `onEnter` exitoso.
+
+- **ErrorItem:**
+  - Serialización/deserialización más robusta: niveles desconocidos hacen *fallback* a
+    `ErrorLevelEnum.systemInfo`.
+  - `copyWith(meta:)` retorna un mapa **inmodificable** para prevenir mutaciones accidentales.
+
+### Docs
+
+- DartDoc ampliado para `OnboardingStep`, `OnEnterResult`, `ErrorItem`, `ErrorLevelEnum` y
+  `ErrorItemEnum`, incluyendo ejemplos de uso y pautas de UI.
+
+### Tests
+
+- **Onboarding:** suite completa que cubre configuración/arranque (pasos vacíos/no vacíos),
+  `onEnter` (éxito, `Left(ErrorItem)`, excepción), `retryOnEnter`, `clearError`, `next/back` con
+  cancelación de temporizadores, `currentStep` en múltiples estados, guardas de *race conditions*
+  vía *epoch*, y preservación de errores en estados terminales (`skip`, `complete`).
+- **Theme/Repository:** casos adicionales para robustez del *gateway* y verificación de
+  normalización HEX en JSON (sin cambios de API).
+- **ErrorItem:** *round-trip* JSON, *fallback* de niveles desconocidos, e inmutabilidad de `meta` en
+  `copyWith`.
+
+> **Notas:** No hay cambios incompatibles.
+> - Si tus pruebas asumían auto-avance al usar `back()`, actualízalas al nuevo comportamiento.
+> - Si tu código modificaba el mapa devuelto por `copyWith(meta: ...)`, clónalo antes de mutarlo.
+
+## [1.26.2] - 2025-09-13
+
+### Added
+
+- **BlocOnboarding:** se introduce `AutoAdvancePolicy` para controlar con mayor granularidad cuándo
+  el flujo avanza automáticamente al siguiente paso.
+
+### Changed
+
+- **ErrorItem:**
+  - Serialización/deserialización más robusta: niveles de error desconocidos ahora hacen *fallback*
+    a `ErrorLevelEnum.systemInfo`.
+  - `copyWith(meta:)` devuelve un mapa **inmodificable** para evitar mutaciones accidentales.
+
+### Docs
+
+- DartDoc ampliado para `ErrorItem`, `ErrorLevelEnum` y `ErrorItemEnum`, con ejemplos de uso y
+  pautas para UI.
+
+### Tests
+
+- Cobertura añadida para:
+  - *Fallback* de niveles desconocidos en `errorLevel`.
+  - *Round-trip* JSON de `ErrorItem`.
+  - Inmutabilidad de `meta` en `copyWith`.
+  - Casos básicos de `AutoAdvancePolicy` en `BlocOnboarding`.
+
+> **Notas:** No hay cambios incompatibles. Si tu código mutaba el mapa retornado por
+`copyWith(meta: ...)`, clónalo explícitamente antes de modificarlo. `AutoAdvancePolicy` mantiene el
+> comportamiento por defecto previo salvo que definas una política específica.
+
+## [1.26.1] - 2025-09-13
+
+### Added
+
+- **BlocOnboarding – Tests completos**:
+  - Configuración y arranque (pasos vacíos / no vacíos).
+  - Comportamiento de `onEnter`: éxito, error (`Left(ErrorItem)`) y excepciones.
+  - `retryOnEnter` y `clearError`.
+  - Navegación `next` y `back` con cancelación de temporizadores y transiciones de estado.
+  - Verificación de `currentStep` en múltiples estados.
+  - Guardas contra *race conditions* mediante el mecanismo de *epoch*.
+  - Estados terminales (`skip`, `complete`) preservando errores.
+  - Efectos de `dispose()` sobre temporizadores.
+
+### Changed
+
+- **BlocOnboarding – Navegación hacia atrás**:
+  - `back()` ahora evita el auto-avance incluso si el paso tiene `autoAdvanceAfter`, ofreciendo una
+    UX más predecible.
+  - Se mantiene la ejecución de `onEnter` del paso previo.
+- **OnboardingStep – Contratos y documentación**:
+  - `onEnter` **no debe lanzar**; devolver `Left(ErrorItem)` para permanecer en el paso.
+  - Debe ser rápido; trabajo pesado va a *use cases*.
+  - `null` implica éxito inmediato.
+  - `autoAdvanceAfter` solo aplica tras un `onEnter` exitoso.
+  - Se refinó la documentación de `title`, `description`, `autoAdvanceAfter`, `onEnter` y del
+    *typedef* `OnEnterResult`.
+
+### Tests
+
+- **Onboarding**: suite ampliada (ver “Added”).
+- **Theme**: cobertura extendida y robustez del *gateway* (sin cambios de API).
+
+### Docs
+
+- Ejemplo adicional que cubre distintas configuraciones de `OnboardingStep` y resultados de
+  `onEnter`.
+- Aclaraciones de contrato en DartDoc para `OnboardingStep` y `OnEnterResult`.
+
+> **Notas:** No hay cambios incompatibles. El cambio en `back()` mejora la previsibilidad del flujo;
+> si tus pruebas asumían auto-avance al retroceder, actualízalas para reflejar el nuevo
+> comportamiento.
+
 ## [1.26.0] - 2025-09-07
 
 ### Added

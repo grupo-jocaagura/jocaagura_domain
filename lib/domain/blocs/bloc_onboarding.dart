@@ -1,24 +1,160 @@
 part of '../../jocaagura_domain.dart';
 
+typedef BlocStepper = BlocOnboarding;
+
+enum NavCause { start, next, back, retry }
+
+typedef AutoAdvancePolicy = bool Function(NavCause cause, OnboardingStep step);
+
+bool defaultAutoAdvancePolicy(NavCause cause, OnboardingStep step) {
+  switch (cause) {
+    case NavCause.start:
+    case NavCause.next:
+    case NavCause.retry:
+      return true;
+    case NavCause.back:
+      return false;
+  }
+}
+
 /// BLoC to orchestrate an onboarding flow (sequence of steps).
 ///
-/// - Each step may run an async side-effect on enter returning
-///   `FutureOr<Either<ErrorItem, Unit>>`.
-/// - If `onEnter` returns `Left(ErrorItem)`, the flow stays on the step and
-///   exposes `state.error`.
-/// - If `onEnter` throws, the exception is mapped to `ErrorItem` using the
-///   injected [ErrorMapper] (defaults to [DefaultErrorMapper]).
+/// ### Purpose
+/// Coordinates step transitions (`start`, `next`, `back`, `skip`, `complete`),
+/// executes optional `onEnter` side-effects, captures errors into
+/// [OnboardingState.error], and schedules **auto-advance** only when a step
+/// enters successfully.
 ///
-/// Auto-advance is scheduled **only** when `onEnter` succeeds (Right).
+/// ### Error handling contract
+/// - `onEnter` must **not throw** (return `Left(ErrorItem)` on failure).
+/// - If `onEnter` **throws** unexpectedly, the exception is mapped to an
+///   [ErrorItem] through the injected [ErrorMapper] (defaults to
+///   [DefaultErrorMapper]) and stored in `state.error`.
+/// - On `Left(ErrorItem)`, the flow **stays** on the current step (no auto-advance).
+///
+/// ### Concurrency and race-safety
+/// - Uses an internal **epoch** (`_epoch`) plus identity checks
+///   (`identical(step, currentStep)`) to ignore stale async completions when
+///   the step changes during a pending `onEnter`.
+/// - Timers are cancelled on every transition to prevent orphan callbacks.
+///
+/// ### Auto-advance policy
+/// - Auto-advance is scheduled **only** when `onEnter` completes with success
+///   (`Right(unit)`), and only if the step defines a positive
+///   `autoAdvanceAfter`.
+/// - Steps without `onEnter` are treated as **immediate success** for the
+///   purpose of auto-advance: the delay is scheduled if present.
+/// - **After `back()`** the orchestrator **does not auto-advance**, even if the
+///   step defines `autoAdvanceAfter`. This prevents surprising jumps right
+///   after a manual back action. Callers can still navigate forward explicitly
+///   or re-run logic via [retryOnEnter].
+///
+/// ### State invariants (responsibility split)
+/// - This BLoC relies on [OnboardingState] invariants being ensured by the
+///   orchestrator/flow itself when moving between steps:
+///   - When `status == running`, callers should ensure:
+///     - `totalSteps > 0`
+///     - `0 ≤ stepIndex < totalSteps`
+/// - The public API updates state consistently (`idle` on `configure`, `running`
+///   on `start`, etc.). Any domain validation beyond that must be handled in
+///   higher layers if required.
+///
+/// ### Error persistence on terminal states
+/// - [complete] and [skip] do **not** clear `error` automatically. If the UI
+///   must present terminal screens without previous errors, call [clearError]
+///   before or after these transitions.
+///
+/// ### Minimal usage
+/// ```dart
+/// final BlocOnboarding bloc = BlocOnboarding();
+/// bloc.configure(<OnboardingStep>[/* steps */]);
+/// bloc.start(); // emits running + executes onEnter for step 0
+/// // listen on bloc.stateStream for updates
+/// ```
+///
+/// ### Copy-paste runnable example (pure Dart)
+/// ```dart
+/// import 'dart:async';
+/// import 'package:jocaagura_domain/jocaagura_domain.dart';
+///
+/// Future<void> main() async {
+///   final BlocOnboarding bloc = BlocOnboarding();
+///
+///   final List<OnboardingStep> steps = <OnboardingStep>[
+///     OnboardingStep(
+///       title: 'Welcome',
+///       description: 'Shows a welcome message',
+///       autoAdvanceAfter: const Duration(milliseconds: 100),
+///       // No onEnter: treated as immediate success for auto-advance.
+///     ),
+///     OnboardingStep(
+///       title: 'Permissions',
+///       description: 'Request critical permissions',
+///       onEnter: () async {
+///         // Simulate async work
+///         await Future<void>.delayed(const Duration(milliseconds: 50));
+///         final bool granted = true;
+///         return granted
+///             ? Right<ErrorItem, Unit>(Unit.value)
+///             : Left<ErrorItem, Unit>(ErrorItem(
+///                 title: 'Permission Denied',
+///                 code: 'ERR_PERM',
+///                 description: 'User did not grant permissions',
+///               ));
+///       },
+///       autoAdvanceAfter: const Duration(milliseconds: 100),
+///     ),
+///     OnboardingStep(
+///       title: 'Finalize',
+///       description: 'Finishes the setup',
+///       onEnter: () async => Right<ErrorItem, Unit>(Unit.value),
+///     ),
+///   ];
+///
+///   // Observe state changes
+///   final StreamSubscription<OnboardingState> sub =
+///       bloc.stateStream.listen((OnboardingState s) {
+///     print('[STATE] $s');
+///   });
+///
+///   bloc.configure(steps);
+///   bloc.start();
+///
+///   // Wait enough for first auto-advance (Welcome -> Permissions)
+///   await Future<void>.delayed(const Duration(milliseconds: 200));
+///
+///   // Demonstrate back(): it will NOT auto-advance after going back
+///   bloc.back(); // Go back from Permissions to Welcome
+///   await Future<void>.delayed(const Duration(milliseconds: 200));
+///
+///   // Move forward explicitly
+///   bloc.next(); // Welcome -> Permissions
+///   await Future<void>.delayed(const Duration(milliseconds: 200));
+///
+///   // Complete flow
+///   bloc.complete();
+///
+///   await sub.cancel();
+///   bloc.dispose();
+/// }
+/// ```
 class BlocOnboarding extends BlocModule {
   /// Create a BlocOnboarding with an optional [ErrorMapper].
   ///
   /// If none is provided, a [DefaultErrorMapper] instance is used.
-  BlocOnboarding({ErrorMapper? errorMapper})
-      : _errorMapper = errorMapper ?? const DefaultErrorMapper();
+  BlocOnboarding({
+    ErrorMapper? errorMapper,
+    AutoAdvancePolicy? autoAdvancePolicy,
+  })  : _errorMapper = errorMapper ?? const DefaultErrorMapper(),
+        _autoAdvancePolicy = autoAdvancePolicy ?? defaultAutoAdvancePolicy;
+
+  final AutoAdvancePolicy _autoAdvancePolicy;
+
+  /// Reactive state holder. Starts from [OnboardingState.idle].
   final BlocGeneral<OnboardingState> _state =
       BlocGeneral<OnboardingState>(OnboardingState.idle());
 
+  /// Logical name for diagnostics and registries.
   static const String name = 'blocOnboarding';
 
   /// Error mapper for unexpected thrown exceptions in `onEnter`.
@@ -28,16 +164,38 @@ class BlocOnboarding extends BlocModule {
   Timer? _timer;
   bool _disposed = false;
 
+  /// Exposes the current scheduled timer (debug-only).
+  Timer? get timer => _timer;
+
+  /// Whether the bloc has been disposed.
+  bool get isDisposed => _disposed;
+
   // Guards to ignore stale async completions when the step changes.
   int _epoch = 0;
 
-  /// Reactive state access.
+  /// Monotonically increasing token to guard async completions.
+  int get epoch => _epoch;
+
+  /// Reactive state stream.
   Stream<OnboardingState> get stateStream => _state.stream;
+
+  /// Current snapshot of the state.
   OnboardingState get state => _state.value;
+
+  /// Convenience: whether the flow is currently running.
   bool get isRunning => state.status == OnboardingStatus.running;
 
+  /// Configure the list of steps and reset to `idle` with `totalSteps`.
+  ///
+  /// Preconditions:
+  /// - The bloc **must not** be disposed.
+  ///
+  /// Postconditions:
+  /// - Cancels any pending timer.
+  /// - Stores an **unmodifiable** copy of [steps].
+  /// - Emits `idle()` with `totalSteps = steps.length` and `error = null`.
   void configure(List<OnboardingStep> steps) {
-    assert(!_disposed, 'BlocOnboarding has been disposed.');
+    assert(!isDisposed, 'BlocOnboarding has been disposed.');
     _cancelTimer();
     _steps = List<OnboardingStep>.unmodifiable(steps);
     _emit(
@@ -45,8 +203,14 @@ class BlocOnboarding extends BlocModule {
     );
   }
 
+  /// Start the flow.
+  ///
+  /// Behavior:
+  /// - If there are no steps, emits `completed` immediately.
+  /// - Otherwise emits `running` with `stepIndex = 0`, then executes `onEnter`
+  ///   and maybe schedules auto-advance.
   void start() {
-    assert(!_disposed, 'BlocOnboarding has been disposed.');
+    assert(!isDisposed, 'BlocOnboarding has been disposed.');
     if (_steps.isEmpty) {
       _emit(
         state.copyWith(
@@ -67,11 +231,12 @@ class BlocOnboarding extends BlocModule {
         error: null,
       ),
     );
-    _runOnEnterAndMaybeSchedule(_epoch);
+    _runOnEnterAndMaybeSchedule(epoch, cause: NavCause.start);
   }
 
+  /// Move to the next step or `complete()` if already at the last step.
   void next() {
-    assert(!_disposed, 'BlocOnboarding has been disposed.');
+    assert(!isDisposed, 'BlocOnboarding has been disposed.');
     if (!isRunning) {
       return;
     }
@@ -79,14 +244,22 @@ class BlocOnboarding extends BlocModule {
     if (state.stepIndex + 1 < state.totalSteps) {
       _epoch++;
       _emit(state.copyWith(stepIndex: state.stepIndex + 1, error: null));
-      _runOnEnterAndMaybeSchedule(_epoch);
+      _runOnEnterAndMaybeSchedule(epoch, cause: NavCause.next);
     } else {
       complete();
     }
   }
 
+  /// Move to the previous step if possible.
+  ///
+  /// Policy:
+  /// - Cancels any pending timer.
+  /// - Executes `onEnter` of the previous step, but **does not** auto-schedule
+  ///   an advance (even if `autoAdvanceAfter` is set). This prevents surprising
+  ///   jumps right after a manual back action. Callers can still navigate forward
+  ///   explicitly or re-run logic via [retryOnEnter].
   void back() {
-    assert(!_disposed, 'BlocOnboarding has been disposed.');
+    assert(!isDisposed, 'BlocOnboarding has been disposed.');
     if (!isRunning) {
       return;
     }
@@ -94,44 +267,50 @@ class BlocOnboarding extends BlocModule {
     if (state.stepIndex > 0) {
       _epoch++;
       _emit(state.copyWith(stepIndex: state.stepIndex - 1, error: null));
-      _runOnEnterAndMaybeSchedule(_epoch);
+      _runOnEnterAndMaybeSchedule(epoch, cause: NavCause.back);
     }
   }
 
+  /// Skip the flow and mark it as [OnboardingStatus.skipped].
+  ///
+  /// Note: does **not** clear [OnboardingState.error].
   void skip() {
-    assert(!_disposed, 'BlocOnboarding has been disposed.');
+    assert(!isDisposed, 'BlocOnboarding has been disposed.');
     _cancelTimer();
     _emit(state.copyWith(status: OnboardingStatus.skipped));
   }
 
+  /// Mark the flow as [OnboardingStatus.completed].
+  ///
+  /// Note: does **not** clear [OnboardingState.error].
   void complete() {
-    assert(!_disposed, 'BlocOnboarding has been disposed.');
+    assert(!isDisposed, 'BlocOnboarding has been disposed.');
     _cancelTimer();
     _emit(state.copyWith(status: OnboardingStatus.completed));
   }
 
   /// Clears the error without changing the current step/status.
   void clearError() {
-    if (_disposed) {
+    if (isDisposed) {
       return;
     }
     _emit(state.copyWith(error: null));
   }
 
   /// Re-runs `onEnter` for the current step (useful after showing an error).
+  ///
+  /// No-op when disposed or not running.
   void retryOnEnter() {
-    // No-op si el bloc ya no está vivo o si no está en ejecución.
-    if (_disposed || !isRunning) {
+    if (isDisposed || !isRunning) {
       return;
     }
-
     _cancelTimer();
     _epoch++;
-    // Evita assert de clearError; _emit ya protege contra _disposed.
     _emit(state.copyWith(error: null));
-    _runOnEnterAndMaybeSchedule(_epoch);
+    _runOnEnterAndMaybeSchedule(epoch, cause: NavCause.retry);
   }
 
+  /// Current step or `null` when not running/out-of-range.
   OnboardingStep? get currentStep {
     if (!isRunning) {
       return null;
@@ -143,27 +322,36 @@ class BlocOnboarding extends BlocModule {
   }
 
   void _emit(OnboardingState newState) {
-    if (!_disposed) {
+    if (!isDisposed) {
       _state.value = newState;
     }
   }
 
-  Future<void> _runOnEnterAndMaybeSchedule(int epochAtCall) async {
+  /// Runs `onEnter` (if any) and schedules auto-advance on success.
+  ///
+  /// Race-safety:
+  /// - Guards with [epochAtCall] and identity checks to ignore stale completions.
+  Future<void> _runOnEnterAndMaybeSchedule(
+    int epochAtCall, {
+    required NavCause cause,
+  }) async {
     final OnboardingStep? step = currentStep;
     if (step == null) {
       return;
     }
 
-    // 1) Ejecuta onEnter si está definido
+    // Decidir si se permite scheduling para esta causa/paso
+    final bool allowAutoAdvance = _autoAdvancePolicy(cause, step);
+
+    // 1) onEnter si existe
     if (step.onEnter != null) {
       Either<ErrorItem, Unit> result;
-
       try {
         result =
-            await step.onEnter?.call() ?? Right<ErrorItem, Unit>(Unit.value);
+            await (step.onEnter?.call() ?? Right<ErrorItem, Unit>(Unit.value));
       } catch (e, s) {
-        if (_disposed ||
-            epochAtCall != _epoch ||
+        if (isDisposed ||
+            epochAtCall != epoch ||
             !identical(step, currentStep)) {
           return;
         }
@@ -177,31 +365,33 @@ class BlocOnboarding extends BlocModule {
         return;
       }
 
-      // Si cambió de paso mientras esperábamos, ignorar.
-      if (_disposed || epochAtCall != _epoch || !identical(step, currentStep)) {
+      if (isDisposed || epochAtCall != epoch || !identical(step, currentStep)) {
         return;
       }
 
-      // 2) Maneja Either con `when`
       result.when(
         (ErrorItem err) {
           _emit(state.copyWith(error: err));
-          // No auto-advance si hay error.
         },
         (Unit _) {
-          _scheduleAutoAdvanceIfAny();
+          if (allowAutoAdvance) {
+            _scheduleAutoAdvanceIfAny();
+          }
         },
       );
       return;
     }
 
-    // 3) Sin onEnter → solo auto-advance si aplica
-    if (_disposed || epochAtCall != _epoch || !identical(step, currentStep)) {
+    // 2) sin onEnter → solo schedule si la policy lo permite
+    if (isDisposed || epochAtCall != epoch || !identical(step, currentStep)) {
       return;
     }
-    _scheduleAutoAdvanceIfAny();
+    if (allowAutoAdvance) {
+      _scheduleAutoAdvanceIfAny();
+    }
   }
 
+  /// Schedules auto-advance if the current step defines a positive delay.
   void _scheduleAutoAdvanceIfAny() {
     final OnboardingStep? step = currentStep;
     if (step == null) {
@@ -213,7 +403,7 @@ class BlocOnboarding extends BlocModule {
     }
 
     _timer = Timer(d, () {
-      if (!_disposed && isRunning && identical(step, currentStep)) {
+      if (!isDisposed && isRunning && identical(step, currentStep)) {
         next();
       }
     });
@@ -224,10 +414,18 @@ class BlocOnboarding extends BlocModule {
     _timer = null;
   }
 
+  /// Disposes resources and stops the bloc.
+  ///
+  /// Postconditions:
+  /// - `_disposed = true`
+  /// - Pending timers cancelled
+  /// - `_state` disposed
   @override
   void dispose() {
-    _disposed = true;
-    _cancelTimer();
-    _state.dispose();
+    if (!isDisposed) {
+      _disposed = true;
+      _cancelTimer();
+      _state.dispose();
+    }
   }
 }
