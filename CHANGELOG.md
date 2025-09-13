@@ -3,6 +3,49 @@
 This document follows the guidelines of [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.26.1] - 2025-09-13
+
+### Added
+
+- **BlocOnboarding – Tests completos**:
+  - Configuración y arranque (pasos vacíos / no vacíos).
+  - Comportamiento de `onEnter`: éxito, error (`Left(ErrorItem)`) y excepciones.
+  - `retryOnEnter` y `clearError`.
+  - Navegación `next` y `back` con cancelación de temporizadores y transiciones de estado.
+  - Verificación de `currentStep` en múltiples estados.
+  - Guardas contra *race conditions* mediante el mecanismo de *epoch*.
+  - Estados terminales (`skip`, `complete`) preservando errores.
+  - Efectos de `dispose()` sobre temporizadores.
+
+### Changed
+
+- **BlocOnboarding – Navegación hacia atrás**:
+  - `back()` ahora evita el auto-avance incluso si el paso tiene `autoAdvanceAfter`, ofreciendo una
+    UX más predecible.
+  - Se mantiene la ejecución de `onEnter` del paso previo.
+- **OnboardingStep – Contratos y documentación**:
+  - `onEnter` **no debe lanzar**; devolver `Left(ErrorItem)` para permanecer en el paso.
+  - Debe ser rápido; trabajo pesado va a *use cases*.
+  - `null` implica éxito inmediato.
+  - `autoAdvanceAfter` solo aplica tras un `onEnter` exitoso.
+  - Se refinó la documentación de `title`, `description`, `autoAdvanceAfter`, `onEnter` y del
+    *typedef* `OnEnterResult`.
+
+### Tests
+
+- **Onboarding**: suite ampliada (ver “Added”).
+- **Theme**: cobertura extendida y robustez del *gateway* (sin cambios de API).
+
+### Docs
+
+- Ejemplo adicional que cubre distintas configuraciones de `OnboardingStep` y resultados de
+  `onEnter`.
+- Aclaraciones de contrato en DartDoc para `OnboardingStep` y `OnEnterResult`.
+
+> **Notas:** No hay cambios incompatibles. El cambio en `back()` mejora la previsibilidad del flujo;
+> si tus pruebas asumían auto-avance al retroceder, actualízalas para reflejar el nuevo
+> comportamiento.
+
 ## [1.26.0] - 2025-09-07
 
 ### Added
