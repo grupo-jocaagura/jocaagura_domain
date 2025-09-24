@@ -20,28 +20,47 @@ class Utils extends EntityUtil {
     return getJsonEncode(inputMap);
   }
 
-  /// Converts a dynamic value to a [Map].
+  /// Convert a dynamic JSON-like value into a Map<String, dynamic>.
   ///
-  /// - [jsonString]: The dynamic value, either a JSON string or a Map.
-  /// - Returns: A [Map<String, dynamic>], or an empty map if the conversion fails.
+  /// Accepts:
+  /// - A `Map<String, dynamic>` (returned as-is)
+  /// - A raw `Map` with dynamic keys (keys normalized to `String`)
+  /// - A JSON string (decoded to a map)
+  ///
+  /// Returns `{}` when decoding fails (never throws).
   ///
   /// Example:
   /// ```dart
-  /// final Map<String, dynamic> result = Utils.mapFromDynamic('{"key": "value"}');
-  /// print(result); // Output: {key: value}
+  /// void main() {
+  ///   print(Utils.mapFromDynamic('{"a": 1}')); // {a: 1}
+  ///   print(Utils.mapFromDynamic({'x': 2}));   // {x: 2}
+  ///   print(Utils.mapFromDynamic('oops'));     // {}
+  /// }
   /// ```
-  static Map<String, dynamic> mapFromDynamic(dynamic jsonString) {
-    if (jsonString is Map<String, dynamic>) {
-      return jsonString;
+  static Map<String, dynamic> mapFromDynamic(dynamic jsonLike) {
+    if (jsonLike is Map<String, dynamic>) {
+      return jsonLike;
     }
 
-    final dynamic json = jsonDecode(jsonString.toString());
-    if (json is Map) {
-      final Map<String, dynamic> result = <String, dynamic>{};
-      json.forEach((dynamic key, dynamic value) {
-        result['$key'] = value;
+    if (jsonLike is Map) {
+      final Map<String, dynamic> m = <String, dynamic>{};
+      jsonLike.forEach((dynamic k, dynamic v) {
+        m['$k'] = v;
       });
-      return result;
+      return m;
+    }
+
+    try {
+      final dynamic decoded = jsonDecode(jsonLike.toString());
+      if (decoded is Map) {
+        final Map<String, dynamic> result = <String, dynamic>{};
+        decoded.forEach((dynamic k, dynamic v) {
+          result['$k'] = v;
+        });
+        return result;
+      }
+    } catch (_) {
+      return <String, dynamic>{};
     }
 
     return <String, dynamic>{};
@@ -76,21 +95,23 @@ class Utils extends EntityUtil {
   /// - [email]: The string to validate.
   /// - Returns: `true` if the string is a valid email, `false` otherwise.
   static bool isEmail(String email) {
-    final RegExp regex = RegExp(
-      r'^[\w-]+(\.[\w-]+)*@([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,7}$',
-    );
-    return regex.hasMatch(email);
+    final RegExp re =
+        RegExp(r'^[A-Za-z0-9._%+\-]+@[A-Za-z0-9.\-]+\.[A-Za-z]{2,24}$');
+    return re.hasMatch(email);
   }
 
   /// Validates if a string is a valid URL format.
   ///
   /// - [url]: The string to validate.
   /// - Returns: `true` if the string is a valid URL, `false` otherwise.
-  static bool isValidUrl(String url) {
-    final RegExp regex = RegExp(
-      r'^(https?|ftp):\/\/[^\s\/$.?#].[^\s]*$',
-    );
-    return regex.hasMatch(url);
+  static bool isValidUrl(String s) {
+    final Uri? u = Uri.tryParse(s.trim());
+    if (u == null) {
+      return false;
+    }
+    final bool okScheme =
+        u.scheme == 'http' || u.scheme == 'https' || u.scheme == 'ftp';
+    return okScheme && u.hasAuthority;
   }
 
   /// Converts a JSON string to a list of strings.
@@ -167,18 +188,44 @@ class Utils extends EntityUtil {
     return json == true;
   }
 
-  /// Converts a dynamic value to a list of `Map<String, dynamic>`.
+  /// Convert a dynamic value into `List<Map<String, dynamic>>`.
   ///
-  /// - [json]: The dynamic value to convert.
-  /// - Returns: A list of maps, or an empty list if the conversion fails.
+  /// Accepts a `List` whose items can be:
+  /// - `Map<String, dynamic>` (kept as-is)
+  /// - raw `Map` with dynamic keys (keys normalized to `String`)
+  ///
+  /// Returns an empty list if the input is not a `List`.
+  ///
+  /// Example:
+  /// ```dart
+  /// void main() {
+  ///   final List<dynamic> raw = [
+  ///     {'a': 1},
+  ///     <dynamic, dynamic>{'b': 2}, // dynamic keys
+  ///     'ignored',
+  ///   ];
+  ///   final List<Map<String, dynamic>> out = Utils.listFromDynamic(raw);
+  ///   print(out); // [{a: 1}, {b: 2}]
+  /// }
+  /// ```
   static List<Map<String, dynamic>> listFromDynamic(dynamic json) {
-    if (json is List) {
-      return json
-          .whereType<Map<String, dynamic>>()
-          .cast<Map<String, dynamic>>()
-          .toList();
+    if (json is! List) {
+      return <Map<String, dynamic>>[];
     }
-    return <Map<String, dynamic>>[];
+
+    final List<Map<String, dynamic>> out = <Map<String, dynamic>>[];
+    for (final dynamic e in json) {
+      if (e is Map<String, dynamic>) {
+        out.add(e);
+      } else if (e is Map) {
+        final Map<String, dynamic> m = <String, dynamic>{};
+        e.forEach((dynamic k, dynamic v) {
+          m['$k'] = v;
+        });
+        out.add(m);
+      }
+    }
+    return out;
   }
 
   /// Converts a dynamic value to an integer.
@@ -218,13 +265,11 @@ class Utils extends EntityUtil {
       return 0;
     }
 
-    // Try int directly first.
     final int? i = int.tryParse(cleaned);
     if (i != null) {
       return i;
     }
 
-    // Fallback: parse as double, then truncate.
     final double? d = double.tryParse(cleaned);
     if (d == null || d.isNaN || d.isInfinite) {
       return 0;
@@ -298,22 +343,17 @@ class Utils extends EntityUtil {
       return null;
     }
 
-    // Replace non-breaking spaces and thin spaces commonly used as thousands separators.
     s = s
         .replaceAll('\u00A0', ' ')
         .replaceAll('\u202F', ' ')
         .replaceAll('\u2009', ' ')
         .trim();
 
-    // Early parse for plain scientific notation or clean numbers.
-    // If this succeeds, prefer the fast path.
     if (double.tryParse(s) != null || int.tryParse(s) != null) {
       return s;
     }
 
-    // Remove currency/exotic symbols but keep digits, signs, separators, exponent chars, and spaces.
-    // We'll decide later which separator is decimal.
-    const String keptCharsPattern = r'[0-9eE\+\-\,\.\s]';
+    const String keptCharsPattern = r'[0-9eE+\-.,\s]';
     final String stripped = s.split('').where((String ch) {
       return RegExp(keptCharsPattern).hasMatch(ch);
     }).join();
@@ -323,69 +363,52 @@ class Utils extends EntityUtil {
       return null;
     }
 
-    // Collapse multiple spaces.
     t = t.replaceAll(RegExp(r'\s+'), '');
 
-    // If still trivially parseable, return.
     if (double.tryParse(t) != null || int.tryParse(t) != null) {
       return t;
     }
 
-    // Decide decimal separator when both are present.
     final int lastDot = t.lastIndexOf('.');
     final int lastComma = t.lastIndexOf(',');
 
     if (lastDot >= 0 && lastComma >= 0) {
-      // Use the last one as decimal; drop the other as thousands.
       final bool commaIsDecimal = lastComma > lastDot;
       if (commaIsDecimal) {
-        // Remove all dots (thousands), then convert comma to dot.
         t = t.replaceAll('.', '');
         t = t.replaceAll(',', '.');
       } else {
-        // Remove all commas (thousands), keep dots as decimal.
         t = t.replaceAll(',', '');
       }
     } else if (lastComma >= 0) {
-      // Only comma present. If multiple commas → thousands; else decimal.
       final int count = RegExp(',').allMatches(t).length;
       if (count > 1) {
-        t = t.replaceAll(',', ''); // likely thousands separators
+        t = t.replaceAll(',', '');
       } else {
-        t = t.replaceAll(',', '.'); // decimal comma → dot
+        t = t.replaceAll(',', '.');
       }
     } else if (lastDot >= 0) {
-      // Only dot present. If multiple dots → thousands; else decimal.
       final int count = RegExp(r'\.').allMatches(t).length;
       if (count > 1) {
-        t = t.replaceAll('.', ''); // likely thousands
+        t = t.replaceAll('.', '');
       }
-      // else: leave single dot as decimal
     }
 
-    // Final safety pass: keep only one leading sign, digits, one dot for decimal,
-    // and exponent part if any.
-    // Split exponent if present to prevent multiple dots in mantissa+exponent.
     String mantissa = t;
     String exponent = '';
-    final Match? expMatch =
-        RegExp(r'([eE][\+\-]?\d+)$').firstMatch(t); // exponent at end
+    final Match? expMatch = RegExp(r'([eE][+-]?\d+)$').firstMatch(t);
     if (expMatch != null) {
-      exponent = expMatch.group(1)!; // like e-3
+      exponent = expMatch.group(1)!;
       mantissa = t.substring(0, expMatch.start);
     }
 
-    // Remove all but digits, sign, and dot in mantissa.
-    // Keep only the first sign (if at start) and the first dot.
     String sign = '';
     if (mantissa.startsWith('+') || mantissa.startsWith('-')) {
       sign = mantissa[0];
       mantissa = mantissa.substring(1);
     }
-    // Remove everything not digit or dot
-    mantissa = mantissa.replaceAll(RegExp(r'[^0-9\.]'), '');
+    mantissa = mantissa.replaceAll(RegExp(r'[^0-9.]'), '');
 
-    // Keep only first dot
     final int firstDotIdx = mantissa.indexOf('.');
     if (firstDotIdx >= 0) {
       final String before = mantissa.substring(0, firstDotIdx + 1);
