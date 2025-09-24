@@ -1,30 +1,31 @@
 part of '../../jocaagura_domain.dart';
 
-/// Enum que representa los campos de un movimiento financiero.
+/// Enumerates the JSON field names for [FinancialMovementModel].
 enum FinancialMovementEnum {
-  /// Identificador único del movimiento financiero.
+  /// Unique identifier of the financial transaction.
   id,
 
-  /// Monto del movimiento en centavos para evitar problemas de precisión.
+  /// Transaction amount in scaled integer using mathPrecision fractional digits
+  /// to avoid precision issues.
   amount,
 
-  /// Fecha en la que se realizó la transacción.
+  /// Date when the transaction was made.
   date,
 
-  /// Concepto general del movimiento financiero.
+  /// General concept of the financial transaction.
   concept,
 
-  /// Descripción detallada del movimiento financiero.
+  /// Detailed description of the financial transaction.
   detailedDescription,
 
-  /// Categoría del movimiento financiero (e.g., "Ingreso", "Gasto").
+  /// Category of the financial transaction (e.g., "Income", "Expense").
   category,
 
-  /// Fecha en la que se registró la transacción.
+  /// Date when the transaction was recorded.
   createdAt,
 }
 
-/// Instancia por defecto de [FinancialMovementModel] para propósitos de inicialización o pruebas.
+/// Default sample instance for initialization or tests.
 final FinancialMovementModel defaultMovement = FinancialMovementModel(
   id: 'fm001',
   amount: 1000,
@@ -35,31 +36,59 @@ final FinancialMovementModel defaultMovement = FinancialMovementModel(
   createdAt: DateTime(2024, 07, 25),
 );
 
-/// Representa un movimiento financiero en el libro de cuentas de un usuario.
+/// Represents an immutable financial movement stored as a scaled integer.
 ///
-/// Esta clase es inmutable y extiende la base [Model] de `jocaagura_domain`.
-/// Asegura consistencia financiera al registrar transacciones sin permitir modificaciones.
+/// Amount is stored as an **integer** using `mathPrecision` fractional digits
+/// (i.e., scaled by `10^mathPrecision`) in order to avoid double precision issues.
+/// For example, with `mathPrecision = 2`, an `amount` of `1234` represents `12.34`.
 ///
-/// ### Ejemplo de uso:
+/// Notes:
+/// - This type is a pure model (no I/O).
+/// - Invariants:
+///   - `amount >= 0`.
+///   - `0 <= mathPrecision <= 6`.
+/// - Contract:
+///   - `amount` is **non-negative** (the sign is not used to encode direction).
+///   - `0 <= mathPrecision <= 6`.
+/// **Non-negative amount policy.**
+/// The monetary amount is modeled as a **non-negative** scaled integer.
+/// The transaction direction (income/expense) is expressed by `category`
+/// (or an equivalent movement type), **not** by the amount sign.
+/// Consequently, all construction paths that ingest external data
+/// (`fromDecimal`, `fromJson`) and mutation helpers (`copyWith`)
+/// **normalize** any negative input to its absolute value.
+/// Integrators must not rely on the amount sign to infer business meaning;
+/// instead, they must use categorical fields.
+/// This policy is enforced by unit tests to ensure consistent normalization and
+/// round-trip behavior. Use `fromDecimal` for new monetary inputs; the default
+/// constructor is intended for already scaled and validated data.
+/// Minimal example:
 /// ```dart
 /// void main() {
-///   final FinancialMovementModel movement = FinancialMovementModel(
+///   final FinancialMovementModel m = FinancialMovementModel.fromDecimal(
 ///     id: 'txn123',
-///     amount: 5000,
-///     date: DateTime.now(),
-///     concept: 'Compra de supermercado',
-///     detailedDescription: 'Pago de alimentos en tienda local',
-///     category: 'Gasto',
-///     createdAt: DateTime.now(),
+///     decimalAmount: 12.34,
+///     date: DateTime(2025, 1, 1),
+///     concept: 'Groceries',
+///     category: 'Expense',
+///     createdAt: DateTime(2025, 1, 2),
+///     precision: 2,
 ///   );
 ///
-///   print(movement);
+///   // m.amount == 1234; m.decimalAmount == 12.34
+///   print(m.toJson());
 /// }
 /// ```
 ///
-/// Esta clase es útil para rastrear transacciones financieras en un sistema de contabilidad personal.
+/// JSON contract:
+/// - Dates are serialized using [DateUtils.dateTimeToString].
+/// - `mathPrecision` MUST be present to preserve round-trip fidelity.
+/// Validation policy:
+/// This type does not throw at construction time in release builds.
+/// Validation is expected to be handled by mappers/repositories/ledger according
+/// to domain rules (e.g., precision policy, temporal consistency).
 class FinancialMovementModel extends Model {
-  /// Crea una nueva instancia de movimiento financiero.
+  /// Creates a new immutable financial movement.
   const FinancialMovementModel({
     required this.id,
     required this.amount,
@@ -69,14 +98,17 @@ class FinancialMovementModel extends Model {
     required this.createdAt,
     this.detailedDescription = '',
     this.mathPrecision = defaultMathPrecision,
-  }) : assert(amount >= 0, 'El monto no puede ser negativo');
+  }) : assert(amount >= 0, 'amount cannot be negative');
 
-  /// Crea una instancia de [FinancialMovementModel] a partir de un JSON.
+  /// Builds a model from JSON.
+  ///
+  /// Missing `mathPrecision` falls back to [defaultMathPrecision].
   factory FinancialMovementModel.fromJson(Map<String, dynamic> json) {
     return FinancialMovementModel(
       id: Utils.getStringFromDynamic(json[FinancialMovementEnum.id.name]),
       amount:
-          Utils.getIntegerFromDynamic(json[FinancialMovementEnum.amount.name]),
+          Utils.getIntegerFromDynamic(json[FinancialMovementEnum.amount.name])
+              .abs(),
       date:
           DateUtils.dateTimeFromDynamic(json[FinancialMovementEnum.date.name]),
       concept:
@@ -90,10 +122,13 @@ class FinancialMovementModel extends Model {
       createdAt: DateUtils.dateTimeFromDynamic(
         json[FinancialMovementEnum.createdAt.name],
       ),
+      mathPrecision: json.containsKey(mathPrecisionKey)
+          ? Utils.getIntegerFromDynamic(json[mathPrecisionKey])
+          : defaultMathPrecision,
     );
   }
 
-  /// Crea un movimiento desde un valor decimal.
+  /// Builds a model from a decimal amount (scales and rounds using `precision`).
   factory FinancialMovementModel.fromDecimal({
     required String id,
     required double decimalAmount,
@@ -104,8 +139,8 @@ class FinancialMovementModel extends Model {
     String detailedDescription = '',
     int precision = defaultMathPrecision,
   }) {
-    final int factor = _getFactor(precision);
-    final int amount = (decimalAmount * factor).round();
+    final int factor = getFactor(precision);
+    final int amount = (decimalAmount * factor).round().abs();
 
     return FinancialMovementModel(
       id: id,
@@ -119,56 +154,62 @@ class FinancialMovementModel extends Model {
     );
   }
 
-  /// [defaultMathPrecision] provee una precision asegurada sin usar double para
-  /// el almacenamiento de las cantidades. Con una localización flexible
-  /// (Colombia, EU, Europa del este...)
+  /// Default precision used to scale decimal amounts as integers.
+  /// We recommend using **4** fractional digits by default for a balanced workflow
+  /// (adjust according to interoperability constraints).
   static const int defaultMathPrecision = 4;
 
-  /// Identificador único del movimiento financiero.
+  /// Allowed precision bounds (inclusive).
+  static const int minPrecision = 0;
+  static const int maxPrecision = 6;
+  static const String mathPrecisionKey = 'mathPrecision';
+
+  /// Unique identifier.
   final String id;
 
-  /// Monto de la transacción (en centavos para evitar problemas de precisión).
+  /// Scaled integer amount (`amount / 10^mathPrecision == decimalAmount`).
   final int amount;
 
-  /// Precisión usada para convertir el monto decimal a entero.
+  /// Fractional digits used to scale `amount`.
   final int mathPrecision;
 
-  /// Monto como valor decimal según la precisión definida.
-  double get decimalAmount => amount / _getFactor(mathPrecision);
+  /// Derived decimal amount.
+  double get decimalAmount => amount / getFactor(mathPrecision);
 
-  static int _getFactor(int precision) => pow(10, precision).toInt();
+  static int getFactor(int precision) => pow(10, precision).toInt();
 
-  /// Fecha en la que se realizó la transacción.
+  /// Transaction date.
   final DateTime date;
 
-  /// Concepto del movimiento (e.g., "Salario", "Compra de supermercado").
+  /// High-level concept (e.g., 'Salary', 'Groceries').
   final String concept;
 
-  /// Descripción detallada del movimiento financiero.
+  /// Optional detailed description.
   final String detailedDescription;
 
-  /// Categoría del movimiento (e.g., "Ingreso", "Gasto").
+  /// Category (e.g., 'Income', 'Expense').
   final String category;
 
-  /// Fecha de creación del registro del movimiento financiero.
+  /// Record creation timestamp.
   final DateTime createdAt;
 
-  /// Convierte este modelo a un formato JSON.
+  /// JSON serialization.
   @override
   Map<String, dynamic> toJson() {
     return <String, dynamic>{
       FinancialMovementEnum.id.name: id,
-      FinancialMovementEnum.amount.name: amount,
+      FinancialMovementEnum.amount.name: amount.abs(),
       FinancialMovementEnum.date.name: DateUtils.dateTimeToString(date),
       FinancialMovementEnum.concept.name: concept,
       FinancialMovementEnum.detailedDescription.name: detailedDescription,
       FinancialMovementEnum.category.name: category,
       FinancialMovementEnum.createdAt.name:
           DateUtils.dateTimeToString(createdAt),
+      mathPrecisionKey: mathPrecision,
     };
   }
 
-  /// Crea una copia de este modelo con valores modificados.
+  /// Returns a copy with the provided fields replaced.
   @override
   FinancialMovementModel copyWith({
     String? id,
@@ -178,19 +219,20 @@ class FinancialMovementModel extends Model {
     String? detailedDescription,
     String? category,
     DateTime? createdAt,
+    int? mathPrecision,
   }) {
     return FinancialMovementModel(
       id: id ?? this.id,
-      amount: amount ?? this.amount,
+      amount: amount?.abs() ?? this.amount.abs(),
       date: date ?? this.date,
       concept: concept ?? this.concept,
       detailedDescription: detailedDescription ?? this.detailedDescription,
       category: category ?? this.category,
       createdAt: createdAt ?? this.createdAt,
+      mathPrecision: mathPrecision ?? this.mathPrecision,
     );
   }
 
-  /// Compara dos instancias de [FinancialMovementModel] para determinar si son iguales.
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
@@ -201,10 +243,10 @@ class FinancialMovementModel extends Model {
             other.concept == concept &&
             other.detailedDescription == detailedDescription &&
             other.category == category &&
+            other.mathPrecision == mathPrecision &&
             other.createdAt == createdAt;
   }
 
-  /// Genera un código hash único para esta instancia.
   @override
   int get hashCode {
     return Object.hash(
@@ -215,13 +257,13 @@ class FinancialMovementModel extends Model {
       detailedDescription,
       category,
       createdAt,
+      mathPrecision,
     );
   }
 
-  /// Representación en cadena de texto del objeto.
   @override
   String toString() {
     return 'FinancialMovementModel(id: $id, amount: $amount, date: $date, '
-        'concept: "$concept", category: "$category", createdAt: $createdAt)';
+        'concept: "$concept", category: "$category", createdAt: $createdAt, mathPrecision: $mathPrecision)';
   }
 }
