@@ -6,6 +6,55 @@ part of 'jocaagura_domain.dart';
 /// such as emails, URLs, phone numbers, JSON, and dynamic types. It also includes
 /// formatters and validators to ensure proper data handling.
 class Utils extends EntityUtil {
+  /// Formats a 10-digit phone number as `(XX) X XXX XXXX`.
+  ///
+  /// This is an alias that keeps the original behavior while fixing the method
+  /// name spelling and parameter naming. It delegates to
+  /// [getFormatedPhoneNumber] without altering logic.
+  ///
+  /// **Contract**
+  /// - Pads the number to 10 digits on the left with `0` when needed.
+  /// - Does not validate country codes or international formats.
+  /// - Negative numbers will keep their minus sign in the input string before
+  ///   padding, which may lead to unexpected results. Prefer passing non-negative
+  ///   integers only.
+  ///
+  /// Example:
+  /// ```dart
+  /// void main() {
+  ///   final String s = Utils.getFormattedPhoneNumber(3001234567);
+  ///   // "(30) 0 123 4567"
+  ///   print(s);
+  /// }
+  /// ```
+  static String getFormattedPhoneNumber(int phoneNumber) {
+    return getFormatedPhoneNumber(phoneNumber);
+  }
+
+  /// Formats a 10-digit phone number as `XXX XXX XXXX`.
+  ///
+  /// This is an alias that keeps the original behavior while fixing the method
+  /// name spelling and parameter naming. It delegates to
+  /// [getFormatedPhoneNumberAlt] without altering logic.
+  ///
+  /// **Contract**
+  /// - Pads the number to 10 digits on the left with `0` when needed.
+  /// - Not intended for international formats or extensions.
+  /// - Input should be a non-negative integer representing a national 10-digit
+  ///   number; other inputs may yield unexpected formatting.
+  ///
+  /// Example:
+  /// ```dart
+  /// void main() {
+  ///   final String s = Utils.getFormattedPhoneNumberAlt(3001234567);
+  ///   // "300 123 4567"
+  ///   print(s);
+  /// }
+  /// ```
+  static String getFormattedPhoneNumberAlt(int phoneNumber) {
+    return getFormatedPhoneNumberAlt(phoneNumber);
+  }
+
   /// Converts a [Map] into a JSON string.
   ///
   /// - [inputMap]: The map to convert.
