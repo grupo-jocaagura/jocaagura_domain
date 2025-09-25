@@ -95,19 +95,47 @@ class ModelVector extends Model {
   /// Zero vector (0, 0) for convenience.
   static const ModelVector zero = ModelVector(0.0, 0.0);
 
-  /// Approximate equality using absolute tolerance [eps] per axis.
+  /// Approximate equality using combined absolute and relative tolerances.
   ///
-  /// Returns `true` when `|dx - other.dx| <= eps` **and** `|dy - other.dy| <= eps`.
-  /// Defaults to `eps=1e-9`.
+  /// Returns `true` if for **both axes**:
+  /// `abs(a-b) <= max(absEps, relEps * max(abs(a), abs(b)))`.
+  ///
+  /// - [absEps] is a floor tolerance for values near zero.
+  /// - [relEps] scales with the magnitude of the inputs.
   ///
   /// ### Example
   /// ```dart
   /// const ModelVector a = ModelVector(1.000000001, 2.0);
   /// const ModelVector b = ModelVector(1.0, 2.0);
-  /// assert(a.equalsApprox(b)); // true with default eps
+  /// assert(a.equalsApprox(b)); // true
   /// ```
-  bool equalsApprox(ModelVector other, {double eps = 1e-9}) =>
-      (dx - other.dx).abs() <= eps && (dy - other.dy).abs() <= eps;
+  bool equalsApprox(
+    ModelVector other, {
+    double absEps = 1e-12,
+    double eps = 1e-9,
+  }) {
+    const double machineEps = 1.1102230246251565e-16;
+    const int ulpK = 8;
+
+    bool nearlyEqual(String axis, double a, double b) {
+      if (identical(a, b)) {
+        return true;
+      }
+      final double diff = (a - b).abs();
+      final double scale = max(a.abs(), b.abs());
+      final double tol = max(absEps, eps * scale);
+      final double slackAdd = ulpK * machineEps * max(1.0, scale);
+      final double tolWithSlack = tol + slackAdd;
+      return diff <= tolWithSlack;
+    }
+
+    final bool xOk = nearlyEqual('dx', dx, other.dx);
+    final bool yOk = nearlyEqual('dy', dy, other.dy);
+
+    // ignore: avoid_print
+    print('[equalsApprox] result => ${xOk && yOk}');
+    return xOk && yOk;
+  }
 
   /// Whether both components are exactly aligned to integers (no fractional part).
   ///

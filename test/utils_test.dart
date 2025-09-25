@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:jocaagura_domain/jocaagura_domain.dart';
 
@@ -670,9 +671,150 @@ void main() {
       expect(out, equals(<String, dynamic>{'á': 1, '世': 2}));
     });
   });
+  group('Utils.listEquals', () {
+    test(
+      'Given same instance When compared Then returns true (fast-path)',
+      () {
+        final List<int> a = <int>[1, 2, 3];
+        expect(Utils.listEquals<int>(a, a), isTrue);
+      },
+    );
+
+    test(
+      'Given equal content and order When compared Then returns true',
+      () {
+        final List<String> a = <String>['x', 'y'];
+        final List<String> b = <String>['x', 'y'];
+        expect(Utils.listEquals<String>(a, b), isTrue);
+      },
+    );
+
+    test(
+      'Given equal content but different order When compared Then returns false',
+      () {
+        final List<int> a = <int>[1, 2, 3];
+        final List<int> b = <int>[3, 2, 1];
+        expect(Utils.listEquals<int>(a, b), isFalse);
+      },
+    );
+
+    test(
+      'Given different lengths When compared Then returns false',
+      () {
+        final List<int> a = <int>[1, 2, 3];
+        final List<int> b = <int>[1, 2, 3, 4];
+        expect(Utils.listEquals<int>(a, b), isFalse);
+      },
+    );
+
+    test(
+      'Given null elements When same pattern Then returns true',
+      () {
+        final List<String?> a = <String?>['a', null, 'c'];
+        final List<String?> b = <String?>['a', null, 'c'];
+        expect(Utils.listEquals<String?>(a, b), isTrue);
+      },
+    );
+
+    test(
+      'Given custom equality type When same values Then returns true',
+      () {
+        final List<Box> a = <Box>[const Box(1), const Box(2)];
+        final List<Box> b = <Box>[const Box(1), const Box(2)];
+        expect(Utils.listEquals<Box>(a, b), isTrue);
+      },
+    );
+
+    test(
+      'Given NaN at same index When compared Then returns false (IEEE754)',
+      () {
+        final List<double> a = <double>[double.nan];
+        final List<double> b = <double>[double.nan];
+        expect(Utils.listEquals<double>(a, b), isFalse);
+      },
+    );
+  });
+
+  group('Utils.listHash', () {
+    test(
+      'Given equal lists per listEquals When hashed Then hashes are equal',
+      () {
+        final List<int> a = <int>[1, 2, 3];
+        final List<int> b = <int>[1, 2, 3];
+        expect(Utils.listEquals<int>(a, b), isTrue);
+        expect(Utils.listHash<int>(a), equals(Utils.listHash<int>(b)));
+      },
+    );
+
+    test(
+      'Given different order When hashed Then hashes typically differ',
+      () {
+        final List<String> a = <String>['a', 'b', 'c'];
+        final List<String> b = <String>['c', 'b', 'a'];
+        expect(Utils.listEquals<String>(a, b), isFalse);
+        expect(Utils.listHash<String>(a) == Utils.listHash<String>(b), isFalse);
+      },
+    );
+
+    test(
+      'Given null elements When hashed Then does not throw and is deterministic',
+      () {
+        final List<String?> a = <String?>['a', null, 'c'];
+        final int h1 = Utils.listHash<String?>(a);
+        final int h2 = Utils.listHash<String?>(a);
+        expect(h1, equals(h2));
+      },
+    );
+
+    test(
+      'Given custom equality/HashCode When equal Then hashes match',
+      () {
+        final List<Box> a = <Box>[const Box(7), const Box(9)];
+        final List<Box> b = <Box>[const Box(7), const Box(9)];
+        expect(Utils.listEquals<Box>(a, b), isTrue);
+        expect(Utils.listHash<Box>(a), equals(Utils.listHash<Box>(b)));
+      },
+    );
+
+    test(
+      'Given shallow structure When elements are lists Then uses element hashCode (no deep hash)',
+      () {
+        final List<List<int>> a = <List<int>>[
+          <int>[1, 2],
+          <int>[3],
+        ];
+        final List<List<int>> b = <List<int>>[
+          <int>[1, 2],
+          <int>[3],
+        ];
+
+        // By default List== is identity; these are different instances.
+        expect(Utils.listEquals<List<int>>(a, b), isFalse);
+
+        // Hash will also differ in general (because element hashCodes differ).
+        expect(
+          Utils.listHash<List<int>>(a) == Utils.listHash<List<int>>(b),
+          isFalse,
+        );
+      },
+    );
+  });
 }
 
 class _JsonLikeToString {
   @override
   String toString() => '{"fromToString":42}';
+}
+
+@immutable
+class Box {
+  const Box(this.v);
+
+  final int v;
+
+  @override
+  bool operator ==(Object other) => other is Box && other.v == v;
+
+  @override
+  int get hashCode => v.hashCode ^ 0x9e3779b1;
 }

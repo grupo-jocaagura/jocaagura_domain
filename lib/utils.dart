@@ -69,21 +69,26 @@ class Utils extends EntityUtil {
     return getJsonEncode(inputMap);
   }
 
-  /// Convert a dynamic JSON-like value into a Map<String, dynamic>.
+  /// Converts a dynamic JSON-like value into a `Map<String, dynamic>`.
   ///
   /// Accepts:
-  /// - A `Map<String, dynamic>` (returned as-is)
-  /// - A raw `Map` with dynamic keys (keys normalized to `String`)
-  /// - A JSON string (decoded to a map)
+  /// - `Map<String, dynamic>` → returned as-is.
+  /// - raw `Map` with dynamic keys → keys are coerced to `String`.
+  /// - JSON `String` → decoded into a map with `String` keys.
   ///
-  /// Returns `{}` when decoding fails (never throws).
+  /// Returns `{}` when decoding fails or when the value is not a map (never throws).
+  ///
+  /// Contract:
+  /// - Keys are stringified (`'$k'`), which may collapse different non-string keys
+  ///   into the same string representation.
+  /// - Unknown/invalid inputs are safely mapped to `{}`.
   ///
   /// Example:
   /// ```dart
   /// void main() {
-  ///   print(Utils.mapFromDynamic('{"a": 1}')); // {a: 1}
-  ///   print(Utils.mapFromDynamic({'x': 2}));   // {x: 2}
-  ///   print(Utils.mapFromDynamic('oops'));     // {}
+  ///   print(Utils.mapFromDynamic('{"a":1}'));            // {a: 1}
+  ///   print(Utils.mapFromDynamic({1: true, 'b': 2}));    // {1: true, b: 2}
+  ///   print(Utils.mapFromDynamic(42));                   // {}
   /// }
   /// ```
   static Map<String, dynamic> mapFromDynamic(dynamic jsonLike) {
@@ -163,10 +168,22 @@ class Utils extends EntityUtil {
     return okScheme && u.hasAuthority;
   }
 
-  /// Converts a JSON string to a list of strings.
+  /// Converts a JSON string to a `List<String>`.
   ///
-  /// - [json]: The JSON string to convert.
-  /// - Returns: A list of strings, or an empty list if the conversion fails.
+  /// Behavior:
+  /// - If the decoded value is a `List`, each item is stringified.
+  /// - If it's any other JSON value (e.g., number, object), returns a single-item
+  ///   list containing its string representation.
+  /// - If parsing fails or the input is `null`, returns `[]`.
+  ///
+  /// Example:
+  /// ```dart
+  /// void main() {
+  ///   print(Utils.convertJsonToList('["a", 1, true]')); // [a, 1, true]
+  ///   print(Utils.convertJsonToList('42'));             // [42]
+  ///   print(Utils.convertJsonToList('oops'));           // []
+  /// }
+  /// ```
   static List<String> convertJsonToList(String? json) {
     json = json.toString();
     try {
@@ -191,10 +208,22 @@ class Utils extends EntityUtil {
     return value?.toString() ?? '';
   }
 
-  /// Converts a map to a JSON string.
+  /// Serializes a `Map<String, dynamic>` into a JSON string.
   ///
-  /// - [map]: The map to convert.
-  /// - Returns: A JSON string, or an error message if the conversion fails.
+  /// Returns a JSON string when serialization succeeds. On failure, returns a
+  /// human-readable **non-JSON** string describing the error (does not throw).
+  ///
+  /// Contract:
+  /// - Consumers that require valid JSON must verify the output or wrap the call
+  ///   to ensure only encodable values are provided.
+  ///
+  /// Example:
+  /// ```dart
+  /// void main() {
+  ///   print(Utils.getJsonEncode({'k': 'v'})); // {"k":"v"}
+  ///   print(Utils.getJsonEncode({'bad': Object()})); // "{error: ...}" (not JSON)
+  /// }
+  /// ```
   static String getJsonEncode(Map<String, dynamic> map) {
     try {
       return jsonEncode(map);
@@ -237,24 +266,21 @@ class Utils extends EntityUtil {
     return json == true;
   }
 
-  /// Convert a dynamic value into `List<Map<String, dynamic>>`.
+  /// Converts a dynamic value into `List<Map<String, dynamic>>`.
   ///
-  /// Accepts a `List` whose items can be:
-  /// - `Map<String, dynamic>` (kept as-is)
-  /// - raw `Map` with dynamic keys (keys normalized to `String`)
+  /// Accepts a `List` whose items can be either:
+  /// - `Map<String, dynamic>` → kept as-is
+  /// - raw `Map` with dynamic keys → keys are coerced to `String`
   ///
-  /// Returns an empty list if the input is not a `List`.
+  /// Non-map elements are ignored. Returns an empty list for non-list inputs.
+  /// Never throws.
   ///
   /// Example:
   /// ```dart
   /// void main() {
-  ///   final List<dynamic> raw = [
-  ///     {'a': 1},
-  ///     <dynamic, dynamic>{'b': 2}, // dynamic keys
-  ///     'ignored',
-  ///   ];
+  ///   final List<dynamic> raw = [ {'a': 1}, {2: 'x'}, 'noise', null ];
   ///   final List<Map<String, dynamic>> out = Utils.listFromDynamic(raw);
-  ///   print(out); // [{a: 1}, {b: 2}]
+  ///   print(out); // [{a: 1}, {2: x}]
   /// }
   /// ```
   static List<Map<String, dynamic>> listFromDynamic(dynamic json) {
@@ -479,5 +505,79 @@ class Utils extends EntityUtil {
     }
 
     return candidate;
+  }
+
+  /// Returns `true` if both lists have the same length and each pair of elements
+  /// at the same index are equal according to `==`.
+  ///
+  /// Characteristics:
+  /// - Order-sensitive (i.e., `[1,2]` ≠ `[2,1]`).
+  /// - Uses element-wise `==`, so custom equality on `T` is honored.
+  /// - `identical(a, b)` is a fast-path for `true`.
+  /// - This is a shallow comparison (nested lists are compared by their own `==`,
+  ///   not by deep traversal).
+  /// - `double.nan` compares unequal to itself, so lists containing `NaN` at the
+  ///   same index will not be considered equal.
+  ///
+  /// Complexity: O(n).
+  ///
+  /// Example:
+  /// ```dart
+  /// void main() {
+  ///   final List<int> x = <int>[1, 2, 3];
+  ///   final List<int> y = <int>[1, 2, 3];
+  ///   final List<int> z = <int>[3, 2, 1];
+  ///
+  ///   print(Utils.listEquals(x, y)); // true
+  ///   print(Utils.listEquals(x, z)); // false (order matters)
+  /// }
+  /// ```
+  static bool listEquals<T>(List<T> a, List<T> b) {
+    if (identical(a, b)) {
+      return true;
+    }
+    if (a.length != b.length) {
+      return false;
+    }
+    for (int i = 0; i < a.length; i++) {
+      if (a[i] != b[i]) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  /// Computes an order-sensitive hash for a list by mixing the `hashCode` of each
+  /// element into an accumulator.
+  ///
+  /// Guarantees:
+  /// - If `listEquals(a, b)` is `true`, then `listHash(a) == listHash(b)`.
+  /// - Order-sensitive: changing the order changes the hash in general.
+  /// - Shallow: relies on each element's `hashCode`; nested lists use their own
+  ///   `hashCode` (no deep hashing).
+  ///
+  /// Notes:
+  /// - Not cryptographic; collisions are possible.
+  /// - `null` elements are supported (their `hashCode` participates).
+  ///
+  /// Example:
+  /// ```dart
+  /// void main() {
+  ///   final List<String?> a = <String?>['a', null, 'c'];
+  ///   final List<String?> b = <String?>['a', null, 'c'];
+  ///   final List<String?> c = <String?>['c', null, 'a'];
+  ///
+  ///   print(Utils.listHash(a) == Utils.listHash(b)); // true
+  ///   print(Utils.listHash(a) == Utils.listHash(c)); // typically false
+  /// }
+  /// ```
+  static int listHash<T>(List<T> a) {
+    int h = 0;
+    for (final T e in a) {
+      h = 0x1fffffff & (h + e.hashCode);
+      h = 0x1fffffff & (h + ((0x0007ffff & h) << 10));
+      h ^= h >> 6;
+    }
+    return h;
   }
 }
