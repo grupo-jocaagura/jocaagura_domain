@@ -9,14 +9,14 @@ void main() {
       // Arrange
       final Map<String, dynamic> json = <String, dynamic>{
         ModelGraphEnum.xAxis.name: <String, dynamic>{
-          GraphAxisSpecEnum.title.name: 'X',
-          GraphAxisSpecEnum.min.name: 0,
-          GraphAxisSpecEnum.max.name: 10,
+          ModelGraphAxisSpecEnum.title.name: 'X',
+          ModelGraphAxisSpecEnum.min.name: 0,
+          ModelGraphAxisSpecEnum.max.name: 10,
         },
         ModelGraphEnum.yAxis.name: <String, dynamic>{
-          GraphAxisSpecEnum.title.name: 'Y',
-          GraphAxisSpecEnum.min.name: 0,
-          GraphAxisSpecEnum.max.name: 100,
+          ModelGraphAxisSpecEnum.title.name: 'Y',
+          ModelGraphAxisSpecEnum.min.name: 0,
+          ModelGraphAxisSpecEnum.max.name: 100,
         },
         ModelGraphEnum.points.name: <Map<String, dynamic>>[
           <String, dynamic>{
@@ -57,14 +57,14 @@ void main() {
 
       final Map<String, dynamic> json = <String, dynamic>{
         ModelGraphEnum.xAxis.name: <String, dynamic>{
-          GraphAxisSpecEnum.title.name: 'X',
-          GraphAxisSpecEnum.min.name: 0,
-          GraphAxisSpecEnum.max.name: 10,
+          ModelGraphAxisSpecEnum.title.name: 'X',
+          ModelGraphAxisSpecEnum.min.name: 0,
+          ModelGraphAxisSpecEnum.max.name: 10,
         },
         ModelGraphEnum.yAxis.name: <String, dynamic>{
-          GraphAxisSpecEnum.title.name: 'Y',
-          GraphAxisSpecEnum.min.name: 0,
-          GraphAxisSpecEnum.max.name: 100,
+          ModelGraphAxisSpecEnum.title.name: 'Y',
+          ModelGraphAxisSpecEnum.min.name: 0,
+          ModelGraphAxisSpecEnum.max.name: 100,
         },
         ModelGraphEnum.points.name: noisy,
       };
@@ -83,8 +83,8 @@ void main() {
         () {
       // Arrange
       final ModelGraph g = ModelGraph(
-        xAxis: const GraphAxisSpec(title: 'X', min: 0, max: 2),
-        yAxis: const GraphAxisSpec(title: 'Y', min: 0, max: 2),
+        xAxis: const ModelGraphAxisSpec(title: 'X', min: 0, max: 2),
+        yAxis: const ModelGraphAxisSpec(title: 'Y', min: 0, max: 2),
         points: const <ModelPoint>[
           ModelPoint(label: 'p1', vector: ModelVector(1, 1)),
         ],
@@ -102,8 +102,8 @@ void main() {
         () {
       // Arrange
       final ModelGraph a = ModelGraph(
-        xAxis: const GraphAxisSpec(title: 'X', min: 0, max: 2),
-        yAxis: const GraphAxisSpec(title: 'Y', min: 0, max: 2),
+        xAxis: const ModelGraphAxisSpec(title: 'X', min: 0, max: 2),
+        yAxis: const ModelGraphAxisSpec(title: 'Y', min: 0, max: 2),
         points: const <ModelPoint>[
           ModelPoint(label: 'p1', vector: ModelVector(1, 1)),
           ModelPoint(label: 'p2', vector: ModelVector(2, 2)),
@@ -114,8 +114,8 @@ void main() {
       );
 
       final ModelGraph b = ModelGraph(
-        xAxis: const GraphAxisSpec(title: 'X', min: 0, max: 2),
-        yAxis: const GraphAxisSpec(title: 'Y', min: 0, max: 2),
+        xAxis: const ModelGraphAxisSpec(title: 'X', min: 0, max: 2),
+        yAxis: const ModelGraphAxisSpec(title: 'Y', min: 0, max: 2),
         points: const <ModelPoint>[
           ModelPoint(label: 'p1', vector: ModelVector(1, 1)),
           ModelPoint(label: 'p2', vector: ModelVector(2, 2)),
@@ -133,8 +133,8 @@ void main() {
     test('Given copyWith When overriding Then points remain unmodifiable', () {
       // Arrange
       final ModelGraph g1 = ModelGraph(
-        xAxis: const GraphAxisSpec(title: 'X', min: 0, max: 1),
-        yAxis: const GraphAxisSpec(title: 'Y', min: 0, max: 1),
+        xAxis: const ModelGraphAxisSpec(title: 'X', min: 0, max: 1),
+        yAxis: const ModelGraphAxisSpec(title: 'Y', min: 0, max: 1),
         points: const <ModelPoint>[
           ModelPoint(label: 'p1', vector: ModelVector(1, 1)),
         ],
@@ -246,8 +246,8 @@ void main() {
         () {
       // Arrange
       final ModelGraph original = ModelGraph(
-        xAxis: const GraphAxisSpec(title: 'X', min: 1.0, max: 12.0),
-        yAxis: const GraphAxisSpec(title: 'Y', min: 0.0, max: 100.0),
+        xAxis: const ModelGraphAxisSpec(title: 'X', min: 1.0, max: 12.0),
+        yAxis: const ModelGraphAxisSpec(title: 'Y', min: 0.0, max: 100.0),
         points: const <ModelPoint>[
           ModelPoint(label: 'Enero', vector: ModelVector(1.0, 10.0)),
           ModelPoint(label: 'Febrero', vector: ModelVector(2.0, 20.0)),
@@ -275,8 +275,8 @@ void main() {
         () {
       // Arrange
       final ModelGraph original = ModelGraph(
-        xAxis: const GraphAxisSpec(title: 'X', min: 0.0, max: 2.0),
-        yAxis: const GraphAxisSpec(title: 'Y', min: 0.0, max: 2.0),
+        xAxis: const ModelGraphAxisSpec(title: 'X', min: 0.0, max: 2.0),
+        yAxis: const ModelGraphAxisSpec(title: 'Y', min: 0.0, max: 2.0),
         points: const <ModelPoint>[
           ModelPoint(label: 'p1', vector: ModelVector(1.0, 1.0)),
         ],
@@ -298,9 +298,9 @@ void main() {
       // Arrange: simulamos un JSON externo con strings vacíos
       final Map<String, dynamic> json = <String, dynamic>{
         ModelGraphEnum.xAxis.name:
-            const GraphAxisSpec(title: 'X', min: 0, max: 1).toJson(),
+            const ModelGraphAxisSpec(title: 'X', min: 0, max: 1).toJson(),
         ModelGraphEnum.yAxis.name:
-            const GraphAxisSpec(title: 'Y', min: 0, max: 1).toJson(),
+            const ModelGraphAxisSpec(title: 'Y', min: 0, max: 1).toJson(),
         ModelGraphEnum.points.name: <Map<String, dynamic>>[
           const ModelPoint(label: 'p', vector: ModelVector(1.0, 1.0)).toJson(),
         ],

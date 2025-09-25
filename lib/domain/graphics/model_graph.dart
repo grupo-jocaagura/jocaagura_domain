@@ -17,6 +17,78 @@ enum ModelGraphEnum { xAxis, yAxis, points, title, subtitle, description }
 ///     any dynamic value is stringified; missing/invalid yields `''`.
 /// - Axis invariants (`min <= max`) and finiteness are **not** enforced here.
 ///   Validate at upper layers if required.
+/// Default graph built from [defaultModelPoints] and default axis ranges.
+///
+/// Example:
+/// ```dart
+/// void main() {
+///   final ModelGraph g = defaultModelGraph();
+///   print(g.points.length); // 3
+/// }
+/// ```
+ModelGraph defaultModelGraph({
+  String title = 'Default Graph',
+  String subtitle = 'Sample points A..C',
+  String description = 'Demo dataset with 3 points',
+}) {
+  const List<ModelPoint> pts = defaultModelPoints;
+  final double minX = pts.map((ModelPoint p) => p.vector.dx).reduce(min);
+  final double maxX = pts.map((ModelPoint p) => p.vector.dx).reduce(max);
+  final double minY = pts.map((ModelPoint p) => p.vector.dy).reduce(min);
+  final double maxY = pts.map((ModelPoint p) => p.vector.dy).reduce(max);
+
+  return ModelGraph(
+    xAxis: ModelGraphAxisSpec(title: 'X', min: minX, max: maxX),
+    yAxis: ModelGraphAxisSpec(title: 'Y', min: minY, max: maxY),
+    points: pts,
+    title: title,
+    subtitle: subtitle,
+    description: description,
+  );
+}
+
+/// Demo graph of pizza prices for 2024 (LATAM — Región Andina).
+///
+/// Builds a [ModelGraph] from a tabular dataset (month/price) using
+/// [ModelGraph.fromTable]. Labels are Spanish month names; values in COP.
+///
+/// Example:
+/// ```dart
+/// void main() {
+///   final ModelGraph g = demoPizzaPrices2024Graph();
+///   print(g.title); // "Precio Pizza — LATAM — Región Andina"
+///   print(g.points.first.label); // "Enero"
+/// }
+/// ```
+ModelGraph demoPizzaPrices2024Graph({
+  String region = 'LATAM — Región Andina',
+}) {
+  final List<Map<String, Object?>> rows = <Map<String, Object?>>[
+    <String, Object?>{'label': 'Enero', 'value': 60000},
+    <String, Object?>{'label': 'Febrero', 'value': 59000},
+    <String, Object?>{'label': 'Marzo', 'value': 61000},
+    <String, Object?>{'label': 'Abril', 'value': 60500},
+    <String, Object?>{'label': 'Mayo', 'value': 62000},
+    <String, Object?>{'label': 'Junio', 'value': 61500},
+    <String, Object?>{'label': 'Julio', 'value': 63000},
+    <String, Object?>{'label': 'Agosto', 'value': 62500},
+    <String, Object?>{'label': 'Septiembre', 'value': 64000},
+    <String, Object?>{'label': 'Octubre', 'value': 65000},
+    <String, Object?>{'label': 'Noviembre', 'value': 64500},
+    <String, Object?>{'label': 'Diciembre', 'value': 66000},
+  ];
+
+  return ModelGraph.fromTable(
+    rows,
+    xLabelKey: 'label',
+    yValueKey: 'value',
+    title: 'Precio Pizza — $region',
+    subtitle: 'Serie mensual 2024',
+    description: 'Valores representativos (COP) por mes • fuente: demo',
+    xTitle: 'Mes (índice)',
+    yTitle: 'Precio (COP)',
+  );
+}
 
 ///
 /// **Example (from tabular data)**
@@ -54,10 +126,10 @@ class ModelGraph extends Model {
   /// Notes:
   /// - Non-string values for titles are stringified; empty string becomes `null`.
   factory ModelGraph.fromJson(Map<String, dynamic> json) => ModelGraph(
-        xAxis: GraphAxisSpec.fromJson(
+        xAxis: ModelGraphAxisSpec.fromJson(
           Utils.mapFromDynamic(json[ModelGraphEnum.xAxis.name]),
         ),
-        yAxis: GraphAxisSpec.fromJson(
+        yAxis: ModelGraphAxisSpec.fromJson(
           Utils.mapFromDynamic(json[ModelGraphEnum.yAxis.name]),
         ),
         points: Utils.listFromDynamic(json[ModelGraphEnum.points.name])
@@ -71,10 +143,10 @@ class ModelGraph extends Model {
       );
 
   /// Human-readable metadata for the X axis.
-  final GraphAxisSpec xAxis;
+  final ModelGraphAxisSpec xAxis;
 
   /// Human-readable metadata for the Y axis.
-  final GraphAxisSpec yAxis;
+  final ModelGraphAxisSpec yAxis;
 
   /// Ordered points to plot. Internally **unmodifiable**.
   final List<ModelPoint> points;
@@ -129,8 +201,16 @@ class ModelGraph extends Model {
         pts.isEmpty ? 0 : pts.map((ModelPoint p) => p.vector.dy).reduce(max);
 
     return ModelGraph(
-      xAxis: GraphAxisSpec(title: xTitle, min: xMin ?? minX, max: xMax ?? maxX),
-      yAxis: GraphAxisSpec(title: yTitle, min: yMin ?? minY, max: yMax ?? maxY),
+      xAxis: ModelGraphAxisSpec(
+        title: xTitle,
+        min: xMin ?? minX,
+        max: xMax ?? maxX,
+      ),
+      yAxis: ModelGraphAxisSpec(
+        title: yTitle,
+        min: yMin ?? minY,
+        max: yMax ?? maxY,
+      ),
       points: pts,
       title: title,
       subtitle: subtitle,
@@ -142,8 +222,8 @@ class ModelGraph extends Model {
   /// wrapped as unmodifiable by the constructor.
   @override
   ModelGraph copyWith({
-    GraphAxisSpec? xAxis,
-    GraphAxisSpec? yAxis,
+    ModelGraphAxisSpec? xAxis,
+    ModelGraphAxisSpec? yAxis,
     List<ModelPoint>? points,
     String? title,
     String? subtitle,

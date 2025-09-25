@@ -9,6 +9,19 @@ enum ModelPointEnum {
   vector,
 }
 
+/// Default point for demos/tests: label "A" at (1, 1).
+const ModelPoint defaultModelPoint = ModelPoint(
+  label: 'A',
+  vector: ModelVector(1.0, 1.0),
+);
+
+/// Small immutable set of default points for quick samples.
+const List<ModelPoint> defaultModelPoints = <ModelPoint>[
+  ModelPoint(label: 'A', vector: ModelVector(1.0, 10.0)),
+  ModelPoint(label: 'B', vector: ModelVector(2.0, 15.0)),
+  ModelPoint(label: 'C', vector: ModelVector(3.0, 12.0)),
+];
+
 /// Represents a labeled point in 2D space.
 ///
 /// Holds a human-readable [label] and a [vector] with the X/Y coordinates

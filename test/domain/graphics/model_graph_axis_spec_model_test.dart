@@ -6,13 +6,13 @@ void main() {
     test('Given valid json When fromJson Then builds spec with doubles', () {
       // Arrange
       final Map<String, dynamic> json = <String, dynamic>{
-        GraphAxisSpecEnum.title.name: 'Price',
-        GraphAxisSpecEnum.min.name: 55000, // int → double 55000.0
-        GraphAxisSpecEnum.max.name: 65000.0, // double
+        ModelGraphAxisSpecEnum.title.name: 'Price',
+        ModelGraphAxisSpecEnum.min.name: 55000, // int → double 55000.0
+        ModelGraphAxisSpecEnum.max.name: 65000.0, // double
       };
 
       // Act
-      final GraphAxisSpec spec = GraphAxisSpec.fromJson(json);
+      final ModelGraphAxisSpec spec = ModelGraphAxisSpec.fromJson(json);
 
       // Assert
       expect(spec.title, 'Price');
@@ -23,13 +23,13 @@ void main() {
     test('Given noisy json When fromJson Then accepts and may yield NaN', () {
       // Arrange: valores no numéricos → Utils.getDouble → double.nan por contrato
       final Map<String, dynamic> json = <String, dynamic>{
-        GraphAxisSpecEnum.title.name: null, // → ''
-        GraphAxisSpecEnum.min.name: 'abc', // → NaN
-        GraphAxisSpecEnum.max.name: '∞', // → NaN
+        ModelGraphAxisSpecEnum.title.name: null, // → ''
+        ModelGraphAxisSpecEnum.min.name: 'abc', // → NaN
+        ModelGraphAxisSpecEnum.max.name: '∞', // → NaN
       };
 
       // Act
-      final GraphAxisSpec spec = GraphAxisSpec.fromJson(json);
+      final ModelGraphAxisSpec spec = ModelGraphAxisSpec.fromJson(json);
 
       // Assert
       expect(spec.title, ''); // getStringFromDynamic(null) → ''
@@ -39,7 +39,7 @@ void main() {
 
     test('Given spec When toJson Then shape and values are preserved', () {
       // Arrange
-      const GraphAxisSpec spec = GraphAxisSpec(
+      const ModelGraphAxisSpec spec = ModelGraphAxisSpec(
         title: 'Units',
         min: 0.0,
         max: 100.0,
@@ -49,19 +49,20 @@ void main() {
       final Map<String, dynamic> out = spec.toJson();
 
       // Assert
-      expect(out[GraphAxisSpecEnum.title.name], 'Units');
-      expect(out[GraphAxisSpecEnum.min.name], 0.0);
-      expect(out[GraphAxisSpecEnum.max.name], 100.0);
+      expect(out[ModelGraphAxisSpecEnum.title.name], 'Units');
+      expect(out[ModelGraphAxisSpecEnum.min.name], 0.0);
+      expect(out[ModelGraphAxisSpecEnum.max.name], 100.0);
     });
 
     test('Given copyWith When overriding Then returns new spec with overrides',
         () {
       // Arrange
-      const GraphAxisSpec a = GraphAxisSpec(title: 'A', min: 1.0, max: 10.0);
+      const ModelGraphAxisSpec a =
+          ModelGraphAxisSpec(title: 'A', min: 1.0, max: 10.0);
 
       // Act
-      final GraphAxisSpec b = a.copyWith(min: -5.0);
-      final GraphAxisSpec c = a.copyWith(title: 'B', max: 20.0);
+      final ModelGraphAxisSpec b = a.copyWith(min: -5.0);
+      final ModelGraphAxisSpec c = a.copyWith(title: 'B', max: 20.0);
 
       // Assert
       expect(b.title, 'A');
@@ -75,8 +76,10 @@ void main() {
 
     test('Given two equal specs When comparing Then == and hashCode match', () {
       // Arrange
-      const GraphAxisSpec a = GraphAxisSpec(title: 'T', min: 0.0, max: 1.0);
-      const GraphAxisSpec b = GraphAxisSpec(title: 'T', min: 0.0, max: 1.0);
+      const ModelGraphAxisSpec a =
+          ModelGraphAxisSpec(title: 'T', min: 0.0, max: 1.0);
+      const ModelGraphAxisSpec b =
+          ModelGraphAxisSpec(title: 'T', min: 0.0, max: 1.0);
 
       // Assert
       expect(a == b, isTrue);
@@ -87,8 +90,8 @@ void main() {
         'Given inverted range When constructing Then model allows it (no validation)',
         () {
       // Arrange
-      const GraphAxisSpec spec =
-          GraphAxisSpec(title: 'NoCheck', min: 10.0, max: -10.0);
+      const ModelGraphAxisSpec spec =
+          ModelGraphAxisSpec(title: 'NoCheck', min: 10.0, max: -10.0);
 
       // Assert (documented: no invariant enforced here)
       expect(spec.min > spec.max, isTrue);

@@ -1,7 +1,7 @@
 part of 'package:jocaagura_domain/jocaagura_domain.dart';
 
-/// Enum for [GraphAxisSpec] JSON fields.
-enum GraphAxisSpecEnum {
+/// Enum for [ModelGraphAxisSpec] JSON fields.
+enum ModelGraphAxisSpecEnum {
   /// Human-readable axis title (e.g., "Month", "Price").
   title,
 
@@ -11,6 +11,20 @@ enum GraphAxisSpecEnum {
   /// Inclusive maximum bound of the axis range.
   max,
 }
+
+/// Default X axis: title "X", range [0, 10].
+const ModelGraphAxisSpec defaultXAxisSpec = ModelGraphAxisSpec(
+  title: 'X',
+  min: 0.0,
+  max: 10.0,
+);
+
+/// Default Y axis: title "Y", range [0, 100].
+const ModelGraphAxisSpec defaultYAxisSpec = ModelGraphAxisSpec(
+  title: 'Y',
+  min: 0.0,
+  max: 100.0,
+);
 
 /// Describes metadata for a simple 2D chart axis.
 ///
@@ -46,21 +60,23 @@ enum GraphAxisSpecEnum {
 ///   print('${a.title} [${a.min}, ${a.max}]'); // Units [0.0, 100.0]
 /// }
 /// ```
-class GraphAxisSpec extends Model {
-  const GraphAxisSpec({
+class ModelGraphAxisSpec extends Model {
+  const ModelGraphAxisSpec({
     required this.title,
     required this.min,
     required this.max,
   });
 
-  /// Builds a [GraphAxisSpec] from a JSON map.
+  /// Builds a [ModelGraphAxisSpec] from a JSON map.
   ///
   /// Expected keys: `"title"`, `"min"`, `"max"`.
   /// Never throws; invalid numeric shapes can yield non-finite values.
-  factory GraphAxisSpec.fromJson(Map<String, dynamic> json) => GraphAxisSpec(
-        title: Utils.getStringFromDynamic(json[GraphAxisSpecEnum.title.name]),
-        min: Utils.getDouble(json[GraphAxisSpecEnum.min.name]),
-        max: Utils.getDouble(json[GraphAxisSpecEnum.max.name]),
+  factory ModelGraphAxisSpec.fromJson(Map<String, dynamic> json) =>
+      ModelGraphAxisSpec(
+        title:
+            Utils.getStringFromDynamic(json[ModelGraphAxisSpecEnum.title.name]),
+        min: Utils.getDouble(json[ModelGraphAxisSpecEnum.min.name]),
+        max: Utils.getDouble(json[ModelGraphAxisSpecEnum.max.name]),
       );
 
   /// Axis title (human-readable).
@@ -74,8 +90,8 @@ class GraphAxisSpec extends Model {
 
   /// Returns a copy with optional overrides.
   @override
-  GraphAxisSpec copyWith({String? title, double? min, double? max}) =>
-      GraphAxisSpec(
+  ModelGraphAxisSpec copyWith({String? title, double? min, double? max}) =>
+      ModelGraphAxisSpec(
         title: title ?? this.title,
         min: min ?? this.min,
         max: max ?? this.max,
@@ -84,9 +100,9 @@ class GraphAxisSpec extends Model {
   /// Serializes this model to JSON
   @override
   Map<String, dynamic> toJson() => <String, dynamic>{
-        GraphAxisSpecEnum.title.name: title,
-        GraphAxisSpecEnum.min.name: min,
-        GraphAxisSpecEnum.max.name: max,
+        ModelGraphAxisSpecEnum.title.name: title,
+        ModelGraphAxisSpecEnum.min.name: min,
+        ModelGraphAxisSpecEnum.max.name: max,
       };
 
   @override
@@ -95,7 +111,7 @@ class GraphAxisSpec extends Model {
   /// Value-based equality on [title], [min], and [max].
   @override
   bool operator ==(Object other) =>
-      other is GraphAxisSpec &&
+      other is ModelGraphAxisSpec &&
       other.title == title &&
       other.min == min &&
       other.max == max;
