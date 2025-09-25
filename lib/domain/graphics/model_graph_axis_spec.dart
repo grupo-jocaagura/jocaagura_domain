@@ -1,11 +1,5 @@
 part of 'package:jocaagura_domain/jocaagura_domain.dart';
 
-/// Fields for [GraphAxisSpec].
-enum GraphAxisSpecEnum { title, min, max }
-
-/// Fields for [ModelPoint].
-enum ModelPointEnum { label, vector }
-
 /// Fields for [ModelGraph].
 enum ModelGraphEnum { xAxis, yAxis, points, title, subtitle, description }
 
