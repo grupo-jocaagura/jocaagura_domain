@@ -3,6 +3,65 @@
 This document follows the guidelines of [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.29.0] - 2025-09-24
+
+### Added
+
+- **Graph models (2D):** `ModelGraph`, `ModelPoint` y `ModelGraphAxisSpec` para representar datos
+  tabulares o de series temporales.
+- **ModelGraph – helpers y demos:**
+  - `defaultModelGraph()` con 3 puntos por defecto y rangos de ejes automáticos.
+  - `demoPizzaPrices2024Graph()` (precios mensuales de pizza en COP para 2024).
+  - Constantes: `defaultModelPoint`, `defaultModelPoints`, `defaultXAxisSpec`, `defaultYAxisSpec`.
+- **Example app:** `graph_example.dart` (`PizzaPricesApp`) con:
+  - `BlocGeneral<ModelGraph>`, gráfico de línea y tabla de precios.
+  - Inyección periódica de datos simulados cada 5 s.
+  - Render propio sin dependencias vía `_SimpleLineChartPainter`.
+  - Componentes `_Header`, `_GraphCard`, `_TableCard`.
+- **Utils:**
+  - `Utils.listEquals` (comparación superficial sensible al orden).
+  - `Utils.listHash` (hash sensible al orden).
+
+### Changed
+
+- **JSON/robustez:**
+  - `ModelGraph.fromJson`: parseo laxo de títulos (convierte dinámicos a `String`, vacíos → `''`).
+  - `ModelPoint.fromJson`: maneja vectores nulos/no-map sin lanzar (devuelve vector inválido
+    controlado).
+- **Inmutabilidad:**
+  - `ModelGraph.points` ahora es **inmodificable** tras construcción y en `copyWith`.
+- **Nombres y organización (consistencia):**
+  - Renombrados: `GraphAxisSpec` → `ModelGraphAxisSpec`.
+  - Renombrados: `GraphAxisSpecEnum` → `ModelGraphAxisSpecEnum`.
+  - Reubicados enums: `ModelGraphAxisSpecEnum` en `model_graph.dart`; `ModelPointEnum` en
+    `model_point.dart`.
+- **Cálculo numérico:**
+  - `ModelVector.equalsApprox` usa tolerancia combinada absoluta/relativa con *ULP slack* para
+    comparaciones de punto flotante más estables.
+
+### Docs
+
+- DartDoc ampliado y aclarado para:
+  - `ModelGraph`, `ModelPoint`, `ModelGraphAxisSpec`: construcción, contratos, manejo de JSON y
+    ejemplos de uso.
+  - Utilidades JSON (`mapFromDynamic`, `listFromDynamic`, `convertJsonToList`, `getJsonEncode`) con
+    ejemplos.
+
+### Tests
+
+- **ModelGraph:**
+  - Parseo laxo de `fromJson`, inmutabilidad de `points`, igualdad por valor (`==`, `hashCode`),
+    `copyWith` inmutable, `fromTable` (rango de ejes y mapeo X), *round-trip* JSON (incluye títulos
+    `null`/vacíos).
+- **ModelGraphAxisSpec (antes `GraphAxisSpec`):**
+  - Des/serialización JSON (válidos y con ruido), `copyWith`, igualdad y `hashCode`, comportamiento
+    con rangos min/max invertidos (sin validación automática).
+- **ModelPoint:**
+  - *Round-trip* JSON, igualdad y `copyWith`; robustez ante vectores nulos/no-map.
+- **Utils:**
+  - Cobertura para `listEquals` y `listHash`.
+
+> **Notas:** No hay cambios en APIs existentes.
 
 ## [1.28.0] - 2025-09-24
 
