@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:jocaagura_domain/jocaagura_domain.dart';
 
@@ -460,4 +462,217 @@ void main() {
       });
     });
   });
+
+  group('listFromDynamic (branch else-if: Map<dynamic,dynamic>)', () {
+    test(
+        'Given list with Map<dynamic,dynamic> When parse Then normalizes keys to String',
+        () {
+      // Arrange
+      final List<dynamic> input = <dynamic>[
+        <dynamic, dynamic>{1: 'a', true: 2}, // claves no String
+        <dynamic, dynamic>{'x': 10, 99: 'y'},
+      ];
+
+      // Act
+      final List<Map<String, dynamic>> out = Utils.listFromDynamic(input);
+
+      // Assert
+      expect(
+        out,
+        equals(<Map<String, dynamic>>[
+          <String, dynamic>{'1': 'a', 'true': 2},
+          <String, dynamic>{'x': 10, '99': 'y'},
+        ]),
+      );
+    });
+
+    test(
+        'Given mixed list with non-Map items When parse Then ignores non-Map items',
+        () {
+      final List<dynamic> input = <dynamic>[
+        <dynamic, dynamic>{0: 'zero'},
+        'not a map',
+        null,
+        123,
+        <dynamic, dynamic>{'ok': true},
+      ];
+
+      final List<Map<String, dynamic>> out = Utils.listFromDynamic(input);
+
+      expect(
+        out,
+        equals(<Map<String, dynamic>>[
+          <String, dynamic>{'0': 'zero'},
+          <String, dynamic>{'ok': true},
+        ]),
+      );
+    });
+
+    test(
+        'Given Map<dynamic,dynamic> with nested structures When parse Then keeps values as-is',
+        () {
+      final List<dynamic> input = <dynamic>[
+        <dynamic, dynamic>{
+          'nested': <String, dynamic>{'a': 1},
+          'list': <dynamic>[
+            1,
+            2,
+            <String, dynamic>{'k': 'v'},
+          ],
+        },
+      ];
+
+      final List<Map<String, dynamic>> out = Utils.listFromDynamic(input);
+
+      expect(out.length, 1);
+      expect(out.first.keys, containsAll(<String>['nested', 'list']));
+      expect(out.first['nested'], isA<Map<String, dynamic>>());
+      expect(out.first['list'], isA<List<dynamic>>());
+    });
+
+    test(
+        'Given empty Map<dynamic,dynamic> When parse Then returns empty normalized map entry',
+        () {
+      final List<dynamic> input = <dynamic>[<dynamic, dynamic>{}];
+
+      final List<Map<String, dynamic>> out = Utils.listFromDynamic(input);
+
+      expect(out, equals(<Map<String, dynamic>>[<String, dynamic>{}]));
+    });
+  });
+
+  group('mapFromDynamic (all branches & edge cases)', () {
+    test(
+        'Given Map<String,dynamic> When passed Then returns same instance (no copy)',
+        () {
+      // Arrange
+      final Map<String, dynamic> m = <String, dynamic>{'a': 1, 'b': true};
+
+      // Act
+      final Map<String, dynamic> out = Utils.mapFromDynamic(m);
+
+      // Assert
+      expect(identical(out, m), isTrue, reason: 'Debe retornar el mismo mapa');
+      expect(out, equals(m));
+    });
+
+    test(
+        'Given Map<dynamic,dynamic> When passed Then normalizes keys to String',
+        () {
+      final Map<dynamic, dynamic> raw = <dynamic, dynamic>{
+        1: 'x',
+        true: 7,
+        'k': <String, dynamic>{'nested': 1},
+      };
+
+      final Map<String, dynamic> out = Utils.mapFromDynamic(raw);
+
+      expect(
+        out,
+        equals(<String, dynamic>{
+          '1': 'x',
+          'true': 7,
+          'k': <String, dynamic>{'nested': 1},
+        }),
+      );
+    });
+
+    test('Given JSON string (object) When decodes Then returns normalized map',
+        () {
+      const String json = '{"a":1,"b":false,"c":{"d":2},"e":[1,2,3]}';
+
+      final Map<String, dynamic> out = Utils.mapFromDynamic(json);
+
+      expect(out['a'], 1);
+      expect(out['b'], false);
+      expect(out['c'], isA<Map<String, dynamic>>());
+      expect(out['e'], isA<List<dynamic>>());
+    });
+
+    test(
+        'Given JSON string with whitespace/unicode When decodes Then returns map',
+        () {
+      const String json = '  {  " título ": "Ok",  "π": 3.14 }  ';
+
+      final Map<String, dynamic> out = Utils.mapFromDynamic(json);
+
+      expect(out, equals(<String, dynamic>{' título ': 'Ok', 'π': 3.14}));
+    });
+
+    test('Given non-JSON string When decode fails Then returns empty map', () {
+      final Map<String, dynamic> out = Utils.mapFromDynamic('not-json');
+      expect(out, isEmpty);
+    });
+
+    test('Given JSON that is not a Map (number) Then returns empty map', () {
+      // jsonDecode('123') -> 123 (num), no es Map => {}
+      final Map<String, dynamic> out = Utils.mapFromDynamic('123');
+      expect(out, isEmpty);
+    });
+
+    test('Given JSON that is not a Map (list) Then returns empty map', () {
+      // jsonDecode('[1,2]') -> List, no es Map => {}
+      final Map<String, dynamic> out = Utils.mapFromDynamic('[1,2]');
+      expect(out, isEmpty);
+    });
+
+    test(
+        'Given non-string non-map whose toString() is valid JSON map Then decodes it',
+        () {
+      final Map<String, dynamic> out =
+          Utils.mapFromDynamic(_JsonLikeToString());
+      expect(out, equals(<String, dynamic>{'fromToString': 42}));
+    });
+
+    test(
+        'Given null When toString -> "null" Then jsonDecode returns null => not a Map => {}',
+        () {
+      final Map<String, dynamic> out = Utils.mapFromDynamic(null);
+      expect(out, isEmpty);
+    });
+
+    test(
+        'Given empty map literal {} When passed Then returns same (identity true)',
+        () {
+      final Map<String, dynamic> empty = <String, dynamic>{};
+      final Map<String, dynamic> out = Utils.mapFromDynamic(empty);
+      expect(identical(out, empty), isTrue);
+      expect(out, isEmpty);
+    });
+
+    test(
+        'Given Map<dynamic,dynamic> with complex nested values Then only keys are normalized',
+        () {
+      final Map<dynamic, dynamic> raw = <dynamic, dynamic>{
+        9: <dynamic, dynamic>{
+          'inner': <String, dynamic>{'x': 1},
+          'list': <dynamic>[
+            1,
+            <String, dynamic>{'k': 'v'},
+          ],
+        },
+      };
+
+      final Map<String, dynamic> out = Utils.mapFromDynamic(raw);
+
+      expect(out.keys, equals(<String>['9']));
+      expect(out['9'], isA<Map<dynamic, dynamic>>());
+      final Map<dynamic, dynamic> nested = out['9'] as Map<dynamic, dynamic>;
+      expect(nested['inner'], isA<Map<String, dynamic>>());
+      expect(nested['list'], isA<List<dynamic>>());
+    });
+
+    test(
+        'Given String that is JSON object with non-ASCII keys Then keys remain as decoded strings',
+        () {
+      final String json = jsonEncode(<String, dynamic>{'á': 1, '世': 2});
+      final Map<String, dynamic> out = Utils.mapFromDynamic(json);
+      expect(out, equals(<String, dynamic>{'á': 1, '世': 2}));
+    });
+  });
+}
+
+class _JsonLikeToString {
+  @override
+  String toString() => '{"fromToString":42}';
 }
