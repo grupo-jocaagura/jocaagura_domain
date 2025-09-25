@@ -1,72 +1,59 @@
 part of '../../jocaagura_domain.dart';
 
-/// Enum que representa los campos de un libro contable.
-enum LedgerEnum {
-  /// Nombre del libro contable.
-  nameOfLedger,
+enum LedgerEnum { nameOfLedger, incomeLedger, expenseLedger }
 
-  /// Lista de ingresos.
-  incomeLedger,
-
-  /// Lista de egresos.
-  expenseLedger,
-}
-
-/// Representa un libro contable que agrupa los movimientos financieros de un usuario.
-///
-/// Cada libro contiene una lista de ingresos y egresos, calculando totales y permitiendo
-/// operaciones básicas de análisis financiero.
 class LedgerModel extends Model {
-  /// Crea una instancia de [LedgerModel].
   const LedgerModel({
     required this.nameOfLedger,
     required this.incomeLedger,
     required this.expenseLedger,
   });
 
-  /// Crea una instancia de [LedgerModel] a partir de un JSON.
   factory LedgerModel.fromJson(Map<String, dynamic> json) {
+    final String name =
+        Utils.getStringFromDynamic(json[LedgerEnum.nameOfLedger.name]);
+
+    final List<Map<String, dynamic>> incomeRaw =
+        Utils.listFromDynamic(json[LedgerEnum.incomeLedger.name]);
+    final List<Map<String, dynamic>> expenseRaw =
+        Utils.listFromDynamic(json[LedgerEnum.expenseLedger.name]);
+
+    final List<FinancialMovementModel> incomes =
+        incomeRaw.map(FinancialMovementModel.fromJson).toList(growable: false);
+    final List<FinancialMovementModel> expenses =
+        expenseRaw.map(FinancialMovementModel.fromJson).toList(growable: false);
+
     return LedgerModel(
-      nameOfLedger:
-          Utils.getStringFromDynamic(json[LedgerEnum.nameOfLedger.name]),
-      incomeLedger: Utils.listFromDynamic(json[LedgerEnum.incomeLedger.name])
-          .map(FinancialMovementModel.fromJson)
-          .toList(),
-      expenseLedger: Utils.listFromDynamic(json[LedgerEnum.expenseLedger.name])
-          .map(FinancialMovementModel.fromJson)
-          .toList(),
+      nameOfLedger: name,
+      incomeLedger: List<FinancialMovementModel>.unmodifiable(incomes),
+      expenseLedger: List<FinancialMovementModel>.unmodifiable(expenses),
     );
   }
 
-  /// Nombre del libro contable.
   final String nameOfLedger;
 
-  /// Lista de ingresos.
+  // Nota: siguen expuestos como List<...> para no romper API ni const-ctor.
   final List<FinancialMovementModel> incomeLedger;
-
-  /// Lista de egresos.
   final List<FinancialMovementModel> expenseLedger;
 
-  /// Retorna el saldo total del libro (ingresos - egresos).
   int get balance =>
       MoneyUtils.totalAmount(incomeLedger) -
       MoneyUtils.totalAmount(expenseLedger);
 
-  /// Retorna el saldo total del libro en formato decimal.
   double get decimalBalance =>
       MoneyUtils.totalDecimalAmount(incomeLedger) -
       MoneyUtils.totalDecimalAmount(expenseLedger);
 
   @override
-  Map<String, dynamic> toJson() {
-    return <String, dynamic>{
-      LedgerEnum.nameOfLedger.name: nameOfLedger,
-      LedgerEnum.incomeLedger.name:
-          incomeLedger.map((FinancialMovementModel e) => e.toJson()).toList(),
-      LedgerEnum.expenseLedger.name:
-          expenseLedger.map((FinancialMovementModel e) => e.toJson()).toList(),
-    };
-  }
+  Map<String, dynamic> toJson() => <String, dynamic>{
+        LedgerEnum.nameOfLedger.name: nameOfLedger,
+        LedgerEnum.incomeLedger.name: incomeLedger
+            .map((FinancialMovementModel e) => e.toJson())
+            .toList(growable: false),
+        LedgerEnum.expenseLedger.name: expenseLedger
+            .map((FinancialMovementModel e) => e.toJson())
+            .toList(growable: false),
+      };
 
   @override
   LedgerModel copyWith({
@@ -76,25 +63,56 @@ class LedgerModel extends Model {
   }) {
     return LedgerModel(
       nameOfLedger: nameOfLedger ?? this.nameOfLedger,
-      incomeLedger: incomeLedger ?? this.incomeLedger,
-      expenseLedger: expenseLedger ?? this.expenseLedger,
+      // copy defensiva e inmutable si vienen nuevas listas
+      incomeLedger: incomeLedger == null
+          ? this.incomeLedger
+          : List<FinancialMovementModel>.unmodifiable(incomeLedger),
+      expenseLedger: expenseLedger == null
+          ? this.expenseLedger
+          : List<FinancialMovementModel>.unmodifiable(expenseLedger),
     );
   }
 
-  @override
-  bool operator ==(Object other) {
-    return identical(this, other) ||
-        other is LedgerModel &&
-            nameOfLedger == other.nameOfLedger &&
-            incomeLedger == other.incomeLedger &&
-            expenseLedger == other.expenseLedger;
+  // --- Deep equality/hash SIN paquetes externos (ordenada) ---
+  static bool _listEquals<T>(List<T> a, List<T> b) {
+    if (identical(a, b)) {
+      return true;
+    }
+    if (a.length != b.length) {
+      return false;
+    }
+    for (int i = 0; i < a.length; i += 1) {
+      if (a[i] != b[i]) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  static int _listHash<T>(List<T> list) {
+    int hash = 17;
+    for (final T e in list) {
+      hash = 37 * hash + (e?.hashCode ?? 0);
+    }
+    return hash;
   }
 
   @override
-  int get hashCode => Object.hash(nameOfLedger, incomeLedger, expenseLedger);
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is LedgerModel &&
+          nameOfLedger == other.nameOfLedger &&
+          _listEquals(incomeLedger, other.incomeLedger) &&
+          _listEquals(expenseLedger, other.expenseLedger);
 
   @override
-  String toString() {
-    return 'LedgerModel(name: $nameOfLedger, balance: $decimalBalance)';
-  }
+  int get hashCode => Object.hash(
+        nameOfLedger,
+        _listHash(incomeLedger),
+        _listHash(expenseLedger),
+      );
+
+  @override
+  String toString() =>
+      'LedgerModel(name: $nameOfLedger, balance: $decimalBalance)';
 }
