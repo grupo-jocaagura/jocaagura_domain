@@ -2,6 +2,37 @@ part of '../../jocaagura_domain.dart';
 
 enum LedgerEnum { nameOfLedger, incomeLedger, expenseLedger }
 
+/// Represents a financial ledger composed of incomes and expenses.
+///
+/// This model aggregates two collections of [FinancialMovementModel] and
+/// exposes derived balances in both scaled integer (`balance`) and decimal
+/// form (`decimalBalance`). It is intended to be *logically immutable*:
+/// factories and `copyWith` wrap collections using `List.unmodifiable`.
+///
+/// **Immutability contract**
+/// - The default constructor expects **already unmodifiable** lists; it does
+///   not wrap them to preserve `const` usage and API compatibility.
+/// - Prefer building instances via `fromJson` or `copyWith`, which enforce
+///   unmodifiable collections internally.
+/// - Mutating the provided lists *after* passing them to the constructor
+///   breaks the immutability assumptions and may invalidate `==`/`hashCode`.
+///
+/// **Equality and hashing**
+/// - Deep equality is performed in order (index-by-index).
+/// - `hashCode` is derived from list contents to remain consistent with `==`.
+///
+/// Minimal example:
+/// ```dart
+/// void main() {
+///   final LedgerModel ledger = LedgerModel.fromJson(<String, dynamic>{
+///     'nameOfLedger': 'My Ledger',
+///     'incomeLedger': <Map<String, dynamic>>[defaultMovement.toJson()],
+///     'expenseLedger': <Map<String, dynamic>>[],
+///   });
+///   print(ledger.balance);        // total incomes - total expenses (scaled int)
+///   print(ledger.decimalBalance); // decimal difference
+/// }
+/// ```
 class LedgerModel extends Model {
   const LedgerModel({
     required this.nameOfLedger,
@@ -73,7 +104,6 @@ class LedgerModel extends Model {
     );
   }
 
-  // --- Deep equality/hash SIN paquetes externos (ordenada) ---
   static bool _listEquals<T>(List<T> a, List<T> b) {
     if (identical(a, b)) {
       return true;
@@ -92,7 +122,7 @@ class LedgerModel extends Model {
   static int _listHash<T>(List<T> list) {
     int hash = 17;
     for (final T e in list) {
-      hash = 37 * hash + (e?.hashCode ?? 0);
+      hash = 37 * hash + e.hashCode;
     }
     return hash;
   }
