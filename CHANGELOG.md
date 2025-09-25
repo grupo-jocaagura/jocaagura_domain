@@ -3,6 +3,47 @@
 This document follows the guidelines of [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.28.0] - 2025-09-24
+
+### Added
+
+- **FinancialMovementModel – Tests:** casos para normalización de montos, *round-trip* JSON y
+  diferencias por `mathPrecision`.
+- **Utils.listFromDynamic – Tests:** validación con entradas mixtas (ruido, llaves extra, `null`) y
+  verificación de compatibilidad con `LedgerModel.fromJson`.
+- **LedgerModel – Tests:** cobertura para JSON en formas válidas variadas, inmutabilidad, balance
+  entero/decimal, igualdad/hash y sensibilidad al orden.
+
+### Changed
+
+- **FinancialMovementModel:**
+  - **Política de no-negativos:** `fromDecimal`, `fromJson` y `copyWith` normalizan montos con
+    `abs()`. El signo **no** codifica ingreso/egreso (lo define `category`).
+  - **`mathPrecision`:** ahora se **lee/escribe** en JSON y forma parte de `==`/`hashCode`.
+  - **`fromJson`:** usa `containsKey` para distinguir entre valor provisto y `defaultMathPrecision`.
+- **LedgerModel (inmutabilidad):**
+  - `fromJson` y `copyWith` envuelven listas con `List.unmodifiable`.
+  - Se documenta que el **ctor principal** espera listas ya inmutables.
+- **Igualdad/orden (`LedgerModel`):** se mantiene igualdad profunda **sensible al orden** y
+  `hashCode` consistente con ese contrato.
+
+### Fixed
+
+- **LedgerModel:** corrección crítica en `_listHash` para usar `e.hashCode` (eliminado
+  `e?.hashCode`) evitando discrepancias de hash.
+
+### Docs
+
+- **FinancialMovementModel:** contrato aclarado (entero escalado, uso recomendado de `fromDecimal`,
+  límites de precisión) y ejemplo mínimo.
+- **LedgerModel:** contrato de inmutabilidad, ejemplo mínimo y nota sobre costo de `toString()`.
+
+> **Notas:**
+> - El modelo financiero ahora **siempre** almacena montos no negativos; si tu lógica dependía del
+    signo para distinguir ingreso/egreso, usa el campo `category`.
+> - Al incorporarse `mathPrecision` a `==`/`hashCode`, comparaciones y *sets/maps* podrían cambiar
+    si mezclas precisiones distintas para el mismo valor numérico.
+
 ## [1.27.0] - 2025-09-13
 
 ### Added
