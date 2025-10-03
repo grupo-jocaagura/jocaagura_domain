@@ -2,37 +2,51 @@ import 'dart:async';
 
 import '../../jocaagura_domain.dart';
 
-/// Fake implementation of [ServiceSession] for development and testing.
+/// Simulates a session/auth service for development and tests.
 ///
-/// - Works exclusively with `Map<String, dynamic>` payloads (no domain models).
-/// - Uses a [BlocGeneral<Map<String, dynamic>?>] to emit auth state changes.
-/// - Simulates latency and allows forcing auth failures by throwing exceptions.
-/// - All methods may `throw`; the Gateway layer must catch & map to [ErrorItem].
+/// - Emits auth state through a `BlocGeneral<Map<String, dynamic>?>`.
+/// - Works exclusively with raw JSON-like `Map<String, dynamic>` payloads.
+/// - Adds artificial latency and can force failures on sign-in flows.
+/// - Any public method may `throw`; the Gateway/Repository layer must catch
+///   and translate to domain errors (e.g., `ErrorItem`).
 ///
-/// ### Example
+/// ### Quick start
 /// ```dart
-/// final ServiceSession svc = FakeServiceSession(latency: Duration(milliseconds: 300));
+/// void main() async {
+///   final ServiceSession svc = FakeServiceSession(
+///     latency: const Duration(milliseconds: 50),
+///   );
 ///
-/// // Email + password login
-/// final Map<String, dynamic> userJson = await svc.logInUserAndPassword(
-///   email: 'fake@fake.com',
-///   password: 'secret',
-/// );
+///   // Listen to auth state
+///   final StreamSubscription sub = svc.authStateChanges().listen((e) {
+///     print('authState: ${e == null ? 'SIGNED OUT' : 'SIGNED IN'}');
+///   });
 ///
-/// // Listen changes
-/// final sub = svc.authStateChanges().listen((payload) {
-///   if (payload == null) {
-///     print('Signed out');
-///   } else {
-///     print('Signed in as ${payload['email']}');
-///   }
-/// });
+///   final Map<String, dynamic> user = await svc.signInUserAndPassword(
+///     email: 'john@doe.com',
+///     password: 'secret',
+///   );
+///   assert(user['email'] == 'john@doe.com');
 ///
-/// await svc.logOutUser(userJson);
-/// await sub.cancel();
-/// svc.dispose();
+///   await svc.logOutUser(user);
+///   await sub.cancel();
+///   svc.dispose();
+/// }
 /// ```
+///
+/// ### Notes
+/// - This fake uses `email` as the user `id` in password flows.
+/// - `refreshSession` expects `sessionJson['jwt']` to be a map-like object
+///   containing token metadata; it will be replaced with refreshed values.
+/// - Once `dispose()` is called, any further method invocation will throw
+///   `StateError`.
 class FakeServiceSession implements ServiceSession {
+  /// Creates a new fake session service.
+  ///
+  /// - [latency]: artificial delay applied to async operations.
+  /// - [throwOnSignIn]: when `true`, sign-in flows will throw `StateError`.
+  /// - [initialUserJson]: optional initial signed-in payload; it will be
+  ///   emitted immediately by `authStateChanges()`.
   FakeServiceSession({
     this.latency = const Duration(seconds: 3),
     this.throwOnSignIn = false,
@@ -41,10 +55,10 @@ class FakeServiceSession implements ServiceSession {
     _userJson = initialUserJson;
   }
 
-  /// Simulated latency for operations (default: 3 seconds).
+  /// Artificial delay applied to async operations (default: 3s).
   final Duration latency;
 
-  /// When true, any auth operation that logs in will throw a [StateError].
+  /// When `true`, any sign-in operation will throw a [StateError].
   final bool throwOnSignIn;
 
   final BlocGeneral<Map<String, dynamic>?> _bloc;
@@ -89,6 +103,17 @@ class FakeServiceSession implements ServiceSession {
     };
   }
 
+  /// Signs up or signs in with email & password and returns the user payload.
+  ///
+  /// **Preconditions**
+  /// - [email] and [password] must be non-empty.
+  ///
+  /// **Throws**
+  /// - [ArgumentError] if [email] or [password] is empty.
+  /// - [StateError] when [throwOnSignIn] is `true`.
+  ///
+  /// **Postconditions**
+  /// - Emits a non-null payload through [authStateChanges].
   @override
   Future<Map<String, dynamic>> signInUserAndPassword({
     required String email,
@@ -108,6 +133,17 @@ class FakeServiceSession implements ServiceSession {
     return _userJson!;
   }
 
+  /// Logs in with email & password and returns the user payload.
+  ///
+  /// **Preconditions**
+  /// - [email] and [password] must be non-empty.
+  ///
+  /// **Throws**
+  /// - [ArgumentError] if [email] or [password] is empty.
+  /// - [StateError] when [throwOnSignIn] is `true`.
+  ///
+  /// **Postconditions**
+  /// - Emits a non-null payload through [authStateChanges].
   @override
   Future<Map<String, dynamic>> logInUserAndPassword({
     required String email,
@@ -127,6 +163,13 @@ class FakeServiceSession implements ServiceSession {
     return _userJson!;
   }
 
+  /// Logs in with a simulated Google account and returns the user payload.
+  ///
+  /// **Throws**
+  /// - [StateError] when [throwOnSignIn] is `true`.
+  ///
+  /// **Postconditions**
+  /// - Emits a non-null payload through [authStateChanges].
   @override
   Future<Map<String, dynamic>> logInWithGoogle() async {
     _checkDisposed();
@@ -143,6 +186,16 @@ class FakeServiceSession implements ServiceSession {
     return _userJson!;
   }
 
+  /// Accepts a previously stored session and considers it valid (silent sign-in).
+  ///
+  /// **Preconditions**
+  /// - [sessionJson] must be non-empty (map-like).
+  ///
+  /// **Throws**
+  /// - [StateError] if [sessionJson] is empty.
+  ///
+  /// **Postconditions**
+  /// - Emits a non-null payload through [authStateChanges].
   @override
   Future<Map<String, dynamic>> logInSilently(
     Map<String, dynamic> sessionJson,
@@ -158,6 +211,17 @@ class FakeServiceSession implements ServiceSession {
     return _userJson!;
   }
 
+  /// Refreshes token metadata within the provided session payload.
+  ///
+  /// **Contract**
+  /// - `sessionJson['jwt']` must be a map-like structure.
+  ///
+  /// **Throws**
+  /// - [StateError] if [sessionJson] is empty.
+  /// - May rethrow if `sessionJson['jwt']` is not map-like (depends on `Utils`).
+  ///
+  /// **Postconditions**
+  /// - Returns and emits the same session with refreshed `jwt` fields.
   @override
   Future<Map<String, dynamic>> refreshSession(
     Map<String, dynamic> sessionJson,
@@ -168,9 +232,8 @@ class FakeServiceSession implements ServiceSession {
       throw StateError('No session payload to refresh');
     }
     final DateTime now = DateTime.now();
-    final Map<String, dynamic> next = Map<String, dynamic>.from(sessionJson);
-    final Map<String, dynamic> jwt =
-        Map<String, dynamic>.from(Utils.mapFromDynamic(next['jwt']));
+    final Map<String, dynamic> next = Utils.mapFromDynamic(sessionJson);
+    final Map<String, dynamic> jwt = Utils.mapFromDynamic(next['jwt']);
     jwt['accessToken'] = 'refreshed-token-${next['id'] ?? 'unknown'}';
     jwt['refreshedAt'] = now.toIso8601String();
     jwt['expiresAt'] = now.add(const Duration(hours: 1)).toIso8601String();
@@ -180,6 +243,13 @@ class FakeServiceSession implements ServiceSession {
     return _userJson!;
   }
 
+  /// Sends a password recovery email.
+  ///
+  /// **Preconditions**
+  /// - [email] must be non-empty.
+  ///
+  /// **Throws**
+  /// - [ArgumentError] if [email] is empty.
   @override
   Future<Map<String, dynamic>> recoverPassword({required String email}) async {
     _checkDisposed();
@@ -193,6 +263,10 @@ class FakeServiceSession implements ServiceSession {
     );
   }
 
+  /// Logs out the current user and emits `null`.
+  ///
+  /// **Note**
+  /// - The [sessionJson] argument is not validated; the fake always signs out.
   @override
   Future<Map<String, dynamic>> logOutUser(
     Map<String, dynamic> sessionJson,
@@ -204,6 +278,10 @@ class FakeServiceSession implements ServiceSession {
     return _ack(message: 'Logged out');
   }
 
+  /// Returns the current user payload if signed in.
+  ///
+  /// **Throws**
+  /// - [StateError] if there is no active session.
   @override
   Future<Map<String, dynamic>> getCurrentUser() async {
     _checkDisposed();
@@ -215,6 +293,16 @@ class FakeServiceSession implements ServiceSession {
     return u;
   }
 
+  /// Returns whether there is an active session.
+  ///
+  /// Example:
+  /// ```dart
+  /// void main() async {
+  ///   final ServiceSession svc = FakeServiceSession();
+  ///   final Map<String, dynamic> r = await svc.isSignedIn();
+  ///   print(r['isSignedIn']); // false
+  /// }
+  /// ```
   @override
   Future<Map<String, dynamic>> isSignedIn() async {
     _checkDisposed();
@@ -222,12 +310,17 @@ class FakeServiceSession implements ServiceSession {
     return <String, dynamic>{'isSignedIn': _userJson != null};
   }
 
+  /// Emits the auth state whenever it changes.
+  ///
+  /// **Throws**
+  /// - [StateError] if called after [dispose].
   @override
   Stream<Map<String, dynamic>?> authStateChanges() {
     _checkDisposed();
     return _bloc.stream;
   }
 
+  /// Releases resources. After calling this, any method invocation will throw.
   @override
   void dispose() {
     _bloc.dispose();
