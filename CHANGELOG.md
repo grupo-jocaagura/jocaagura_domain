@@ -3,6 +3,28 @@
 This document follows the guidelines of [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.30.1] - 2025-09-24
+
+### Changed
+
+- **Session:** `BlocSession` ahora **extiende `BlocModule`** para unificar el ciclo de vida con el
+  resto de BLoCs del paquete.
+
+### Added
+
+- **Session:** identificador estático `BlocSession.name` para trazabilidad y registros.
+
+### Fixed
+
+- **Lifecycle:** se **sobrescribe `dispose()`** en `BlocSession` para alinearlo con el contrato de
+  `BlocModule`, garantizando liberación consistente de recursos.
+
+### Notes
+
+- No hay cambios en la API pública de métodos de `BlocSession`.
+- Si tu código dependía del **tipo base anterior** en anotaciones genéricas o *type checks*, ajusta
+  las restricciones para aceptar `BlocModule`.
+
 ## [1.30.0] - 2025-09-24
 
 ### Added
