@@ -3,6 +3,81 @@
 This document follows the guidelines of [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.30.0] - 2025-09-24
+
+### Added
+
+- **Ledger – Datos y demo visual:**
+  - `defaultLedgerModel` (dataset liviano 2024: ingresos/egresos por categoría).
+  - `ledger_example.dart`: página Flutter que renderiza **pie** y **barras** anuales por
+    categoría/mes usando `CustomPainter` (sin dependencias externas).
+- **Session – API de arranque rápido:**
+  - `BlocSession.fromRepository(RepositoryAuth repo)`: *factory* recomendado que cablea
+    automáticamente los *use cases* necesarios.
+- **Session – Calidad de vida:**
+  - `SessionError.error`: *alias* de `message` para acceso conveniente.
+- **Auth – Pruebas Gateway/Repo:**
+  - Suite completa para `GatewayAuthImpl`:
+    - *Stubs* `_StubServiceSession` y *fake* `ErrorMapper`.
+    - Cobertura de rutas felices (`Right`), errores de *payload* (`Left`) y excepciones de servicio.
+    - Verificación del stream `authStateChanges` (`Right` con usuario/`null`, `Left` en error).
+  - Suite completa para `RepositoryAuthImpl`:
+    - *Stubs* `_StubGateway`, `_FakeErrorMapper`.
+    - Cobertura de *happy paths*, errores del gateway, excepciones y stream `authStateChanges`.
+    - Se expone `ackToVoid` (antes `_ackToVoid`) para mejorar testabilidad.
+
+### Changed
+
+- **Auth – Contratos y documentación (revisión de flujo):**
+  - `GatewayAuth` documentado como **frontera segura de dominio** para operaciones de autenticación:
+    - Contratos de comportamiento, manejo de errores e I/O (solo primitivos/JSON).
+    - *DartDoc* por método con precondiciones y `Either` esperado, más ejemplo mínimo con *fake*.
+  - `GatewayAuthImpl` alinea documentación: mapeo de errores y lógica del stream.
+  - `authStateChanges` ahora documentado/emite `Either<ErrorItem, Map<String, dynamic>?>`.
+- **Session – Constructor simplificado:**
+  - `BlocSession` elimina el parámetro explícito `WatchAuthStateChangesUsecase`; ahora se obtiene
+    vía la *fachada* `SessionUsecases`. Menos parámetros, inicialización y pruebas más claras.
+
+### Fixed
+
+- **Session:** corrección del **deep copy** en *session refresh* y en el **current user**, evitando
+  compartir referencias internas de manera no intencional.
+
+### Docs
+
+- **RepositoryAuth / RepositoryAuthImpl:**
+  - *DartDoc* ampliado: contratos de comportamiento, políticas de manejo de errores y semántica de
+    métodos; ejemplo mínimo de uso.
+- **GatewayAuth / GatewayAuthImpl:**
+  - *DartDoc* exhaustivo alineado con los nuevos contratos, detalle de mapeo de errores y manejo de
+    streams.
+
+### Tests
+
+- **GatewayAuthImpl / RepositoryAuthImpl:** mayor cobertura de ramas y *edge cases* (bloques
+  `try-catch`, *acknowledgement*).
+- **BlocSession:** `bloc_session_from_repository_test.dart`:
+  - Transiciones de estado vía stream del repositorio (`boot`).
+  - Flujos de autenticación (`logIn`, `logOut`).
+  - Políticas post-dispose (`returnLastSnapshot`, `returnSessionError`).
+
+### Migration notes
+
+- **`BlocSession` (posible cambio rompiente):**
+  - Si usabas el **constructor** con `WatchAuthStateChangesUsecase` como parámetro, migra a:
+    - Constructor simplificado (sin ese parámetro), o
+    - `BlocSession.fromRepository(repo)` como opción recomendada.
+- **Streams de auth:**
+  - Asegura que tu capa superior consuma `Either<ErrorItem, Map<String, dynamic>?>` en
+    `authStateChanges`.
+- **Ejemplos:**
+  - Consulta `bloc_session_example.dart` y `ledger_example.dart` para patrones de integración de UI
+    sin dependencias externas.
+
+> **Notas:** El objetivo de esta versión es consolidar el **auth flow** con contratos claros,
+> mejorar la testabilidad y ofrecer ejemplos prácticos de **ledger** y **sesión** listos para copiar
+> en proyectos reales.
+
 ## [1.29.0] - 2025-09-24
 
 ### Added
