@@ -81,7 +81,7 @@ class RepositoryAuthImpl implements RepositoryAuth {
 
   /// Converts an acknowledgement-like JSON payload to `Right(void)` if OK,
   /// otherwise returns `Left(ErrorItem)` detected by the [ErrorMapper].
-  Either<ErrorItem, void> _ackToVoid(
+  Either<ErrorItem, void> ackToVoid(
     Map<String, dynamic> json, {
     required String location,
   }) {
@@ -178,7 +178,7 @@ class RepositoryAuthImpl implements RepositoryAuth {
         await _gateway.recoverPassword(email);
     return r.fold(
       Left.new,
-      (Map<String, dynamic> json) => _ackToVoid(
+      (Map<String, dynamic> json) => ackToVoid(
         json,
         location: 'RepositoryAuthImpl.recoverPassword',
       ),
@@ -191,7 +191,7 @@ class RepositoryAuthImpl implements RepositoryAuth {
         await _gateway.logOutUser(user.toJson());
     return r.fold(
       Left.new,
-      (Map<String, dynamic> json) => _ackToVoid(
+      (Map<String, dynamic> json) => ackToVoid(
         json,
         location: 'RepositoryAuthImpl.logOutUser',
       ),
