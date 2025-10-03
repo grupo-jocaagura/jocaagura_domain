@@ -65,4 +65,6 @@ class Refreshing extends SessionState {
 class SessionError extends SessionState {
   const SessionError(this.message);
   final ErrorItem message;
+
+  ErrorItem get error => message;
 }

@@ -178,7 +178,6 @@ class _SessionDemoPageState extends State<SessionDemoPage> {
   late final RepositoryAuth _repo;
 
   late final SessionUsecases _usecases;
-  late final WatchAuthStateChangesUsecase _watchUC;
   late final BlocSession _bloc;
 
   @override
@@ -211,10 +210,8 @@ class _SessionDemoPageState extends State<SessionDemoPage> {
       watchAuthStateChangesUsecase: WatchAuthStateChangesUsecase(_repo),
     );
 
-    _watchUC = WatchAuthStateChangesUsecase(_repo);
     _bloc = BlocSession(
       usecases: _usecases,
-      watchAuthStateChanges: _watchUC,
       authDebouncer: Debouncer(milliseconds: 250),
       refreshDebouncer: Debouncer(milliseconds: 250),
     );

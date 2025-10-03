@@ -600,7 +600,6 @@ void main() {
       expect(refreshed['email'], 'b@x.com');
       expect(refreshed['id'], 'b@x.com');
       expect(refreshedJwt['accessToken'], startsWith('refreshed-token-'));
-
       expect(
         DateUtils.dateTimeFromDynamic(refreshedJwt['expiresAt'])
             .isAfter(DateUtils.dateTimeFromDynamic(beforeJwt['expiresAt'])),
@@ -643,6 +642,255 @@ void main() {
 
       svc.dispose();
       await sub.cancel();
+    });
+  });
+
+  group('FakeServiceSession | password flows', () {
+    test(
+        'Given valid email/password When signInUserAndPassword Then emits user & returns payload',
+        () async {
+      final FakeServiceSession svc =
+          FakeServiceSession(latency: const Duration(milliseconds: 1));
+      final Completer<Map<String, dynamic>?> emission =
+          Completer<Map<String, dynamic>?>();
+      final StreamSubscription<Map<String, dynamic>?> sub =
+          svc.authStateChanges().listen((Map<String, dynamic>? e) {
+        if (!emission.isCompleted) {
+          emission.complete(e);
+        }
+      });
+
+      await svc.signInUserAndPassword(email: 'a@b.com', password: 'x');
+
+      final Map<String, dynamic>? firstNonNull = await svc
+          .authStateChanges()
+          .firstWhere((Map<String, dynamic>? e) => e != null);
+
+      expect(firstNonNull, isNotNull);
+      expect(firstNonNull!['email'], 'a@b.com');
+
+      await sub.cancel();
+      svc.dispose();
+    });
+
+    test('Given empty email When signIn Then throws ArgumentError', () async {
+      final FakeServiceSession svc =
+          FakeServiceSession(latency: const Duration(milliseconds: 1));
+
+      expect(
+        () => svc.signInUserAndPassword(email: '', password: 'x'),
+        throwsA(isA<ArgumentError>()),
+      );
+
+      svc.dispose();
+    });
+
+    test(
+        'Given throwOnSignIn true When logInUserAndPassword Then throws StateError',
+        () async {
+      final FakeServiceSession svc = FakeServiceSession(
+        latency: const Duration(milliseconds: 1),
+        throwOnSignIn: true,
+      );
+
+      expect(
+        () => svc.logInUserAndPassword(email: 'a@b.com', password: 'x'),
+        throwsA(isA<StateError>()),
+      );
+
+      svc.dispose();
+    });
+  });
+
+  group('FakeServiceSession | google & silent', () {
+    test('Given normal flow When logInWithGoogle Then returns and emits user',
+        () async {
+      final FakeServiceSession svc =
+          FakeServiceSession(latency: const Duration(milliseconds: 1));
+      final List<Map<String, dynamic>?> emissions = <Map<String, dynamic>?>[];
+      final StreamSubscription<Map<String, dynamic>?> sub =
+          svc.authStateChanges().listen(emissions.add);
+
+      final Map<String, dynamic> user = await svc.logInWithGoogle();
+      expect(user['email'], 'fake@fake.com');
+
+      // Espera a que el stream procese el payload (salta el null inicial).
+      final Map<String, dynamic>? firstNonNull = await svc
+          .authStateChanges()
+          .firstWhere((Map<String, dynamic>? e) => e != null);
+
+      expect(firstNonNull, isNotNull);
+      expect(firstNonNull!['email'], 'fake@fake.com');
+
+      await sub.cancel();
+      svc.dispose();
+    });
+
+    test('Given non-empty session When logInSilently Then emits session',
+        () async {
+      final FakeServiceSession svc =
+          FakeServiceSession(latency: const Duration(milliseconds: 1));
+      final Map<String, dynamic> session = <String, dynamic>{
+        'id': 'id-1',
+        'email': 'a@b.com',
+        'jwt': <String, dynamic>{'accessToken': 'old', 'expiresAt': 'tbd'},
+      };
+
+      final Map<String, dynamic> result = await svc.logInSilently(session);
+      expect(result['id'], 'id-1');
+
+      svc.dispose();
+    });
+
+    test('Given empty session When logInSilently Then throws StateError',
+        () async {
+      final FakeServiceSession svc =
+          FakeServiceSession(latency: const Duration(milliseconds: 1));
+      expect(
+        () => svc.logInSilently(<String, dynamic>{}),
+        throwsA(isA<StateError>()),
+      );
+      svc.dispose();
+    });
+  });
+
+  group('FakeServiceSession | refresh & recovery', () {
+    test('Given valid jwt When refreshSession Then rewrites jwt fields',
+        () async {
+      final FakeServiceSession svc =
+          FakeServiceSession(latency: const Duration(milliseconds: 1));
+      final Map<String, dynamic> session = <String, dynamic>{
+        'id': 'abc',
+        'email': 'a@b.com',
+        'jwt': <String, dynamic>{'accessToken': 'old', 'expiresAt': 'tbd'},
+      };
+
+      final Map<String, dynamic> refreshed = await svc.refreshSession(session);
+      final Map<String, dynamic> jwt = refreshed['jwt'] as Map<String, dynamic>;
+      expect(jwt['accessToken'], startsWith('refreshed-token-'));
+      expect(jwt.containsKey('expiresAt'), isTrue);
+      expect(jwt.containsKey('refreshedAt'), isTrue);
+
+      svc.dispose();
+    });
+
+    test('Given empty session When refreshSession Then throws StateError',
+        () async {
+      final FakeServiceSession svc =
+          FakeServiceSession(latency: const Duration(milliseconds: 1));
+      expect(
+        () => svc.refreshSession(<String, dynamic>{}),
+        throwsA(isA<StateError>()),
+      );
+      svc.dispose();
+    });
+
+    test('Given email When recoverPassword Then returns ack with email',
+        () async {
+      final FakeServiceSession svc =
+          FakeServiceSession(latency: const Duration(milliseconds: 1));
+      final Map<String, dynamic> r =
+          await svc.recoverPassword(email: 'a@b.com');
+      expect(r['ok'], isTrue);
+      expect(r['email'], 'a@b.com');
+      svc.dispose();
+    });
+
+    test('Given empty email When recoverPassword Then throws ArgumentError',
+        () async {
+      final FakeServiceSession svc =
+          FakeServiceSession(latency: const Duration(milliseconds: 1));
+      expect(
+        () => svc.recoverPassword(email: ''),
+        throwsA(isA<ArgumentError>()),
+      );
+      svc.dispose();
+    });
+  });
+
+  group('FakeServiceSession | current, signedIn, logout', () {
+    test('Given signed in When getCurrentUser Then returns user', () async {
+      final FakeServiceSession svc =
+          FakeServiceSession(latency: const Duration(milliseconds: 1));
+      await svc.logInUserAndPassword(email: 'a@b.com', password: 'x');
+      final Map<String, dynamic> u = await svc.getCurrentUser();
+      expect(u['email'], 'a@b.com');
+      svc.dispose();
+    });
+
+    test('Given no session When getCurrentUser Then throws StateError',
+        () async {
+      final FakeServiceSession svc =
+          FakeServiceSession(latency: const Duration(milliseconds: 1));
+      expect(() => svc.getCurrentUser(), throwsA(isA<StateError>()));
+      svc.dispose();
+    });
+
+    test('Given session When logOutUser Then emits null and returns ack',
+        () async {
+      final FakeServiceSession svc =
+          FakeServiceSession(latency: const Duration(milliseconds: 1));
+      await svc.logInWithGoogle();
+
+      final Completer<Map<String, dynamic>?> emission =
+          Completer<Map<String, dynamic>?>();
+      final StreamSubscription<Map<String, dynamic>?> sub =
+          svc.authStateChanges().listen((Map<String, dynamic>? e) {
+        if (!emission.isCompleted && e == null) {
+          emission.complete(e);
+        }
+      });
+
+      final Map<String, dynamic> r = await svc.logOutUser(<String, dynamic>{});
+      expect(r['ok'], isTrue);
+
+      await emission.future; // Wait for null emission
+      await sub.cancel();
+      svc.dispose();
+    });
+
+    test('Given states When isSignedIn Then reflects boolean correctly',
+        () async {
+      final FakeServiceSession svc =
+          FakeServiceSession(latency: const Duration(milliseconds: 1));
+      expect((await svc.isSignedIn())['isSignedIn'], isFalse);
+
+      await svc.logInWithGoogle();
+      expect((await svc.isSignedIn())['isSignedIn'], isTrue);
+      svc.dispose();
+    });
+  });
+
+  group('FakeServiceSession | lifecycle & initial state', () {
+    test('Given initialUserJson When created Then first emission is that user',
+        () async {
+      final Map<String, dynamic> initial = <String, dynamic>{
+        'id': 'init',
+        'email': 'init@x.com',
+        'jwt': <String, dynamic>{'accessToken': 'init'},
+      };
+      final FakeServiceSession svc = FakeServiceSession(
+        latency: const Duration(milliseconds: 1),
+        initialUserJson: initial,
+      );
+
+      final Map<String, dynamic>? first = await svc.authStateChanges().first;
+      expect(first, isNotNull);
+      expect(first!['email'], 'init@x.com');
+
+      svc.dispose();
+    });
+
+    test(
+        'Given disposed service When calling any method Then throws StateError',
+        () async {
+      final FakeServiceSession svc =
+          FakeServiceSession(latency: const Duration(milliseconds: 1));
+      svc.dispose();
+
+      expect(() => svc.authStateChanges(), throwsA(isA<StateError>()));
+      expect(() => svc.isSignedIn(), throwsA(isA<StateError>()));
+      expect(() => svc.logInWithGoogle(), throwsA(isA<StateError>()));
     });
   });
 }

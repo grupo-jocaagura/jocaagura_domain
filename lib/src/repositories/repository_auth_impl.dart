@@ -1,6 +1,54 @@
 import '../../jocaagura_domain.dart';
 
+/// Concrete `RepositoryAuth` that adapts JSON payloads from a `GatewayAuth`
+/// into domain models (`UserModel`) and stabilizes failures with `Either`.
+///
+/// - **Mapping policy**
+///   - Successful JSON payloads are parsed with `UserModel.fromJson`.
+///   - If the payload encodes a business error (e.g. `{ok:false}`, `{error:{...}}`,
+///     or `{code,message}`), the injected [ErrorMapper] returns an [ErrorItem]
+///     and the repository yields `Left(ErrorItem)`.
+///   - Any thrown exception (parse, shape mismatch, etc.) is caught and mapped
+///     to `Left(ErrorItem)` via [ErrorMapper.fromException].
+///
+/// - **Ack policy**
+///   - Operations that conceptually return an acknowledgement (e.g. recover,
+///     logout) are converted to `Right(void)` when the payload is considered OK,
+///     otherwise `Left(ErrorItem)`.
+///
+/// - **Auth state stream**
+///   - `authStateChanges()` maps gateway emissions:
+///     - `Right(null)` → signed out
+///     - `Right(userJson)` → parsed to `Right(UserModel)`
+///     - any error → `Left(ErrorItem)`
+///
+/// ### Notes
+/// - Keep provider-specific quirks at the Gateway. Repository focuses on
+///   domain parsing/validation and error normalization.
+/// - The same [ErrorMapper] convention is used at Gateway and Repository to
+///   preserve consistent error taxonomy across layers.
+///
+/// ### Example
+/// ```dart
+/// void main(){
+/// final RepositoryAuth repo = RepositoryAuthImpl(
+///   gateway: GatewayAuthImpl(FakeServiceSession()),
+/// );
+///
+/// final Either<ErrorItem, UserModel> r =
+///     await repo.logInUserAndPassword('john@doe.com', 'secret');
+///
+/// r.fold(
+///   (err) => print('error: ${err.code}'),
+///   (user) => print('hello ${user.email}'),
+/// );
+/// }
+/// ```
 class RepositoryAuthImpl implements RepositoryAuth {
+  /// Creates a new [RepositoryAuthImpl].
+  ///
+  /// - [gateway]: underlying data source for auth calls.
+  /// - [errorMapper]: optional error mapper; defaults to [DefaultErrorMapper].
   RepositoryAuthImpl({
     required GatewayAuth gateway,
     ErrorMapper? errorMapper,
@@ -10,17 +58,19 @@ class RepositoryAuthImpl implements RepositoryAuth {
   final GatewayAuth _gateway;
   final ErrorMapper _err;
 
+  /// Converts a successful JSON payload into a [UserModel] and then to an `R`.
+  ///
+  /// - If [ErrorMapper.fromPayload] detects a business error, returns `Left`.
+  /// - If `UserModel.fromJson` throws, returns `Left` built from the exception.
   Either<ErrorItem, R> _mapUser<R>({
     required Map<String, dynamic> json,
     required R Function(UserModel user) onOk,
     required String location,
   }) {
-    // Business error encoded in payload?
     final ErrorItem? pe = _err.fromPayload(json, location: location);
     if (pe != null) {
       return Left<ErrorItem, R>(pe);
     }
-
     try {
       final UserModel user = UserModel.fromJson(json);
       return Right<ErrorItem, R>(onOk(user));
@@ -29,7 +79,9 @@ class RepositoryAuthImpl implements RepositoryAuth {
     }
   }
 
-  Either<ErrorItem, void> _ackToVoid(
+  /// Converts an acknowledgement-like JSON payload to `Right(void)` if OK,
+  /// otherwise returns `Left(ErrorItem)` detected by the [ErrorMapper].
+  Either<ErrorItem, void> ackToVoid(
     Map<String, dynamic> json, {
     required String location,
   }) {
@@ -126,7 +178,7 @@ class RepositoryAuthImpl implements RepositoryAuth {
         await _gateway.recoverPassword(email);
     return r.fold(
       Left.new,
-      (Map<String, dynamic> json) => _ackToVoid(
+      (Map<String, dynamic> json) => ackToVoid(
         json,
         location: 'RepositoryAuthImpl.recoverPassword',
       ),
@@ -139,7 +191,7 @@ class RepositoryAuthImpl implements RepositoryAuth {
         await _gateway.logOutUser(user.toJson());
     return r.fold(
       Left.new,
-      (Map<String, dynamic> json) => _ackToVoid(
+      (Map<String, dynamic> json) => ackToVoid(
         json,
         location: 'RepositoryAuthImpl.logOutUser',
       ),
