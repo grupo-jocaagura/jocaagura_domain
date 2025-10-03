@@ -35,52 +35,34 @@ enum PostDisposePolicy {
 
 /// Centralized BLoC for session flows using [SessionState] and `BlocGeneral`.
 ///
-/// - Starts in [Unauthenticated].
-/// - `boot()` subscribes to repo-level `authStateChanges` via
-///   [WatchAuthStateChangesUsecase] (no silent login forced).
-/// - Uses [Debouncer] to avoid rapid double actions on auth methods.
-/// - When a usecase yields `Left(ErrorItem)`, the state is set to
-///   `SessionError(err)` and **doesn't auto-revert** (UI decides next step).
+/// Use [BlocSession.fromRepository] when you only have a [RepositoryAuth] and
+/// want the BLoC to wire all use cases for you. This keeps callers decoupled
+/// from concrete use-case classes and remains backward compatible.
 ///
-/// ### Example
+/// ### Quick start (repository-only)
 /// ```dart
-/// final session = BlocSession(
-///   usecases: SessionUsecases(
-///     logInUserAndPassword: logInUC,
-///     logOutUsecase: logOutUC,
-///     signInUserAndPassword: signInUC,
-///     recoverPassword: recoverUC,
-///     logInSilently: silentUC,
-///     loginWithGoogle: googleUC,
-///     refreshSession: refreshUC,
-///     getCurrentUser: getCurrentUC,
-///   ),
-///   watchAuthStateChanges: WatchAuthStateChangesUsecase(repositoryAuth),
-///   // Optional: choose a lenient post-dispose policy if you need it:
+/// final RepositoryAuth repo = RepositoryAuthImpl(gateway: ...);
+///
+/// final BlocSession session = BlocSession.fromRepository(
+///   repository: repo,
+///   // Optional:
 ///   // postDisposePolicy: PostDisposePolicy.returnLastSnapshot,
 /// );
 ///
-/// // Start listening to backend-driven auth changes (no silent login here):
-/// await session.boot();
+/// await session.boot(); // start listening to repo auth changes
 ///
-/// // Log in:
-/// final result = await session.logIn(email: 'me@mail.com', password: 'secret');
-/// result.fold(
-///   (e) => debugPrint('Login error: ${e.description}'),
-///   (u) => debugPrint('Hi ${u.email}'),
+/// final r = await session.logIn(email: 'me@mail.com', password: 'secret');
+/// r.fold(
+///   (e) => debugPrint('Login error: ${e.code}'),
+///   (u) => debugPrint('Hello ${u.email}'),
 /// );
 ///
-/// // Read-only helpers:
-/// final bool signed = session.isAuthenticated;
-/// final UserModel me = session.currentUser; // defaultUserModel if not signed
-///
-/// // Exact state vs. best-effort snapshot:
-/// final SessionState exact = session.state;          // e.g. Authenticating/Refreshing/SessionError
-/// final SessionState simple = session.stateOrDefault; // Authenticated or Unauthenticated
-///
-/// // Clean up:
 /// session.dispose();
 /// ```
+///
+/// See the class docs for details on state semantics, post-dispose policies,
+/// and debouncing of auth/refresh actions.
+
 class BlocSession {
   /// Creates a [BlocSession].
   ///
@@ -97,6 +79,38 @@ class BlocSession {
         _authDebouncer = authDebouncer ?? Debouncer(),
         _refreshDebouncer = refreshDebouncer ?? Debouncer(),
         _states = BlocGeneral<SessionState>(const Unauthenticated());
+
+  /// Convenience factory that wires the required use cases using only a
+  /// [RepositoryAuth]. This keeps callers repository-centric and backward
+  /// compatible with future improvements in the use case layer.
+  ///
+  /// - [repository]: the domain repository for auth operations.
+  /// - [authDebouncer]/[refreshDebouncer]: optional debouncers.
+  /// - [postDisposePolicy]: post-dispose behavior; defaults to strict mode.
+  factory BlocSession.fromRepository({
+    required RepositoryAuth repository,
+    Debouncer? authDebouncer,
+    Debouncer? refreshDebouncer,
+    PostDisposePolicy postDisposePolicy = PostDisposePolicy.throwStateError,
+  }) {
+    final SessionUsecases usecases = SessionUsecases(
+      logInUserAndPassword: LogInUserAndPasswordUsecase(repository),
+      logOutUsecase: LogOutUsecase(repository),
+      signInUserAndPassword: SignInUserAndPasswordUsecase(repository),
+      recoverPassword: RecoverPasswordUsecase(repository),
+      logInSilently: LogInSilentlyUsecase(repository),
+      loginWithGoogle: LoginWithGoogleUsecase(repository),
+      refreshSession: RefreshSessionUsecase(repository),
+      getCurrentUser: GetCurrentUserUsecase(repository),
+      watchAuthStateChangesUsecase: WatchAuthStateChangesUsecase(repository),
+    );
+    return BlocSession(
+      usecases: usecases,
+      authDebouncer: authDebouncer,
+      refreshDebouncer: refreshDebouncer,
+      postDisposePolicy: postDisposePolicy,
+    );
+  }
 
   // ---- Dependencies & holders ------------------------------------------------
 
