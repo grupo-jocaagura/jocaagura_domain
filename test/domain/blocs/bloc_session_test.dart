@@ -18,7 +18,6 @@ void main() {
     late FakeRepositoryAuth repo;
     late SessionUsecases usecases;
     late BlocSession bloc;
-    late WatchAuthStateChangesUsecase watchUC;
 
     final Debouncer tinyAuthDebouncer = Debouncer(milliseconds: 1);
     final Debouncer tinyRefreshDebouncer = Debouncer(milliseconds: 1);
@@ -36,10 +35,8 @@ void main() {
         getCurrentUser: GetCurrentUserUsecase(repo),
         watchAuthStateChangesUsecase: WatchAuthStateChangesUsecase(repo),
       );
-      watchUC = WatchAuthStateChangesUsecase(repo);
       bloc = BlocSession(
         usecases: usecases,
-        watchAuthStateChanges: watchUC,
         authDebouncer: tinyAuthDebouncer,
         refreshDebouncer: tinyRefreshDebouncer,
       );
@@ -448,7 +445,6 @@ void main() {
     late FakeRepositoryAuth repo;
     late SessionUsecases usecases;
     late BlocSession bloc;
-    late WatchAuthStateChangesUsecase watchUC;
 
     // Debouncers ultrarrápidos para no ralentizar los tests.
     final Debouncer tinyAuthDebouncer = Debouncer(milliseconds: 1);
@@ -467,10 +463,8 @@ void main() {
         getCurrentUser: GetCurrentUserUsecase(repo),
         watchAuthStateChangesUsecase: WatchAuthStateChangesUsecase(repo),
       );
-      watchUC = WatchAuthStateChangesUsecase(repo);
       bloc = BlocSession(
         usecases: usecases,
-        watchAuthStateChanges: watchUC,
         authDebouncer: tinyAuthDebouncer,
         refreshDebouncer: tinyRefreshDebouncer,
       );
@@ -684,7 +678,6 @@ void main() {
   group('BlocSession: dispose & postDisposePolicy', () {
     late FakeRepositoryAuth repo;
     late SessionUsecases usecases;
-    late WatchAuthStateChangesUsecase watchUC;
 
     final Debouncer tinyAuthDebouncer = Debouncer(milliseconds: 1);
     final Debouncer tinyRefreshDebouncer = Debouncer(milliseconds: 1);
@@ -702,7 +695,6 @@ void main() {
         getCurrentUser: GetCurrentUserUsecase(repo),
         watchAuthStateChangesUsecase: WatchAuthStateChangesUsecase(repo),
       );
-      watchUC = WatchAuthStateChangesUsecase(repo);
     });
 
     group('Default policy = throwStateError', () {
@@ -711,7 +703,6 @@ void main() {
       setUp(() {
         bloc = BlocSession(
           usecases: usecases,
-          watchAuthStateChanges: watchUC,
           authDebouncer: tinyAuthDebouncer,
           refreshDebouncer: tinyRefreshDebouncer,
           // default es throwStateError
@@ -780,7 +771,6 @@ void main() {
       setUp(() {
         bloc = BlocSession(
           usecases: usecases,
-          watchAuthStateChanges: watchUC,
           authDebouncer: tinyAuthDebouncer,
           refreshDebouncer: tinyRefreshDebouncer,
           postDisposePolicy: PostDisposePolicy.returnLastSnapshot,
@@ -892,7 +882,6 @@ void main() {
       setUp(() {
         bloc = BlocSession(
           usecases: usecases,
-          watchAuthStateChanges: watchUC,
           authDebouncer: tinyAuthDebouncer,
           refreshDebouncer: tinyRefreshDebouncer,
           postDisposePolicy: PostDisposePolicy.returnSessionError,
