@@ -63,7 +63,7 @@ enum PostDisposePolicy {
 /// See the class docs for details on state semantics, post-dispose policies,
 /// and debouncing of auth/refresh actions.
 
-class BlocSession {
+class BlocSession extends BlocModule {
   /// Creates a [BlocSession].
   ///
   /// The default [postDisposePolicy] is [PostDisposePolicy.throwStateError],
@@ -112,6 +112,8 @@ class BlocSession {
     );
   }
 
+  /// BLoC identifier (useful for logs/registry).
+  static const String name = 'blocSession';
   // ---- Dependencies & holders ------------------------------------------------
 
   // Facade of use cases.
@@ -317,6 +319,7 @@ class BlocSession {
   }
 
   /// Disposes internal resources.
+  @override
   void dispose() {
     if (_disposed) {
       return;
