@@ -231,13 +231,23 @@ class FakeServiceSession implements ServiceSession {
     if (sessionJson.isEmpty) {
       throw StateError('No session payload to refresh');
     }
+
     final DateTime now = DateTime.now();
-    final Map<String, dynamic> next = Utils.mapFromDynamic(sessionJson);
-    final Map<String, dynamic> jwt = Utils.mapFromDynamic(next['jwt']);
+
+    final Map<String, dynamic> next =
+        Utils.mapFromDynamic(Utils.getJsonEncode(sessionJson));
+    final Map<String, dynamic> nextTmp = Utils.mapFromDynamic(next['jwt']);
+
+    final Map<String, dynamic> jwt = Utils.mapFromDynamic(
+      Utils.getJsonEncode(nextTmp),
+    );
+
     jwt['accessToken'] = 'refreshed-token-${next['id'] ?? 'unknown'}';
     jwt['refreshedAt'] = now.toIso8601String();
     jwt['expiresAt'] = now.add(const Duration(hours: 1)).toIso8601String();
+
     next['jwt'] = jwt;
+
     _userJson = next;
     _bloc.value = _userJson;
     return _userJson!;
@@ -279,9 +289,9 @@ class FakeServiceSession implements ServiceSession {
   }
 
   /// Returns the current user payload if signed in.
+  /// A deep-copied, read-only view is returned to avoid external mutation.
   ///
-  /// **Throws**
-  /// - [StateError] if there is no active session.
+  /// Uses Utils.getJsonEncode + Utils.mapFromDynamic to force a deep copy.
   @override
   Future<Map<String, dynamic>> getCurrentUser() async {
     _checkDisposed();
@@ -290,7 +300,12 @@ class FakeServiceSession implements ServiceSession {
     if (u == null) {
       throw StateError('No active session');
     }
-    return u;
+
+    // Deep copy using only Utils helpers (required by your constraint).
+    final Map<String, dynamic> deep =
+        Utils.mapFromDynamic(Utils.getJsonEncode(u));
+
+    return Map<String, dynamic>.unmodifiable(deep);
   }
 
   /// Returns whether there is an active session.
