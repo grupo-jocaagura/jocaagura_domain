@@ -90,12 +90,10 @@ class BlocSession {
   /// lenient policy.
   BlocSession({
     required SessionUsecases usecases,
-    required WatchAuthStateChangesUsecase watchAuthStateChanges,
     Debouncer? authDebouncer,
     Debouncer? refreshDebouncer,
     this.postDisposePolicy = PostDisposePolicy.throwStateError,
   })  : _usecases = usecases,
-        _watch = watchAuthStateChanges,
         _authDebouncer = authDebouncer ?? Debouncer(),
         _refreshDebouncer = refreshDebouncer ?? Debouncer(),
         _states = BlocGeneral<SessionState>(const Unauthenticated());
@@ -104,9 +102,6 @@ class BlocSession {
 
   // Facade of use cases.
   final SessionUsecases _usecases;
-
-  // Source for auth state changes.
-  final WatchAuthStateChangesUsecase _watch;
 
   // Main state holder.
   final BlocGeneral<SessionState> _states;
@@ -291,7 +286,9 @@ class BlocSession {
   Future<void> boot() async {
     _ensureNotDisposed();
     await cancelAuthSubscription();
-    _authSub = _watch.call().listen((Either<ErrorItem, UserModel?> event) {
+    _authSub = _usecases.watchAuthStateChangesUsecase
+        .call()
+        .listen((Either<ErrorItem, UserModel?> event) {
       event.fold(
         (ErrorItem err) => _states.value = SessionError(err),
         (UserModel? user) {
