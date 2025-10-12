@@ -693,6 +693,54 @@ class Utils extends EntityUtil {
     return true;
   }
 
+  /// Computes a deep hash for dynamic, JSON-like structures.
+  ///
+  /// Behavior:
+  /// - **Map**: keys are coerced to `String` via [Utils.mapFromDynamic]; each
+  ///   entry contributes `Object.hash(key, deepHash(value))`, then all entry
+  ///   hashes are combined with `Object.hashAllUnordered` (order-independent).
+  /// - **List**: elements are hashed recursively with [deepHash] and combined
+  ///   using `Object.hashAll` (order-sensitive).
+  /// - **Other values (including `null`)**: returns `value.hashCode`.
+  ///
+  /// Guarantees:
+  /// - If `Utils.deepEqualsDynamic(a, b)` is `true`, then `deepHash(a) == deepHash(b)`.
+  /// - Different list orders generally produce different hashes; different map
+  ///   key orders produce the **same** hash.
+  ///
+  /// Notes & limitations:
+  /// - **Not cryptographic**; collisions are possible.
+  /// - Map key coercion uses stringification (`'$k'`), which may collapse
+  ///   distinct non-string keys to the same `String`.
+  /// - Input must be **acyclic**; cyclic structures will cause unbounded recursion.
+  /// - Values like `double.nan` have a stable `hashCode`, but keep in mind that
+  ///   `NaN != NaN`; unequal values may still collide by hash.
+  ///
+  /// Complexity: O(n) over the number of elements traversed.
+  ///
+  /// Example:
+  /// ```dart
+  /// void main() {
+  ///   final Map<String, dynamic> a = <String, dynamic>{
+  ///     'user': <String, dynamic>{'id': 1, 'tags': <String>['a', 'b']},
+  ///     'ok': true,
+  ///   };
+  ///   final Map<String, dynamic> b = <String, dynamic>{
+  ///     'ok': true,
+  ///     'user': <String, dynamic>{'tags': <String>['a', 'b'], 'id': 1},
+  ///   };
+  ///
+  ///   // Same deep content (map order differs) → same hash
+  ///   final int ha = deepHash(a);
+  ///   final int hb = deepHash(b);
+  ///   print(ha == hb); // true
+  ///
+  ///   // List order matters
+  ///   final List<int> x = <int>[1, 2, 3];
+  ///   final List<int> y = <int>[3, 2, 1];
+  ///   print(deepHash(x) == deepHash(y)); // typically false
+  /// }
+  /// ```
   static int deepHash(dynamic value) {
     if (value is Map) {
       final Map<String, dynamic> m = Utils.mapFromDynamic(value);

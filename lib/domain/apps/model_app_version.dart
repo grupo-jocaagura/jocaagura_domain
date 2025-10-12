@@ -17,6 +17,43 @@ enum ModelAppVersionEnum {
 }
 
 /// Immutable app version descriptor used across CI/CD and runtime checks.
+///
+/// Guarantees:
+/// - Instances are **immutable**: all fields are `final`; `meta` is wrapped with
+///   `Map.unmodifiable`; `buildAt` is normalized to **UTC** on construction.
+/// - JSON round-trip safety: `toJson()` and `fromJson(...)` preserve values,
+///   coercing `buildAt` to UTC and normalizing `meta` keys via `Utils.mapFromDynamic`.
+///
+/// Equality & hashing:
+/// - `==` compares all scalar fields and uses `Utils.deepEqualsMap` for `meta`.
+/// - `hashCode` mixes all scalars and uses `Utils.deepHash(meta)` for deep hashing.
+///   If `a == b`, then `a.hashCode == b.hashCode`.
+///
+/// Contracts & notes:
+/// - `version` is expected to be a SemVer string (not validated here).
+/// - `platform`/`channel` are free strings (e.g., `android`/`dev`).
+/// - `buildNumber` is monotonic and non-negative in typical pipelines.
+/// - `buildAt` must be a valid `DateTime`; it is stored as **UTC**.
+/// - `meta` is a JSON-like map (string-keyed); raw maps will be normalized.
+///
+/// Minimal example:
+/// ```dart
+/// void main() {
+///   final ModelAppVersion v = ModelAppVersion(
+///     id: '42',
+///     appName: 'Pixel',
+///     version: '1.2.3',
+///     buildNumber: 1203,
+///     platform: 'android',
+///     channel: 'prod',
+///     buildAt: DateTime.now().toUtc(),
+///     meta: <String, dynamic>{'commit': 'abc123', 'size': 4200},
+///   );
+///   final Map<String, dynamic> json = v.toJson();
+///   final ModelAppVersion back = ModelAppVersion.fromJson(json);
+///   assert(v == back);
+/// }
+/// ```
 class ModelAppVersion extends Model {
   ModelAppVersion({
     required this.id,
@@ -35,6 +72,15 @@ class ModelAppVersion extends Model {
   })  : buildAt = buildAt.isUtc ? buildAt : buildAt.toUtc(),
         meta = Map<String, dynamic>.unmodifiable(meta);
 
+  /// Creates an instance from a JSON-like map.
+  ///
+  /// Behavior:
+  /// - Uses `Utils.get*` helpers for robust parsing of scalars.
+  /// - `buildAt` is parsed via `DateUtils.dateTimeFromDynamic` and normalized to UTC.
+  /// - `meta` is normalized to a string-keyed map via `Utils.mapFromDynamic`.
+  ///
+  /// Never throws for unknown keys; missing values default to constructor defaults.
+  /// Invalid `buildAt` values are delegated to `DateUtils.dateTimeFromDynamic`.
   factory ModelAppVersion.fromJson(Map<String, dynamic> json) {
     final Map<String, dynamic> jsonCopy = Map<String, dynamic>.from(json);
     final DateTime dt = DateUtils.dateTimeFromDynamic(
@@ -103,6 +149,10 @@ class ModelAppVersion extends Model {
     buildAt: DateTime.fromMillisecondsSinceEpoch(0, isUtc: true),
   );
 
+  /// Returns a copy with selected fields replaced.
+  ///
+  /// `meta` is wrapped with `Map.unmodifiable` to preserve immutability.
+  /// If `buildAt` is provided, it is stored as-is; ensure it is UTC if required.
   @override
   ModelAppVersion copyWith({
     String? id,
@@ -135,6 +185,14 @@ class ModelAppVersion extends Model {
         meta: Map<String, dynamic>.unmodifiable(meta ?? this.meta),
       );
 
+  /// Serializes the model into a JSON map.
+  ///
+  /// Notes:
+  /// - `buildAt` is emitted as a string using `DateUtils.dateTimeToString(buildAt.toUtc())`.
+  /// - `meta` is emitted as stored (string-keyed, unmodifiable at runtime).
+  ///
+  /// Consumers should not mutate the returned map for long-lived sharing.
+  /// If mutation is needed, clone it first.
   @override
   Map<String, dynamic> toJson() => <String, dynamic>{
         ModelAppVersionEnum.id.name: id,
@@ -153,6 +211,9 @@ class ModelAppVersion extends Model {
         ModelAppVersionEnum.meta.name: meta,
       };
 
+  /// Two instances are equal when all scalar fields match, `buildAt` represents
+  /// the same instant (`isAtSameMomentAs`) and `meta` is deep-equal via
+  /// `Utils.deepEqualsMap`.
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) {
@@ -174,6 +235,9 @@ class ModelAppVersion extends Model {
         Utils.deepEqualsMap(other.meta, meta);
   }
 
+  /// Mixes all scalar fields plus a deep hash of `meta`.
+  ///
+  /// Guarantee: if `a == b`, then `a.hashCode == b.hashCode`.
   @override
   int get hashCode => Object.hash(
         id,

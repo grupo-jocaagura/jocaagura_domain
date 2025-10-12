@@ -3,6 +3,45 @@
 This document follows the guidelines of [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.30.3] - 2025-10-12
+
+### Added
+
+- **Domain – `ModelAppVersion`:** modelo inmutable para versionamiento de apps.
+  - Campos: `id`, `appName`, `version`, `buildNumber`, `platform`, `channel`,
+    `minSupportedVersion`, `forceUpdate`, `artifactUrl`, `changelogUrl`, `commitSha`, `buildAt`.
+  - `fromJson`/`toJson` para (de)serialización robusta.
+
+- **Utils – Deep compare & hashing:**
+  - `Utils.deepEqualsDynamic` para comparar recursivamente valores dinámicos (listas/mapas
+    anidados).
+  - `Utils.deepEqualsMap` para comparar mapas con llaves `String`.
+  - `Utils.deepHash` para *hash* profundo (orden-independiente en mapas, orden-sensible en listas).
+
+### Changed
+
+- **ModelAppVersion (refactor):**
+  - **Inmutabilidad reforzada:** `buildAt` se almacena siempre en **UTC**; `meta` queda envuelto en
+    `Map.unmodifiable` tanto en el constructor como en `copyWith`.
+  - **Igualdad y hashing:** `operator==` usa `Utils.deepEqualsMap` para `meta`; `hashCode` usa
+    `Utils.deepHash` garantizando consistencia con la igualdad por contenido.
+  - **JSON:** `fromJson` normaliza llaves de `meta` y endurece el *parsing*; `toJson` serializa
+    `buildAt` como **UTC**.
+
+### Docs
+
+- **ModelAppVersion:** DartDoc detallada de contratos y comportamiento de JSON (UTC, `meta`
+  inmutable).
+- **Utils:** documentación y ejemplos de uso para `deepEqualsDynamic`, `deepEqualsMap` y `deepHash`.
+
+### Tests
+
+- **model_app_version_test.dart:**
+  - Garantías de inmutabilidad (UTC, `meta` inmodificable).
+  - Igualdad profunda y consistencia `hashCode`.
+  - Cobertura de `copyWith`.
+  - *Round-trip* JSON con mapas dinámicos y variaciones de zona horaria.
+
 ## [1.30.2] - 2025-10-12
 
 ### Added
