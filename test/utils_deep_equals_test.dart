@@ -278,4 +278,102 @@ void main() {
       expect(Utils.deepEqualsMap(a, b), isFalse);
     });
   });
+  group('Utils.deepHash', () {
+    test('Map: mismo contenido distinto orden de llaves → mismo hash', () {
+      final Map<String, dynamic> a = <String, dynamic>{'a': 1, 'b': 2};
+      final Map<String, dynamic> b = <String, dynamic>{'b': 2, 'a': 1};
+
+      expect(Utils.deepHash(a), equals(Utils.deepHash(b)));
+    });
+
+    test('Map: cambio de valor → hash distinto', () {
+      final Map<String, dynamic> a = <String, dynamic>{'a': 1, 'b': 2};
+      final Map<String, dynamic> b = <String, dynamic>{'a': 1, 'b': 3};
+
+      expect(Utils.deepHash(a), isNot(equals(Utils.deepHash(b))));
+    });
+
+    test('List: el orden sí importa → hashes distintos', () {
+      final List<int> a = <int>[1, 2, 3];
+      final List<int> b = <int>[3, 2, 1];
+
+      expect(Utils.deepHash(a), isNot(equals(Utils.deepHash(b))));
+    });
+
+    test('Estructura anidada igual → mismo hash', () {
+      final Map<String, dynamic> a = <String, dynamic>{
+        'x': <int>[1, 2, 3],
+        'y': <String, dynamic>{'k': 'v', 'n': 10},
+      };
+      final Map<String, dynamic> b = <String, dynamic>{
+        'y': <String, dynamic>{'n': 10, 'k': 'v'},
+        'x': <int>[1, 2, 3],
+      };
+
+      expect(Utils.deepHash(a), equals(Utils.deepHash(b)));
+    });
+
+    test('Normalización de llaves dinámicas en Map → mismo hash', () {
+      // mapFromDynamic convierte llaves a String → {1: 'x'} y {'1': 'x'} colapsan
+      final Map<dynamic, dynamic> a = <dynamic, dynamic>{1: 'x'};
+      final Map<String, dynamic> b = <String, dynamic>{'1': 'x'};
+
+      expect(Utils.deepHash(a), equals(Utils.deepHash(b)));
+    });
+
+    test('List con nulls y strings igual → mismo hash', () {
+      final List<dynamic> a = <dynamic>[null, 'a', null];
+      final List<dynamic> b = <dynamic>[null, 'a', null];
+
+      expect(Utils.deepHash(a), equals(Utils.deepHash(b)));
+    });
+
+    test(
+        'NaN en la misma posición → mismo hash (pero deepEqualsDynamic es false)',
+        () {
+      final List<double> a = <double>[double.nan];
+      final List<double> b = <double>[double.nan];
+
+      // deepHash usa hashCode de primitivos → NaN.hashCode es estable
+      expect(Utils.deepHash(a), equals(Utils.deepHash(b)));
+
+      // Recordatorio de contrato: igualdad profunda actual trata NaN != NaN
+      expect(Utils.deepEqualsDynamic(a, b), isFalse);
+    });
+
+    test('Anidación compleja: orden-insensible en Map y sensible en List', () {
+      final Map<String, dynamic> a = <String, dynamic>{
+        'cfg': <String, dynamic>{
+          'flags': <String>['a', 'b', 'c'],
+          'meta': <String, dynamic>{'x': 1, 'y': 2},
+        },
+        'v': 1,
+      };
+
+      final Map<String, dynamic> b = <String, dynamic>{
+        'v': 1,
+        'cfg': <String, dynamic>{
+          'meta': <String, dynamic>{'y': 2, 'x': 1}, // reordenado (Map)
+          'flags': <String>['a', 'b', 'c'], // mismo orden (List)
+        },
+      };
+
+      final Map<String, dynamic> c = <String, dynamic>{
+        'v': 1,
+        'cfg': <String, dynamic>{
+          'meta': <String, dynamic>{'y': 2, 'x': 1},
+          'flags': <String>['c', 'b', 'a'], // distinto orden (List)
+        },
+      };
+
+      expect(
+        Utils.deepHash(a),
+        equals(Utils.deepHash(b)),
+      ); // Map reordenado → mismo hash
+      expect(
+        Utils.deepHash(a),
+        isNot(equals(Utils.deepHash(c))),
+      ); // List reordenada → hash distinto
+    });
+  });
 }

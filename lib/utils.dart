@@ -692,4 +692,18 @@ class Utils extends EntityUtil {
     }
     return true;
   }
+
+  static int deepHash(dynamic value) {
+    if (value is Map) {
+      final Map<String, dynamic> m = Utils.mapFromDynamic(value);
+      final Iterable<int> perEntry = m.entries.map(
+        (MapEntry<String, dynamic> e) => Object.hash(e.key, deepHash(e.value)),
+      );
+      return Object.hashAllUnordered(perEntry);
+    }
+    if (value is List) {
+      return Object.hashAll(value.map(deepHash));
+    }
+    return value.hashCode;
+  }
 }

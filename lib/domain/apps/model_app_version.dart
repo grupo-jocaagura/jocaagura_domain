@@ -1,6 +1,6 @@
 part of 'package:jocaagura_domain/jocaagura_domain.dart';
 
-enum ModelAppVErsionEnum {
+enum ModelAppVersionEnum {
   id,
   appName,
   version,
@@ -18,60 +18,64 @@ enum ModelAppVErsionEnum {
 
 /// Immutable app version descriptor used across CI/CD and runtime checks.
 class ModelAppVersion extends Model {
-  const ModelAppVersion({
+  ModelAppVersion({
     required this.id,
     required this.appName,
     required this.version,
     required this.buildNumber,
     required this.platform,
     required this.channel,
-    required this.buildAt,
-    this.minSupportedVersion,
+    required DateTime buildAt,
+    this.minSupportedVersion = '',
     this.forceUpdate = false,
     this.artifactUrl = '',
     this.changelogUrl = '',
     this.commitSha = '',
-    this.meta = const <String, dynamic>{},
-  });
+    Map<String, dynamic> meta = const <String, dynamic>{},
+  })  : buildAt = buildAt.isUtc ? buildAt : buildAt.toUtc(),
+        meta = Map<String, dynamic>.unmodifiable(meta);
 
   factory ModelAppVersion.fromJson(Map<String, dynamic> json) {
     final Map<String, dynamic> jsonCopy = Map<String, dynamic>.from(json);
+    final DateTime dt = DateUtils.dateTimeFromDynamic(
+      jsonCopy[ModelAppVersionEnum.buildAt.name],
+    );
+    final DateTime buildAtUtc = dt.isUtc ? dt : dt.toUtc();
+
     return ModelAppVersion(
-      id: Utils.getStringFromDynamic(jsonCopy[ModelAppVErsionEnum.id.name]),
+      id: Utils.getStringFromDynamic(jsonCopy[ModelAppVersionEnum.id.name]),
       appName: Utils.getStringFromDynamic(
-        jsonCopy[ModelAppVErsionEnum.appName.name],
+        jsonCopy[ModelAppVersionEnum.appName.name],
       ),
       version: Utils.getStringFromDynamic(
-        jsonCopy[ModelAppVErsionEnum.version.name],
+        jsonCopy[ModelAppVersionEnum.version.name],
       ),
       buildNumber: Utils.getIntegerFromDynamic(
-        jsonCopy[ModelAppVErsionEnum.buildNumber.name],
+        jsonCopy[ModelAppVersionEnum.buildNumber.name],
       ),
       platform: Utils.getStringFromDynamic(
-        jsonCopy[ModelAppVErsionEnum.platform.name],
+        jsonCopy[ModelAppVersionEnum.platform.name],
       ),
       channel: Utils.getStringFromDynamic(
-        jsonCopy[ModelAppVErsionEnum.channel.name],
+        jsonCopy[ModelAppVersionEnum.channel.name],
       ),
       minSupportedVersion: Utils.getStringFromDynamic(
-        jsonCopy[ModelAppVErsionEnum.minSupportedVersion.name],
+        jsonCopy[ModelAppVersionEnum.minSupportedVersion.name],
       ),
       forceUpdate: Utils.getBoolFromDynamic(
-        jsonCopy[ModelAppVErsionEnum.forceUpdate.name],
+        jsonCopy[ModelAppVersionEnum.forceUpdate.name],
       ),
       artifactUrl: Utils.getStringFromDynamic(
-        jsonCopy[ModelAppVErsionEnum.artifactUrl.name],
+        jsonCopy[ModelAppVersionEnum.artifactUrl.name],
       ),
       changelogUrl: Utils.getStringFromDynamic(
-        jsonCopy[ModelAppVErsionEnum.changelogUrl.name],
+        jsonCopy[ModelAppVersionEnum.changelogUrl.name],
       ),
       commitSha: Utils.getStringFromDynamic(
-        jsonCopy[ModelAppVErsionEnum.commitSha.name],
+        jsonCopy[ModelAppVersionEnum.commitSha.name],
       ),
-      buildAt: DateUtils.dateTimeFromDynamic(
-        jsonCopy[ModelAppVErsionEnum.buildAt.name],
-      ),
-      meta: Utils.mapFromDynamic(jsonCopy[ModelAppVErsionEnum.meta.name]),
+      buildAt: buildAtUtc,
+      meta: Utils.mapFromDynamic(jsonCopy[ModelAppVersionEnum.meta.name]),
     );
   }
 
@@ -81,13 +85,23 @@ class ModelAppVersion extends Model {
   final int buildNumber; // Monotonic build number
   final String platform; // 'android' | 'ios' | 'web' | ...
   final String channel; // 'dev' | 'beta' | 'prod' | ...
-  final String? minSupportedVersion;
+  final String minSupportedVersion;
   final bool forceUpdate;
   final String artifactUrl;
   final String changelogUrl;
   final String commitSha;
   final DateTime buildAt; // UTC
   final Map<String, dynamic> meta;
+
+  static final ModelAppVersion defaultModelAppVersion = ModelAppVersion(
+    id: 'default',
+    appName: 'app',
+    version: '0.0.0',
+    buildNumber: 0,
+    platform: 'shared',
+    channel: 'dev',
+    buildAt: DateTime.fromMillisecondsSinceEpoch(0, isUtc: true),
+  );
 
   @override
   ModelAppVersion copyWith({
@@ -123,24 +137,27 @@ class ModelAppVersion extends Model {
 
   @override
   Map<String, dynamic> toJson() => <String, dynamic>{
-        ModelAppVErsionEnum.id.name: id,
-        ModelAppVErsionEnum.appName.name: appName,
-        ModelAppVErsionEnum.version.name: version,
-        ModelAppVErsionEnum.buildNumber.name: buildNumber,
-        ModelAppVErsionEnum.platform.name: platform,
-        ModelAppVErsionEnum.channel.name: channel,
-        ModelAppVErsionEnum.minSupportedVersion.name: minSupportedVersion,
-        ModelAppVErsionEnum.forceUpdate.name: forceUpdate,
-        ModelAppVErsionEnum.artifactUrl.name: artifactUrl,
-        ModelAppVErsionEnum.changelogUrl.name: changelogUrl,
-        ModelAppVErsionEnum.commitSha.name: commitSha,
-        ModelAppVErsionEnum.buildAt.name: DateUtils.dateTimeToString(buildAt),
-        ModelAppVErsionEnum.meta.name: meta,
+        ModelAppVersionEnum.id.name: id,
+        ModelAppVersionEnum.appName.name: appName,
+        ModelAppVersionEnum.version.name: version,
+        ModelAppVersionEnum.buildNumber.name: buildNumber,
+        ModelAppVersionEnum.platform.name: platform,
+        ModelAppVersionEnum.channel.name: channel,
+        ModelAppVersionEnum.minSupportedVersion.name: minSupportedVersion,
+        ModelAppVersionEnum.forceUpdate.name: forceUpdate,
+        ModelAppVersionEnum.artifactUrl.name: artifactUrl,
+        ModelAppVersionEnum.changelogUrl.name: changelogUrl,
+        ModelAppVersionEnum.commitSha.name: commitSha,
+        ModelAppVersionEnum.buildAt.name:
+            DateUtils.dateTimeToString(buildAt.toUtc()),
+        ModelAppVersionEnum.meta.name: meta,
       };
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other)) return true;
+    if (identical(this, other)) {
+      return true;
+    }
     return other is ModelAppVersion &&
         other.id == id &&
         other.appName == appName &&
@@ -171,6 +188,6 @@ class ModelAppVersion extends Model {
         changelogUrl,
         commitSha,
         buildAt.millisecondsSinceEpoch,
-        meta.hashCode,
+        Utils.deepHash(meta),
       );
 }
