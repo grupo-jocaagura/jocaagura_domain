@@ -26,6 +26,7 @@ export 'src/repositories/repository_ws_database_impl.dart';
 
 part 'date_utils.dart';
 part 'domain/address_model.dart';
+part 'domain/apps/model_app_version.dart';
 part 'domain/attribute_model.dart';
 part 'domain/bloc.dart';
 part 'domain/bloc_core.dart';
