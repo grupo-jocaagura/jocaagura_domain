@@ -18,6 +18,7 @@ import '../../jocaagura_domain.dart';
 ///
 /// ### Example
 /// ```dart
+/// void main(){
 /// final repo = RepositoryWsDatabaseImpl<UserModel>(
 ///   gateway: gateway,
 ///   fromJson: UserModel.fromJson,
@@ -28,6 +29,7 @@ import '../../jocaagura_domain.dart';
 /// final res = await repo.write('u1', someUser);
 /// final got = await repo.read('u1');
 /// final sub = repo.watch('u1').listen(...);
+/// }
 /// ```
 class RepositoryWsDatabaseImpl<T extends Model>
     implements RepositoryWsDatabase<T> {
@@ -79,63 +81,28 @@ class RepositoryWsDatabaseImpl<T extends Model>
   }
 
   @override
-  Future<Either<ErrorItem, T>> write(String docId, T entity) async {
+  Future<Either<ErrorItem, T>> write(String docId, T entity) {
     _assertNotDisposed();
-    final Future<Either<ErrorItem, T>> task = () async {
-      final Either<ErrorItem, Map<String, dynamic>> res =
-          await _gateway.write(docId, entity.toJson());
-      return res.fold(
-        (ErrorItem l) => Left<ErrorItem, T>(l),
-        (Map<String, dynamic> json) => _decode(json),
-      );
-    }();
-
-    if (!_serializeWrites) {
-      return task;
-    }
-
-    // Chain the task after the current queue for this docId completes.
-    final Future<void> prev = _queues[docId] ?? Future<void>.value();
-    final Completer<void> gate = Completer<void>();
-    _queues[docId] = prev.then((_) => gate.future);
-
-    try {
-      await prev;
-      return await task;
-    } finally {
-      if (!gate.isCompleted) {
-        gate.complete();
-      }
-      if (identical(_queues[docId], gate.future)) {
-        _queues.remove(docId);
-      }
-    }
+    return _enqueuePerDoc<T>(
+      docId,
+      () async {
+        final Either<ErrorItem, Map<String, dynamic>> res =
+            await _gateway.write(docId, entity.toJson());
+        return res.fold(
+          (ErrorItem l) => Left<ErrorItem, T>(l),
+          (Map<String, dynamic> json) => _decode(json),
+        );
+      },
+    );
   }
 
   @override
-  Future<Either<ErrorItem, Unit>> delete(String docId) async {
+  Future<Either<ErrorItem, Unit>> delete(String docId) {
     _assertNotDisposed();
-    final Future<Either<ErrorItem, Unit>> task = _gateway.delete(docId);
-
-    if (!_serializeWrites) {
-      return task;
-    }
-
-    final Future<void> prev = _queues[docId] ?? Future<void>.value();
-    final Completer<void> gate = Completer<void>();
-    _queues[docId] = prev.then((_) => gate.future);
-
-    try {
-      await prev;
-      return await task;
-    } finally {
-      if (!gate.isCompleted) {
-        gate.complete();
-      }
-      if (identical(_queues[docId], gate.future)) {
-        _queues.remove(docId);
-      }
-    }
+    return _enqueuePerDoc<Unit>(
+      docId,
+      () => _gateway.delete(docId),
+    );
   }
 
   @override
@@ -169,5 +136,30 @@ class RepositoryWsDatabaseImpl<T extends Model>
 
   void _assertNotDisposed() {
     assert(!_isDisposed, 'RepositoryWsDatabaseImpl is disposed');
+  }
+
+  Future<Either<ErrorItem, R>> _enqueuePerDoc<R>(
+    String docId,
+    Future<Either<ErrorItem, R>> Function() createTask,
+  ) async {
+    if (!_serializeWrites) {
+      return createTask();
+    }
+
+    final Future<void> prev = _queues[docId] ?? Future<void>.value();
+    final Completer<void> gate = Completer<void>();
+    _queues[docId] = prev.then((_) => gate.future);
+
+    try {
+      await prev;
+      return await createTask();
+    } finally {
+      if (!gate.isCompleted) {
+        gate.complete();
+      }
+      if (identical(_queues[docId], gate.future)) {
+        _queues.remove(docId);
+      }
+    }
   }
 }

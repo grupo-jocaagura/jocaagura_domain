@@ -68,6 +68,7 @@ class GatewayWsDatabaseImpl implements GatewayWsDatabase {
   /// - [idKey]: JSON key used to expose the `docId` in successful payloads.
   /// - [readAfterWrite]: when `true`, `write()` returns a fresh `read()` result.
   /// - [treatEmptyAsMissing]: when `true`, `{}` snapshots are treated as "not found".
+  @Deprecated('Use GatewayWsDb at Repository layer.')
   GatewayWsDatabaseImpl({
     required ServiceWsDatabase<Map<String, dynamic>> service,
     required String collection,
