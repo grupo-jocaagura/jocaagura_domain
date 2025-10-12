@@ -547,4 +547,59 @@ class BlocSession extends BlocModule {
     );
     return right;
   }
+
+  /// Registers a named side-effect to be invoked on every [SessionState]
+  /// emission from this bloc.
+  ///
+  /// This is a thin pass-through to the underlying `BlocGeneral<SessionState>`
+  /// that powers the bloc. The function is stored under [key] so it can be
+  /// replaced or removed later without touching other listeners.
+  ///
+  /// If [executeNow] is `true`, the function is invoked immediately with the
+  /// current cached [SessionState] (useful to sync UI/handlers with the latest
+  /// snapshot before new emissions arrive).
+  ///
+  /// ### Semantics
+  /// - Runs on *every* subsequent state emission (e.g., `Unauthenticated`,
+  ///   `Authenticating`, `Authenticated`, `Refreshing`, `SessionError`).
+  /// - If another function is added with the same [key], it replaces the
+  ///   previous one.
+  /// - After [dispose], no further emissions occur; if [executeNow] is `true`,
+  ///   the function will still receive the last cached state immediately.
+  ///
+  /// ### Example
+  /// ```dart
+  /// session.addFunctionToProcessTValueOnStream('logger', (s) {
+  ///   debugPrint('Session state: $s');
+  /// }, true);
+  /// ```
+  void addFunctionToProcessTValueOnStream(
+    String key,
+    Function(SessionState val) function, [
+    bool executeNow = false,
+  ]) {
+    _states.addFunctionToProcessTValueOnStream(key, function, executeNow);
+  }
+
+  /// Unregisters the side-effect associated with [key].
+  ///
+  /// Safe to call multiple times; removing a non-existent key is a no-op.
+  ///
+  /// ### Example
+  /// ```dart
+  /// session.deleteFunctionToProcessTValueOnStream('logger');
+  /// ```
+  void deleteFunctionToProcessTValueOnStream(String key) {
+    _states.deleteFunctionToProcessTValueOnStream(key);
+  }
+
+  /// Returns whether a side-effect is currently registered under [key].
+  ///
+  /// ### Example
+  /// ```dart
+  /// final bool installed = session.containsFunctionToProcessValueOnStream('logger');
+  /// ```
+  bool containsFunctionToProcessValueOnStream(String key) {
+    return _states.containsKeyFunction(key);
+  }
 }
