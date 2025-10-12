@@ -3,6 +3,28 @@
 This document follows the guidelines of [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.30.2] - 2025-10-12
+
+### Added
+
+- **Session – Side-effect hooks en `BlocSession`:**
+  - `addFunctionToProcessTValueOnStream(key, callback, [executeNow=false])`: registra un *callback*
+    que se dispara en **cada** emisión de `SessionState`, con opción de ejecución inmediata usando
+    el estado actual.
+  - `deleteFunctionToProcessTValueOnStream(key)`: elimina el *callback* registrado por su clave.
+  - `containsFunctionToProcessValueOnStream(key)`: verifica si existe un *callback* para la clave
+    dada.
+
+### Tests
+
+- **bloc_session_hooks_test.dart**: cobertura completa para registro, ejecución inmediata,
+  eliminación, reemplazo y comportamiento de ciclo de vida (limpieza en `dispose()`).
+
+### Notes
+
+- Cambios **no rompientes**. Las APIs de hooks exponen de forma segura la funcionalidad subyacente
+  de `BlocGeneral` sin modificar el flujo de sesión existente.
+
 ## [1.30.1] - 2025-09-24
 
 ### Changed
