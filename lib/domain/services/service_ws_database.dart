@@ -38,6 +38,7 @@ part of '../../jocaagura_domain.dart';
 ///   fromMap: (json) => User.fromJson(json),
 /// );
 /// ```
+@Deprecated('Use ServiceWsDb. Map at Repository/Gateway layer.')
 abstract class ServiceWsDatabase<T> {
   /// Writes or replaces a document in the specified [collection] with ID [docId].
   ///
