@@ -22,6 +22,7 @@ export 'src/fake_services/ws_db_error_mini_mapper.dart';
 export 'src/gateways/gateway_auth_impl.dart';
 export 'src/gateways/gateway_connectivity_impl.dart';
 export 'src/gateways/gateway_ws_database_impl.dart';
+export 'src/gateways/gateway_ws_db_impl.dart';
 export 'src/repositories/repository_auth_impl.dart';
 export 'src/repositories/repository_connectivity_impl.dart';
 export 'src/repositories/repository_ws_database_impl.dart';
@@ -91,7 +92,6 @@ part 'domain/services/service_notifications.dart';
 part 'domain/services/service_preferences.dart';
 part 'domain/services/service_session.dart';
 part 'domain/services/service_ws_database.dart';
-
 part 'domain/services/service_ws_db.dart';
 part 'domain/states/onboarding_state.dart';
 part 'domain/states/onboarding_step.dart';
