@@ -3,6 +3,76 @@
 This document follows the guidelines of [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.30.4] - 2025-10-12
+
+### Added
+
+- **DB (JSON-first):** `ServiceWsDb` — servicio abstracto estilo WebSocket/NoSQL que opera *
+  *exclusivamente** con `Map<String, dynamic>`:
+  - Operaciones: `save`, `read`, `delete`, `documentStream`, `collectionStream`.
+- **DB Fake:** `FakeServiceWsDb` — implementación en memoria para pruebas/desarrollo:
+  - Latencia configurable, simulación de errores, *deep copy*, *de-dupe* por contenido y *hooks*
+    para inspección interna.
+- **Gateway WS:** `GatewayWsDbImpl` — capa multiplexada sobre `ServiceWsDb`:
+  - **Multiplexing:** comparte una sola suscripción por `docId`.
+  - **Reference counting:** `watch` / `detachWatch` y `releaseDoc` para *lifecycle* eficiente;
+    `dispose` para *teardown* global.
+  - **Error mapping:** todo a `Either<ErrorItem, …>` vía `ErrorMapper`.
+  - **Configuración:** `idKey` personalizado, `readAfterWrite`, `treatEmptyAsMissing`.
+- **Mapper de errores:** `WsDbErrorMiniMapper` para mapear `ArgumentError`/`StateError` a JSON de
+  error estructurado.
+- **Example:** `bloc_ws_db_example.dart` — demo completa CRUD + *realtime* de **Contactos**:
+  - UI de dos paneles (formulario + visor de estado).
+  - `BlocWsDatabase<ContactModel>` (documento) y `ContactsCollectionBloc` (colección).
+  - Muestra `WsDbState`, *ledger* de transiciones y lista en vivo.
+  - Flujo recomendado: `FakeServiceWsDb` → `GatewayWsDbImpl` → `RepositoryWsDatabaseImpl` →
+    `FacadeWsDatabaseUsecases` → `BlocWsDatabase`.
+
+### Changed
+
+- **Estandarización de nombres (WS DB):**
+  - `ServiceWsDatabase` → **`ServiceWsDb`**
+  - `FakeServiceWsDatabase` → **`FakeServiceWsDb`**
+  - `GatewayWsDatabaseImpl` → **`GatewayWsDbImpl`**
+
+### Deprecated
+
+- **`ServiceWsDatabase<T>`:** marcado como `@Deprecated` en favor del enfoque **JSON-first**; el
+  *type mapping* queda en Repository/Gateway.
+
+### Docs
+
+- **`bloc_ws_database.dart`:**
+  - Aclara que publica un único *stream* de `WsDbState` (el **último evento gana** cuando hay
+    múltiples `watch` activos).
+  - Documenta `dispose`: *best-effort* para desprender *watches* y **no** dispone *stacks*
+    compartidos.
+  - Mejora la descripción de ciclo de vida de *watch* (`startWatch`, `stopWatch`, `stopAllWatches`).
+
+### Tests
+
+- **FakeServiceWsDb:** suite integral (operaciones básicas, configuración, manejo de errores).
+- **GatewayWsDbImpl:** lectura, escritura, borrado y *watch*; mapeo de errores y *lifecycle* por
+  referencias.
+- **BlocWsDatabase:** `bloc_ws_database_ext_test.dart`
+  - Estado ante `read/write/delete` (`doc`, `loading`, `error`).
+  - `startWatch`/`stopWatch`/`stopAllWatches`, *facade* detachment y coordinación de `watchUntil`.
+  - *Lifecycle:* `dispose` cancela suscripciones sin disponer repos compartidos.
+  - *Helpers:* `existsDoc`, `ensureDoc`, `mutateDoc`, `patchDoc`.
+
+### Migration notes
+
+- **Renombres:** actualiza imports y tipos a `ServiceWsDb`, `FakeServiceWsDb`, `GatewayWsDbImpl`.
+- **Deprecación:** si usabas `ServiceWsDatabase<T>`, migra al contrato **JSON-first** (
+  `Map<String, dynamic>`); mueve el mapeo de tipos a Repository/Gateway.
+- **Comportamiento de `treatEmptyAsMissing`:** si tu servicio devuelve `{}` para *not found*,
+  habilita esta opción en el Gateway para recibir un `Left(ErrorItem)` consistente.
+- **Multiplexing:** si tenías *watch* duplicados por `docId`, ahora se comparte la suscripción;
+  considera llamar `detachWatch`/`releaseDoc` al desmontar widgets para liberar referencias.
+
+> **Notas:** No hay cambios incompatibles fuera de los **renombres** y la **deprecación** indicada.
+> El ejemplo de **Contactos** sirve como guía de integración sin dependencias externas.
+
 ## [1.30.3] - 2025-10-12
 
 ### Added
