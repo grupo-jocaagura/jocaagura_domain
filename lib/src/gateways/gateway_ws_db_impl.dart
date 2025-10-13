@@ -2,75 +2,77 @@ import 'dart:async';
 
 import '../../jocaagura_domain.dart';
 
-/// Generic, JSON-first implementation of [GatewayWsDatabase] that multiplexes
-/// a **single** underlying `ServiceWsDatabase` stream per `docId` using
-/// [BlocGeneral].
+/// JSON-first gateway over a [ServiceWsDb] that **multiplexes one backend
+/// subscription per `docId`** and exposes results as `Either<ErrorItem, ...>`.
 ///
-/// ### Highlights
-/// - **One service subscription per `docId`**: multiple watchers share the same
-///   [BlocGeneral] channel to avoid duplicate backend subscriptions.
-/// - **Either for success/failure**: all operations and the watch stream
-///   surface `Either<ErrorItem, ...>`.
-/// - **Id injection**: the returned JSON includes the `docId` under [idKey]
-///   (unless the server already provided an `idKey` field).
-/// - **Lifecycle**: calling [watch] increases a per-doc ref-count; you **must**
-///   call [detachWatch] when you stop observing that `docId`. Use [releaseDoc]
-///   for forced cleanup of a single doc, and [dispose] for global teardown.
+/// This gateway keeps a **shared** [BlocGeneral] channel per `docId` so that
+/// multiple watchers do not duplicate the underlying `ServiceWsDb.documentStream`
+/// subscription. It injects the logical identifier back into the payload under
+/// [idKey] (unless the server already provides that field).
 ///
-/// ### Configuration
-/// - [idKey] (default `'id'`): property name to inject into outgoing payloads
-///   when the server does not include it.
-/// - [readAfterWrite] (default `false`): when `true`, `write()` performs a
-///   round-trip `read()` and returns the authoritative payload.
-/// - [treatEmptyAsMissing] (default `false`): when `true`, `{}` snapshots are
-///   converted to `Left(DatabaseErrorItems.notFound)`.
+/// ## Lifecycle & Responsibilities
+/// - Calling [watch] **increments** an internal reference counter for `docId`.
+/// - The **caller is responsible** for eventually invoking [detachWatch] once
+///   *all* subscriptions created via that `watch(docId)` have been cancelled.
+///   Not doing so will keep the shared channel and the underlying backend
+///   subscription alive until [releaseDoc] or [dispose] is invoked.
+/// - [releaseDoc] forces immediate cleanup for a single `docId` regardless of
+///   outstanding references (useful on logout or test teardown).
+/// - [dispose] performs global teardown of all channels and should be called
+///   when the gateway is no longer needed (e.g., app shutdown, test end).
 ///
-/// ### Example
+/// > Important: cancelling a StreamSubscription returned by [watch] does **not**
+/// > imply automatic detachment. You **must** call [detachWatch(docId)] to
+/// > decrement the internal reference counter and allow the channel to close
+/// > when it reaches zero.
+///
+/// ## Configuration
+/// - [idKey] (default `'id'`): JSON key used to expose `docId`.
+/// - [readAfterWrite] (default `false`): if `true`, `write()` performs a round-trip
+///   `read()` and returns the authoritative payload.
+/// - [treatEmptyAsMissing] (default `false`): if `true`, empty `{}` snapshots
+///   are mapped to `Left(DatabaseErrorItems.notFound)`.
+///
+/// ## Error mapping
+/// All failures are mapped using [ErrorMapper]:
+/// - `fromPayload(json, location)` for business errors encoded in payloads.
+/// - `fromException(error, stack, location)` for thrown exceptions.
+///
+/// ## Usage pattern
 /// ```dart
-/// final service = FakeServiceWsDatabase();
-/// final gateway = GatewayWsDatabaseImpl(
-///   service: service,
-///   collection: 'canvas',
-///   mapper: DefaultErrorMapper(),
-///   idKey: GatewayWsDatabaseImpl.defaultIdKey, // 'id'
-///   readAfterWrite: false,
-///   treatEmptyAsMissing: false,
-/// );
-///
-/// // Write
-/// final resWrite = await gateway.write('c1', {'name': 'Board'});
-/// resWrite.fold(
-///   (err) => print('write error: ${err.code}'),
-///   (json) => print('saved: $json'), // contains {'id':'c1', ...}
-/// );
-///
-/// // Watch (remember to detach!)
-/// final sub = gateway.watch('c1').listen((either) {
-///   either.fold(
-///     (err) => print('watch error: ${err.code}'),
-///     (json) => print('update: $json'),
-///   );
-/// });
-///
-/// // Later...
-/// await sub.cancel();
-/// gateway.detachWatch('c1'); // <— important: decrements ref-count
-///
-/// // Global teardown (tests/app shutdown)
-/// gateway.dispose();
+/// final sub = gateway.watch('doc1').listen(onEvent, onError: onErr);
+/// // ... later ...
+/// await sub.cancel();        // 1) stop listening
+/// gateway.detachWatch('doc1'); // 2) explicit detach (required)
 /// ```
-class GatewayWsDatabaseImpl implements GatewayWsDatabase {
-  /// Creates a gateway over a [ServiceWsDatabase] that stores JSON documents.
+///
+/// ## Anti-pattern
+/// ```dart
+/// final sub = gateway.watch('doc1').listen(onEvent);
+/// await sub.cancel();           // ❌ Forgetting detach keeps channel alive
+/// // gateway.detachWatch('doc1'); // Missing: channel not released
+/// ```
+/// ### Quick checklist
+/// [ ] Keep a reference to your StreamSubscription(s) from watch(docId).
+/// [ ] Call `await sub.cancel()` when you stop observing.
+/// [ ] Immediately call `gateway.detachWatch(docId)` after cancelling the last subscription.
+/// [ ] On forced flows (logout/test teardown), consider `gateway.releaseDoc(docId)`.
+/// [ ] On global shutdown, call `gateway.dispose()` exactly once.
+///
+/// 🚫 Do not rely on subscription cancel to auto-detach — it is caller-managed by design.
+class GatewayWsDbImpl implements GatewayWsDatabase {
+  /// Creates a JSON-first gateway over a [ServiceWsDb].
   ///
-  /// - [service]: the underlying database service (JSON `Map<String, dynamic>`).
-  /// - [collection]: collection name to scope operations.
+  /// - [service]: underlying database service (`Map<String, dynamic>` payloads).
+  /// - [collection]: collection name used to scope all operations.
   /// - [mapper]: optional [ErrorMapper]; defaults to [DefaultErrorMapper].
-  /// - [idKey]: JSON key used to expose the `docId` in successful payloads.
-  /// - [readAfterWrite]: when `true`, `write()` returns a fresh `read()` result.
-  /// - [treatEmptyAsMissing]: when `true`, `{}` snapshots are treated as "not found".
-  @Deprecated('Use GatewayWsDb at Repository layer.')
-  GatewayWsDatabaseImpl({
-    required ServiceWsDatabase<Map<String, dynamic>> service,
+  /// - [idKey]: JSON key used to publish the `docId` when it is not present.
+  /// - [readAfterWrite]: if `true`, `write()` returns the **service-saved snapshot**
+  ///   from `saveDocument` (server-normalized) instead of echoing the input JSON.
+  ///   This avoids an extra round-trip read while still returning authoritative data.
+  /// - [treatEmptyAsMissing]: if `true`, empty `{}` snapshots are treated as "not found".
+  GatewayWsDbImpl({
+    required ServiceWsDb service,
     required String collection,
     ErrorMapper? mapper,
     String idKey = defaultIdKey,
@@ -87,7 +89,7 @@ class GatewayWsDatabaseImpl implements GatewayWsDatabase {
   static const String defaultIdKey = 'id';
 
   /// Underlying JSON database service.
-  final ServiceWsDatabase<Map<String, dynamic>> _service;
+  final ServiceWsDb _service;
 
   /// Collection name this gateway operates on.
   final String _collection;
@@ -113,13 +115,13 @@ class GatewayWsDatabaseImpl implements GatewayWsDatabase {
   /// Reads a document by [docId].
   ///
   /// Returns:
-  /// - `Right(json + {idKey: docId})` on success (keeps server-provided `idKey` if present).
-  /// - `Left(...)` if the payload encodes a business error via [ErrorMapper.fromPayload],
-  ///   or if an exception occurs (mapped with [ErrorMapper.fromException]).
+  /// - `Right(json ∪ {idKey: docId})` on success (server-provided `idKey` wins).
+  /// - `Left(err)` if:
+  ///   - [ErrorMapper.fromPayload] detects a business error in the payload, or
+  ///   - an exception occurs (mapped with [ErrorMapper.fromException]), or
+  ///   - when [treatEmptyAsMissing] is `true` and the payload is `{}`.
   ///
-  /// Behavior:
-  /// - If [treatEmptyAsMissing] is `true` and the JSON is `{}`, returns
-  ///   `Left(DatabaseErrorItems.notFound)`.
+  /// Throws: never (errors are mapped to `Left`).
   @override
   Future<Either<ErrorItem, Map<String, dynamic>>> read(String docId) async {
     _assertNotDisposed();
@@ -152,12 +154,13 @@ class GatewayWsDatabaseImpl implements GatewayWsDatabase {
   /// Writes (creates/updates) a document with [docId] and JSON [json].
   ///
   /// Returns:
-  /// - If [readAfterWrite] is `true`, performs an authoritative `read(docId)` and
-  ///   returns its result.
-  /// - Otherwise, returns the provided [json] with `{idKey: docId}` injected
-  ///   (unless the server already provided an `idKey` field).
+  /// - If [readAfterWrite] is `true`: `Right(_withId(docId, saved))`, where `saved`
+  ///   is the server-normalized snapshot returned by [ServiceWsDb.saveDocument].
+  ///   (No extra `read()` is performed.)
+  /// - Otherwise: `Right(_withId(docId, json))`, preserving any server-provided `idKey`.
   ///
-  /// Failures are mapped with [ErrorMapper.fromException].
+  /// Errors are mapped via [ErrorMapper.fromException].
+  /// Throws: never (errors are mapped to `Left`).
   @override
   Future<Either<ErrorItem, Map<String, dynamic>>> write(
     String docId,
@@ -165,13 +168,13 @@ class GatewayWsDatabaseImpl implements GatewayWsDatabase {
   ) async {
     _assertNotDisposed();
     try {
-      await _service.saveDocument(
+      final Map<String, dynamic> saved = await _service.saveDocument(
         collection: _collection,
         docId: docId,
         document: json,
       );
       if (_readAfterWrite) {
-        return read(docId); // authoritative
+        return Right<ErrorItem, Map<String, dynamic>>(_withId(docId, saved));
       }
       return Right<ErrorItem, Map<String, dynamic>>(_withId(docId, json));
     } catch (e, s) {
@@ -183,8 +186,10 @@ class GatewayWsDatabaseImpl implements GatewayWsDatabase {
 
   /// Deletes a document by [docId].
   ///
-  /// Returns `Right(Unit.value)` on success; otherwise `Left(...)` mapped with
+  /// Returns `Right(Unit.value)` on success; otherwise `Left(err)` via
   /// [ErrorMapper.fromException].
+  ///
+  /// Throws: never (errors are mapped to `Left`).
   @override
   Future<Either<ErrorItem, Unit>> delete(String docId) async {
     _assertNotDisposed();
@@ -198,18 +203,22 @@ class GatewayWsDatabaseImpl implements GatewayWsDatabase {
     }
   }
 
-  /// Returns the **shared** [BlocGeneral] stream for [docId] and **increments**
-  /// the internal reference count for that document channel.
-  ///
-  /// Consumers (Repository/BLoC/UseCase) **must** call [detachWatch] once they
-  /// cancel their subscription(s), so the gateway can release the underlying
-  /// service subscription when no watchers remain.
+  /// Returns the **shared** stream for [docId] and **increments** the
+  /// per-document reference count.
   ///
   /// Emissions:
-  /// - `Right(json + {idKey: docId})` on valid payloads.
-  /// - `Left(...)` if the payload encodes a business error (via [ErrorMapper.fromPayload]),
-  ///   on service errors (mapped with [ErrorMapper.fromException]), or when the
-  ///   source stream completes (emits `DatabaseErrorItems.streamClosed`).
+  /// - **Initial seed**: `Right({})` as the channel bootstrap value. This is emitted
+  ///   regardless of [treatEmptyAsMissing]. Subsequent events come from the
+  ///   underlying service.
+  /// - Then: `Right(json ∪ {idKey: docId})` on valid payloads.
+  /// - Or: `Left(err)` when:
+  ///   - [ErrorMapper.fromPayload] detects business errors,
+  ///   - the service reports an error (mapped via [ErrorMapper.fromException]),
+  ///   - the source stream completes (`DatabaseErrorItems.streamClosed`).
+  ///
+  /// Note on [treatEmptyAsMissing]:
+  /// - The `{}` → `notFound` mapping applies to **incoming service events**. The
+  ///   initial seed `Right({})` is not converted.
   @override
   Stream<Either<ErrorItem, Map<String, dynamic>>> watch(String docId) {
     _assertNotDisposed();
@@ -253,11 +262,14 @@ class GatewayWsDatabaseImpl implements GatewayWsDatabase {
     return channel.bloc.stream;
   }
 
-  /// Decrements the internal reference count for [docId] and disposes the
-  /// underlying channel (closing the service subscription and the [BlocGeneral])
-  /// when it reaches zero.
+  /// Decrements the internal reference counter for [docId] and disposes the
+  /// underlying per-doc channel (closing the backend subscription and the
+  /// shared [BlocGeneral]) when the counter reaches zero.
   ///
-  /// Call this **after** canceling your `watch(docId)` subscription(s).
+  /// Caller responsibilities:
+  /// - Invoke this **after** cancelling *all* subscriptions created via
+  ///   [watch(docId)] from your component.
+  /// - Safe to call multiple times; if the channel is not present, this is a no-op.
   @override
   void detachWatch(String docId) {
     final _DocChannel? ch = _channels[docId];
@@ -270,8 +282,9 @@ class GatewayWsDatabaseImpl implements GatewayWsDatabase {
     }
   }
 
-  /// Forces immediate cleanup of the channel associated with [docId]
-  /// (e.g., logout, test teardown), regardless of its reference count.
+  /// Forces immediate cleanup of the channel associated with [docId], regardless
+  /// of its current reference count (useful for logout paths, navigation resets,
+  /// or test teardown). Safe to call even if the doc is not currently watched.
   @override
   void releaseDoc(String docId) {
     final _DocChannel? ch = _channels.remove(docId);
@@ -279,7 +292,12 @@ class GatewayWsDatabaseImpl implements GatewayWsDatabase {
   }
 
   /// Global teardown of the gateway. Disposes all active channels and prevents
-  /// subsequent API calls (guarded by an [assert]).
+  /// subsequent API calls (guarded by a debug `assert` in development builds).
+  ///
+  /// Notes:
+  /// - This does **not** call [detachWatch] per doc; it directly disposes all
+  ///   channels and clears internal state.
+  /// - Treat the instance as terminal after calling this method.
   @override
   void dispose() {
     _isDisposed = true;
@@ -293,7 +311,7 @@ class GatewayWsDatabaseImpl implements GatewayWsDatabase {
   /// already provided that field—in which case the server value is preserved.
   Map<String, dynamic> _withId(String docId, Map<String, dynamic> json) {
     if (json.containsKey(_idKey)) {
-      return json; // keep server value
+      return json;
     }
     return <String, dynamic>{...json, _idKey: docId};
   }
@@ -324,12 +342,15 @@ class GatewayWsDatabaseImpl implements GatewayWsDatabase {
 }
 
 /// Internal per-document channel holding the shared [BlocGeneral] and the
-/// single subscription to the underlying `ServiceWsDatabase` stream.
+/// single subscription to the underlying `ServiceWsDb.documentStream`.
 ///
-/// The channel uses a simple reference counter:
+/// Reference counting:
 /// - [retain] increments watchers count,
-/// - [release] decrements and returns `true` when count reaches zero,
+/// - [release] decrements and returns `true` when the count reaches **zero**,
 /// - [dispose] cancels the service subscription and disposes the bloc.
+///
+/// Errors and completion are propagated to the outer gateway as `Left(...)`
+/// values according to the mapping rules in [GatewayWsDbImpl.watch].
 class _DocChannel {
   _DocChannel({required this.bloc, required this.sub});
 
@@ -348,13 +369,18 @@ class _DocChannel {
 
   /// Decrements the watcher reference count.
   ///
-  /// Returns `true` when reference count reaches **zero** (caller should dispose).
+  /// Returns `true` when the count reaches **zero** (caller should dispose).
+  /// Caller responsibility: ensure `retain()`/`release()` are balanced per watch lifecycle.
   bool release() {
     _refs -= 1;
     return _refs <= 0;
   }
 
-  /// Cancels the underlying subscription and disposes the [BlocGeneral].
+  /// Disposes this per-document channel:
+  /// - Cancels the single subscription to the underlying service stream.
+  /// - Disposes the shared [BlocGeneral] used by all watchers of this `docId`.
+  ///
+  /// Called by the gateway when the reference count reaches zero or on global teardown.
   void dispose() {
     bloc.dispose();
     sub.cancel();

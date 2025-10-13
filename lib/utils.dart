@@ -580,4 +580,178 @@ class Utils extends EntityUtil {
     }
     return h;
   }
+
+  /// Performs a deep equality comparison between two dynamic values.
+  ///
+  /// Rules:
+  /// - Maps: compared by keys and values using [deepEqualsMap] (keys are coerced
+  ///   to `String` through [Utils.mapFromDynamic] when needed).
+  /// - Lists: order-sensitive, length must match, elements compared recursively.
+  /// - Primitives/other: compared with `==`.
+  /// - Fast path: `identical(a, b)` returns `true`.
+  ///
+  /// Notes:
+  /// - `double.nan` is **not** equal to itself in Dart (`NaN != NaN`), therefore
+  ///   nested structures containing `NaN` at the same position will be considered
+  ///   **not equal**.
+  ///
+  /// Example:
+  /// ```dart
+  /// void main() {
+  ///   final Map<String, dynamic> a = <String, dynamic>{
+  ///     'x': <int>[1, 2, 3],
+  ///     'y': <String, dynamic>{'k': 'v'}
+  ///   };
+  ///   final Map<String, dynamic> b = <String, dynamic>{
+  ///     'y': <String, dynamic>{'k': 'v'},
+  ///     'x': <int>[1, 2, 3],
+  ///   };
+  ///
+  ///   // Deep equal (order-independent for maps, order-sensitive for lists).
+  ///   final bool eq = Utils.deepEqualsDynamic(a, b); // true
+  ///   print(eq);
+  /// }
+  /// ```
+  static bool deepEqualsDynamic(dynamic a, dynamic b) {
+    // 1) Caso especial para double: NaN ≠ NaN según el contrato de estos tests.
+    if (a is double && b is double) {
+      if (a.isNaN && b.isNaN) {
+        return false; // <- clave para que el test pase
+      }
+      // otros doubles siguen evaluándose normalmente (== maneja 0.0/-0.0 e infinitos)
+    }
+
+    // 2) Fast-path habitual
+    if (identical(a, b)) {
+      return true;
+    }
+
+    // 3) Map
+    if (a is Map && b is Map) {
+      return deepEqualsMap(Utils.mapFromDynamic(a), Utils.mapFromDynamic(b));
+    }
+
+    // 4) List
+    if (a is List && b is List) {
+      if (a.length != b.length) {
+        return false;
+      }
+      for (int i = 0; i < a.length; i++) {
+        if (!deepEqualsDynamic(a[i], b[i])) {
+          return false;
+        }
+      }
+      return true;
+    }
+
+    // 5) Primitivos/otros
+    return a == b;
+  }
+
+  /// Performs a deep equality comparison between two string-keyed maps.
+  ///
+  /// Conditions for equality:
+  /// - Both maps must have the same set of keys (order does not matter).
+  /// - Each value pair is compared recursively via [deepEqualsDynamic].
+  /// - Fast path: `identical(a, b)` returns `true`.
+  ///
+  /// Limitations:
+  /// - Keys must be of type `String`. If your inputs come from dynamic/raw maps,
+  ///   first normalize them with [Utils.mapFromDynamic] to ensure string keys and
+  ///   consistent comparison semantics.
+  ///
+  /// Example:
+  /// ```dart
+  /// void main() {
+  ///   final Map<String, dynamic> a = <String, dynamic>{
+  ///     'user': <String, dynamic>{'id': 1, 'name': 'Ana'},
+  ///     'tags': <String>['a', 'b']
+  ///   };
+  ///   final Map<String, dynamic> b = <String, dynamic>{
+  ///     'tags': <String>['a', 'b'],
+  ///     'user': <String, dynamic>{'id': 1, 'name': 'Ana'},
+  ///   };
+  ///
+  ///   print(Utils.deepEqualsMap(a, b)); // true
+  /// }
+  /// ```
+  static bool deepEqualsMap(Map<String, dynamic> a, Map<String, dynamic> b) {
+    if (identical(a, b)) {
+      return true;
+    }
+    if (a.length != b.length) {
+      return false;
+    }
+    for (final String k in a.keys) {
+      if (!b.containsKey(k)) {
+        return false;
+      }
+      if (!deepEqualsDynamic(a[k], b[k])) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  /// Computes a deep hash for dynamic, JSON-like structures.
+  ///
+  /// Behavior:
+  /// - **Map**: keys are coerced to `String` via [Utils.mapFromDynamic]; each
+  ///   entry contributes `Object.hash(key, deepHash(value))`, then all entry
+  ///   hashes are combined with `Object.hashAllUnordered` (order-independent).
+  /// - **List**: elements are hashed recursively with [deepHash] and combined
+  ///   using `Object.hashAll` (order-sensitive).
+  /// - **Other values (including `null`)**: returns `value.hashCode`.
+  ///
+  /// Guarantees:
+  /// - If `Utils.deepEqualsDynamic(a, b)` is `true`, then `deepHash(a) == deepHash(b)`.
+  /// - Different list orders generally produce different hashes; different map
+  ///   key orders produce the **same** hash.
+  ///
+  /// Notes & limitations:
+  /// - **Not cryptographic**; collisions are possible.
+  /// - Map key coercion uses stringification (`'$k'`), which may collapse
+  ///   distinct non-string keys to the same `String`.
+  /// - Input must be **acyclic**; cyclic structures will cause unbounded recursion.
+  /// - Values like `double.nan` have a stable `hashCode`, but keep in mind that
+  ///   `NaN != NaN`; unequal values may still collide by hash.
+  ///
+  /// Complexity: O(n) over the number of elements traversed.
+  ///
+  /// Example:
+  /// ```dart
+  /// void main() {
+  ///   final Map<String, dynamic> a = <String, dynamic>{
+  ///     'user': <String, dynamic>{'id': 1, 'tags': <String>['a', 'b']},
+  ///     'ok': true,
+  ///   };
+  ///   final Map<String, dynamic> b = <String, dynamic>{
+  ///     'ok': true,
+  ///     'user': <String, dynamic>{'tags': <String>['a', 'b'], 'id': 1},
+  ///   };
+  ///
+  ///   // Same deep content (map order differs) → same hash
+  ///   final int ha = deepHash(a);
+  ///   final int hb = deepHash(b);
+  ///   print(ha == hb); // true
+  ///
+  ///   // List order matters
+  ///   final List<int> x = <int>[1, 2, 3];
+  ///   final List<int> y = <int>[3, 2, 1];
+  ///   print(deepHash(x) == deepHash(y)); // typically false
+  /// }
+  /// ```
+  static int deepHash(dynamic value) {
+    if (value is Map) {
+      final Map<String, dynamic> m = Utils.mapFromDynamic(value);
+      final Iterable<int> perEntry = m.entries.map(
+        (MapEntry<String, dynamic> e) => Object.hash(e.key, deepHash(e.value)),
+      );
+      return Object.hashAllUnordered(perEntry);
+    }
+    if (value is List) {
+      return Object.hashAll(value.map(deepHash));
+    }
+    return value.hashCode;
+  }
 }

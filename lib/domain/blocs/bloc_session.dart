@@ -547,4 +547,110 @@ class BlocSession extends BlocModule {
     );
     return right;
   }
+
+  /// Registers a named side-effect to be invoked on every [SessionState]
+  /// emission from this bloc.
+  ///
+  /// This is a thin pass-through to the underlying `BlocGeneral<SessionState>`
+  /// that powers the bloc. The function is stored under [key] so it can be
+  /// replaced or removed later without touching other listeners.
+  ///
+  /// If [executeNow] is `true`, the function is invoked immediately with the
+  /// current cached [SessionState] (useful to sync UI/handlers with the latest
+  /// snapshot before new emissions arrive).
+  ///
+  /// ### Semantics
+  /// - Runs on *every* subsequent state emission (e.g., `Unauthenticated`,
+  ///   `Authenticating`, `Authenticated`, `Refreshing`, `SessionError`).
+  /// - If another function is added with the same [key], it replaces the
+  ///   previous one.
+  /// - After [dispose], no further emissions occur; if [executeNow] is `true`,
+  ///   the function will still receive the last cached state immediately.
+  ///
+  /// ### Example
+  /// ```dart
+  /// session.addFunctionToProcessTValueOnStream('logger', (s) {
+  ///   debugPrint('Session state: $s');
+  /// }, true);
+  /// ```
+  void addFunctionToProcessTValueOnStream(
+    String key,
+    Function(SessionState val) function, [
+    bool executeNow = false,
+  ]) {
+    _states.addFunctionToProcessTValueOnStream(key, function, executeNow);
+  }
+
+  /// Unregisters the side-effect associated with [key].
+  ///
+  /// Safe to call multiple times; removing a non-existent key is a no-op.
+  ///
+  /// ### Example
+  /// ```dart
+  /// session.deleteFunctionToProcessTValueOnStream('logger');
+  /// ```
+  void deleteFunctionToProcessTValueOnStream(String key) {
+    _states.deleteFunctionToProcessTValueOnStream(key);
+  }
+
+  /// Returns whether a side-effect is currently registered under [key].
+  ///
+  /// ### Example
+  /// ```dart
+  /// final bool installed = session.containsFunctionToProcessValueOnStream('logger');
+  /// ```
+  bool containsFunctionToProcessValueOnStream(String key) {
+    return _states.containsKeyFunction(key);
+  }
+
+  Completer<Either<ErrorItem, UserModel>>? _pendingGetCurrentUser;
+
+  /// Retrieves the current authenticated user from the repository and updates the
+  /// session state accordingly.
+  ///
+  /// Semantics:
+  /// - Sets [Authenticating] while resolving.
+  /// - On `Right(UserModel)`: transitions to [Authenticated].
+  /// - On `Left(ErrorItem)`: transitions to [SessionError].
+  ///
+  /// Debouncing:
+  /// - Uses the auth debouncer to avoid double-taps from the UI.
+  ///
+  /// Returns:
+  /// - `Right(UserModel)` on success.
+  /// - `Left(ErrorItem)` on failure.
+  ///
+  /// Throws:
+  /// - [StateError] if this bloc has been disposed (strict policy).
+  Future<Either<ErrorItem, UserModel>> getCurrentUser() {
+    _ensureNotDisposed();
+    if (_pendingGetCurrentUser != null &&
+        !_pendingGetCurrentUser!.isCompleted) {
+      return _pendingGetCurrentUser!.future;
+    }
+
+    final Completer<Either<ErrorItem, UserModel>> completer =
+        Completer<Either<ErrorItem, UserModel>>();
+    _pendingGetCurrentUser = completer;
+
+    _authDebouncer(() async {
+      try {
+        _states.value = const Authenticating();
+        final Either<ErrorItem, UserModel> result =
+            await _usecases.getCurrentUser.call();
+        result.fold(
+          (ErrorItem e) => _states.value = SessionError(e),
+          (UserModel u) => _states.value = Authenticated(u),
+        );
+        completer.complete(result);
+      } catch (e, s) {
+        completer.completeError(e, s);
+        rethrow;
+      } finally {
+        _pendingGetCurrentUser = null;
+      }
+    });
+
+    return completer.future;
+  }
 }

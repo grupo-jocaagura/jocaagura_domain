@@ -4,16 +4,13 @@ part of '../../../../jocaagura_domain.dart';
 ///
 /// - Extends [BlocGeneral] to publish a single immutable [WsDbState] stream.
 /// - Delegates all operations to a [FacadeWsDatabaseUsecases] (clean layering).
-/// - Manages **one or many `watch(docId)` subscriptions** and detaches them
-///   from the gateway/repository when stopped or on [dispose].
+/// - Manages one or many `watch(docId)` subscriptions and detaches them
+///   when stopped or on [dispose].
 ///
-/// ### What this BLoC is (and is not)
-/// - ✅ A thin orchestration layer for UI/AppManager.
-/// - ✅ Publishes **state** (`loading`, `error`, `doc`, `docId`, `isWatching`).
-/// - ✅ No custom streams are created; it only updates its own state via
-///   `BlocGeneral.value`.
-/// - ❌ It does not transform JSON nor talk to services directly; that’s the
-///   job of Repository/Gateway.
+/// ### Semantics
+/// - The BLoC publishes a **single** [WsDbState]: if multiple `docId` watches
+///   are active, the **last incoming event wins** and updates `docId/doc/error`.
+///   Prefer a single active document per BLoC instance in UI flows.
 ///
 /// ### Usage
 /// ```dart
@@ -184,8 +181,10 @@ class BlocWsDatabase<T extends Model> extends BlocGeneral<WsDbState<T>> {
   /// Starts (or restarts) a realtime watch for [docId].
   ///
   /// - Reuses underlying gateway channel (no duplicate backend subscriptions).
-  /// - If there was a previous watch for the same [docId], it is canceled first.
-  /// - Updates state on each tick: `doc` or `error` accordingly.
+  /// - If a previous watch for the same [docId] exists, it is canceled first.
+  /// - Updates state on each tick: sets `doc` or `error`.
+  /// - When multiple watches are active, the **latest event** (from any watched
+  ///   `docId`) will update the single [WsDbState] published by this BLoC.
   Future<void> startWatch(String docId) async {
     await stopWatch(docId);
 
@@ -215,7 +214,9 @@ class BlocWsDatabase<T extends Model> extends BlocGeneral<WsDbState<T>> {
     }
   }
 
-  /// Stops all watches and detaches their channels.
+  /// Stops a realtime watch for [docId] and detaches the underlying channel.
+  /// Safe to call multiple times. When the last watch for the current `docId` is
+  /// removed, `isWatching` is set to `false`.
   Future<void> stopAllWatches() async {
     final List<Future<void>> tasks = <Future<void>>[];
     for (final MapEntry<String, StreamSubscription<Either<ErrorItem, T>>> e
@@ -233,12 +234,14 @@ class BlocWsDatabase<T extends Model> extends BlocGeneral<WsDbState<T>> {
   // ---------------------------------------------------------------------------
 
   /// Disposes the BLoC:
-  /// - Cancels all active watches and detaches channels.
+  /// - Cancels all active watches and requests channel detachment.
   /// - Calls `super.dispose()` to close the [BlocGeneral] stream.
   ///
-  /// Note: it does **not** call `facade.disposeAll()` automatically because
-  /// multiple BLoCs could share the same repository/gateway. If you own the
-  /// stack, call [disposeStack] instead.
+  /// Note:
+  /// - Detach calls are intentionally **not awaited** (dispose is best-effort).
+  ///   Add `// ignore: unawaited_futures` if your linter flags them.
+  /// - This does **not** dispose the repository/gateway stack; use [disposeStack]
+  ///   if this BLoC owns it.
   @override
   void dispose() {
     // best-effort cleanup (no `await` in dispose)
@@ -263,7 +266,8 @@ class BlocWsDatabase<T extends Model> extends BlocGeneral<WsDbState<T>> {
     value = value.copyWith(
       docId: docId ?? value.docId,
       loading: loading,
-      // keep current doc/error
+      doc: value.doc,
+      error: value.error,
     );
   }
 
@@ -283,6 +287,8 @@ class BlocWsDatabase<T extends Model> extends BlocGeneral<WsDbState<T>> {
     value = value.copyWith(
       docId: docId ?? value.docId,
       isWatching: isWatching,
+      doc: value.doc,
+      error: value.error,
     );
   }
 }

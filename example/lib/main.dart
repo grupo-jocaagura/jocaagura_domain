@@ -1,110 +1,106 @@
+// main.dart
+//
+// 🔹 "Kitchen Sink" de jocaagura_domain en un solo archivo para pub.dev
+// 🔹 Incluye ejemplos completos, comentados y navegables:
+//    1) Onboarding (validación de área de cuadrado)
+//    2) Onboarding (Either onEnter)
+//    3) Ledger (pastel + barras, sin libs extra)
+//    4) Graph (línea precios pizza + tabla, con updates periódicos)
+//    5) WS Database (CRUD + watch de ContactModel + colección en vivo)
+//    6) Session/Auth (flavors dev/qa/prod con FakeServiceSession)
+//    7) Connectivity (flow completo con Either<ErrorItem,...>)
+//    8) Loading (single/queue, anti-flicker, FIFO)
+//    9) Responsive (grid, métricas, simulación de tamaño)
+//
+// 📦 Dependencias clave (pubspec.yaml):
+//   dependencies:
+//     flutter:
+//       sdk: flutter
+//     jocaagura_domain: ^<versión>
+// -----------------------------------------------------------------------------
+
 import 'dart:async';
+import 'dart:math' show Random, max, min;
 
 import 'package:flutter/material.dart';
 import 'package:jocaagura_domain/jocaagura_domain.dart';
 
-void main() {
-  runApp(const MyApp());
-}
+void main() => runApp(const KitchenSinkApp());
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+/// App raíz: muestra un home con lista de demos.
+/// Cada demo es una pantalla separada.
+class KitchenSinkApp extends StatelessWidget {
+  const KitchenSinkApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'jocaagura_domain • Kitchen Sink',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.indigo),
         useMaterial3: true,
       ),
-      home: const HomePage(),
+      home: const _HomePage(),
     );
   }
 }
 
-/// Abstraction to access a JSON-like WebSocket database (canvas domain).
-///
-/// - Uses Either con ErrorItem, ... for success/failure.
-/// - Embeds the [docId] into the returned JSON under [idKey] (default: 'id').
-/// - Maps thrown exceptions using [ErrorMapper].
-abstract class GatewayWsDatabase {
-  /// Reads a document by [docId]. Returns the raw JSON with [idKey] injected.
-  Future<Either<ErrorItem, Map<String, dynamic>>> read(String docId);
+// ╔═══════════════════════════════════════════════════════════════════════════
+// ║ HOME
+// ╚═══════════════════════════════════════════════════════════════════════════
 
-  /// Writes (create/update) a document. Returns the JSON considered authoritative:
-  /// - if [readAfterWrite] is enabled, returns a fresh read;
-  /// - otherwise returns the provided input (with [idKey] injected).
-  Future<Either<ErrorItem, Map<String, dynamic>>> write(
-    String docId,
-    Map<String, dynamic> json,
-  );
-
-  /// Deletes a document. Returns [Unit] on success.
-  Future<Either<ErrorItem, Unit>> delete(String docId);
-
-  /// Watches a single document. Emits Either on each tick.
-  /// - Right(json with [idKey])
-  /// - Left(error) when the payload encodes a business error or on stream error
-  ///   (the stream remains open if possible).
-  Stream<Either<ErrorItem, Map<String, dynamic>>> watch(String docId);
-
-  void dispose();
-
-  /// Cleans up resources related to [docId] (e.g. active listeners).
-  void releaseDoc(String docId);
-
-  /// Cleans up active watch on [docId], if any.
-  void detachWatch(String docId);
-}
-
-class HomePage extends StatelessWidget {
-  const HomePage({super.key});
+class _HomePage extends StatelessWidget {
+  const _HomePage();
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      body: Column(
+    return Scaffold(
+      appBar: AppBar(title: const Text('Demos disponibles')),
+      body: ListView(
+        padding: const EdgeInsets.all(16),
         children: <Widget>[
-          Text('Examples availables'),
-          SizedBox(
-            height: 16,
+          const Text('Modelos por defecto (del paquete)'),
+          const SizedBox(height: 8),
+          const _ModelTile(label: 'UserModel', model: defaultUserModel),
+          const _ModelTile(label: 'AddressModel', model: defaultAddressModel),
+          const _ModelTile(label: 'StoreModel', model: defaultStoreModel),
+          const Divider(height: 32),
+          const Text('Demos de features'),
+          const SizedBox(height: 8),
+          const _NavTile(
+            label: 'Onboarding • Área de un cuadrado',
+            page: OnboardingSquareAreaValidationPage(),
           ),
-          _ListTile(
-            label: 'UserModel',
-            model: defaultUserModel,
-          ),
-          _ListTile(
-            label: 'AddressModel',
-            model: defaultAddressModel,
-          ),
-          _ListTile(
-            label: 'StoreModel',
-            model: defaultStoreModel,
-          ),
-          _NavigatorListTile(
-            label: 'BlocSession demo',
-            page: SessionDemoPage(),
-          ),
-          _NavigatorListTile(
-            label: 'BlocWsDatabase demo',
-            page: WsDatabaseUserDemoPage(),
-          ),
-          _NavigatorListTile(
-            label: 'BlocConnectivity demo',
-            page: ConnectivityDemoPage(),
-          ),
-          _NavigatorListTile(
-            label: 'BlocLoading demo',
-            page: BlocLoadingDemoPage(),
-          ),
-          _NavigatorListTile(
-            label: 'BlocOnboarding demo',
+          const _NavTile(
+            label: 'Onboarding • Either onEnter (3 pasos)',
             page: BlocOnboardingDemoPage(),
           ),
-          _NavigatorListTile(
-            label: 'BlocResponsive demo',
+          const _NavTile(
+            label: 'Ledger • Ponqué y Barras',
+            page: LedgerChartsPage(regionName: 'Colombia'),
+          ),
+          const _NavTile(
+            label: 'Graph • Precios Pizza (línea + tabla)',
+            page: PizzaPricesPage(regionName: 'LATAM — Región Andina'),
+          ),
+          _NavTile(
+            label: 'WS DB • CRUD + Watch + Colección (ContactModel)',
+            page: WsContactsHome.wrapper(),
+          ),
+          const _NavTile(
+            label: 'Auth/Session • Flavors dev/qa/prod',
+            page: SessionFlavorDemoPage(),
+          ),
+          const _NavTile(
+            label: 'Connectivity • Flow con Either',
+            page: ConnectivityDemoPage(),
+          ),
+          const _NavTile(
+            label: 'Loading • Single + Queue (FIFO)',
+            page: BlocLoadingDemoPage(),
+          ),
+          const _NavTile(
+            label: 'Responsive • Grid + métricas + simulador',
             page: BlocResponsiveDemoPage(),
           ),
         ],
@@ -113,334 +109,41 @@ class HomePage extends StatelessWidget {
   }
 }
 
-class _NavigatorListTile extends StatelessWidget {
-  const _NavigatorListTile({
-    required this.label,
-    required this.page,
-  });
-
+class _NavTile extends StatelessWidget {
+  const _NavTile({required this.label, required this.page});
   final String label;
   final Widget page;
 
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      title: Text(label),
       leading: const Icon(Icons.arrow_forward_ios),
+      title: Text(label),
       onTap: () {
-        Navigator.of(context).push(
-          MaterialPageRoute<void>(
-            builder: (_) => page,
-          ),
-        );
+        Navigator.of(context)
+            .push(MaterialPageRoute<void>(builder: (_) => page));
       },
     );
   }
 }
 
-class _ListTile extends StatelessWidget {
-  const _ListTile({
-    required this.label,
-    required this.model,
-  });
-
+class _ModelTile extends StatelessWidget {
+  const _ModelTile({required this.label, required this.model});
   final String label;
   final Model model;
 
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      title: Text(
-        label,
-        style: Theme.of(context).textTheme.titleMedium,
-      ),
-      subtitle: Text(
-        model.toString(),
-      ),
+      title: Text(label, style: Theme.of(context).textTheme.titleMedium),
+      subtitle: Text(model.toString()),
     );
   }
 }
 
-class SessionDemoPage extends StatefulWidget {
-  const SessionDemoPage({super.key});
-
-  @override
-  State<SessionDemoPage> createState() => _SessionDemoPageState();
-}
-
-class _SessionDemoPageState extends State<SessionDemoPage> {
-  late final TextEditingController _emailCtrl;
-  late final TextEditingController _passCtrl;
-
-  late final ServiceSession _service;
-  late final ErrorMapper _errorMapper;
-  late final GatewayAuth _gateway;
-  late final RepositoryAuth _repo;
-
-  late final SessionUsecases _usecases;
-  late final BlocSession _bloc;
-
-  @override
-  void initState() {
-    super.initState();
-
-    _emailCtrl = TextEditingController(text: 'demo@x.com');
-    _passCtrl = TextEditingController(text: 'secret');
-
-    // Infra de ejemplo (puedes cambiar latency o arrancar logueado con initialUserJson)
-    _service = FakeServiceSession(
-      latency: const Duration(milliseconds: 250),
-      // initialUserJson: { ... } // si quieres arrancar logueado
-    );
-
-    // Ajusta estos nombres si en tu paquete son distintos
-    _errorMapper = const DefaultErrorMapper();
-    _gateway = GatewayAuthImpl(_service, errorMapper: _errorMapper);
-    _repo = RepositoryAuthImpl(gateway: _gateway, errorMapper: _errorMapper);
-
-    _usecases = SessionUsecases(
-      logInUserAndPassword: LogInUserAndPasswordUsecase(_repo),
-      logOutUsecase: LogOutUsecase(_repo),
-      signInUserAndPassword: SignInUserAndPasswordUsecase(_repo),
-      recoverPassword: RecoverPasswordUsecase(_repo),
-      logInSilently: LogInSilentlyUsecase(_repo),
-      loginWithGoogle: LoginWithGoogleUsecase(_repo),
-      refreshSession: RefreshSessionUsecase(_repo),
-      getCurrentUser: GetCurrentUserUsecase(_repo),
-      watchAuthStateChangesUsecase: WatchAuthStateChangesUsecase(_repo),
-    );
-
-    _bloc = BlocSession(
-      usecases: _usecases,
-      authDebouncer: Debouncer(milliseconds: 250),
-      refreshDebouncer: Debouncer(milliseconds: 250),
-    );
-
-    // Nos suscribimos a cambios del repo (no fuerza silent-login)
-    _bloc.boot();
-  }
-
-  @override
-  void dispose() {
-    _emailCtrl.dispose();
-    _passCtrl.dispose();
-    _bloc.dispose();
-    super.dispose();
-  }
-
-  Future<void> _handleEither<T>(
-    Either<ErrorItem, T> r, {
-    String success = 'OK',
-  }) async {
-    r.fold(
-      (ErrorItem e) => _showSnack('${e.title} • ${e.code}'),
-      (_) => _showSnack(success),
-    );
-  }
-
-  void _showSnack(String msg) {
-    if (!mounted) {
-      return;
-    }
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(msg)),
-    );
-  }
-
-  Widget _stateChip(SessionState s) {
-    if (s is Authenticating) {
-      return const Chip(label: Text('Authenticating'));
-    }
-    if (s is Refreshing) {
-      return const Chip(label: Text('Refreshing'));
-    }
-    if (s is Authenticated) {
-      return const Chip(label: Text('Authenticated'));
-    }
-    if (s is SessionError) {
-      return Chip(label: Text('Error: ${s.message.code}'));
-    }
-    return const Chip(label: Text('Unauthenticated'));
-    // Unauthenticated
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Session Demo')),
-      body: StreamBuilder<SessionState>(
-        stream: _bloc.sessionStream,
-        initialData: const Unauthenticated(),
-        builder: (BuildContext _, AsyncSnapshot<SessionState> snap) {
-          final SessionState state = snap.data ?? const Unauthenticated();
-          final UserModel current = _bloc.currentUser;
-
-          return ListView(
-            padding: const EdgeInsets.all(16),
-            children: <Widget>[
-              Row(
-                children: <Widget>[
-                  _stateChip(state),
-                  const SizedBox(width: 12),
-                  Text(_bloc.isAuthenticated ? 'signed in' : 'signed out'),
-                ],
-              ),
-              const SizedBox(height: 16),
-              Text(
-                'Current user:',
-                style: Theme.of(context).textTheme.titleMedium,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                current == defaultUserModel
-                    ? '(defaultUserModel)'
-                    : '${current.email}\nJWT: ${current.jwt}',
-              ),
-              const Divider(height: 32),
-
-              // Email + password
-              Text(
-                'Email & Password',
-                style: Theme.of(context).textTheme.titleMedium,
-              ),
-              const SizedBox(height: 8),
-              TextField(
-                controller: _emailCtrl,
-                decoration: const InputDecoration(
-                  labelText: 'Email',
-                  border: OutlineInputBorder(),
-                ),
-              ),
-              const SizedBox(height: 8),
-              TextField(
-                controller: _passCtrl,
-                obscureText: true,
-                decoration: const InputDecoration(
-                  labelText: 'Password',
-                  border: OutlineInputBorder(),
-                ),
-              ),
-              const SizedBox(height: 12),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: <Widget>[
-                  ElevatedButton(
-                    onPressed: () async {
-                      final Either<ErrorItem, UserModel> r = await _bloc.logIn(
-                        email: _emailCtrl.text.trim(),
-                        password: _passCtrl.text,
-                      );
-                      await _handleEither<UserModel>(r, success: 'Logged in!');
-                    },
-                    child: const Text('Log In'),
-                  ),
-                  ElevatedButton(
-                    onPressed: () async {
-                      final Either<ErrorItem, UserModel> r = await _bloc.signIn(
-                        email: _emailCtrl.text.trim(),
-                        password: _passCtrl.text,
-                      );
-                      await _handleEither<UserModel>(r, success: 'Signed up!');
-                    },
-                    child: const Text('Sign Up'),
-                  ),
-                  ElevatedButton(
-                    onPressed: () async {
-                      final Either<ErrorItem, void> r =
-                          await _bloc.recoverPassword(
-                        email: _emailCtrl.text.trim(),
-                      );
-                      await _handleEither<void>(r, success: 'Recovery sent!');
-                    },
-                    child: const Text('Recover'),
-                  ),
-                ],
-              ),
-              const Divider(height: 32),
-
-              // Social / session ops
-              Text(
-                'Session Ops',
-                style: Theme.of(context).textTheme.titleMedium,
-              ),
-              const SizedBox(height: 8),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: <Widget>[
-                  OutlinedButton(
-                    onPressed: () async {
-                      final Either<ErrorItem, UserModel> r =
-                          await _bloc.logInWithGoogle();
-                      await _handleEither<UserModel>(r, success: 'Google OK!');
-                    },
-                    child: const Text('Google Login'),
-                  ),
-                  OutlinedButton(
-                    onPressed: () async {
-                      final Either<ErrorItem, UserModel>? r =
-                          await _bloc.logInSilently();
-                      if (r == null) {
-                        _showSnack('No current session for silent login');
-                        return;
-                      }
-                      await _handleEither<UserModel>(
-                        r,
-                        success: 'Silent login OK!',
-                      );
-                    },
-                    child: const Text('Silent Login'),
-                  ),
-                  OutlinedButton(
-                    onPressed: () async {
-                      final Either<ErrorItem, UserModel>? r =
-                          await _bloc.refreshSession();
-                      if (r == null) {
-                        _showSnack('No session to refresh');
-                        return;
-                      }
-                      await _handleEither<UserModel>(r, success: 'Refreshed!');
-                    },
-                    child: const Text('Refresh'),
-                  ),
-                  OutlinedButton(
-                    onPressed: () async {
-                      final Either<ErrorItem, void>? r = await _bloc.logOut();
-                      if (r == null) {
-                        _showSnack('Already signed out');
-                        return;
-                      }
-                      await _handleEither<void>(r, success: 'Logged out!');
-                    },
-                    child: const Text('Log Out'),
-                  ),
-                  OutlinedButton(
-                    onPressed: () async {
-                      await _bloc.boot();
-                      _showSnack('Listening to authStateChanges...');
-                    },
-                    child: const Text('Reboot listener'),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 24),
-
-              // Nota sobre configuración rápida del fake
-              Text(
-                'Tip: ajusta la latencia o arranca logueado usando FakeServiceSession(latency: ..., initialUserJson: ...)',
-                style: Theme.of(context)
-                    .textTheme
-                    .bodySmall
-                    ?.copyWith(color: Colors.grey[600]),
-              ),
-            ],
-          );
-        },
-      ),
-    );
-  }
-}
+// ╔═══════════════════════════════════════════════════════════════════════════
+// ║ WIDGET DE UX CENTRALIZADA PARA ErrorItem (SnackBars automáticos)
+// ╚═══════════════════════════════════════════════════════════════════════════
 
 class ErrorItemWidget extends StatefulWidget {
   const ErrorItemWidget({
@@ -503,749 +206,416 @@ class _ErrorItemWidgetState extends State<ErrorItemWidget> {
   Widget build(BuildContext context) => widget.child;
 }
 
-/// Connectivity **Demo Page** — reference wiring for the full stack without external packages.
-///
-/// ### Purpose
-/// - Show how UI consumes a **pure** `BlocConnectivity` that emits `Either<ErrorItem, ConnectivityModel>`.
-/// - Demonstrate the **proposed flow** and separation of responsibilities (Clean Architecture):
-///
-/// ```text
-/// UI → AppManager → Bloc → UseCase → Repository → Gateway → Service
-/// ```
-///
-/// ### Design notes
-/// - **The BLoC does not know about UI**: it never throws nor shows SnackBars.
-/// - **Errors travel as domain data**: `Left(ErrorItem)`; the UI decides how to present them.
-/// - We wrap the content in an `ErrorItemWidget` that centralizes UX for errors (SnackBar/Banner).
-/// - This demo uses `FakeServiceConnectivity` for dev/testing. In production, replace it with a
-///   real `ServiceConnectivity` backed by the platform (plugins/SDKs).
-///
-/// ### Lifecycle essentials
-/// - Call `loadInitial()` once to fetch the first snapshot.
-/// - Call `startWatching()` to subscribe to updates; `stopWatching()` on dispose/background.
-/// - Always call `dispose()` on the BLoC and on the Service if it holds resources.
-///
-/// ### Why this matters
-/// - Keeps **domain/UI decoupled**, simplifies testing, and prevents side-effects from leaking into logic.
-/// - Uniform error semantics via `ErrorItem` across all modules in Jocaagura.
-class ConnectivityDemoPage extends StatefulWidget {
-  const ConnectivityDemoPage({super.key});
-  static const String name = 'ConnectivityDemoPage';
+// ╔═══════════════════════════════════════════════════════════════════════════
+// ║ 1) ONBOARDING — ÁREA DE CUADRADO (con validación en onEnter)
+// ╚═══════════════════════════════════════════════════════════════════════════
+//
+// Implementación guiada:
+//  - bloc = BlocOnboarding()
+//  - configure([...]) con pasos: Bienvenida(auto), Explicación(auto),
+//    Input(manual), Validación(onEnter con Left/Right), Resultado, Final.
+//  - En Validación: Left(ErrorItem) si side inválido; Right(Unit) si ok.
+//  - UI llama bloc.start() al iniciar.
+
+class OnboardingSquareAreaValidationPage extends StatefulWidget {
+  const OnboardingSquareAreaValidationPage({super.key});
 
   @override
-  State<ConnectivityDemoPage> createState() => _ConnectivityDemoPageState();
+  State<OnboardingSquareAreaValidationPage> createState() =>
+      _OnboardingSquareAreaValidationPageState();
 }
 
-class _ConnectivityDemoPageState extends State<ConnectivityDemoPage> {
-  late final FakeServiceConnectivity _service;
-  late final GatewayConnectivity _gateway;
-  late final RepositoryConnectivity _repo;
-  late final BlocConnectivity _bloc;
+class _OnboardingSquareAreaValidationPageState
+    extends State<OnboardingSquareAreaValidationPage> {
+  late final BlocOnboarding bloc;
 
-  ConnectivityModel _lastGood = const ConnectivityModel(
-    connectionType: ConnectionTypeEnum.none,
-    internetSpeed: 0,
-  );
+  double? side; // estado local: lado ingresado
+  final TextEditingController sideController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    // 1) Service (dev/test fake). In production: provide a real ServiceConnectivity
-    _service = FakeServiceConnectivity(
-      latencyConnectivity: const Duration(milliseconds: 80),
-      latencySpeed: const Duration(milliseconds: 120),
-      initial: const ConnectivityModel(
-        connectionType: ConnectionTypeEnum.wifi,
-        internetSpeed: 40,
-      ),
-    );
-    // 2) Gateway: converts Service → raw payload (Map) and wraps exceptions as ErrorItem
-    _gateway = GatewayConnectivityImpl(_service, const DefaultErrorMapper());
-    // 3) Repository: maps payload → ConnectivityModel, detects business errors via ErrorMapper
-    _repo = RepositoryConnectivityImpl(
-      _gateway,
-      errorMapper: const DefaultErrorMapper(),
-    );
-    // 4) Bloc: exposes Stream<Either<ErrorItem, ConnectivityModel>> to the UI (pure, no UI side-effects)
-    _bloc = BlocConnectivity(
-      watch: WatchConnectivityUseCase(_repo),
-      snapshot: GetConnectivitySnapshotUseCase(_repo),
-      checkType: CheckConnectivityTypeUseCase(_repo),
-      checkSpeed: CheckInternetSpeedUseCase(_repo),
-    );
-    // Fetch initial snapshot once
-    _bloc.loadInitial();
-    // Start continuous updates — remember to stop on dispose in real screens
-    _bloc.startWatching();
+    bloc = BlocOnboarding();
+    _configureSteps();
+    bloc.start(); // arranca el flujo
   }
 
   @override
   void dispose() {
-    _bloc.dispose();
-    _service.dispose();
+    sideController.dispose();
+    bloc.dispose();
     super.dispose();
+  }
+
+  void _configureSteps() {
+    bloc.configure(<OnboardingStep>[
+      const OnboardingStep(
+        title: 'Bienvenida',
+        description: 'Vamos a calcular el área de un cuadrado paso a paso.',
+        autoAdvanceAfter: Duration(milliseconds: 1500),
+      ),
+      const OnboardingStep(
+        title: 'Explicación',
+        description:
+            'El área de un cuadrado es lado × lado. Ingresarás un valor y lo validaremos.',
+        autoAdvanceAfter: Duration(milliseconds: 3000),
+      ),
+      OnboardingStep(
+        title: 'Ingresa el lado',
+        description:
+            'Ingresa un número mayor que 0 y como máximo 100, luego confirma.',
+        onEnter: () async => Right<ErrorItem, Unit>(Unit.value),
+      ),
+      OnboardingStep(
+        title: 'Validación',
+        description: 'Validamos tu valor. Si hay un error, te lo mostramos.',
+        onEnter: () async {
+          final double? s = side;
+          if (s == null || s <= 0) {
+            return Left<ErrorItem, Unit>(
+              const ErrorItem(
+                title: 'Lado inválido',
+                code: 'ERR_SIDE_NON_POSITIVE',
+                description: 'El lado debe ser mayor que 0.',
+                errorLevel: ErrorLevelEnum.warning,
+              ),
+            );
+          }
+          if (s > 100) {
+            return Left<ErrorItem, Unit>(
+              const ErrorItem(
+                title: 'Lado demasiado grande',
+                code: 'ERR_SIDE_TOO_BIG',
+                description: 'El lado no puede ser mayor que 100.',
+                errorLevel: ErrorLevelEnum.warning,
+              ),
+            );
+          }
+          return Right<ErrorItem, Unit>(Unit.value);
+        },
+        autoAdvanceAfter: const Duration(milliseconds: 800),
+      ),
+      OnboardingStep(
+        title: 'Resultado',
+        description: 'Mostramos el área calculada y puedes finalizar.',
+        onEnter: () async => Right<ErrorItem, Unit>(Unit.value),
+      ),
+      const OnboardingStep(
+        title: 'Final',
+        description: '¡Has completado el tutorial! 🎉',
+      ),
+    ]);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Connectivity Demo')),
-      body: StreamBuilder<Either<ErrorItem, ConnectivityModel>>(
-        stream: _bloc.stream,
-        initialData: _bloc.value,
-        builder: (
-          BuildContext context,
-          AsyncSnapshot<Either<ErrorItem, ConnectivityModel>> snap,
-        ) {
-          // Either coming from the BLoC (no exceptions thrown)
-          final Either<ErrorItem, ConnectivityModel> either =
-              snap.data ?? _bloc.value;
-          final ConnectivityModel m = either.isRight
-              ? (either as Right<ErrorItem, ConnectivityModel>).value
-              : _lastGood; // keep last good model when Left
-
-          if (either.isRight) {
-            _lastGood = (either as Right<ErrorItem, ConnectivityModel>).value;
+      appBar: AppBar(title: const Text('Área de un cuadrado – Onboarding')),
+      body: StreamBuilder<OnboardingState>(
+        stream: bloc.stateStream,
+        initialData: bloc.state,
+        builder: (BuildContext context, AsyncSnapshot<OnboardingState> snap) {
+          final OnboardingState state = snap.data!;
+          final OnboardingStep? step = bloc.currentStep;
+          if (step == null) {
+            return const Center(child: Text('No hay pasos.'));
           }
 
-          // Handle Either<ErrorItem, ConnectivityModel> from the BLoC:
-          // - Right → render UI with latest ConnectivityModel
-          // - Left  → ErrorItemWidget emits UX (SnackBar/Banner) but we keep last good UI state
-          return ErrorItemWidget(
-            state: either as Either<ErrorItem, Object>,
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Text(
-                    'Type:  ${m.connectionType.name}',
-                    style: Theme.of(context).textTheme.titleLarge,
-                  ),
-                  const SizedBox(height: 8),
-                  Text('Speed: ${m.internetSpeed.toStringAsFixed(1)} Mbps'),
-                  const SizedBox(height: 16),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: <Widget>[
-                      ElevatedButton(
-                        onPressed: () => _service
-                            .simulateConnection(ConnectionTypeEnum.none),
-                        child: const Text('Go Offline'),
-                      ),
-                      ElevatedButton(
-                        onPressed: () => _service
-                            .simulateConnection(ConnectionTypeEnum.wifi),
-                        child: const Text('Wi‑Fi'),
-                      ),
-                      ElevatedButton(
-                        onPressed: () => _service
-                            .simulateConnection(ConnectionTypeEnum.mobile),
-                        child: const Text('Mobile'),
-                      ),
-                      ElevatedButton(
-                        onPressed: () => _service.simulateSpeed(
-                          (((m.internetSpeed + 10).clamp(0.0, 9999.0)) as num)
-                              .toDouble(),
-                        ),
-                        child: const Text('+10 Mbps'),
-                      ),
-                      ElevatedButton(
-                        onPressed: () => _service.simulateSpeed(
-                          (((m.internetSpeed - 10).clamp(0.0, 9999.0)) as num)
-                              .toDouble(),
-                        ),
-                        child: const Text('−10 Mbps'),
-                      ),
-                      ElevatedButton(
-                        onPressed: () => _service.startSpeedJitter(),
-                        child: const Text('Start Jitter'),
-                      ),
-                      ElevatedButton(
-                        onPressed: () => _service.stopSpeedJitter(),
-                        child: const Text('Stop Jitter'),
-                      ),
-                      ElevatedButton(
-                        onPressed: _bloc.refreshType,
-                        child: const Text('Refresh Type'),
-                      ),
-                      ElevatedButton(
-                        onPressed: _bloc.refreshSpeed,
-                        child: const Text('Refresh Speed'),
-                      ),
-                      const SizedBox(height: 12),
-                      const Divider(),
-                      const SizedBox(height: 12),
-                      ElevatedButton(
-                        onPressed: () {
-                          _service.simulateErrorOnCheckConnectivityOnce();
-                          _bloc.refreshType();
-                        },
-                        child: const Text('Sim error: check type'),
-                      ),
-                      ElevatedButton(
-                        onPressed: () {
-                          _service.simulateErrorOnCheckSpeedOnce();
-                          _bloc.refreshSpeed();
-                        },
-                        child: const Text('Sim error: check speed'),
-                      ),
-                      ElevatedButton(
-                        onPressed: () {
-                          _service.simulateStreamErrorOnce();
-                          _service.simulateSpeed(
-                            m.internetSpeed + 1,
-                          ); // trigger next stream event
-                        },
-                        child: const Text('Sim error: stream'),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          );
-        },
-      ),
-    );
-  }
-}
+          final Widget errorBanner = _buildErrorBannerIfAny(state);
 
-class BlocResponsiveDemoPage extends StatefulWidget {
-  /// Permite inyectar una instancia existente (p. ej. desde AppManager).
-  /// Si viene null, la página crea y dispone su propio bloc.
-  const BlocResponsiveDemoPage({super.key, this.injected});
-  static const String name = 'BlocResponsiveDemoPage';
+          Widget content;
+          switch (step.title) {
+            case 'Ingresa el lado':
+              content = _buildInputStep(state);
+              break;
+            case 'Validación':
+              content = _buildValidationStep(state);
+              break;
+            case 'Resultado':
+              final String area =
+                  side != null ? (side! * side!).toStringAsFixed(2) : '--';
+              content = _buildResultStep(area);
+              break;
+            case 'Final':
+              content = _buildFinalStep(step);
+              break;
+            default:
+              content = _buildSimpleStep(step, state);
+              break;
+          }
 
-  final BlocResponsive? injected;
-
-  @override
-  State<BlocResponsiveDemoPage> createState() => _BlocResponsiveDemoPageState();
-}
-
-class _BlocResponsiveDemoPageState extends State<BlocResponsiveDemoPage> {
-  late final BlocResponsive _bloc;
-  late final bool _ownsBloc; // ¿Quién es dueño del ciclo de vida?
-
-  bool _showGrid = true; // Muestra/oculta la superposición de columnas
-  bool _simulateSize = false; // Activa el modo “simular tamaño”
-  double _simWidth = 1024; // Ancho simulado
-  double _simHeight = 720; // Alto simulado
-
-  @override
-  void initState() {
-    super.initState();
-    // 📦 Inyección opcional desde AppManager/configuración externa.
-    if (widget.injected != null) {
-      _bloc = widget.injected!;
-      _ownsBloc = false; // No lo disponemos nosotros.
-    } else {
-      _bloc = BlocResponsive(); // Uso “standalone” para la demo.
-      _ownsBloc = true; // Lo disponemos en dispose().
-    }
-  }
-
-  @override
-  void dispose() {
-    // Si la UI creó el bloc, también debe disponerlo.
-    if (_ownsBloc) {
-      _bloc.dispose();
-    }
-    super.dispose();
-  }
-
-  /// Mantiene el bloc sincronizado con el tamaño actual.
-  /// - En modo normal, usa `MediaQuery` a través de `setSizeFromContext`.
-  /// - En modo simulado, empuja valores manuales con `setSizeForTesting`.
-  void _syncSize(BuildContext context) {
-    if (_simulateSize) {
-      _bloc.setSizeForTesting(Size(_simWidth, _simHeight));
-    } else {
-      _bloc.setSizeFromContext(context);
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    // 📌 Importante: Sincroniza el tamaño DESPUÉS del frame para evitar
-    // loops de rebuild (especialmente útil si llamas desde `build`).
-    WidgetsBinding.instance.addPostFrameCallback((_) => _syncSize(context));
-
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('BlocResponsive Demo'),
-        actions: <Widget>[
-          // Política de AppBar encapsulada en el bloc (presentación).
-          // Si tu layout oculta la AppBar, `screenHeightWithoutAppbar` lo refleja.
-          Row(
+          return Column(
             children: <Widget>[
-              const Text('Show AppBar', style: TextStyle(fontSize: 12)),
-              Switch(
-                value: _bloc.showAppbar,
-                onChanged: (bool v) {
-                  setState(() => _bloc.showAppbar = v);
-                },
-              ),
-              const SizedBox(width: 8),
-            ],
-          ),
-        ],
-      ),
-
-      // Nos suscribimos al stream de tamaño de pantalla para actualizar métricas.
-      body: StreamBuilder<Size>(
-        stream: _bloc.appScreenSizeStream,
-        initialData: _bloc.value,
-        builder: (BuildContext context, AsyncSnapshot<Size> _) {
-          // Re-sincroniza en cada rebuild significativo
-          _syncSize(context);
-
-          // 📐 Lee todas las métricas derivadas del bloc.
-          final Size size = _bloc.size;
-          final Size work = _bloc.workAreaSize;
-          final int cols = _bloc.columnsNumber;
-          final double margin = _bloc.marginWidth;
-          final double gutter = _bloc.gutterWidth;
-          final double colW = _bloc.columnWidth;
-          final double drawerW = _bloc.drawerWidth;
-          final ScreenSizeEnum device = _bloc.deviceType;
-
-          return ListView(
-            padding: const EdgeInsets.all(16),
-            children: <Widget>[
-              _DocCard(), // Guía en pantalla (qué hace y cómo se usa)
-              const SizedBox(height: 12),
-
-              // Controles de demo: grid overlay, simulación de tamaño (sliders)
-              _ControlsCard(
-                showGrid: _showGrid,
-                simulateSize: _simulateSize,
-                simWidth: _simWidth,
-                simHeight: _simHeight,
-                onToggleGrid: (bool v) => setState(() => _showGrid = v),
-                onToggleSim: (bool v) {
-                  setState(() {
-                    _simulateSize = v;
-                    _syncSize(context);
-                  });
-                },
-                onWidthChanged: (double v) {
-                  setState(() {
-                    _simWidth = v;
-                    _syncSize(context);
-                  });
-                },
-                onHeightChanged: (double v) {
-                  setState(() {
-                    _simHeight = v;
-                    _syncSize(context);
-                  });
-                },
-              ),
-              const SizedBox(height: 12),
-
-              // Métricas “en vivo” para entender los cálculos de layout.
-              _MetricsCard(
-                device: device,
-                size: size,
-                work: work,
-                cols: cols,
-                margin: margin,
-                gutter: gutter,
-                colW: colW,
-                drawer: drawerW,
-                appBarHeight: _bloc.appBarHeight,
-                heightWithoutAppBar: _bloc.screenHeightWithoutAppbar,
-              ),
-              const SizedBox(height: 12),
-
-              // Vista previa de la grilla (columnas + gutters) respetando márgenes.
-              _GridPreview(
-                showGrid: _showGrid,
-                cols: cols,
-                margin: margin,
-                gutter: gutter,
-                columnWidth: colW,
-                workArea: work,
-              ),
+              if (errorBanner != const SizedBox.shrink()) errorBanner,
+              Expanded(child: content),
             ],
           );
         },
       ),
     );
   }
-}
 
-/// Tarjeta con documentación en pantalla para el implementador.
-/// Explica el propósito, el flujo y la forma recomendada de integración.
-class _DocCard extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    final TextStyle s = Theme.of(context).textTheme.bodyMedium!;
-    return Card(
+  // --- UI helpers para onboarding cuadrado ---
+
+  Widget _buildSimpleStep(OnboardingStep step, OnboardingState state) {
+    return Center(
       child: Padding(
         padding: const EdgeInsets.all(16),
-        child: DefaultTextStyle(
-          style: s,
-          child: const Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Text(
-                'How this demo works / Cómo funciona',
-                style: TextStyle(fontWeight: FontWeight.w600),
-              ),
-              SizedBox(height: 8),
-              Text(
-                '1) The UI keeps the bloc in sync with the current viewport size.',
-              ),
-              Text(
-                '   Use `setSizeFromContext(context)` in widgets, or `setSize(Size)` in headless tests.',
-              ),
-              SizedBox(height: 6),
-              Text(
-                '2) BlocResponsive computes device type, margins, gutters, columns and work area from the size and config.',
-              ),
-              Text(
-                '   For desktop/TV it uses a percentage of the viewport as work area (config-driven).',
-              ),
-              SizedBox(height: 6),
-              Text(
-                '3) The grid preview draws columns respecting margins and gutters; useful to validate breakpoints.',
-              ),
-              SizedBox(height: 12),
-              Text(
-                'Clean Architecture: UI → AppManager → BlocResponsive (presentation infra).',
-                style: TextStyle(fontStyle: FontStyle.italic),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-/// Tarjeta de controles de la demo.
-/// - Muestra/oculta la grilla.
-/// - Activa sliders para simular tamaños sin depender del dispositivo real.
-class _ControlsCard extends StatelessWidget {
-  const _ControlsCard({
-    required this.showGrid,
-    required this.simulateSize,
-    required this.simWidth,
-    required this.simHeight,
-    required this.onToggleGrid,
-    required this.onToggleSim,
-    required this.onWidthChanged,
-    required this.onHeightChanged,
-  });
-
-  final bool showGrid;
-  final bool simulateSize;
-  final double simWidth;
-  final double simHeight;
-  final ValueChanged<bool> onToggleGrid;
-  final ValueChanged<bool> onToggleSim;
-  final ValueChanged<double> onWidthChanged;
-  final ValueChanged<double> onHeightChanged;
-
-  @override
-  Widget build(BuildContext context) {
-    final TextStyle s = Theme.of(context).textTheme.bodyMedium!;
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: DefaultTextStyle(
-          style: s,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              const Text(
-                'Controls / Controles',
-                style: TextStyle(fontWeight: FontWeight.w600),
-              ),
-              const SizedBox(height: 8),
-              Row(
-                children: <Widget>[
-                  Expanded(
-                    child: SwitchListTile(
-                      title: const Text('Show grid overlay'),
-                      value: showGrid,
-                      onChanged: onToggleGrid,
-                      dense: true,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: SwitchListTile(
-                      title: const Text('Simulate size (sliders)'),
-                      value: simulateSize,
-                      onChanged: onToggleSim,
-                      dense: true,
-                    ),
-                  ),
-                ],
-              ),
-
-              // Sliders visibles solo si activamos el modo de simulación.
-              if (simulateSize) ...<Widget>[
-                const SizedBox(height: 8),
-                const Text('Width'),
-                Slider(
-                  min: 320,
-                  max: 2560,
-                  divisions: 224, // paso ~10 px
-                  label: simWidth.toStringAsFixed(0),
-                  value: simWidth.clamp(320, 2560),
-                  onChanged: onWidthChanged,
-                ),
-                const Text('Height'),
-                Slider(
-                  min: 480,
-                  max: 1600,
-                  divisions: 112,
-                  label: simHeight.toStringAsFixed(0),
-                  value: simHeight.clamp(480, 1600),
-                  onChanged: onHeightChanged,
-                ),
-              ],
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-/// Tarjeta de métricas: muestra en vivo todos los cálculos que hace el bloc.
-/// Útil para validar breakpoints y coherencia de grilla en QA/manual testing.
-class _MetricsCard extends StatelessWidget {
-  const _MetricsCard({
-    required this.device,
-    required this.size,
-    required this.work,
-    required this.cols,
-    required this.margin,
-    required this.gutter,
-    required this.colW,
-    required this.drawer,
-    required this.appBarHeight,
-    required this.heightWithoutAppBar,
-  });
-
-  final ScreenSizeEnum device;
-  final Size size;
-  final Size work;
-  final int cols;
-  final double margin;
-  final double gutter;
-  final double colW;
-  final double drawer;
-  final double appBarHeight;
-  final double heightWithoutAppBar;
-
-  @override
-  Widget build(BuildContext context) {
-    final TextStyle s = Theme.of(context).textTheme.bodyMedium!;
-    final String deviceName = device.toString().split('.').last.toUpperCase();
-
-    String fmtSize(Size x) =>
-        '${x.width.toStringAsFixed(0)} × ${x.height.toStringAsFixed(0)}';
-    String px(num v) => '${v.toStringAsFixed(0)} px';
-
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: DefaultTextStyle(
-          style: s,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              const Text(
-                'Metrics / Métricas',
-                style: TextStyle(fontWeight: FontWeight.w600),
-              ),
-              const SizedBox(height: 8),
-              Text('Device: $deviceName'),
-              Text('Viewport size: ${fmtSize(size)}'),
-              Text('Work area: ${fmtSize(work)}  (drawer: ${px(drawer)})'),
-              Text('Columns: $cols  •  Column width: ${px(colW)}'),
-              Text(
-                'Margin width: ${px(margin)}  •  Gutter width: ${px(gutter)}',
-              ),
-              Text(
-                'AppBar height: ${px(appBarHeight)}  •  Height w/o AppBar: ${px(heightWithoutAppBar)}',
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-/// Vista previa de la grilla basada en las métricas del bloc.
-/// Dibuja columnas y gutters respetando los márgenes; no usa LayoutBuilder
-/// porque queremos que las medidas provengan del bloc (fuente de verdad).
-class _GridPreview extends StatelessWidget {
-  const _GridPreview({
-    required this.showGrid,
-    required this.cols,
-    required this.margin,
-    required this.gutter,
-    required this.columnWidth,
-    required this.workArea,
-  });
-
-  final bool showGrid;
-  final int cols;
-  final double margin;
-  final double gutter;
-  final double columnWidth;
-  final Size workArea;
-
-  @override
-  Widget build(BuildContext context) {
-    // Altura fija para visualizar sin depender del alto real del viewport.
-    const double previewHeight = 180;
-
-    // Construimos la fila: col, gutter, col, gutter, ...
-    final List<Widget> rowChildren = <Widget>[];
-    for (int i = 0; i < cols; i++) {
-      rowChildren.add(
-        Container(
-          width: columnWidth,
-          height: previewHeight,
-          decoration: BoxDecoration(
-            color: Colors.blueGrey.withValues(alpha: 0.75),
-            borderRadius: BorderRadius.circular(4),
-            border: Border.all(color: Colors.blueGrey.withValues(alpha: 0.5)),
-          ),
-        ),
-      );
-      if (i < cols - 1) {
-        rowChildren.add(SizedBox(width: gutter));
-      }
-    }
-
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(12),
         child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            const Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                'Grid preview / Vista de grilla',
-                style: TextStyle(fontWeight: FontWeight.w600),
-              ),
-            ),
+            Text(step.title, style: Theme.of(context).textTheme.headlineMedium),
             const SizedBox(height: 12),
-
-            // Contenedor ancho = workArea + márgenes a cada lado.
-            // Esto permite ver claramente cómo influyen los márgenes globales.
-            Container(
-              width: workArea.width + margin * 2,
-              constraints: const BoxConstraints(minHeight: previewHeight + 24),
-              decoration: BoxDecoration(
-                color: Colors.black12.withValues(alpha: 0.04),
-                borderRadius: BorderRadius.circular(6),
+            if (step.description != null)
+              Text(step.description!, textAlign: TextAlign.center),
+            const SizedBox(height: 24),
+            if (state.status == OnboardingStatus.running &&
+                bloc.currentStep?.autoAdvanceAfter == null)
+              ElevatedButton(
+                onPressed: bloc.next,
+                child: const Text('Siguiente'),
               ),
-              child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: margin),
-                child: Stack(
-                  children: <Widget>[
-                    // Fondo “área de trabajo” para distinguir del viewport.
-                    Positioned.fill(
-                      child: Container(
-                        margin: const EdgeInsets.symmetric(vertical: 12),
-                        decoration: BoxDecoration(
-                          color: Colors.teal.withValues(alpha: 0.06),
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                      ),
-                    ),
-
-                    // Fila de columnas + gutters (scroll horizontal por si el ancho no alcanza).
-                    if (showGrid)
-                      SingleChildScrollView(
-                        scrollDirection: Axis.horizontal,
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 12),
-                          child: Row(children: rowChildren),
-                        ),
-                      ),
-
-                    // Mensaje cuando se oculta la grilla.
-                    if (!showGrid)
-                      const Positioned.fill(
-                        child: Center(
-                          child: Text(
-                            'Grid overlay disabled',
-                            style: TextStyle(fontStyle: FontStyle.italic),
-                          ),
-                        ),
-                      ),
-                  ],
-                ),
-              ),
-            ),
           ],
         ),
       ),
     );
   }
+
+  Widget _buildInputStep(OnboardingState state) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 420),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Text(
+                'Paso ${state.stepNumber} de ${state.totalSteps}',
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+              const SizedBox(height: 12),
+              const Text(
+                'Ingresa el lado (0 < lado ≤ 100):',
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: sideController,
+                keyboardType:
+                    const TextInputType.numberWithOptions(decimal: true),
+                decoration: const InputDecoration(
+                  border: OutlineInputBorder(),
+                  hintText: 'Ej: 12.5',
+                ),
+              ),
+              const SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  ElevatedButton.icon(
+                    onPressed: () {
+                      final double? value =
+                          double.tryParse(sideController.text.trim());
+                      if (value != null) {
+                        setState(() => side = value);
+                        bloc.next(); // pasa a Validación
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Ingresa un número válido.'),
+                          ),
+                        );
+                      }
+                    },
+                    icon: const Icon(Icons.check),
+                    label: const Text('Confirmar'),
+                  ),
+                  const SizedBox(width: 12),
+                  OutlinedButton.icon(
+                    onPressed: () {
+                      sideController.clear();
+                      setState(() => side = null);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Se limpió el valor.')),
+                      );
+                    },
+                    icon: const Icon(Icons.clear),
+                    label: const Text('Limpiar'),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildValidationStep(OnboardingState state) {
+    final bool hasError = state.error != null;
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 520),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Text(
+                'Validación',
+                style: Theme.of(context).textTheme.headlineMedium,
+              ),
+              const SizedBox(height: 12),
+              Text(
+                hasError
+                    ? 'Encontramos un problema con el valor.'
+                    : '¡Todo correcto! Avanzaremos automáticamente.',
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 24),
+              Wrap(
+                spacing: 12,
+                alignment: WrapAlignment.center,
+                children: <Widget>[
+                  if (hasError)
+                    ElevatedButton.icon(
+                      onPressed: () {
+                        bloc.clearError();
+                        bloc.back();
+                      },
+                      icon: const Icon(Icons.edit),
+                      label: const Text('Corregir'),
+                    ),
+                  if (hasError)
+                    OutlinedButton.icon(
+                      onPressed: () {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Reintentando validación…'),
+                          ),
+                        );
+                        bloc.retryOnEnter();
+                      },
+                      icon: const Icon(Icons.refresh),
+                      label: const Text('Reintentar'),
+                    ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildResultStep(String area) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 420),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Text(
+                'Resultado',
+                style: Theme.of(context).textTheme.headlineMedium,
+              ),
+              const SizedBox(height: 12),
+              Text(
+                'Área = $area',
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+              const SizedBox(height: 24),
+              ElevatedButton.icon(
+                onPressed: bloc.next,
+                icon: const Icon(Icons.flag),
+                label: const Text('Finalizar'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFinalStep(OnboardingStep step) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 420),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Text(
+                step.title,
+                style: Theme.of(context).textTheme.headlineMedium,
+              ),
+              const SizedBox(height: 12),
+              if (step.description != null)
+                Text(step.description!, textAlign: TextAlign.center),
+              const SizedBox(height: 24),
+              ElevatedButton.icon(
+                onPressed: () {
+                  sideController.clear();
+                  side = null;
+                  _configureSteps();
+                  bloc.start();
+                },
+                icon: const Icon(Icons.replay),
+                label: const Text('Ver de nuevo'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildErrorBannerIfAny(OnboardingState state) {
+    final ErrorItem? err = state.error;
+    if (err == null) {
+      return const SizedBox.shrink();
+    }
+    return MaterialBanner(
+      backgroundColor: Colors.red.shade50,
+      content: Text(
+        '${err.title} (${err.code})\n${err.description}',
+        style: TextStyle(color: Colors.red.shade900),
+      ),
+      actions: <Widget>[
+        TextButton.icon(
+          onPressed: () {
+            bloc.clearError();
+            bloc.back();
+          },
+          icon: const Icon(Icons.edit),
+          label: const Text('Corregir'),
+        ),
+        TextButton.icon(
+          onPressed: () {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Reintentando validación…')),
+            );
+            bloc.retryOnEnter();
+          },
+          icon: const Icon(Icons.refresh),
+          label: const Text('Reintentar'),
+        ),
+      ],
+    );
+  }
 }
 
-/// Demo page for `BlocOnboarding` with async `onEnter` returning `Either<ErrorItem, Unit>`.
-///
-/// ─────────────────────────────────────────────────────────────────────────────
-/// PURPOSE / PROPÓSITO
-/// - Orquestar un flujo de onboarding por pasos, donde cada paso puede ejecutar
-///   un side-effect asíncrono (p.ej., pedir permisos, cargar configuración,
-///   migraciones locales, fetch remoto inicial, aceptar Términos, etc.).
-/// - `onEnter` devuelve Either:
-///     • Right(Unit) → éxito; se **agenda** auto-avance si el paso lo define.
-///     • Left(ErrorItem) → error de negocio; el flujo se **detiene** en el paso
-///       y expone `state.error` para que la UI decida (retry/back/skip).
-/// - Si `onEnter` **lanza** una excepción, `ErrorMapper.fromException` la
-///   traduce a `ErrorItem` y el flujo se detiene en el paso (sin auto-avance).
-///
-/// ─────────────────────────────────────────────────────────────────────────────
-/// ARCHITECTURE / ARQUITECTURA
-/// UI → AppManager → BlocOnboarding → (use cases invocados dentro de onEnter)
-/// *El BLoC no mapea dominio ni consume servicios directamente; solo orquesta.*
-///
-/// ─────────────────────────────────────────────────────────────────────────────
-/// COMMON USE CASES / CASOS DE USO
-/// 1) Permissions gate: solicitar permisos y continuar solo si son otorgados.
-/// 2) Warm-up: precargar Remote Config / Feature Flags / tokens efímeros.
-/// 3) Data seed/migrations: inicializar BD local o migrar esquemas.
-/// 4) Legal gates: EULA/Privacy/Consent con persistencia y verificación.
-/// 5) First-run checks: conectividad mínima, versión soportada, etc.
-///
-/// ─────────────────────────────────────────────────────────────────────────────
-/// ERROR HANDLING / MANEJO DE ERRORES
-/// - En fallos **esperados**: devuelve `Left(ErrorItem)` desde `onEnter`.
-/// - En fallos **inesperados**: deja que lance → el BLoC usa `ErrorMapper`.
-/// - La UI puede: mostrar el error, ofrecer `Retry onEnter`, `Back`, `Skip`.
-/// - `retryOnEnter()` no cambia índice; limpia `state.error` y reejecuta el
-///   `onEnter` del paso actual. Útil tras resolver la causa (p.ej., usuario
-///   habilitó permisos en ajustes, restauró red, etc.).
-///
-/// ─────────────────────────────────────────────────────────────────────────────
-/// TESTING TIPS
-/// - Usa delays cortos (20-100ms) para comprobar auto-avance.
-/// - Valida: Right → avanza; Left → no avanza + error; throw → mapeado.
-/// - Prueba `retryOnEnter()` y navegación `back/next` cancelando timers.
-///
-/// ─────────────────────────────────────────────────────────────────────────────
+// ╔═══════════════════════════════════════════════════════════════════════════
+// ║ 2) ONBOARDING — DEMO Either onEnter (3 pasos)
+// ╚═══════════════════════════════════════════════════════════════════════════
+
 class BlocOnboardingDemoPage extends StatefulWidget {
   const BlocOnboardingDemoPage({super.key, this.injected});
   static const String name = 'BlocOnboardingDemoPage';
-
-  /// Optional injection of an existing BlocOnboarding (managed upstream).
   final BlocOnboarding? injected;
 
   @override
@@ -1256,15 +626,11 @@ class _BlocOnboardingDemoPageState extends State<BlocOnboardingDemoPage> {
   late final BlocOnboarding _bloc;
   late final bool _ownsBloc;
   StreamSubscription<OnboardingState>? _sub;
-
-  // Log en pantalla para visualizar el orden de eventos y estados.
   final List<String> _log = <String>[];
 
-  // Simuladores:
-  bool _failStep2AsLeft = false; // devuelve Left(ErrorItem) en paso 2
-  bool _throwStep2 = false; // lanza excepción en paso 2 (ErrorMapper)
+  bool _failStep2AsLeft = false;
+  bool _throwStep2 = false;
 
-  // Helper para registrar mensajes en la UI.
   void _logMsg(String msg) {
     if (!mounted) {
       return;
@@ -1275,14 +641,9 @@ class _BlocOnboardingDemoPageState extends State<BlocOnboardingDemoPage> {
   @override
   void initState() {
     super.initState();
-    // Preferido: inyectar desde AppManager. Si no hay, se crea localmente
-    // (usando DefaultErrorMapper).
     _bloc = widget.injected ?? BlocOnboarding();
     _ownsBloc = widget.injected == null;
-
     _configureSteps();
-
-    // Escucha del estado para feedback y para loguear transiciones.
     _sub = _bloc.stateStream.listen((OnboardingState s) {
       if (!mounted) {
         return;
@@ -1311,55 +672,40 @@ class _BlocOnboardingDemoPageState extends State<BlocOnboardingDemoPage> {
     super.dispose();
   }
 
-  /// Define los pasos del onboarding. Reinvocar esta función cuando cambien
-  /// flags de simulación para que los closures capturen el nuevo estado.
   void _configureSteps() {
     _bloc.configure(<OnboardingStep>[
-      // STEP 1 — Welcome (Right + auto-advance)
       OnboardingStep(
         title: 'Welcome',
         description: 'Short tour starts here',
         onEnter: () async {
           _logMsg('onEnter: Welcome (step 1)');
           await Future<void>.delayed(const Duration(milliseconds: 120));
-          return Right<ErrorItem, Unit>(
-            Unit.value,
-          ); // éxito → permitirá auto-avance
+          return Right<ErrorItem, Unit>(Unit.value);
         },
         autoAdvanceAfter: const Duration(milliseconds: 900),
       ),
-
-      // STEP 2 — Permissions (Left o throw según toggles)
       OnboardingStep(
         title: 'Permissions',
         description: 'Request minimal permissions',
         onEnter: () async {
           _logMsg('onEnter: Permissions (step 2)');
           await Future<void>.delayed(const Duration(milliseconds: 120));
-
           if (_throwStep2) {
-            // Fallo inesperado → será mapeado por ErrorMapper
             throw StateError('Simulated thrown exception in step 2');
           }
-
           if (_failStep2AsLeft) {
-            // Fallo esperado de negocio (no lanzar)
             return Left<ErrorItem, Unit>(
               const ErrorItem(
                 title: 'Permissions required',
                 code: 'PERM_DENIED',
                 description: 'User denied permissions (simulated Left)',
-                meta: <String, dynamic>{'source': 'demo'},
               ),
             );
           }
-
-          return Right<ErrorItem, Unit>(Unit.value); // éxito
+          return Right<ErrorItem, Unit>(Unit.value);
         },
         autoAdvanceAfter: const Duration(milliseconds: 900),
       ),
-
-      // STEP 3 — Finish (Right sin auto-advance)
       OnboardingStep(
         title: 'Finish',
         description: 'You are all set',
@@ -1368,7 +714,6 @@ class _BlocOnboardingDemoPageState extends State<BlocOnboardingDemoPage> {
           await Future<void>.delayed(const Duration(milliseconds: 100));
           return Right<ErrorItem, Unit>(Unit.value);
         },
-        // sin auto-avance: el usuario decide finalizar/omitir
       ),
     ]);
   }
@@ -1389,8 +734,6 @@ class _BlocOnboardingDemoPageState extends State<BlocOnboardingDemoPage> {
             children: <Widget>[
               _DocCardIntro(),
               const SizedBox(height: 12),
-
-              // Simuladores de fallo en paso 2
               Card(
                 child: Padding(
                   padding: const EdgeInsets.all(12),
@@ -1411,26 +754,17 @@ class _BlocOnboardingDemoPageState extends State<BlocOnboardingDemoPage> {
                         },
                       ),
                       SwitchListTile(
-                        title: const Text(
-                          'Throw in step 2 (mapped by ErrorMapper)',
-                        ),
+                        title: const Text('Throw in step 2 (ErrorMapper)'),
                         value: _throwStep2,
                         onChanged: (bool v) {
                           setState(() => _throwStep2 = v);
                           _configureSteps();
                         },
                       ),
-                      const SizedBox(height: 4),
-                      const Text(
-                        'Tip: Enciende uno u otro (no ambos) para ver la diferencia entre Left(ErrorItem) '
-                        'y una excepción mapeada por ErrorMapper.',
-                        style: TextStyle(fontSize: 12),
-                      ),
                     ],
                   ),
                 ),
               ),
-
               const SizedBox(height: 8),
               _ControlsRow(
                 state: s,
@@ -1440,12 +774,9 @@ class _BlocOnboardingDemoPageState extends State<BlocOnboardingDemoPage> {
                 onSkip: _bloc.skip,
                 onComplete: _bloc.complete,
                 onRetryOnEnter: _bloc.retryOnEnter,
-                onClearError: () => _bloc.clearError(), // helper explícito
+                onClearError: _bloc.clearError,
               ),
-
               const SizedBox(height: 12),
-
-              // Panel de error (podrías cambiar por tu ErrorItemWidget si ya lo tienes)
               if (s.error != null)
                 Card(
                   color: Colors.red.shade50,
@@ -1468,13 +799,10 @@ class _BlocOnboardingDemoPageState extends State<BlocOnboardingDemoPage> {
                     ),
                   ),
                 ),
-
               _StateCard(state: s, step: step),
               const SizedBox(height: 12),
-
               _DocCardUseCases(),
               const SizedBox(height: 12),
-
               Card(
                 child: Padding(
                   padding: const EdgeInsets.all(16),
@@ -1501,7 +829,6 @@ class _BlocOnboardingDemoPageState extends State<BlocOnboardingDemoPage> {
   }
 }
 
-/// Card con una explicación introductoria y reglas clave.
 class _DocCardIntro extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -1520,32 +847,23 @@ class _DocCardIntro extends StatelessWidget {
               ),
               SizedBox(height: 8),
               Text(
-                '• Each step defines an optional `onEnter` side-effect returning `Either<ErrorItem, Unit>`.',
+                '• Cada paso puede tener `onEnter` → Either<ErrorItem, Unit>.',
               ),
-              Text(
-                '• On Right(Unit): the step may auto-advance after its configured delay.',
-              ),
-              Text(
-                '• On Left(ErrorItem): the flow stays on the current step and exposes `state.error`.',
-              ),
-              Text(
-                '• If `onEnter` throws: `ErrorMapper.fromException` maps the exception to `ErrorItem`.',
-              ),
+              Text('• Right(Unit) → puede auto-avanzar si está configurado.'),
+              Text('• Left(ErrorItem) → se detiene y expone `state.error`.'),
+              Text('• Si onEnter lanza → ErrorMapper lo mapea a ErrorItem.'),
               SizedBox(height: 12),
-              Text(
-                'Commands / Comandos',
-                style: TextStyle(fontWeight: FontWeight.w600),
-              ),
+              Text('Comandos', style: TextStyle(fontWeight: FontWeight.w600)),
               Text(
                 'start(), next(), back(), skip(), complete(), retryOnEnter(), clearError()',
               ),
               SizedBox(height: 12),
               Text(
-                'Concurrency / Concurrencia',
+                'Concurrencia',
                 style: TextStyle(fontWeight: FontWeight.w600),
               ),
               Text(
-                'Solo hay un timer de auto-avance activo. Cualquier comando cancela el timer en curso.',
+                'Un solo timer de auto-avance activo; un comando cancela el actual.',
               ),
             ],
           ),
@@ -1555,7 +873,6 @@ class _DocCardIntro extends StatelessWidget {
   }
 }
 
-/// Card con casos de uso y patrones recomendados.
 class _DocCardUseCases extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -1569,34 +886,15 @@ class _DocCardUseCases extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               Text(
-                'Use cases & patterns / Casos de uso y patrones',
+                'Use cases & patrones',
                 style: TextStyle(fontWeight: FontWeight.w600),
               ),
               SizedBox(height: 8),
-              Text(
-                '• Permissions gate: ejecuta un caso de uso que solicite permisos; si el usuario niega → Left(ErrorItem); si acepta → Right(Unit).',
-              ),
-              Text(
-                '• Warm-up (Remote Config / Flags): lee flags; en failure controlado → Left(ErrorItem) y ofrece retry.',
-              ),
-              Text(
-                '• Migrations / Seed: corre migraciones locales; en error controlado → Left; en error inesperado → throw (ErrorMapper).',
-              ),
-              Text(
-                '• Legal gates (EULA/Privacy): si el usuario no acepta → Left(ErrorItem).',
-              ),
-              Text(
-                '• First-run network check: si no hay red mínima → Left para que la UI guíe al usuario.',
-              ),
-              SizedBox(height: 12),
-              Text('UI tips', style: TextStyle(fontWeight: FontWeight.w600)),
-              Text(
-                '• Usa `retryOnEnter()` tras corregir la causa (p.ej., habilitar permisos).',
-              ),
-              Text('• Considera exponer botones Back/Skip según tu UX.'),
-              Text(
-                '• Puedes reemplazar el panel de error por tu `ErrorItemWidget` si ya lo tienes.',
-              ),
+              Text('• Permissions gate → Left si niega; Right si acepta.'),
+              Text('• Warm-up (Flags) → Left controlado + retry.'),
+              Text('• Migrations/Seed → Left o throw (mapeado).'),
+              Text('• EULA/Privacy → Left si no acepta.'),
+              Text('• First-run network check → Left si insuficiente.'),
             ],
           ),
         ),
@@ -1668,7 +966,6 @@ class _ControlsRow extends StatelessWidget {
 
 class _StateCard extends StatelessWidget {
   const _StateCard({required this.state, required this.step});
-
   final OnboardingState state;
   final OnboardingStep? step;
 
@@ -1704,9 +1001,7 @@ class _StateCard extends StatelessWidget {
                   '• Auto-advance: ${step!.autoAdvanceAfter?.inMilliseconds ?? 0} ms',
                 ),
                 const SizedBox(height: 8),
-                const Text(
-                  'Note: auto-advance occurs only after a successful onEnter (Right(Unit)).',
-                ),
+                const Text('Note: auto-advance solo tras Right(Unit).'),
               ] else
                 const Text('No active step'),
             ],
@@ -1717,29 +1012,2000 @@ class _StateCard extends StatelessWidget {
   }
 }
 
-/// Demo page for `BlocLoading`.
-///
-/// ## What this page shows
-/// - **Single action**: uses `loadingWhile` to run one task with a min visible time,
-///   demonstrating anti-flicker UX.
-/// - **Queued actions (FIFO)**: uses `queueLoadingWhile` to run 3 tasks in sequence.
-///   Each task sets a **progressive message** ("Step 1/3", "Step 2/3", "Step 3/3").
-///
-/// ## How to wire the Bloc
-/// - Preferred: obtain it from your **AppManager** (UI → AppManager → Bloc).
-/// - Alternative: inject via constructor or create a local instance (this demo supports both).
-///
-/// ## Concurrency semantics (important)
-/// - `loadingMsgWithFuture`: ignores overlapping calls (visual + execution).
-/// - `loadingWhile<T>`: if already loading, **does not override UI** but still **executes** the action and returns its result.
-/// - `queueLoadingWhile<T>`: serializes tasks (FIFO). Each task shows its own message.
-///
-/// UI text is bilingual for clarity to implementers.
+// ╔═══════════════════════════════════════════════════════════════════════════
+// ║ 3) LEDGER — Pastel por categoría + Barras por mes (COP)
+// ╚═══════════════════════════════════════════════════════════════════════════
+
+class LedgerChartsPage extends StatefulWidget {
+  const LedgerChartsPage({required this.regionName, super.key});
+
+  final String regionName;
+
+  @override
+  State<LedgerChartsPage> createState() => _LedgerChartsPageState();
+}
+
+class _LedgerChartsPageState extends State<LedgerChartsPage> {
+  final BlocGeneral<LedgerModel> _ledgerBloc =
+      BlocGeneral<LedgerModel>(defaultLedgerModel());
+  final BlocGeneral<ModelGraph> _barsBloc =
+      BlocGeneral<ModelGraph>(defaultModelGraph());
+
+  final Map<String, Color> _categoryColors = <String, Color>{
+    'Mercado': const Color(0xFFFFD54F),
+    'Transporte': const Color(0xFF90CAF9),
+    'Entretenimiento': const Color(0xFFF48FB1),
+    'Servicios': const Color(0xFFA5D6A7),
+    'Arriendo': const Color(0xFFB39DDB),
+    'Otros': const Color(0xFFFFAB91),
+  };
+
+  @override
+  void initState() {
+    super.initState();
+    final LedgerModel ledger2024 = _buildDemoLedger2024(widget.regionName);
+    _ledgerBloc.value = ledger2024;
+    _barsBloc.value = _buildMonthlyExpensesGraph(ledger2024);
+  }
+
+  @override
+  void dispose() {
+    _ledgerBloc.dispose();
+    _barsBloc.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final TextTheme t = Theme.of(context).textTheme;
+    return Scaffold(
+      appBar:
+          AppBar(title: Text('Resumen financiero 2024 • ${widget.regionName}')),
+      body: StreamBuilder<LedgerModel>(
+        stream: _ledgerBloc.stream,
+        initialData: _ledgerBloc.value,
+        builder: (BuildContext context, AsyncSnapshot<LedgerModel> ledgerSnap) {
+          final LedgerModel? ledger = ledgerSnap.data;
+          if (ledger == null) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          final Map<String, double> byCategory = _sumExpensesByCategory(ledger);
+          final double totalExpenses =
+              byCategory.values.fold(0.0, (double a, double b) => a + b);
+
+          return StreamBuilder<ModelGraph>(
+            stream: _barsBloc.stream,
+            initialData: _barsBloc.value,
+            builder:
+                (BuildContext context, AsyncSnapshot<ModelGraph> barsSnap) {
+              final ModelGraph? bars = barsSnap.data;
+              if (bars == null) {
+                return const Center(child: CircularProgressIndicator());
+              }
+
+              return SingleChildScrollView(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: <Widget>[
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 8),
+                      child: Text(
+                        'Por categoría',
+                        textAlign: TextAlign.center,
+                        style: t.titleMedium
+                            ?.copyWith(fontWeight: FontWeight.w700),
+                      ),
+                    ),
+                    AspectRatio(
+                      aspectRatio: 1.1,
+                      child: Card(
+                        elevation: 2,
+                        clipBehavior: Clip.antiAlias,
+                        child: Padding(
+                          padding: const EdgeInsets.all(24.0),
+                          child: _PieChart(
+                            totals: byCategory,
+                            colors: _categoryColors,
+                            centerLabel: 'Gasto total',
+                            centerValue: _fmtCOP(totalExpenses),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 8),
+                      child: Text(
+                        'Por fecha',
+                        textAlign: TextAlign.center,
+                        style: t.titleMedium
+                            ?.copyWith(fontWeight: FontWeight.w700),
+                      ),
+                    ),
+                    AspectRatio(
+                      aspectRatio: 1.7,
+                      child: Card(
+                        elevation: 2,
+                        clipBehavior: Clip.antiAlias,
+                        child: Padding(
+                          padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+                          child: _BarsChart(graph: bars),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    _Legend(colors: _categoryColors, totals: byCategory),
+                  ],
+                ),
+              );
+            },
+          );
+        },
+      ),
+    );
+  }
+
+  LedgerModel _buildDemoLedger2024(String region) =>
+      _buildDemoLedger2024Full(region: region);
+
+  LedgerModel _buildDemoLedger2024Full({required String region}) {
+    final Random rng = Random(2024);
+    final List<FinancialMovementModel> incomes = <FinancialMovementModel>[];
+    final List<FinancialMovementModel> expenses = <FinancialMovementModel>[];
+
+    for (int m = 1; m <= 12; m++) {
+      incomes.add(
+        FinancialMovementModel(
+          id: 'inc-sal-$m',
+          amount: 3500000,
+          date: DateTime(2024, m, 25),
+          concept: 'Salario',
+          detailedDescription: 'Salario mensual',
+          category: 'Salario',
+          createdAt: DateTime(2024, m, 25),
+        ),
+      );
+      if (<int>{3, 7, 11}.contains(m)) {
+        final int sale = 300000 + rng.nextInt(400000);
+        incomes.add(
+          FinancialMovementModel(
+            id: 'inc-sell-$m',
+            amount: sale,
+            date: DateTime(2024, m, 12),
+            concept: 'Venta',
+            detailedDescription: 'Venta ocasional',
+            category: 'Ventas',
+            createdAt: DateTime(2024, m, 12),
+          ),
+        );
+      }
+    }
+
+    for (int m = 1; m <= 12; m++) {
+      expenses.add(
+        FinancialMovementModel(
+          id: 'exp-rent-$m',
+          amount: 1500000,
+          date: DateTime(2024, m),
+          concept: 'Arriendo',
+          detailedDescription: 'Arriendo mensual',
+          category: 'Arriendo',
+          createdAt: DateTime(2024, m),
+        ),
+      );
+      final int utilities = 220000 + rng.nextInt(60000);
+      expenses.add(
+        FinancialMovementModel(
+          id: 'exp-utils-$m',
+          amount: utilities,
+          date: DateTime(2024, m, 15),
+          concept: 'Servicios',
+          detailedDescription: 'Luz/agua/internet',
+          category: 'Servicios',
+          createdAt: DateTime(2024, m, 15),
+        ),
+      );
+    }
+
+    for (int m = 1; m <= 12; m++) {
+      for (int k = 0; k < 4; k++) {
+        final int groceries = 220000 + rng.nextInt(80000);
+        expenses.add(
+          FinancialMovementModel(
+            id: 'exp-groc-$m-$k',
+            amount: groceries,
+            date: DateTime(2024, m, 3 + k * 7),
+            concept: 'Mercado',
+            detailedDescription: 'Supermercado',
+            category: 'Mercado',
+            createdAt: DateTime(2024, m, 3 + k * 7),
+          ),
+        );
+      }
+      for (int d = 1; d <= 20; d++) {
+        final int transport = 8000 + rng.nextInt(3000);
+        expenses.add(
+          FinancialMovementModel(
+            id: 'exp-trns-$m-$d',
+            amount: transport,
+            date: DateTime(2024, m, 2 + d),
+            concept: 'Transporte',
+            detailedDescription: 'Movilidad urbana',
+            category: 'Transporte',
+            createdAt: DateTime(2024, m, 2 + d),
+          ),
+        );
+      }
+      for (int e = 0; e < 2; e++) {
+        final int fun = 60000 + rng.nextInt(120000);
+        expenses.add(
+          FinancialMovementModel(
+            id: 'exp-fun-$m-$e',
+            amount: fun,
+            date: DateTime(2024, m, 6 + e * 12),
+            concept: 'Entretenimiento',
+            detailedDescription: 'Ocio',
+            category: 'Entretenimiento',
+            createdAt: DateTime(2024, m, 6 + e * 12),
+          ),
+        );
+      }
+    }
+
+    return LedgerModel(
+      incomeLedger: List<FinancialMovementModel>.unmodifiable(incomes),
+      expenseLedger: List<FinancialMovementModel>.unmodifiable(expenses),
+      nameOfLedger: 'My ledger',
+    );
+  }
+
+  Map<String, double> _sumExpensesByCategory(LedgerModel ledger) {
+    final Map<String, double> out = <String, double>{};
+    for (final FinancialMovementModel m in ledger.expenseLedger) {
+      final String cat = m.category;
+      final double v = out[cat] ?? 0.0;
+      out[cat] = v + m.amount.toDouble();
+    }
+    return out;
+  }
+
+  ModelGraph _buildMonthlyExpensesGraph(LedgerModel ledger) {
+    final List<String> short = <String>[
+      'ene',
+      'feb',
+      'mar',
+      'abr',
+      'may',
+      'jun',
+      'jul',
+      'ago',
+      'sep',
+      'oct',
+      'nov',
+      'dic',
+    ];
+    final List<Map<String, Object?>> rows = <Map<String, Object?>>[];
+
+    for (int m = 1; m <= 12; m++) {
+      double sum = 0.0;
+      for (final FinancialMovementModel e in ledger.expenseLedger) {
+        if (e.date.year == 2024 && e.date.month == m) {
+          sum += e.amount.toDouble();
+        }
+      }
+      rows.add(<String, Object?>{'label': short[m - 1], 'value': sum});
+    }
+
+    return ModelGraph.fromTable(
+      rows,
+      xLabelKey: 'label',
+      yValueKey: 'value',
+      title: 'Gasto mensual 2024',
+      subtitle: 'Totales por mes (COP)',
+      description: 'Fuente: ledger demo',
+      xTitle: 'Mes',
+      yTitle: 'COP',
+    );
+  }
+}
+
+class _Legend extends StatelessWidget {
+  const _Legend({required this.colors, required this.totals});
+
+  final Map<String, Color> colors;
+  final Map<String, double> totals;
+
+  @override
+  Widget build(BuildContext context) {
+    final List<String> cats = totals.keys.toList()..sort();
+    return Wrap(
+      spacing: 16,
+      runSpacing: 8,
+      alignment: WrapAlignment.center,
+      children: <Widget>[
+        for (final String c in cats)
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              Container(
+                width: 12,
+                height: 12,
+                decoration: BoxDecoration(
+                  color: colors[c] ?? Colors.grey,
+                  shape: BoxShape.circle,
+                ),
+              ),
+              const SizedBox(width: 6),
+              Text('$c (${_fmtCOP(totals[c] ?? 0)})'),
+            ],
+          ),
+      ],
+    );
+  }
+}
+
+class _PieChart extends StatelessWidget {
+  const _PieChart({
+    required this.totals,
+    required this.colors,
+    this.centerLabel,
+    this.centerValue,
+  });
+
+  final Map<String, double> totals;
+  final Map<String, Color> colors;
+  final String? centerLabel;
+  final String? centerValue;
+
+  @override
+  Widget build(BuildContext context) {
+    return CustomPaint(
+      painter: _PiePainter(
+        totals: totals,
+        colors: colors,
+        centerLabel: centerLabel,
+        centerValue: centerValue,
+      ),
+      child: const SizedBox.expand(),
+    );
+  }
+}
+
+class _PiePainter extends CustomPainter {
+  _PiePainter({
+    required this.totals,
+    required this.colors,
+    this.centerLabel,
+    this.centerValue,
+  });
+
+  final Map<String, double> totals;
+  final Map<String, Color> colors;
+  final String? centerLabel;
+  final String? centerValue;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final double total = totals.values.fold(0.0, (double a, double b) => a + b);
+    final Offset c = Offset(size.width / 2, size.height / 2);
+    final double r = size.shortestSide * 0.38;
+
+    if (total <= 0) {
+      final Paint p = Paint()..color = Colors.pink.shade100;
+      canvas.drawCircle(c, r, p);
+      return;
+    }
+
+    double start = -90 * (3.14159 / 180);
+    for (final MapEntry<String, double> e in totals.entries) {
+      final double sweep = (e.value / total) * (2 * 3.14159);
+      final Paint seg = Paint()
+        ..color = colors[e.key] ?? Colors.grey
+        ..style = PaintingStyle.fill;
+      canvas.drawArc(
+        Rect.fromCircle(center: c, radius: r),
+        start,
+        sweep,
+        true,
+        seg,
+      );
+      start += sweep;
+    }
+
+    final Paint hole = Paint()..color = Colors.white.withValues(alpha: 0.9);
+    canvas.drawCircle(c, r * 0.55, hole);
+
+    final TextPainter tp1 = TextPainter(
+      textDirection: TextDirection.ltr,
+      textAlign: TextAlign.center,
+    );
+    if (centerLabel != null && centerLabel!.isNotEmpty) {
+      tp1.text = TextSpan(
+        text: centerLabel,
+        style: const TextStyle(fontSize: 12, color: Colors.black87),
+      );
+      tp1.layout(maxWidth: r * 1.6);
+      tp1.paint(canvas, Offset(c.dx - tp1.width / 2, c.dy - tp1.height - 2));
+    }
+
+    if (centerValue != null && centerValue!.isNotEmpty) {
+      final TextPainter tp2 = TextPainter(
+        textDirection: TextDirection.ltr,
+        textAlign: TextAlign.center,
+        text: TextSpan(
+          text: centerValue,
+          style: const TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w700,
+            color: Colors.black,
+          ),
+        ),
+      )..layout(maxWidth: r * 1.6);
+      tp2.paint(canvas, Offset(c.dx - tp2.width / 2, c.dy + 2));
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _PiePainter oldDelegate) =>
+      oldDelegate.totals != totals;
+}
+
+class _BarsChart extends StatelessWidget {
+  const _BarsChart({required this.graph});
+
+  final ModelGraph graph;
+
+  @override
+  Widget build(BuildContext context) {
+    return CustomPaint(
+      painter: _BarsPainter(graph: graph),
+      child: const SizedBox.expand(),
+    );
+  }
+}
+
+class _BarsPainter extends CustomPainter {
+  _BarsPainter({required this.graph});
+
+  final ModelGraph graph;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    const double padLeft = 24, padRight = 16, padTop = 8, padBottom = 40;
+    final Rect plot = Rect.fromLTWH(
+      padLeft,
+      padTop,
+      size.width - padLeft - padRight,
+      size.height - padTop - padBottom,
+    );
+
+    final Paint axis = Paint()
+      ..color = Colors.grey.shade500
+      ..strokeWidth = 1;
+    canvas.drawLine(
+      Offset(plot.left, plot.bottom),
+      Offset(plot.right, plot.bottom),
+      axis,
+    );
+    canvas.drawLine(
+      Offset(plot.left, plot.top),
+      Offset(plot.left, plot.bottom),
+      axis,
+    );
+
+    final double xMin = graph.xAxis.min,
+        xMax = graph.xAxis.max,
+        yMin = 0,
+        yMax = graph.yAxis.max <= 0 ? 1 : graph.yAxis.max;
+    double sx(double x) => plot.left + (x - xMin) * plot.width / (xMax - xMin);
+    double sy(double y) =>
+        plot.bottom - (y - yMin) * plot.height / (yMax - yMin);
+
+    final int n = graph.points.length;
+    if (n == 0) {
+      return;
+    }
+
+    final double band = plot.width / n;
+    final double barWidth = band * 0.5;
+    final Paint bar = Paint()..color = const Color(0xFFFFD54F);
+
+    final TextPainter tp = TextPainter(textDirection: TextDirection.ltr);
+
+    for (int i = 0; i < n; i++) {
+      final ModelPoint p = graph.points[i];
+      final double cx = sx(p.vector.dx);
+      final double top = sy(max(0, p.vector.dy));
+      final Rect r = Rect.fromCenter(
+        center: Offset(cx, (top + plot.bottom) / 2),
+        width: barWidth,
+        height: (plot.bottom - top).abs(),
+      );
+      canvas.drawRRect(
+        RRect.fromRectAndRadius(r, const Radius.circular(8)),
+        bar,
+      );
+
+      tp.text = TextSpan(
+        text: p.label,
+        style: const TextStyle(fontSize: 10, color: Colors.black87),
+      );
+      tp.layout(maxWidth: band);
+      tp.paint(canvas, Offset(cx - tp.width / 2, plot.bottom + 8));
+    }
+
+    final TextPainter ty = TextPainter(
+      textDirection: TextDirection.ltr,
+      textAlign: TextAlign.right,
+    );
+    for (int i = 0; i <= 4; i++) {
+      final double v = yMin + (i * (yMax - yMin) / 4.0);
+      final double yy = sy(v);
+      canvas.drawLine(Offset(plot.left - 4, yy), Offset(plot.left, yy), axis);
+
+      ty.text = TextSpan(
+        text: _fmtShortCop(v),
+        style: const TextStyle(fontSize: 10, color: Colors.black87),
+      );
+      ty.layout();
+      ty.paint(canvas, Offset(plot.left - 6 - ty.width, yy - ty.height / 2));
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _BarsPainter oldDelegate) =>
+      oldDelegate.graph != graph;
+
+  String _fmtShortCop(double v) {
+    if (v >= 1e6) {
+      return '${(v / 1e6).toStringAsFixed(1)}M';
+    }
+    if (v >= 1e3) {
+      return '${(v / 1e3).toStringAsFixed(0)}k';
+    }
+    return v.toStringAsFixed(0);
+  }
+}
+
+String _fmtCOP(double v) {
+  final String s = v.toStringAsFixed(0);
+  final StringBuffer b = StringBuffer();
+  for (int i = 0; i < s.length; i++) {
+    final int idx = s.length - i;
+    b.write(s[i]);
+    if (idx > 1 && idx % 3 == 1) {
+      b.write('.');
+    }
+  }
+  return '\$$b';
+}
+
+// ===== Graph • Pizza Prices (línea + tabla) =====
+
+class PizzaPricesPage extends StatefulWidget {
+  const PizzaPricesPage({required this.regionName, super.key});
+
+  final String regionName;
+
+  @override
+  State<PizzaPricesPage> createState() => _PizzaPricesPageState();
+}
+
+class _PizzaPricesPageState extends State<PizzaPricesPage> {
+  final BlocGeneral<ModelGraph> _bloc =
+      BlocGeneral<ModelGraph>(defaultModelGraph());
+  Timer? _timer;
+  final Random _rng = Random(2024);
+  int _futureMonthsAppended = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _bloc.value = _buildInitialGraph(widget.regionName);
+    _timer = Timer.periodic(const Duration(seconds: 5), _onTick);
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    _bloc.dispose();
+    super.dispose();
+  }
+
+  void _onTick(Timer timer) {
+    if (_futureMonthsAppended >= 12) {
+      timer.cancel();
+      return;
+    }
+    final ModelGraph current = _bloc.value;
+    final ModelGraph next = _appendNextMonth(current, widget.regionName);
+    _futureMonthsAppended += 1;
+    _bloc.value = next;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text('Pizza Prices 2024 • ${widget.regionName}')),
+      body: StreamBuilder<ModelGraph>(
+        stream: _bloc.stream,
+        initialData: _bloc.value,
+        builder: (BuildContext context, AsyncSnapshot<ModelGraph> snap) {
+          final ModelGraph? graph = snap.data;
+          if (graph == null) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          return Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              children: <Widget>[
+                _PizzaHeader(graph: graph),
+                const SizedBox(height: 12),
+                Expanded(flex: 2, child: _GraphCard(graph: graph)),
+                const SizedBox(height: 12),
+                Expanded(flex: 3, child: _TableCard(graph: graph)),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  ModelGraph _buildInitialGraph(String region) {
+    final List<Map<String, Object?>> rows = <Map<String, Object?>>[
+      <String, Object?>{'label': 'Enero', 'value': 60000},
+      <String, Object?>{'label': 'Febrero', 'value': 59000},
+      <String, Object?>{'label': 'Marzo', 'value': 61000},
+      <String, Object?>{'label': 'Abril', 'value': 60500},
+      <String, Object?>{'label': 'Mayo', 'value': 62000},
+      <String, Object?>{'label': 'Junio', 'value': 61500},
+      <String, Object?>{'label': 'Julio', 'value': 63000},
+      <String, Object?>{'label': 'Agosto', 'value': 62500},
+      <String, Object?>{'label': 'Septiembre', 'value': 64000},
+      <String, Object?>{'label': 'Octubre', 'value': 65000},
+      <String, Object?>{'label': 'Noviembre', 'value': 64500},
+      <String, Object?>{'label': 'Diciembre', 'value': 66000},
+    ];
+    return ModelGraph.fromTable(
+      rows,
+      xLabelKey: 'label',
+      yValueKey: 'value',
+      title: 'Precio Pizza — $region',
+      subtitle: 'Serie mensual 2024',
+      description: 'Valores representativos (COP) por mes • fuente: demo',
+      xTitle: 'Mes (índice)',
+      yTitle: 'Precio (COP)',
+    );
+  }
+
+  ModelGraph _appendNextMonth(ModelGraph current, String region) {
+    final List<ModelPoint> pts = List<ModelPoint>.from(current.points);
+    final int nextIndex = pts.isEmpty ? 1 : (pts.last.vector.dx.round() + 1);
+    final String label = _labelForIndex(nextIndex);
+    final double lastY = pts.isEmpty ? 60000.0 : pts.last.vector.dy;
+    final double delta = (_rng.nextDouble() * 4000.0) - 1000.0;
+    final double nextY = (lastY + delta).clamp(50000.0, 90000.0);
+    pts.add(
+      ModelPoint(
+        label: label,
+        vector: ModelVector(nextIndex.toDouble(), nextY),
+      ),
+    );
+
+    final double minX = pts.map((ModelPoint p) => p.vector.dx).reduce(min);
+    final double maxX = pts.map((ModelPoint p) => p.vector.dx).reduce(max);
+    final double minY = pts.map((ModelPoint p) => p.vector.dy).reduce(min);
+    final double maxY = pts.map((ModelPoint p) => p.vector.dy).reduce(max);
+
+    return ModelGraph(
+      xAxis:
+          ModelGraphAxisSpec(title: current.xAxis.title, min: minX, max: maxX),
+      yAxis:
+          ModelGraphAxisSpec(title: current.yAxis.title, min: minY, max: maxY),
+      points: pts,
+      title: current.title.isEmpty ? 'Precio Pizza — $region' : current.title,
+      subtitle: 'Serie mensual 2024 (+ futuro simulado)',
+      description: current.description,
+    );
+  }
+
+  String _labelForIndex(int index) {
+    final List<String> months = <String>[
+      'Enero',
+      'Febrero',
+      'Marzo',
+      'Abril',
+      'Mayo',
+      'Junio',
+      'Julio',
+      'Agosto',
+      'Septiembre',
+      'Octubre',
+      'Noviembre',
+      'Diciembre',
+    ];
+    if (index <= 12) {
+      return months[index - 1];
+    }
+    final int zeroBased = (index - 1) % 12;
+    final int yearOffset = (index - 1) ~/ 12;
+    final int year = 2024 + yearOffset;
+    final String short = <String>[
+      'Ene',
+      'Feb',
+      'Mar',
+      'Abr',
+      'May',
+      'Jun',
+      'Jul',
+      'Ago',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dic',
+    ][zeroBased];
+    return '$short ($year)';
+  }
+}
+
+class _PizzaHeader extends StatelessWidget {
+  const _PizzaHeader({required this.graph});
+
+  final ModelGraph graph;
+
+  @override
+  Widget build(BuildContext context) {
+    final TextTheme t = Theme.of(context).textTheme;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        Text(
+          graph.title.isEmpty ? 'Pizza Prices' : graph.title,
+          style: t.titleLarge,
+        ),
+        if (graph.subtitle.isNotEmpty)
+          Text(graph.subtitle, style: t.bodyMedium),
+        if (graph.description.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.only(top: 4.0),
+            child: Text(graph.description, style: t.bodySmall),
+          ),
+      ],
+    );
+  }
+}
+
+class _GraphCard extends StatelessWidget {
+  const _GraphCard({required this.graph});
+
+  final ModelGraph graph;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      elevation: 2,
+      clipBehavior: Clip.antiAlias,
+      child: Padding(
+        padding: const EdgeInsets.all(12.0),
+        child: CustomPaint(
+          painter: _SimpleLineChartPainter(graph: graph),
+          child: const SizedBox.expand(),
+        ),
+      ),
+    );
+  }
+}
+
+class _TableCard extends StatelessWidget {
+  const _TableCard({required this.graph});
+
+  final ModelGraph graph;
+
+  @override
+  Widget build(BuildContext context) {
+    final List<DataRow> rows = graph.points
+        .map(
+          (ModelPoint p) => DataRow(
+            cells: <DataCell>[
+              DataCell(Text(p.label)),
+              DataCell(Text(p.vector.dy.toStringAsFixed(0))),
+            ],
+          ),
+        )
+        .toList();
+    return Card(
+      elevation: 2,
+      child: Padding(
+        padding: const EdgeInsets.all(12.0),
+        child: SingleChildScrollView(
+          child: DataTable(
+            headingRowHeight: 36,
+            dataRowMinHeight: 36,
+            dataRowMaxHeight: 40,
+            columns: const <DataColumn>[
+              DataColumn(label: Text('Mes')),
+              DataColumn(label: Text('Precio (COP)')),
+            ],
+            rows: rows,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _SimpleLineChartPainter extends CustomPainter {
+  _SimpleLineChartPainter({required this.graph});
+
+  final ModelGraph graph;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    const double padLeft = 48, padRight = 16, padTop = 16, padBottom = 32;
+    final Rect plot = Rect.fromLTWH(
+      padLeft,
+      padTop,
+      size.width - padLeft - padRight,
+      size.height - padTop - padBottom,
+    );
+    final Paint axisPaint = Paint()
+      ..color = Colors.grey.shade500
+      ..strokeWidth = 1.0;
+
+    canvas.drawLine(
+      Offset(plot.left, plot.bottom),
+      Offset(plot.right, plot.bottom),
+      axisPaint,
+    );
+    canvas.drawLine(
+      Offset(plot.left, plot.top),
+      Offset(plot.left, plot.bottom),
+      axisPaint,
+    );
+
+    if (graph.points.length < 2 ||
+        !graph.xAxis.min.isFinite ||
+        !graph.xAxis.max.isFinite ||
+        !graph.yAxis.min.isFinite ||
+        !graph.yAxis.max.isFinite ||
+        graph.xAxis.max == graph.xAxis.min ||
+        graph.yAxis.max == graph.yAxis.min) {
+      final TextPainter tp = TextPainter(
+        textDirection: TextDirection.ltr,
+        text: const TextSpan(
+          text: 'No data',
+          style: TextStyle(fontSize: 12, color: Colors.grey),
+        ),
+      )..layout();
+      tp.paint(
+        canvas,
+        Offset(
+          plot.left + (plot.width - tp.width) / 2,
+          plot.top + (plot.height - tp.height) / 2,
+        ),
+      );
+      return;
+    }
+
+    final double xMin = graph.xAxis.min,
+        xMax = graph.xAxis.max,
+        yMin = graph.yAxis.min,
+        yMax = graph.yAxis.max;
+    double sx(double x) => plot.left + (x - xMin) * plot.width / (xMax - xMin);
+    double sy(double y) =>
+        plot.bottom - (y - yMin) * plot.height / (yMax - yMin);
+
+    final Paint linePaint = Paint()
+      ..color = Colors.blue
+      ..strokeWidth = 2.0
+      ..style = PaintingStyle.stroke;
+    final Path path = Path();
+    for (int i = 0; i < graph.points.length; i++) {
+      final ModelPoint p = graph.points[i];
+      final Offset o = Offset(sx(p.vector.dx), sy(p.vector.dy));
+      if (i == 0) {
+        path.moveTo(o.dx, o.dy);
+      } else {
+        path.lineTo(o.dx, o.dy);
+      }
+    }
+    canvas.drawPath(path, linePaint);
+
+    final Paint dotPaint = Paint()..color = Colors.blue;
+    for (final ModelPoint p in graph.points) {
+      final Offset o = Offset(sx(p.vector.dx), sy(p.vector.dy));
+      canvas.drawCircle(o, 3.0, dotPaint);
+    }
+
+    final TextPainter tp = TextPainter(
+      textDirection: TextDirection.ltr,
+      textAlign: TextAlign.right,
+    );
+    for (int i = 0; i <= 4; i++) {
+      final double t = yMin + (i * (yMax - yMin) / 4.0);
+      final double yy = sy(t);
+      canvas.drawLine(
+        Offset(plot.left - 4, yy),
+        Offset(plot.left, yy),
+        axisPaint,
+      );
+      tp.text = TextSpan(
+        text: t.toStringAsFixed(0),
+        style: const TextStyle(fontSize: 10, color: Colors.black87),
+      );
+      tp.layout();
+      tp.paint(canvas, Offset(plot.left - 6 - tp.width, yy - tp.height / 2));
+    }
+
+    final List<ModelPoint> pts = graph.points;
+    final List<int> idxs =
+        <int>{0, (pts.length / 2).floor(), pts.length - 1}.toList()..sort();
+    for (final int i in idxs) {
+      final ModelPoint p = pts[i];
+      final double xx = sx(p.vector.dx);
+      canvas.drawLine(
+        Offset(xx, plot.bottom),
+        Offset(xx, plot.bottom + 4),
+        axisPaint,
+      );
+      tp.text = TextSpan(
+        text: p.label,
+        style: const TextStyle(fontSize: 10, color: Colors.black87),
+      );
+      tp.layout(maxWidth: 80);
+      final double textX = xx - (tp.width / 2);
+      tp.paint(
+        canvas,
+        Offset(
+          textX.clamp(plot.left, plot.right - tp.width),
+          plot.bottom + 6,
+        ),
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _SimpleLineChartPainter oldDelegate) =>
+      oldDelegate.graph != graph;
+}
+
+// ===== WS DB • CRUD + Watch + Colección (ContactModel) =====
+
+class WsContactsHome extends StatefulWidget {
+  const WsContactsHome({
+    required this.contactsBloc,
+    required this.contactsCollectionBloc,
+    super.key,
+  });
+
+  // Helper para crear toda la pila (Service → Gateway → Repo → Facade → Blocs)
+  factory WsContactsHome.wrapper() {
+    final ServiceWsDb service = FakeServiceWsDb(
+      config: const WsDbConfig(latency: Duration(milliseconds: 300)),
+    );
+    final GatewayWsDatabase gateway = GatewayWsDbImpl(
+      service: service,
+      collection: 'contacts',
+      mapper: const DefaultErrorMapper(),
+      readAfterWrite: true,
+      treatEmptyAsMissing: true,
+    );
+    final RepositoryWsDatabase<ContactModel> repo =
+        RepositoryWsDatabaseImpl<ContactModel>(
+      gateway: gateway,
+      fromJson: ContactModel.fromJson,
+      mapper: const DefaultErrorMapper(),
+      serializeWrites: true,
+    );
+    final FacadeWsDatabaseUsecases<ContactModel> facade =
+        FacadeWsDatabaseUsecases<ContactModel>.fromRepository(
+      repository: repo,
+      fromJson: ContactModel.fromJson,
+    );
+    final BlocWsDatabase<ContactModel> docBloc =
+        BlocWsDatabase<ContactModel>(facade: facade);
+    final ContactsCollectionBloc collBloc = ContactsCollectionBloc(
+      service: service,
+      collection: 'contacts',
+      fromJson: ContactModel.fromJson,
+    )..start();
+    return WsContactsHome(
+      contactsBloc: docBloc,
+      contactsCollectionBloc: collBloc,
+    );
+  }
+
+  final BlocWsDatabase<ContactModel> contactsBloc;
+  final ContactsCollectionBloc contactsCollectionBloc;
+
+  @override
+  State<WsContactsHome> createState() => _WsContactsHomeState();
+}
+
+class _WsContactsHomeState extends State<WsContactsHome> {
+  final TextEditingController _id = TextEditingController();
+  final TextEditingController _name = TextEditingController();
+  final TextEditingController _relationship = TextEditingController();
+  final TextEditingController _phone = TextEditingController();
+  final TextEditingController _email = TextEditingController();
+
+  final List<String> _log = <String>[];
+  StreamSubscription<WsDbState<ContactModel>>? _sub;
+  bool _watching = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _sub = widget.contactsBloc.stream.listen((WsDbState<ContactModel> s) {
+      setState(() {
+        _log.add('[${DateTime.now().toIso8601String()}] $s');
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    _sub?.cancel();
+    super.dispose();
+  }
+
+  ContactModel _fromForm() => ContactModel(
+        id: _id.text.trim(),
+        name: _name.text.trim(),
+        relationship: _relationship.text.trim(),
+        phoneNumber: _phone.text.trim(),
+        email: _email.text.trim(),
+      );
+
+  void _fillForm(ContactModel c) {
+    _id.text = c.id;
+    _name.text = c.name;
+    _relationship.text = c.relationship;
+    _phone.text = c.phoneNumber;
+    _email.text = c.email;
+  }
+
+  Future<void> _read() async {
+    if (_id.text.trim().isEmpty) {
+      return;
+    }
+    final Either<ErrorItem, ContactModel> res =
+        await widget.contactsBloc.readDoc(_id.text.trim());
+    res.fold(
+      (ErrorItem e) => _snack('READ error: ${e.code}'),
+      (ContactModel c) {
+        _fillForm(c);
+        _snack('READ ok: ${c.id}');
+      },
+    );
+  }
+
+  Future<void> _write() async {
+    final ContactModel c = _fromForm();
+    if (c.id.isEmpty) {
+      return;
+    }
+    final Either<ErrorItem, ContactModel> res =
+        await widget.contactsBloc.writeDoc(c.id, c);
+    res.fold(
+      (ErrorItem e) => _snack('WRITE error: ${e.code}'),
+      (ContactModel saved) {
+        _fillForm(saved);
+        _snack('WRITE ok: ${saved.id}');
+      },
+    );
+  }
+
+  Future<void> _delete() async {
+    if (_id.text.trim().isEmpty) {
+      return;
+    }
+    final Either<ErrorItem, Unit> res =
+        await widget.contactsBloc.deleteDoc(_id.text.trim());
+    res.fold(
+      (ErrorItem e) => _snack('DELETE error: ${e.code}'),
+      (_) => _snack('DELETE ok'),
+    );
+  }
+
+  Future<void> _toggleWatch() async {
+    final String id = _id.text.trim();
+    if (id.isEmpty) {
+      return;
+    }
+    if (_watching) {
+      await widget.contactsBloc.stopWatch(id);
+    } else {
+      await widget.contactsBloc.startWatch(id);
+    }
+    setState(() => _watching = !_watching);
+  }
+
+  void _snack(String msg) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(msg),
+        duration: const Duration(milliseconds: 900),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Contacts WS CRUD (JSON-first)'),
+        actions: <Widget>[
+          IconButton(
+            tooltip: 'Clear log',
+            onPressed: () => setState(_log.clear),
+            icon: const Icon(Icons.clear_all),
+          ),
+        ],
+      ),
+      body: Column(
+        children: <Widget>[
+          _HeaderCard(watching: _watching),
+          Expanded(
+            child: Row(
+              children: <Widget>[
+                Expanded(child: _formCard()),
+                const VerticalDivider(width: 1),
+                Expanded(child: _stateAndLogAndCollectionCard()),
+              ],
+            ),
+          ),
+        ],
+      ),
+      floatingActionButton: _fabBar(),
+    );
+  }
+
+  Widget _fabBar() {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: <Widget>[
+        FloatingActionButton.extended(
+          heroTag: 'read',
+          onPressed: _read,
+          icon: const Icon(Icons.download),
+          label: const Text('Read'),
+        ),
+        const SizedBox(height: 8),
+        FloatingActionButton.extended(
+          heroTag: 'write',
+          onPressed: _write,
+          icon: const Icon(Icons.upload),
+          label: const Text('Write/Upsert'),
+        ),
+        const SizedBox(height: 8),
+        FloatingActionButton.extended(
+          heroTag: 'delete',
+          onPressed: _delete,
+          icon: const Icon(Icons.delete),
+          label: const Text('Delete'),
+          backgroundColor: Colors.redAccent,
+        ),
+        const SizedBox(height: 8),
+        FloatingActionButton.extended(
+          heroTag: 'watch',
+          onPressed: _toggleWatch,
+          icon: Icon(_watching ? Icons.visibility_off : Icons.visibility),
+          label: Text(_watching ? 'Stop watch' : 'Start watch'),
+          backgroundColor: _watching ? Colors.orange : null,
+        ),
+      ],
+    );
+  }
+
+  Widget _formCard() {
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: Card(
+        elevation: 1,
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: ListView(
+            children: <Widget>[
+              const Text('ContactModel form', style: TextStyle(fontSize: 18)),
+              const SizedBox(height: 12),
+              TextField(
+                controller: _id,
+                decoration: const InputDecoration(
+                  labelText: 'id (docId)',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: _name,
+                decoration: const InputDecoration(
+                  labelText: 'name',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: _relationship,
+                decoration: const InputDecoration(
+                  labelText: 'relationship',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: _phone,
+                decoration: const InputDecoration(
+                  labelText: 'phoneNumber',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: _email,
+                decoration: const InputDecoration(
+                  labelText: 'email',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: 16),
+              _HelperBox(),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _stateAndLogAndCollectionCard() {
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: Card(
+        elevation: 1,
+        child: Column(
+          children: <Widget>[
+            const SizedBox(height: 8),
+            const Text(
+              'WsDbState<ContactModel>',
+              style: TextStyle(fontSize: 18),
+            ),
+            const Divider(),
+            Expanded(
+              flex: 2,
+              child: StreamBuilder<WsDbState<ContactModel>>(
+                stream: widget.contactsBloc.stream,
+                initialData: widget.contactsBloc.value,
+                builder: (
+                  BuildContext context,
+                  AsyncSnapshot<WsDbState<ContactModel>> snap,
+                ) {
+                  final WsDbState<ContactModel> s =
+                      snap.data ?? WsDbState<ContactModel>.idle();
+                  final ContactModel? c = s.doc;
+                  return Padding(
+                    padding: const EdgeInsets.all(12),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: <Widget>[
+                        _kv('loading', '${s.loading}'),
+                        _kv('docId', s.docId),
+                        _kv('isWatching', '${s.isWatching}'),
+                        _kv('error', s.error?.code ?? 'null'),
+                        const Divider(),
+                        const Text(
+                          'doc snapshot',
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        const SizedBox(height: 6),
+                        Expanded(
+                          child: SingleChildScrollView(
+                            child: Text(
+                              c == null ? 'null' : c.toJson().toString(),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+            ),
+            const Divider(height: 1),
+            const Padding(
+              padding: EdgeInsets.only(top: 8.0),
+              child: Text(
+                'Contacts collection (realtime)',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+            ),
+            Expanded(
+              flex: 3,
+              child: StreamBuilder<List<ContactModel>>(
+                stream: widget.contactsCollectionBloc.stream,
+                initialData: widget.contactsCollectionBloc.value,
+                builder: (
+                  BuildContext context,
+                  AsyncSnapshot<List<ContactModel>> snap,
+                ) {
+                  final List<ContactModel> items =
+                      snap.data ?? const <ContactModel>[];
+                  if (items.isEmpty) {
+                    return const Center(child: Text('No contacts yet'));
+                  }
+                  return ListView.separated(
+                    padding: const EdgeInsets.all(8),
+                    itemCount: items.length,
+                    separatorBuilder: (_, __) => const Divider(height: 1),
+                    itemBuilder: (_, int i) {
+                      final ContactModel c = items[i];
+                      return ListTile(
+                        leading: CircleAvatar(
+                          child: Text(c.name.isEmpty ? '?' : c.name[0]),
+                        ),
+                        title: Text(c.name),
+                        subtitle: Text(
+                          '${c.relationship} • ${c.phoneNumber}\n${c.email}',
+                        ),
+                        isThreeLine: true,
+                        trailing: Text('#${c.id}'),
+                        onTap: () => _fillForm(c),
+                      );
+                    },
+                  );
+                },
+              ),
+            ),
+            const Divider(height: 1),
+            const Padding(
+              padding: EdgeInsets.only(top: 8.0, bottom: 4),
+              child: Text('ledger (latest first)'),
+            ),
+            Expanded(
+              flex: 2,
+              child: ListView.builder(
+                reverse: true,
+                itemCount: _log.length,
+                itemBuilder: (_, int i) {
+                  final int idx = _log.length - 1 - i;
+                  return Text(_log[idx], style: const TextStyle(fontSize: 12));
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _HeaderCard extends StatelessWidget {
+  const _HeaderCard({required this.watching});
+
+  final bool watching;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Theme.of(context).colorScheme.surfaceContainer,
+      child: const Padding(
+        padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        child: Row(
+          children: <Widget>[
+            Icon(Icons.cloud_sync),
+            SizedBox(width: 8),
+            Text(
+              'JSON-first WS flow • Service → Gateway → Repository → Facade → BLoC',
+            ),
+            Spacer(),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _HelperBox extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        border: Border.all(color: Theme.of(context).dividerColor),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: const Padding(
+        padding: EdgeInsets.all(12),
+        child: SelectableText('''
+How to swap to your real service:
+
+1) Replace the Fake by your Service implementing ServiceWsDb:
+   final ServiceWsDb service = FirestoreServiceWsDb(...);
+   // or
+   final ServiceWsDb service = GoogleSheetsServiceWsDb(...);
+
+2) Keep the Gateway as-is (JSON-first) for documents:
+   GatewayWsDbImpl(
+     service: service,
+     collection: 'contacts',
+     idKey: 'id',
+     readAfterWrite: true,
+     treatEmptyAsMissing: true,
+   );
+
+3) Repository typed + serializeWrites=true (FIFO per docId).
+4) UI consumes WsDbState<ContactModel> from BlocWsDatabase<ContactModel>.
+
+Collection note:
+- For the demo, the collection list uses service.collectionStream('contacts')
+  via a lightweight ContactsCollectionBloc. In production, consider adding a
+  dedicated Gateway/Repository/Facade for collections too.
+'''),
+      ),
+    );
+  }
+}
+
+Widget _kv(String k, String v) {
+  return Row(
+    children: <Widget>[
+      SizedBox(
+        width: 120,
+        child: Text(k, style: const TextStyle(fontWeight: FontWeight.bold)),
+      ),
+      const Text(':  '),
+      Expanded(child: Text(v)),
+    ],
+  );
+}
+
+class ContactsCollectionBloc extends BlocGeneral<List<ContactModel>> {
+  ContactsCollectionBloc({
+    required ServiceWsDb service,
+    required String collection,
+    required ContactModel Function(Map<String, dynamic>) fromJson,
+  })  : _service = service,
+        _collection = collection,
+        _fromJson = fromJson,
+        super(const <ContactModel>[]);
+
+  final ServiceWsDb _service;
+  final String _collection;
+  final ContactModel Function(Map<String, dynamic>) _fromJson;
+  StreamSubscription<List<Map<String, dynamic>>>? _sub;
+
+  void start() {
+    _sub?.cancel();
+    _sub = _service.collectionStream(collection: _collection).listen(
+      (List<Map<String, dynamic>> rawList) {
+        final List<ContactModel> items = <ContactModel>[];
+        for (final Map<String, dynamic> m in rawList) {
+          try {
+            items.add(_fromJson(m));
+          } catch (_) {}
+        }
+        value = items;
+      },
+      onError: (Object _, StackTrace __) {},
+    );
+  }
+
+  @override
+  void dispose() {
+    _sub?.cancel();
+    super.dispose();
+  }
+}
+
+// ===== Session/Auth • Flavors dev/qa/prod =====
+
+const String kFlavor = String.fromEnvironment('FLAVOR', defaultValue: 'dev');
+
+ServiceSession _buildServiceForFlavor(String flavor) {
+  switch (flavor) {
+    case 'dev':
+      return FakeServiceSession(latency: const Duration(milliseconds: 300));
+    case 'qa':
+      return FakeServiceSession(latency: const Duration(milliseconds: 150));
+    case 'prod':
+      return FakeServiceSession(latency: const Duration(milliseconds: 80));
+    default:
+      return FakeServiceSession(latency: const Duration(milliseconds: 200));
+  }
+}
+
+BlocSession _buildBlocSession() {
+  final ServiceSession svc = _buildServiceForFlavor(kFlavor);
+  final GatewayAuth gateway =
+      GatewayAuthImpl(svc, errorMapper: const DefaultErrorMapper());
+  final RepositoryAuth repository = RepositoryAuthImpl(
+    gateway: gateway,
+    errorMapper: const DefaultErrorMapper(),
+  );
+  return BlocSession.fromRepository(repository: repository);
+}
+
+class SessionFlavorDemoPage extends StatefulWidget {
+  const SessionFlavorDemoPage({super.key});
+
+  @override
+  State<SessionFlavorDemoPage> createState() => _SessionFlavorDemoPageState();
+}
+
+class _SessionFlavorDemoPageState extends State<SessionFlavorDemoPage> {
+  late final BlocSession session;
+  final TextEditingController email =
+      TextEditingController(text: 'user@fake.com');
+  final TextEditingController pass = TextEditingController(text: 'secret');
+
+  @override
+  void initState() {
+    super.initState();
+    session = _buildBlocSession();
+    session.boot(); // escucha cambios auth
+  }
+
+  @override
+  void dispose() {
+    session.dispose();
+    email.dispose();
+    pass.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = ThemeData(
+      colorScheme: ColorScheme.fromSeed(seedColor: Colors.indigo),
+      useMaterial3: true,
+    );
+
+    return MaterialApp(
+      theme: theme,
+      home: Scaffold(
+        appBar: AppBar(
+          title: const Text('Auth flow • Jocaagura (FakeService)'),
+          actions: const <Widget>[
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16),
+              child: Center(
+                child: Text(
+                  'FLAVOR: $kFlavor',
+                  style: TextStyle(
+                    fontFeatures: <FontFeature>[
+                      FontFeature.tabularFigures(),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+        body: StreamBuilder<SessionState>(
+          stream: session.stream,
+          initialData: session.stateOrDefault,
+          builder: (BuildContext context, AsyncSnapshot<SessionState> snap) {
+            final SessionState s = snap.data ?? session.stateOrDefault;
+
+            Widget statusChip;
+            if (s is Authenticating) {
+              statusChip = const Chip(label: Text('Authenticating...'));
+            } else if (s is Refreshing) {
+              statusChip = const Chip(label: Text('Refreshing...'));
+            } else if (s is SessionError) {
+              statusChip = Chip(
+                label: Text('Error: ${s.error.code}'),
+                backgroundColor: Colors.red.withValues(alpha: .15),
+              );
+            } else if (s is Authenticated) {
+              statusChip = const Chip(label: Text('Authenticated'));
+            } else {
+              statusChip = const Chip(label: Text('Unauthenticated'));
+            }
+
+            final String emailLabel = (s is Authenticated) ? s.user.email : '—';
+
+            return ListView(
+              padding: const EdgeInsets.all(16),
+              children: <Widget>[
+                Row(
+                  children: <Widget>[
+                    statusChip,
+                    const SizedBox(width: 12),
+                    Text(
+                      'isAuthenticated: ${session.isAuthenticated}',
+                      style: const TextStyle(fontWeight: FontWeight.w600),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(12),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        const Text(
+                          'Credentials',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        TextField(
+                          controller: email,
+                          decoration: const InputDecoration(
+                            labelText: 'Email',
+                            hintText: 'you@mail.com',
+                            border: OutlineInputBorder(),
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        TextField(
+                          controller: pass,
+                          obscureText: true,
+                          decoration: const InputDecoration(
+                            labelText: 'Password',
+                            border: OutlineInputBorder(),
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: <Widget>[
+                            ElevatedButton(
+                              onPressed: () async {
+                                final Either<ErrorItem, UserModel> r =
+                                    await session.logIn(
+                                  email: email.text,
+                                  password: pass.text,
+                                );
+                                r.fold(
+                                  (ErrorItem e) => _toast(
+                                    context,
+                                    'Login error: ${e.code}',
+                                  ),
+                                  (UserModel u) =>
+                                      _toast(context, 'Hello ${u.email}'),
+                                );
+                              },
+                              child: const Text('Log In (email/pass)'),
+                            ),
+                            ElevatedButton(
+                              onPressed: () async {
+                                final Either<ErrorItem, UserModel> r =
+                                    await session.signIn(
+                                  email: email.text,
+                                  password: pass.text,
+                                );
+                                r.fold(
+                                  (ErrorItem e) => _toast(
+                                    context,
+                                    'Sign In error: ${e.code}',
+                                  ),
+                                  (UserModel u) =>
+                                      _toast(context, 'Welcome ${u.email}'),
+                                );
+                              },
+                              child: const Text('Sign In (create)'),
+                            ),
+                            ElevatedButton(
+                              onPressed: () async {
+                                final Either<ErrorItem, UserModel> r =
+                                    await session.logInWithGoogle();
+                                r.fold(
+                                  (ErrorItem e) => _toast(
+                                    context,
+                                    'Google error: ${e.code}',
+                                  ),
+                                  (UserModel u) =>
+                                      _toast(context, 'Google: ${u.email}'),
+                                );
+                              },
+                              child: const Text('Log In with Google'),
+                            ),
+                            ElevatedButton(
+                              onPressed: () async {
+                                final Either<ErrorItem, void> r = await session
+                                    .recoverPassword(email: email.text);
+                                r.fold(
+                                  (ErrorItem e) => _toast(
+                                    context,
+                                    'Recover error: ${e.code}',
+                                  ),
+                                  (_) => _toast(
+                                    context,
+                                    'Recovery sent to ${email.text}',
+                                  ),
+                                );
+                              },
+                              child: const Text('Recover password'),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(12),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        const Text(
+                          'Session',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text('Current user: $emailLabel'),
+                        const SizedBox(height: 8),
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: <Widget>[
+                            ElevatedButton(
+                              onPressed: () async {
+                                final Either<ErrorItem, UserModel>? r =
+                                    await session.logInSilently();
+                                if (r == null && context.mounted) {
+                                  _toast(context, 'No session to restore');
+                                  return;
+                                }
+                                r?.fold(
+                                  (ErrorItem e) => _toast(
+                                    context,
+                                    'Silent error: ${e.code}',
+                                  ),
+                                  (UserModel u) =>
+                                      _toast(context, 'Restored ${u.email}'),
+                                );
+                              },
+                              child: const Text('Log In silently'),
+                            ),
+                            ElevatedButton(
+                              onPressed: () async {
+                                final Either<ErrorItem, UserModel>? r =
+                                    await session.refreshSession();
+                                if (r == null && context.mounted) {
+                                  _toast(context, 'Nothing to refresh');
+                                  return;
+                                }
+                                r?.fold(
+                                  (ErrorItem e) => _toast(
+                                    context,
+                                    'Refresh error: ${e.code}',
+                                  ),
+                                  (UserModel u) => _toast(
+                                    context,
+                                    'Refreshed for ${u.email}',
+                                  ),
+                                );
+                              },
+                              child: const Text('Refresh session'),
+                            ),
+                            ElevatedButton(
+                              onPressed: () async {
+                                final Either<ErrorItem, void>? r =
+                                    await session.logOut();
+                                if (r == null && context.mounted) {
+                                  _toast(context, 'Already signed out');
+                                  return;
+                                }
+                                r?.fold(
+                                  (ErrorItem e) => _toast(
+                                    context,
+                                    'Logout error: ${e.code}',
+                                  ),
+                                  (_) => _toast(context, 'Signed out'),
+                                );
+                              },
+                              child: const Text('Log out'),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  void _toast(BuildContext ctx, String msg) {
+    ScaffoldMessenger.of(ctx).showSnackBar(SnackBar(content: Text(msg)));
+  }
+}
+
+// ===== Connectivity • Flow con Either =====
+
+class ConnectivityDemoPage extends StatefulWidget {
+  const ConnectivityDemoPage({super.key});
+
+  static const String name = 'ConnectivityDemoPage';
+
+  @override
+  State<ConnectivityDemoPage> createState() => _ConnectivityDemoPageState();
+}
+
+class _ConnectivityDemoPageState extends State<ConnectivityDemoPage> {
+  late final FakeServiceConnectivity _service;
+  late final GatewayConnectivity _gateway;
+  late final RepositoryConnectivity _repo;
+  late final BlocConnectivity _bloc;
+
+  ConnectivityModel _lastGood = const ConnectivityModel(
+    connectionType: ConnectionTypeEnum.none,
+    internetSpeed: 0,
+  );
+
+  @override
+  void initState() {
+    super.initState();
+    _service = FakeServiceConnectivity(
+      latencyConnectivity: const Duration(milliseconds: 80),
+      latencySpeed: const Duration(milliseconds: 120),
+      initial: const ConnectivityModel(
+        connectionType: ConnectionTypeEnum.wifi,
+        internetSpeed: 40,
+      ),
+    );
+    _gateway = GatewayConnectivityImpl(_service, const DefaultErrorMapper());
+    _repo = RepositoryConnectivityImpl(
+      _gateway,
+      errorMapper: const DefaultErrorMapper(),
+    );
+    _bloc = BlocConnectivity(
+      watch: WatchConnectivityUseCase(_repo),
+      snapshot: GetConnectivitySnapshotUseCase(_repo),
+      checkType: CheckConnectivityTypeUseCase(_repo),
+      checkSpeed: CheckInternetSpeedUseCase(_repo),
+    );
+    _bloc.loadInitial();
+    _bloc.startWatching();
+  }
+
+  @override
+  void dispose() {
+    _bloc.dispose();
+    _service.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Connectivity Demo')),
+      body: StreamBuilder<Either<ErrorItem, ConnectivityModel>>(
+        stream: _bloc.stream,
+        initialData: _bloc.value,
+        builder: (
+          BuildContext context,
+          AsyncSnapshot<Either<ErrorItem, ConnectivityModel>> snap,
+        ) {
+          final Either<ErrorItem, ConnectivityModel> either =
+              snap.data ?? _bloc.value;
+          final ConnectivityModel m = either.isRight
+              ? (either as Right<ErrorItem, ConnectivityModel>).value
+              : _lastGood;
+          if (either.isRight) {
+            _lastGood = (either as Right<ErrorItem, ConnectivityModel>).value;
+          }
+
+          return ErrorItemWidget(
+            state: either as Either<ErrorItem, Object>,
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Text(
+                    'Type:  ${m.connectionType.name}',
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
+                  const SizedBox(height: 8),
+                  Text('Speed: ${m.internetSpeed.toStringAsFixed(1)} Mbps'),
+                  const SizedBox(height: 16),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: <Widget>[
+                      ElevatedButton(
+                        onPressed: () => _service
+                            .simulateConnection(ConnectionTypeEnum.none),
+                        child: const Text('Go Offline'),
+                      ),
+                      ElevatedButton(
+                        onPressed: () => _service
+                            .simulateConnection(ConnectionTypeEnum.wifi),
+                        child: const Text('Wi-Fi'),
+                      ),
+                      ElevatedButton(
+                        onPressed: () => _service
+                            .simulateConnection(ConnectionTypeEnum.mobile),
+                        child: const Text('Mobile'),
+                      ),
+                      ElevatedButton(
+                        onPressed: () => _service.simulateSpeed(
+                          (((m.internetSpeed + 10).clamp(0.0, 9999.0)) as num)
+                              .toDouble(),
+                        ),
+                        child: const Text('+10 Mbps'),
+                      ),
+                      ElevatedButton(
+                        onPressed: () => _service.simulateSpeed(
+                          (((m.internetSpeed - 10).clamp(0.0, 9999.0)) as num)
+                              .toDouble(),
+                        ),
+                        child: const Text('−10 Mbps'),
+                      ),
+                      ElevatedButton(
+                        onPressed: () => _service.startSpeedJitter(),
+                        child: const Text('Start Jitter'),
+                      ),
+                      ElevatedButton(
+                        onPressed: () => _service.stopSpeedJitter(),
+                        child: const Text('Stop Jitter'),
+                      ),
+                      ElevatedButton(
+                        onPressed: _bloc.refreshType,
+                        child: const Text('Refresh Type'),
+                      ),
+                      ElevatedButton(
+                        onPressed: _bloc.refreshSpeed,
+                        child: const Text('Refresh Speed'),
+                      ),
+                      const SizedBox(height: 12),
+                      const Divider(),
+                      const SizedBox(height: 12),
+                      ElevatedButton(
+                        onPressed: () {
+                          _service.simulateErrorOnCheckConnectivityOnce();
+                          _bloc.refreshType();
+                        },
+                        child: const Text('Sim error: check type'),
+                      ),
+                      ElevatedButton(
+                        onPressed: () {
+                          _service.simulateErrorOnCheckSpeedOnce();
+                          _bloc.refreshSpeed();
+                        },
+                        child: const Text('Sim error: check speed'),
+                      ),
+                      ElevatedButton(
+                        onPressed: () {
+                          _service.simulateStreamErrorOnce();
+                          _service.simulateSpeed(m.internetSpeed + 1);
+                        },
+                        child: const Text('Sim error: stream'),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
+// ===== Loading • Single + Queue (FIFO) =====
+
 class BlocLoadingDemoPage extends StatefulWidget {
-  /// Optional injection of an existing BlocLoading.
   const BlocLoadingDemoPage({super.key, this.injected});
   static const String name = 'BlocLoadingDemoPage';
-
   final BlocLoading? injected;
 
   @override
@@ -1749,24 +3015,17 @@ class BlocLoadingDemoPage extends StatefulWidget {
 class _BlocLoadingDemoPageState extends State<BlocLoadingDemoPage> {
   late final BlocLoading _bloc;
   late final bool _ownsBloc;
-
-  // Simple in-page log to visualize execution/order for the queue demo.
   final List<String> _log = <String>[];
 
   @override
   void initState() {
     super.initState();
-
-    // Preferred (commented): obtain from AppManager when available in your app:
-    // _bloc = AppManager.of(context).config.blocLoading; _ownsBloc = false;
-    //
-    // This demo supports injection or local creation for portability.
     if (widget.injected != null) {
       _bloc = widget.injected!;
-      _ownsBloc = false; // lifecycle managed by the caller
+      _ownsBloc = false;
     } else {
       _bloc = BlocLoading();
-      _ownsBloc = true; // dispose when page is disposed
+      _ownsBloc = true;
     }
   }
 
@@ -1779,17 +3038,14 @@ class _BlocLoadingDemoPageState extends State<BlocLoadingDemoPage> {
   }
 
   Future<void> _runSingleAction() async {
-    // Example: single action using loadingWhile with anti-flicker minShow.
     final int result = await _bloc.loadingWhile<int>(
       'Loading single action… / Cargando acción única…',
       () async {
-        // Simulate quick job; minShow will keep overlay stable
         await Future<void>.delayed(const Duration(milliseconds: 220));
         return 42;
       },
       minShow: const Duration(milliseconds: 480),
     );
-
     if (!mounted) {
       return;
     }
@@ -1804,7 +3060,6 @@ class _BlocLoadingDemoPageState extends State<BlocLoadingDemoPage> {
       _log.add('Queue started…');
     });
 
-    // We queue 3 tasks. Each one sets its own message and simulates different durations.
     final Future<int> t1 = _bloc.queueLoadingWhile<int>(
       'Step 1/3 — Preparing… / Paso 1/3 — Preparando…',
       () async {
@@ -1839,12 +3094,10 @@ class _BlocLoadingDemoPageState extends State<BlocLoadingDemoPage> {
     );
 
     final List<int> results = await Future.wait(<Future<int>>[t1, t2, t3]);
-
     if (!mounted) {
       return;
     }
     setState(() => _log.add('Queue done. Results = $results'));
-
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Queued actions completed (FIFO)')),
     );
@@ -1852,9 +3105,6 @@ class _BlocLoadingDemoPageState extends State<BlocLoadingDemoPage> {
 
   @override
   Widget build(BuildContext context) {
-    // We use two streams:
-    // - isLoadingStream (bool) to drive the overlay cheaply with distinct()
-    // - loadingMsgStream (String) to show the current message text
     return Scaffold(
       appBar: AppBar(title: const Text('BlocLoading Demo')),
       body: Stack(
@@ -1862,7 +3112,6 @@ class _BlocLoadingDemoPageState extends State<BlocLoadingDemoPage> {
           ListView(
             padding: const EdgeInsets.all(16),
             children: <Widget>[
-              // In-screen documentation for implementers.
               const Card(
                 child: Padding(
                   padding: EdgeInsets.all(16),
@@ -1878,28 +3127,20 @@ class _BlocLoadingDemoPageState extends State<BlocLoadingDemoPage> {
                       ),
                       SizedBox(height: 12),
                       Text(
-                        '1) Single action — uses `loadingWhile` with a minimal visible time (`minShow`) to avoid flicker.',
+                        '1) Single action — `loadingWhile` con `minShow` anti-flicker.',
                       ),
                       Text(
-                        '   • If another loading is already active, it does NOT override the UI but still executes the action and returns its result.',
-                      ),
-                      SizedBox(height: 8),
-                      Text(
-                        '2) Queued actions — uses `queueLoadingWhile` to serialize three tasks (FIFO).',
-                      ),
-                      Text(
-                        '   • Each task sets its own progressive message: "Step 1/3", "Step 2/3", "Step 3/3".',
-                      ),
-                      Text(
-                        '   • The overlay remains visible while tasks run one after another.',
+                        '   • Si ya hay loading, no sobreescribe UI, pero ejecuta la acción igualmente.',
                       ),
                       SizedBox(height: 8),
-                      Text('3) Streams used:'),
                       Text(
-                        '   • `isLoadingStream` (bool) → drives the overlay efficiently via `.distinct()`.',
+                        '2) Queued actions — `queueLoadingWhile` serializa tareas (FIFO).',
                       ),
+                      Text('   • Mensaje progresivo “Step 1/3”, “Step 2/3”…'),
+                      Text('   • Overlay visible mientras dura la cola.'),
+                      SizedBox(height: 8),
                       Text(
-                        '   • `loadingMsgStream` (String) → provides the current message text.',
+                        '3) Streams: `isLoadingStream` (bool) + `loadingMsgStream` (String).',
                       ),
                     ],
                   ),
@@ -1926,7 +3167,6 @@ class _BlocLoadingDemoPageState extends State<BlocLoadingDemoPage> {
                 ],
               ),
               const SizedBox(height: 16),
-              // Tiny log area to visualize the order of events for the queue demo.
               Card(
                 child: Padding(
                   padding: const EdgeInsets.all(16),
@@ -1951,8 +3191,6 @@ class _BlocLoadingDemoPageState extends State<BlocLoadingDemoPage> {
               ),
             ],
           ),
-
-          // Loading overlay driven by isLoadingStream + loadingMsgStream
           StreamBuilder<bool>(
             stream: _bloc.isLoadingStream,
             initialData: _bloc.isLoading,
@@ -1961,7 +3199,6 @@ class _BlocLoadingDemoPageState extends State<BlocLoadingDemoPage> {
               if (!active) {
                 return const SizedBox.shrink();
               }
-
               return Positioned.fill(
                 child: ColoredBox(
                   color: Colors.black54,
@@ -2010,367 +3247,140 @@ class _BlocLoadingDemoPageState extends State<BlocLoadingDemoPage> {
   }
 }
 
-/// ---------------------------------------------------------------------------
-/// WsDatabaseUserDemoPage
-/// ---------------------------------------------------------------------------
-///
-/// # Propósito de esta demo
-///
-/// Mostrar, de punta a punta, **cómo orquestar un CRUD + realtime (watch)**
-/// sobre documentos con un *stack* por capas:
-///
-/// 1) **ServiceWsDatabase**  → transporte (aquí, un Fake in-memory con semántica
-///    de WebSocket: streams por doc/colección).
-/// 2) **GatewayWsDatabase**  → mapea excepciones a ErrorItem, inyecta `id` y
-///    multiplexa los watch por docId (un solo stream compartido por doc).
-/// 3) **RepositoryWsDatabase<T>** → mapea JSON ↔️ Model (T) y opcionalmente
-///    **serializa escrituras por docId** para evitar carreras.
-/// 4) **Use cases + Facade** → casos de uso transversales (read, write, watch…)
-///    expuestos en una fachada amigable para la UI.
-/// 5) **BlocWsDatabase<T>** → capa reactiva para la vista: publica un único
-///    `WsDbState<T>` con `loading/error/doc/docId/isWatching`.
-///
-/// # ¿Por qué esta arquitectura?
-///
-/// - **Separación de responsabilidades:** cada capa resuelve un problema y la UI
-///   solo consume *casos de uso*.
-/// - **Reutilizable y testeable:** puedes cambiar Service (REST, WS real, etc.)
-///   sin tocar BLoC ni UI; Gateway y Repository tienen unit tests sencillos.
-/// - **Streams eficientes:** el Gateway crea **un solo** canal por `docId` y lo
-///   comparte entre todos los observadores; libera memoria cuando nadie observa.
-/// - **Errores coherentes:** Los errores en transporte/payload se estandariza
-///   vía `ErrorItem`, lo que simplifica la UI.
-///
-/// # Qué puedes hacer desde la UI
-///
-/// - **Read**, **Write/Upsert**, **Delete**, **Exists**
-/// - **Ensure** (crear si falta, actualizar si existe)
-/// - **Mutate** (leer → transformar → escribir)
-/// - **Patch** (merge parcial de JSON)
-/// - **Watch/Stop watch** (realtime)
-/// - **Auto +1/sec**: un “motor” que simula cambios en servidor para ver el
-///   watch en vivo (incrementa un contador en el documento).
-///
-/// # Tips de integración en tu app
-///
-/// - Si compartes Repository/Gateway entre varias pantallas, llama
-///   `bloc.dispose()` para cerrar la UI, y `facade.disposeAll()` **solo** si
-///   eres dueño del stack (p.ej. al cerrar sesión).
-/// - Tras cancelar un `watch`, recuerda llamar a `facade.detach(...)`
-///   (el BLoC lo hace por ti en `stopWatch` y `dispose`).
-/// - Si tu backend emite snapshots vacíos cuando el doc no existe, configura el
-///   Gateway con `treatEmptyAsMissing` en true.
-///
-class WsDatabaseUserDemoPage extends StatefulWidget {
-  const WsDatabaseUserDemoPage({super.key});
+// ===== Responsive • Grid + métricas + simulador =====
+
+class BlocResponsiveDemoPage extends StatefulWidget {
+  const BlocResponsiveDemoPage({super.key, this.injected});
+
+  static const String name = 'BlocResponsiveDemoPage';
+  final BlocResponsive? injected;
 
   @override
-  State<WsDatabaseUserDemoPage> createState() => _WsDatabaseUserDemoPageState();
+  State<BlocResponsiveDemoPage> createState() => _BlocResponsiveDemoPageState();
 }
 
-class _WsDatabaseUserDemoPageState extends State<WsDatabaseUserDemoPage> {
-  // Capas (5): Service → Gateway → Repository → Facade → Bloc
-  late final FakeServiceWsDatabase _service;
-  late final GatewayWsDatabaseImpl _gateway;
-  late final RepositoryWsDatabaseImpl<UserModel> _repository;
-  late final FacadeWsDatabaseUsecases<UserModel> _facade;
-  late final BlocWsDatabase<UserModel> _bloc;
+class _BlocResponsiveDemoPageState extends State<BlocResponsiveDemoPage> {
+  late final BlocResponsive _bloc;
+  late final bool _ownsBloc;
 
-  // Un pequeño "motor" para simular cambios en el servidor y ver el watch.
-  WsDocTicker? _ticker;
-
-  // Campos de UI para construir un UserModel de prueba.
-  final TextEditingController _docIdCtrl =
-      TextEditingController(text: 'user_001');
-  final TextEditingController _nameCtrl =
-      TextEditingController(text: 'John Doe');
-  final TextEditingController _emailCtrl =
-      TextEditingController(text: 'john.doe@example.com');
-  final TextEditingController _photoCtrl =
-      TextEditingController(text: 'https://example.com/profile.jpg');
+  bool _showGrid = true;
+  bool _simulateSize = false;
+  double _simWidth = 1024;
+  double _simHeight = 720;
 
   @override
   void initState() {
     super.initState();
-
-    // (1) Service: fake WebSocket-like DB en memoria (streams por doc/colección).
-    _service = FakeServiceWsDatabase();
-
-    // (2) Gateway: mapea excepciones a ErrorItem, inyecta 'id',
-    //     multiplexa watch por docId y maneja payload errors.
-    _gateway = GatewayWsDatabaseImpl(
-      service: _service,
-      collection: 'users',
-      // idKey/readAfterWrite/treatEmptyAsMissing → defaults conservadores.
-    );
-
-    // (3) Repository: mapea JSON ↔️ UserModel y (opcional) serializa writes
-    //     por docId para evitar solapamientos (útil con UI impaciente).
-    _repository = RepositoryWsDatabaseImpl<UserModel>(
-      gateway: _gateway,
-      fromJson: UserModel.fromJson,
-      serializeWrites: true,
-    );
-
-    // (4) Facade: agrupa los casos de uso (read, write, watch, batch, etc.)
-    _facade = FacadeWsDatabaseUsecases<UserModel>.fromRepository(
-      repository: _repository,
-      fromJson: UserModel.fromJson,
-    );
-
-    // (5) Bloc: publica WsDbState<T> (loading/error/doc/docId/isWatching)
-    _bloc = BlocWsDatabase<UserModel>(facade: _facade);
-
-    // Motor de cambios “servidor”: actualiza un campo contador en el doc.
-    // - Usa el Service directamente para simular eventos “externos”
-    //   (el Gateway/Repo/Bloc observarán los cambios como en producción).
-    _ticker = WsDocTicker(
-      service: _service,
-      collection: 'users',
-      docId: _docIdCtrl.text.trim(),
-      seedMode: SeedMode.none, // no crea doc si no existe
-    );
+    if (widget.injected != null) {
+      _bloc = widget.injected!;
+      _ownsBloc = false;
+    } else {
+      _bloc = BlocResponsive();
+      _ownsBloc = true;
+    }
   }
 
   @override
   void dispose() {
-    // Buen ciudadano: detiene motor y cierra BLoC/stream de estado.
-    _ticker?.stop();
-    _bloc.dispose();
-    _docIdCtrl.dispose();
-    _nameCtrl.dispose();
-    _emailCtrl.dispose();
-    _photoCtrl.dispose();
+    if (_ownsBloc) {
+      _bloc.dispose();
+    }
     super.dispose();
   }
 
-  /// Construye un UserModel desde los campos de UI.
-  ///
-  /// Nota: en esta demo el `jwt` es vacío; el motor (_ticker_) toca este campo
-  /// para simular cambios en caliente (por ejemplo `jwt.countRef`).
-  UserModel _buildUser(String id) => UserModel(
-        id: id,
-        displayName: _nameCtrl.text.trim(),
-        photoUrl: _photoCtrl.text.trim(),
-        email: _emailCtrl.text.trim(),
-        jwt: const <String, dynamic>{},
-      );
-
-  void _snack(String msg) {
-    if (!mounted) {
-      return;
+  void _syncSize(BuildContext context) {
+    if (_simulateSize) {
+      _bloc.setSizeForTesting(Size(_simWidth, _simHeight));
+    } else {
+      _bloc.setSizeFromContext(context);
     }
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
   }
 
   @override
   Widget build(BuildContext context) {
+    WidgetsBinding.instance.addPostFrameCallback((_) => _syncSize(context));
+
     return Scaffold(
-      appBar: AppBar(title: const Text('WsDatabase Demo — UserModel')),
-      // La vista se suscribe al stream de estado del BLoC.
-      body: StreamBuilder<WsDbState<UserModel>>(
-        stream: _bloc.stream,
+      appBar: AppBar(
+        title: const Text('BlocResponsive Demo'),
+        actions: <Widget>[
+          Row(
+            children: <Widget>[
+              const Text('Show AppBar', style: TextStyle(fontSize: 12)),
+              Switch(
+                value: _bloc.showAppbar,
+                onChanged: (bool v) => setState(() => _bloc.showAppbar = v),
+              ),
+              const SizedBox(width: 8),
+            ],
+          ),
+        ],
+      ),
+      body: StreamBuilder<Size>(
+        stream: _bloc.appScreenSizeStream,
         initialData: _bloc.value,
-        builder: (BuildContext context, AsyncSnapshot<WsDbState<UserModel>> s) {
-          final WsDbState<UserModel> state =
-              s.data ?? WsDbState<UserModel>.idle();
+        builder: (BuildContext context, AsyncSnapshot<Size> _) {
+          _syncSize(context);
+          final Size size = _bloc.size;
+          final Size work = _bloc.workAreaSize;
+          final int cols = _bloc.columnsNumber;
+          final double margin = _bloc.marginWidth;
+          final double gutter = _bloc.gutterWidth;
+          final double colW = _bloc.columnWidth;
+          final double drawerW = _bloc.drawerWidth;
+          final ScreenSizeEnum device = _bloc.deviceType;
 
           return ListView(
             padding: const EdgeInsets.all(16),
             children: <Widget>[
-              _Header(loading: state.loading, isWatching: state.isWatching),
+              _DocCard(),
               const SizedBox(height: 12),
-              _DocIdField(controller: _docIdCtrl),
-              const SizedBox(height: 8),
-              _TextField(label: 'Display name', controller: _nameCtrl),
-              const SizedBox(height: 8),
-              _TextField(label: 'Email', controller: _emailCtrl),
-              const SizedBox(height: 8),
-              _TextField(label: 'Photo URL', controller: _photoCtrl),
-              const SizedBox(height: 16),
-
-              // ----------------------------------------------------------------
-              // Botones de acciones (un botón = un caso de uso)
-              // ----------------------------------------------------------------
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: <Widget>[
-                  // READ: carga un doc por id → actualiza state.doc/docId
-                  ElevatedButton(
-                    onPressed: () async {
-                      final String id = _docIdCtrl.text.trim();
-                      final Either<ErrorItem, UserModel> res =
-                          await _bloc.readDoc(id);
-                      res.fold(
-                        (ErrorItem e) => _snack('READ error: ${e.code}'),
-                        (UserModel u) => _snack('READ ok: ${u.displayName}'),
-                      );
-                    },
-                    child: const Text('Read'),
-                  ),
-
-                  // WRITE / UPSERT: persiste el doc → devuelve versión autoritativa
-                  ElevatedButton(
-                    onPressed: () async {
-                      final String id = _docIdCtrl.text.trim();
-                      final UserModel user = _buildUser(id);
-                      final Either<ErrorItem, UserModel> res =
-                          await _bloc.writeDoc(id, user);
-                      res.fold(
-                        (ErrorItem e) => _snack('WRITE error: ${e.code}'),
-                        (UserModel u) => _snack('WRITE ok: ${u.displayName}'),
-                      );
-                    },
-                    child: const Text('Write / Upsert'),
-                  ),
-
-                  // DELETE: elimina por id → si es el doc activo, lo limpia del state
-                  ElevatedButton(
-                    onPressed: () async {
-                      final String id = _docIdCtrl.text.trim();
-                      final Either<ErrorItem, Unit> res =
-                          await _bloc.deleteDoc(id);
-                      res.fold(
-                        (ErrorItem e) => _snack('DELETE error: ${e.code}'),
-                        (_) => _snack('DELETE ok'),
-                      );
-                    },
-                    child: const Text('Delete'),
-                  ),
-
-                  // EXISTS: no altera el doc del state, solo informa si existe
-                  ElevatedButton(
-                    onPressed: () async {
-                      final String id = _docIdCtrl.text.trim();
-                      final Either<ErrorItem, bool> res =
-                          await _bloc.existsDoc(id);
-                      res.fold(
-                        (ErrorItem e) => _snack('EXISTS error: ${e.code}'),
-                        (bool exists) => _snack('EXISTS: $exists'),
-                      );
-                    },
-                    child: const Text('Exists'),
-                  ),
-
-                  // ENSURE: crea si falta, opcionalmente actualiza si existe
-                  ElevatedButton(
-                    onPressed: () async {
-                      final String id = _docIdCtrl.text.trim();
-                      final Either<ErrorItem, UserModel> res =
-                          await _bloc.ensureDoc(
-                        docId: id,
-                        create: () => _buildUser(id),
-                        updateIfExists: (UserModel u) =>
-                            u.copyWith(displayName: '${u.displayName} ✅'),
-                      );
-                      res.fold(
-                        (ErrorItem e) => _snack('ENSURE error: ${e.code}'),
-                        (UserModel u) => _snack('ENSURE ok: ${u.displayName}'),
-                      );
-                    },
-                    child: const Text('Ensure'),
-                  ),
-
-                  // MUTATE: lectura → transformación pura → escritura
-                  ElevatedButton(
-                    onPressed: () async {
-                      final String id = _docIdCtrl.text.trim();
-                      final Either<ErrorItem, UserModel> res =
-                          await _bloc.mutateDoc(
-                        id,
-                        (UserModel u) =>
-                            u.copyWith(displayName: '${u.displayName} *'),
-                      );
-                      res.fold(
-                        (ErrorItem e) => _snack('MUTATE error: ${e.code}'),
-                        (UserModel u) => _snack('MUTATE ok: ${u.displayName}'),
-                      );
-                    },
-                    child: const Text('Mutate name'),
-                  ),
-
-                  // PATCH: merge parcial de JSON (útil para “editar por campos”)
-                  ElevatedButton(
-                    onPressed: () async {
-                      final String id = _docIdCtrl.text.trim();
-                      final Either<ErrorItem, UserModel> res =
-                          await _bloc.patchDoc(id, <String, dynamic>{
-                        UserEnum.displayName.name:
-                            '${_nameCtrl.text.trim()} (patched)',
-                      });
-                      res.fold(
-                        (ErrorItem e) => _snack('PATCH error: ${e.code}'),
-                        (UserModel u) => _snack('PATCH ok: ${u.displayName}'),
-                      );
-                    },
-                    child: const Text('Patch name'),
-                  ),
-
-                  // WATCH: inicia la observación realtime del doc via Gateway/Repo
-                  ElevatedButton(
-                    onPressed: () async {
-                      final String id = _docIdCtrl.text.trim();
-                      await _bloc.startWatch(id);
-                      _snack('Watch started for $id');
-                    },
-                    child: const Text('Watch'),
-                  ),
-
-                  // STOP WATCH: cancela suscripción y “detach” del canal compartido
-                  ElevatedButton(
-                    onPressed: () async {
-                      final String id = _docIdCtrl.text.trim();
-                      await _bloc.stopWatch(id);
-                      _snack('Watch stopped for $id');
-                    },
-                    child: const Text('Stop watch'),
-                  ),
-
-                  // “Motor” que simula actualizaciones de servidor:
-                  // - Asegura doc
-                  // - Inicia watch
-                  // - Empieza a incrementar un contador cada segundo
-                  ElevatedButton(
-                    onPressed: () async {
-                      final String id = _docIdCtrl.text.trim();
-                      await _bloc.ensureDoc(
-                        docId: id,
-                        create: () => _buildUser(id),
-                      );
-
-                      _bloc.startWatch(id); // verás los cambios en vivo
-                      await _ticker?.start(id);
-
-                      _snack('Auto +1/sec started on $id');
-                    },
-                    child: const Text('Auto +1/sec (start)'),
-                  ),
-
-                  ElevatedButton(
-                    onPressed: () async {
-                      await _ticker?.stop();
-                      _snack('Auto +1/sec stopped');
-                    },
-                    child: const Text('Auto +1/sec (stop)'),
-                  ),
-                ],
+              _ControlsCard(
+                showGrid: _showGrid,
+                simulateSize: _simulateSize,
+                simWidth: _simWidth,
+                simHeight: _simHeight,
+                onToggleGrid: (bool v) => setState(() => _showGrid = v),
+                onToggleSim: (bool v) {
+                  setState(() {
+                    _simulateSize = v;
+                    _syncSize(context);
+                  });
+                },
+                onWidthChanged: (double v) {
+                  setState(() {
+                    _simWidth = v;
+                    _syncSize(context);
+                  });
+                },
+                onHeightChanged: (double v) {
+                  setState(() {
+                    _simHeight = v;
+                    _syncSize(context);
+                  });
+                },
               ),
-
-              const SizedBox(height: 24),
-
-              // Estado del BLoC (lo que debería consumir tu UI real)
-              _StateView(state: state),
-
-              const SizedBox(height: 80),
               const SizedBox(height: 12),
-
-              // Vista de “raw” (desde Service directly) para enseñar el JSON crudo
-              // que viaja por la capa de transporte. Útil para depurar el watch.
-              _RawCountView(
-                service: _service,
-                collection: 'users',
-                docId: _docIdCtrl.text,
+              _MetricsCard(
+                device: device,
+                size: size,
+                work: work,
+                cols: cols,
+                margin: margin,
+                gutter: gutter,
+                colW: colW,
+                drawer: drawerW,
+                appBarHeight: _bloc.appBarHeight,
+                heightWithoutAppBar: _bloc.screenHeightWithoutAppbar,
+              ),
+              const SizedBox(height: 12),
+              _GridPreview(
+                showGrid: _showGrid,
+                cols: cols,
+                margin: margin,
+                gutter: gutter,
+                columnWidth: colW,
+                workArea: work,
               ),
             ],
           );
@@ -2380,329 +3390,291 @@ class _WsDatabaseUserDemoPageState extends State<WsDatabaseUserDemoPage> {
   }
 }
 
-// --- UI bits ---------------------------------------------------------------
-
-class _Header extends StatelessWidget {
-  const _Header({required this.loading, required this.isWatching});
-
-  final bool loading;
-  final bool isWatching;
-
+class _DocCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: <Widget>[
-        if (loading)
-          const Padding(
-            padding: EdgeInsets.only(right: 8.0),
-            child: SizedBox(
-              width: 18,
-              height: 18,
-              child: CircularProgressIndicator(strokeWidth: 2),
-            ),
+    final TextStyle s = Theme.of(context).textTheme.bodyMedium!;
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: DefaultTextStyle(
+          style: s,
+          child: const Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Text(
+                'How this demo works / Cómo funciona',
+                style: TextStyle(fontWeight: FontWeight.w600),
+              ),
+              SizedBox(height: 8),
+              Text('1) La UI sincroniza el bloc con el tamaño del viewport.'),
+              Text(
+                '   Usa setSizeFromContext(context) en widgets o setSize(Size) en tests.',
+              ),
+              SizedBox(height: 6),
+              Text(
+                '2) Calcula device type, margins, gutters, columns y work area según config.',
+              ),
+              Text(
+                '3) La vista previa dibuja columnas + gutters respetando márgenes.',
+              ),
+              SizedBox(height: 12),
+              Text('Clean Architecture: UI → AppManager → BlocResponsive'),
+            ],
           ),
-        Text('Loading: $loading'),
-        const SizedBox(width: 16),
-        Text('Watching: $isWatching'),
-      ],
-    );
-  }
-}
-
-class _DocIdField extends StatelessWidget {
-  const _DocIdField({required this.controller});
-  final TextEditingController controller;
-
-  @override
-  Widget build(BuildContext context) {
-    return TextField(
-      controller: controller,
-      decoration: const InputDecoration(
-        labelText: 'docId',
-        border: OutlineInputBorder(),
-      ),
-    );
-  }
-}
-
-class _TextField extends StatelessWidget {
-  const _TextField({required this.label, required this.controller});
-  final String label;
-  final TextEditingController controller;
-
-  @override
-  Widget build(BuildContext context) {
-    return TextField(
-      controller: controller,
-      decoration: InputDecoration(
-        labelText: label,
-        border: const OutlineInputBorder(),
-      ),
-    );
-  }
-}
-
-class _StateView extends StatelessWidget {
-  const _StateView({required this.state});
-  final WsDbState<UserModel> state;
-
-  @override
-  Widget build(BuildContext context) {
-    final ErrorItem? err = state.error;
-    final UserModel? user = state.doc;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        const Text(
-          'Bloc state:',
-          style: TextStyle(fontWeight: FontWeight.bold),
         ),
-        const SizedBox(height: 8),
-        _kv('docId', state.docId),
-        _kv('loading', state.loading.toString()),
-        _kv('isWatching', state.isWatching.toString()),
-        const SizedBox(height: 12),
-        if (err != null)
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: Colors.red.withValues(alpha: 0.93),
-              border: Border.all(color: Colors.red.withValues(alpha: 0.6)),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Text(
-              'Error: ${err.code}\n${err.title}\n${err.description}',
-              style: const TextStyle(color: Colors.red),
-            ),
-          ),
-        if (user != null) ...<Widget>[
-          const SizedBox(height: 12),
-          const Text('User:', style: TextStyle(fontWeight: FontWeight.bold)),
-          _kv('id', user.id),
-          _kv('displayName', user.displayName),
-          _kv('email', user.email),
-          _kv('photoUrl', user.photoUrl),
-          _kv('jwt(json)', Utils.mapToString(user.jwt)),
-        ],
-      ],
-    );
-  }
-
-  Widget _kv(String k, String v) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 2),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          SizedBox(width: 120, child: Text('$k:')),
-          Expanded(child: Text(v)),
-        ],
       ),
     );
   }
 }
 
-/// Cómo sembrar/actualizar el doc para que el watch “se vea”:
-///
-/// Este motor usa **el Service directamente** para simular cambios producidos por
-/// el servidor. Así el Repository/Gateway/Bloc “ven” actualizaciones como en
-/// producción.
-///
-/// - `seedMode` define qué hacer si el doc no existe (no crearlo, crearlo con
-///   mínimo, o crearlo con una factoría custom).
-/// - En esta variante el contador vive dentro de `jwt.countRef` (clave común
-///   que siempre está en los JSON de usuario). Si prefieres un campo de nivel
-///   superior (`count`), adapta `_ensureCountField/_tick` y la UI de `_RawCountView`.
-enum SeedMode {
-  /// No crea el documento si no existe. El ticker solo incrementa si ya hay doc.
-  none,
-
-  /// Crea un doc mínimo: solo {'count': 0} o el campo que decidas.
-  minimalCountOnly,
-
-  /// Crea usando una factoría custom (por ejemplo, traer un JSON externo).
-  customFactory,
-}
-
-/// Tiny engine que incrementa cada [interval] un contador dentro del JSON.
-///
-/// - Garantiza que el doc tenga el campo contador.
-/// - Cada tick: lee el JSON actual, incrementa y guarda.
-/// - Usa **ServiceWsDatabase** para simular backend y que el *watch* dispare.
-///
-/// Si decides mover el contador a otra ruta (p.ej. `count` toplevel),
-/// ajusta el merge en `_ensureCountField/_tick` y la vista `_RawCountView`.
-class WsDocTicker {
-  WsDocTicker({
-    required ServiceWsDatabase<Map<String, dynamic>> service,
-    required String collection,
-    required String docId,
-    this.interval = const Duration(seconds: 1),
-    this.seedMode = SeedMode.minimalCountOnly,
-    this.seedFactory,
-  })  : _service = service,
-        _collection = collection,
-        _docId = docId;
-
-  final ServiceWsDatabase<Map<String, dynamic>> _service;
-  final String _collection;
-  String _docId;
-  final Duration interval;
-
-  /// Estrategia para crear doc si está ausente.
-  final SeedMode seedMode;
-
-  /// Factoría opcional para SeedMode.customFactory. Recibe `docId` y devuelve el JSON base.
-  final Map<String, dynamic> Function(String docId)? seedFactory;
-
-  Timer? _timer;
-  bool get isRunning => _timer != null;
-
-  Future<void> start([String? docId]) async {
-    if (docId != null) {
-      _docId = docId;
-    }
-    if (_timer != null) {
-      return;
-    }
-
-    await _ensureCountField();
-    _timer = Timer.periodic(interval, (_) => _tick());
-  }
-
-  Future<void> stop() async {
-    _timer?.cancel();
-    _timer = null;
-  }
-
-  Future<void> _ensureCountField() async {
-    try {
-      final Map<String, dynamic> json = await _service.readDocument(
-        collection: _collection,
-        docId: _docId,
-      );
-
-      // Contador embebido en jwt.countRef — cambia aquí si usas otra ruta.
-      final Map<String, dynamic> jwt = Utils.mapFromDynamic(json['jwt']);
-      if (!jwt.containsKey('countRef')) {
-        final Map<String, dynamic> merged = <String, dynamic>{
-          ...json,
-          'jwt': <String, dynamic>{...jwt, 'countRef': 0},
-        };
-        await _service.saveDocument(
-          collection: _collection,
-          docId: _docId,
-          document: merged,
-        );
-      }
-    } catch (_) {
-      // Doc ausente
-      if (seedMode == SeedMode.none) {
-        return;
-      }
-
-      Map<String, dynamic> base = const <String, dynamic>{};
-      if (seedMode == SeedMode.customFactory) {
-        base = seedFactory?.call(_docId) ?? const <String, dynamic>{};
-      }
-
-      await _service.saveDocument(
-        collection: _collection,
-        docId: _docId,
-        document: <String, dynamic>{
-          ...base,
-          'jwt': <String, dynamic>{'countRef': 0},
-        },
-      );
-    }
-  }
-
-  Future<void> _tick() async {
-    try {
-      final Map<String, dynamic> json = await _service.readDocument(
-        collection: _collection,
-        docId: _docId,
-      );
-
-      final Map<String, dynamic> jwt = Utils.mapFromDynamic(json['jwt']);
-      final int current = Utils.getIntegerFromDynamic(jwt['countRef']);
-
-      final Map<String, dynamic> next = <String, dynamic>{
-        ...json,
-        'jwt': <String, dynamic>{...jwt, 'countRef': current + 1},
-      };
-
-      await _service.saveDocument(
-        collection: _collection,
-        docId: _docId,
-        document: next,
-      );
-    } catch (_) {
-      if (seedMode == SeedMode.none) {
-        return;
-      }
-
-      Map<String, dynamic> base = const <String, dynamic>{};
-      if (seedMode == SeedMode.customFactory) {
-        base = seedFactory?.call(_docId) ?? const <String, dynamic>{};
-      }
-      await _service.saveDocument(
-        collection: _collection,
-        docId: _docId,
-        document: <String, dynamic>{
-          ...base,
-          'jwt': <String, dynamic>{'countRef': 0},
-        },
-      );
-    }
-  }
-}
-
-/// Vista auxiliar que muestra el **JSON crudo** que emite el Service al hacer
-/// watch del documento. Es útil para depurar si las actualizaciones llegan.
-///
-/// **Nota:** En esta demo el ticker incrementa `jwt.countRef`. Si decides
-/// mostrar ese valor, extrae `raw['jwt']['countRef']`. Aquí se deja el ejemplo
-/// simple con `raw['count']` para ilustrar que puedes adaptar el render a la
-/// ruta que uses en tu payload.
-class _RawCountView extends StatelessWidget {
-  const _RawCountView({
-    required this.service,
-    required this.collection,
-    required this.docId,
+class _ControlsCard extends StatelessWidget {
+  const _ControlsCard({
+    required this.showGrid,
+    required this.simulateSize,
+    required this.simWidth,
+    required this.simHeight,
+    required this.onToggleGrid,
+    required this.onToggleSim,
+    required this.onWidthChanged,
+    required this.onHeightChanged,
   });
 
-  final ServiceWsDatabase<Map<String, dynamic>> service;
-  final String collection;
-  final String docId;
+  final bool showGrid;
+  final bool simulateSize;
+  final double simWidth;
+  final double simHeight;
+  final ValueChanged<bool> onToggleGrid;
+  final ValueChanged<bool> onToggleSim;
+  final ValueChanged<double> onWidthChanged;
+  final ValueChanged<double> onHeightChanged;
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<Map<String, dynamic>>(
-      stream: service.documentStream(collection: collection, docId: docId),
-      builder:
-          (BuildContext context, AsyncSnapshot<Map<String, dynamic>> snap) {
-        final Map<String, dynamic> raw = snap.data ?? const <String, dynamic>{};
+    final TextStyle s = Theme.of(context).textTheme.bodyMedium!;
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: DefaultTextStyle(
+          style: s,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              const Text(
+                'Controls / Controles',
+                style: TextStyle(fontWeight: FontWeight.w600),
+              ),
+              const SizedBox(height: 8),
+              Row(
+                children: <Widget>[
+                  Expanded(
+                    child: SwitchListTile(
+                      title: const Text('Show grid overlay'),
+                      value: showGrid,
+                      onChanged: onToggleGrid,
+                      dense: true,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: SwitchListTile(
+                      title: const Text('Simulate size (sliders)'),
+                      value: simulateSize,
+                      onChanged: onToggleSim,
+                      dense: true,
+                    ),
+                  ),
+                ],
+              ),
+              if (simulateSize) ...<Widget>[
+                const SizedBox(height: 8),
+                const Text('Width'),
+                Slider(
+                  min: 320,
+                  max: 2560,
+                  divisions: 224,
+                  label: simWidth.toStringAsFixed(0),
+                  value: simWidth.clamp(320, 2560),
+                  onChanged: onWidthChanged,
+                ),
+                const Text('Height'),
+                Slider(
+                  min: 480,
+                  max: 1600,
+                  divisions: 112,
+                  label: simHeight.toStringAsFixed(0),
+                  value: simHeight.clamp(480, 1600),
+                  onChanged: onHeightChanged,
+                ),
+              ],
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
 
-        // Si usas jwt.countRef:
-        // final int count = Utils.getIntegerFromDynamic(
-        //   Utils.mapFromDynamic(raw['jwt'])['countRef'],
-        // );
-        // Para mantener el ejemplo original, se deja 'count' toplevel:
-        final int count = Utils.getIntegerFromDynamic(raw['count']);
+class _MetricsCard extends StatelessWidget {
+  const _MetricsCard({
+    required this.device,
+    required this.size,
+    required this.work,
+    required this.cols,
+    required this.margin,
+    required this.gutter,
+    required this.colW,
+    required this.drawer,
+    required this.appBarHeight,
+    required this.heightWithoutAppBar,
+  });
 
-        return Row(
+  final ScreenSizeEnum device;
+  final Size size;
+  final Size work;
+  final int cols;
+  final double margin;
+  final double gutter;
+  final double colW;
+  final double drawer;
+  final double appBarHeight;
+  final double heightWithoutAppBar;
+
+  @override
+  Widget build(BuildContext context) {
+    final TextStyle s = Theme.of(context).textTheme.bodyMedium!;
+    final String deviceName = device.toString().split('.').last.toUpperCase();
+
+    String fmtSize(Size x) =>
+        '${x.width.toStringAsFixed(0)} × ${x.height.toStringAsFixed(0)}';
+    String px(num v) => '${v.toStringAsFixed(0)} px';
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: DefaultTextStyle(
+          style: s,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              const Text(
+                'Metrics / Métricas',
+                style: TextStyle(fontWeight: FontWeight.w600),
+              ),
+              const SizedBox(height: 8),
+              Text('Device: $deviceName'),
+              Text('Viewport size: ${fmtSize(size)}'),
+              Text('Work area: ${fmtSize(work)}  (drawer: ${px(drawer)})'),
+              Text('Columns: $cols  •  Column width: ${px(colW)}'),
+              Text(
+                'Margin width: ${px(margin)}  •  Gutter width: ${px(gutter)}',
+              ),
+              Text(
+                'AppBar height: ${px(appBarHeight)}  •  Height w/o AppBar: ${px(heightWithoutAppBar)}',
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _GridPreview extends StatelessWidget {
+  const _GridPreview({
+    required this.showGrid,
+    required this.cols,
+    required this.margin,
+    required this.gutter,
+    required this.columnWidth,
+    required this.workArea,
+  });
+
+  final bool showGrid;
+  final int cols;
+  final double margin;
+  final double gutter;
+  final double columnWidth;
+  final Size workArea;
+
+  @override
+  Widget build(BuildContext context) {
+    const double previewHeight = 180;
+    final List<Widget> rowChildren = <Widget>[];
+    for (int i = 0; i < cols; i++) {
+      rowChildren.add(
+        Container(
+          width: columnWidth,
+          height: previewHeight,
+          decoration: BoxDecoration(
+            color: Colors.blueGrey.withValues(alpha: .25),
+            borderRadius: BorderRadius.circular(4),
+            border: Border.all(color: Colors.blueGrey.withValues(alpha: 0.5)),
+          ),
+        ),
+      );
+      if (i < cols - 1) {
+        rowChildren.add(SizedBox(width: gutter));
+      }
+    }
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
           children: <Widget>[
-            const Text(
-              'Raw count: ',
-              style: TextStyle(fontWeight: FontWeight.bold),
+            const Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                'Grid preview / Vista de grilla',
+                style: TextStyle(fontWeight: FontWeight.w600),
+              ),
             ),
-            Text('$raw : $count'),
+            const SizedBox(height: 12),
+            Container(
+              width: workArea.width + margin * 2,
+              constraints: const BoxConstraints(minHeight: previewHeight + 24),
+              decoration: BoxDecoration(
+                color: Colors.black12.withValues(alpha: 0.96),
+                borderRadius: BorderRadius.circular(6),
+              ),
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: margin),
+                child: Stack(
+                  children: <Widget>[
+                    Positioned.fill(
+                      child: Container(
+                        margin: const EdgeInsets.symmetric(vertical: 12),
+                        decoration: BoxDecoration(
+                          color: Colors.teal.withValues(alpha: 0.94),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                      ),
+                    ),
+                    if (showGrid)
+                      SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          child: Row(children: rowChildren),
+                        ),
+                      ),
+                    if (!showGrid)
+                      const Positioned.fill(
+                        child: Center(
+                          child: Text(
+                            'Grid overlay disabled',
+                            style: TextStyle(fontStyle: FontStyle.italic),
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            ),
           ],
-        );
-      },
+        ),
+      ),
     );
   }
 }

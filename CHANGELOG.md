@@ -3,6 +3,249 @@
 This document follows the guidelines of [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.31.0] - 2025-10-13
+
+### Resumen práctico
+
+Publicación acumulada que consolida **sesión**, **BD WebSocket JSON-first**, y **utilidades de
+dominio** con ejemplos listos para copiar. Mejora la **testabilidad**, clarifica **contratos** y
+simplifica la **integración** en apps nuevas o existentes.
+
+### Puntos clave
+
+- **Sesión**
+  - `BlocSession` ahora extiende `BlocModule` (ciclo de vida unificado) y expone **hooks** de
+    efectos secundarios por cambio de estado.
+  - Nuevo `getCurrentUser()` con **debounce** y emisión
+    `Authenticating → Authenticated/SessionError`.
+  - Constructor simplificado y *factory* `BlocSession.fromRepository(...)` para *quick start*.
+- **BD WebSocket (JSON-first)**
+  - Nuevo **`ServiceWsDb`** y **`GatewayWsDbImpl`** con **multiplexing** y *reference counting*; *
+    *`FakeServiceWsDb`** en memoria para pruebas.
+  - BLoC `BlocWsDatabase` con ciclo de vida documentado y helpers (`existsDoc`, `ensureDoc`,
+    `mutateDoc`, `patchDoc`).
+- **Dominio / Utils**
+  - `ModelAppVersion` inmutable (UTC, `meta` inmodificable, `deepEqualsMap`/`deepHash`).
+  - Utilidades de igualdad/`hash` profundas para mapas y listas.
+
+### Ejemplos incluidos
+
+- **Contacts CRUD (WebSocket DB):** `bloc_ws_db_example.dart` (form + visor de estado, colección en
+  vivo).
+- **Ledger 2024:** `ledger_example.dart` (torta y barras con `CustomPainter`, sin dependencias
+  externas).
+
+### Documentación
+
+- Contratos ampliados y ejemplos para **use cases de sesión**, `GatewayAuth/RepositoryAuth`,
+  `FacadeCrudDatabaseUsecases`, `BlocWsDatabase` y `ModelAppVersion`.
+- Aclaraciones de ciclo de vida (`dispose`, *watches* compartidos, “último evento gana”).
+
+### Pruebas
+
+- Suites completas para `GatewayAuthImpl`, `RepositoryAuthImpl`, `BlocSession` (hooks y
+  `getCurrentUser`), `GatewayWsDbImpl`, `FakeServiceWsDb`, `BlocWsDatabase` y `ModelAppVersion`.
+
+### Migración rápida
+
+- **WS DB renombres**
+
+  - `ServiceWsDatabase` → `ServiceWsDb`
+  - `FakeServiceWsDatabase` → `FakeServiceWsDb`
+  - `GatewayWsDatabaseImpl` → `GatewayWsDbImpl`
+
+- **Contrato JSON-first**
+
+  - Si usabas `ServiceWsDatabase<T>`, mueve el mapeo de tipos al **Repository/Gateway** y trabaja
+    con
+    `Map<String, dynamic>`.
+
+- **BlocSession**
+
+  - Reemplaza constructores antiguos por el simplificado o `BlocSession.fromRepository`.
+  - Si utilizas `authStateChanges`, consume `Either<ErrorItem, Map<String, dynamic>?>`.
+
+- **Hooks de sesión**
+
+  - Usa `addFunctionToProcessTValueOnStream(key, fn, executeNow)` para efectos en segundo plano sin
+    suscribirte al `Stream`.
+
+> **Notas:** Cambios no rompientes salvo renombres de WS DB y ajustes de constructor/streams en
+> sesión. Los ejemplos sirven como guía de integración inmediata.
+
+## [1.30.5] - 2025-10-13
+
+### Added
+
+- **Session – `BlocSession.getCurrentUser()`**
+    - Método público para consultar el **usuario actual** desde el repositorio.
+    - Emite `Authenticating` → `Authenticated` (éxito) o `SessionError` (falla).
+    - **Debounce** interno para evitar llamadas redundantes ante interacciones rápidas de UI.
+    - Lanza `StateError` si se invoca tras `dispose()`.
+- **Example – WebSocket DB (Contacts CRUD)**
+    - `bloc_ws_db_example.dart`: demo completa de CRUD + *realtime* con
+      `BlocWsDatabase<ContactModel>` y `ContactsCollectionBloc`.
+    - Muestra `WsDbState`, *transition log* y lista en vivo.
+    - Arquitectura ilustrada: `FakeServiceWsDb` → `GatewayWsDbImpl` → `RepositoryWsDatabaseImpl` →
+      `FacadeWsDatabaseUsecases` → `BlocWsDatabase`.
+
+### Changed
+
+- **Use Cases (Session):**
+    - `GetCurrentUserUsecase` ahora invoca correctamente `repository.getCurrentUser()` **sin
+      parámetros**.
+
+### Docs
+
+- **Session Usecases:** DartDoc ampliado con contratos, parámetros, valores de retorno y ejemplos
+  para:
+    - `GetCurrentUserUsecase`, `LogInSilentlyUsecase`, `LogInUserAndPasswordUsecase`,
+      `LoginWithGoogleUsecase`, `LogOutUsecase`, `RecoverPasswordUsecase`,
+      `RefreshSessionUsecase`, `SignInUserAndPasswordUsecase`,
+      `WatchAuthStateChangesUsecase`, y el agregador `SessionUsecases`.
+- **CRUD Facade:** documentación extendida de `FacadeCrudDatabaseUsecases`
+  (visión general, ejemplo integral, clarificación de constructores y distinción entre
+  *use cases* individuales y métodos de conveniencia).
+
+### Tests
+
+- **BlocSession:** `bloc_session_get_current_user_test.dart`
+    - Cubre éxito/falla, lógica de **debounce** y comportamiento post-`dispose()`.
+
+> **Notas:** Cambios no rompientes. Asegúrate de no invocar `getCurrentUser()` después de
+`dispose()` y considera el **debounce** al escribir pruebas o automatizaciones de UI.
+
+## [1.30.4] - 2025-10-12
+
+### Added
+
+- **DB (JSON-first):** `ServiceWsDb` — servicio abstracto estilo WebSocket/NoSQL que opera *
+  *exclusivamente** con `Map<String, dynamic>`:
+  - Operaciones: `save`, `read`, `delete`, `documentStream`, `collectionStream`.
+- **DB Fake:** `FakeServiceWsDb` — implementación en memoria para pruebas/desarrollo:
+  - Latencia configurable, simulación de errores, *deep copy*, *de-dupe* por contenido y *hooks*
+    para inspección interna.
+- **Gateway WS:** `GatewayWsDbImpl` — capa multiplexada sobre `ServiceWsDb`:
+  - **Multiplexing:** comparte una sola suscripción por `docId`.
+  - **Reference counting:** `watch` / `detachWatch` y `releaseDoc` para *lifecycle* eficiente;
+    `dispose` para *teardown* global.
+  - **Error mapping:** todo a `Either<ErrorItem, …>` vía `ErrorMapper`.
+  - **Configuración:** `idKey` personalizado, `readAfterWrite`, `treatEmptyAsMissing`.
+- **Mapper de errores:** `WsDbErrorMiniMapper` para mapear `ArgumentError`/`StateError` a JSON de
+  error estructurado.
+- **Example:** `bloc_ws_db_example.dart` — demo completa CRUD + *realtime* de **Contactos**:
+  - UI de dos paneles (formulario + visor de estado).
+  - `BlocWsDatabase<ContactModel>` (documento) y `ContactsCollectionBloc` (colección).
+  - Muestra `WsDbState`, *ledger* de transiciones y lista en vivo.
+  - Flujo recomendado: `FakeServiceWsDb` → `GatewayWsDbImpl` → `RepositoryWsDatabaseImpl` →
+    `FacadeWsDatabaseUsecases` → `BlocWsDatabase`.
+
+### Changed
+
+- **Estandarización de nombres (WS DB):**
+  - `ServiceWsDatabase` → **`ServiceWsDb`**
+  - `FakeServiceWsDatabase` → **`FakeServiceWsDb`**
+  - `GatewayWsDatabaseImpl` → **`GatewayWsDbImpl`**
+
+### Deprecated
+
+- **`ServiceWsDatabase<T>`:** marcado como `@Deprecated` en favor del enfoque **JSON-first**; el
+  *type mapping* queda en Repository/Gateway.
+
+### Docs
+
+- **`bloc_ws_database.dart`:**
+  - Aclara que publica un único *stream* de `WsDbState` (el **último evento gana** cuando hay
+    múltiples `watch` activos).
+  - Documenta `dispose`: *best-effort* para desprender *watches* y **no** dispone *stacks*
+    compartidos.
+  - Mejora la descripción de ciclo de vida de *watch* (`startWatch`, `stopWatch`, `stopAllWatches`).
+
+### Tests
+
+- **FakeServiceWsDb:** suite integral (operaciones básicas, configuración, manejo de errores).
+- **GatewayWsDbImpl:** lectura, escritura, borrado y *watch*; mapeo de errores y *lifecycle* por
+  referencias.
+- **BlocWsDatabase:** `bloc_ws_database_ext_test.dart`
+  - Estado ante `read/write/delete` (`doc`, `loading`, `error`).
+  - `startWatch`/`stopWatch`/`stopAllWatches`, *facade* detachment y coordinación de `watchUntil`.
+  - *Lifecycle:* `dispose` cancela suscripciones sin disponer repos compartidos.
+  - *Helpers:* `existsDoc`, `ensureDoc`, `mutateDoc`, `patchDoc`.
+
+### Migration notes
+
+- **Renombres:** actualiza imports y tipos a `ServiceWsDb`, `FakeServiceWsDb`, `GatewayWsDbImpl`.
+- **Deprecación:** si usabas `ServiceWsDatabase<T>`, migra al contrato **JSON-first** (
+  `Map<String, dynamic>`); mueve el mapeo de tipos a Repository/Gateway.
+- **Comportamiento de `treatEmptyAsMissing`:** si tu servicio devuelve `{}` para *not found*,
+  habilita esta opción en el Gateway para recibir un `Left(ErrorItem)` consistente.
+- **Multiplexing:** si tenías *watch* duplicados por `docId`, ahora se comparte la suscripción;
+  considera llamar `detachWatch`/`releaseDoc` al desmontar widgets para liberar referencias.
+
+> **Notas:** No hay cambios incompatibles fuera de los **renombres** y la **deprecación** indicada.
+> El ejemplo de **Contactos** sirve como guía de integración sin dependencias externas.
+
+## [1.30.3] - 2025-10-12
+
+### Added
+
+- **Domain – `ModelAppVersion`:** modelo inmutable para versionamiento de apps.
+  - Campos: `id`, `appName`, `version`, `buildNumber`, `platform`, `channel`,
+    `minSupportedVersion`, `forceUpdate`, `artifactUrl`, `changelogUrl`, `commitSha`, `buildAt`.
+  - `fromJson`/`toJson` para (de)serialización robusta.
+
+- **Utils – Deep compare & hashing:**
+  - `Utils.deepEqualsDynamic` para comparar recursivamente valores dinámicos (listas/mapas
+    anidados).
+  - `Utils.deepEqualsMap` para comparar mapas con llaves `String`.
+  - `Utils.deepHash` para *hash* profundo (orden-independiente en mapas, orden-sensible en listas).
+
+### Changed
+
+- **ModelAppVersion (refactor):**
+  - **Inmutabilidad reforzada:** `buildAt` se almacena siempre en **UTC**; `meta` queda envuelto en
+    `Map.unmodifiable` tanto en el constructor como en `copyWith`.
+  - **Igualdad y hashing:** `operator==` usa `Utils.deepEqualsMap` para `meta`; `hashCode` usa
+    `Utils.deepHash` garantizando consistencia con la igualdad por contenido.
+  - **JSON:** `fromJson` normaliza llaves de `meta` y endurece el *parsing*; `toJson` serializa
+    `buildAt` como **UTC**.
+
+### Docs
+
+- **ModelAppVersion:** DartDoc detallada de contratos y comportamiento de JSON (UTC, `meta`
+  inmutable).
+- **Utils:** documentación y ejemplos de uso para `deepEqualsDynamic`, `deepEqualsMap` y `deepHash`.
+
+### Tests
+
+- **model_app_version_test.dart:**
+  - Garantías de inmutabilidad (UTC, `meta` inmodificable).
+  - Igualdad profunda y consistencia `hashCode`.
+  - Cobertura de `copyWith`.
+  - *Round-trip* JSON con mapas dinámicos y variaciones de zona horaria.
+
+## [1.30.2] - 2025-10-12
+
+### Added
+
+- **Session – Side-effect hooks en `BlocSession`:**
+  - `addFunctionToProcessTValueOnStream(key, callback, [executeNow=false])`: registra un *callback*
+    que se dispara en **cada** emisión de `SessionState`, con opción de ejecución inmediata usando
+    el estado actual.
+  - `deleteFunctionToProcessTValueOnStream(key)`: elimina el *callback* registrado por su clave.
+  - `containsFunctionToProcessValueOnStream(key)`: verifica si existe un *callback* para la clave
+    dada.
+
+### Tests
+
+- **bloc_session_hooks_test.dart**: cobertura completa para registro, ejecución inmediata,
+  eliminación, reemplazo y comportamiento de ciclo de vida (limpieza en `dispose()`).
+
+### Notes
+
+- Cambios **no rompientes**. Las APIs de hooks exponen de forma segura la funcionalidad subyacente
+  de `BlocGeneral` sin modificar el flujo de sesión existente.
+
 ## [1.30.1] - 2025-09-24
 
 ### Changed
