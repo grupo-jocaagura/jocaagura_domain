@@ -3,6 +3,75 @@
 This document follows the guidelines of [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.31.0] - 2025-10-13
+
+### Resumen práctico
+
+Publicación acumulada que consolida **sesión**, **BD WebSocket JSON-first**, y **utilidades de
+dominio** con ejemplos listos para copiar. Mejora la **testabilidad**, clarifica **contratos** y
+simplifica la **integración** en apps nuevas o existentes.
+
+### Puntos clave
+
+- **Sesión**
+  - `BlocSession` ahora extiende `BlocModule` (ciclo de vida unificado) y expone **hooks** de
+    efectos secundarios por cambio de estado.
+  - Nuevo `getCurrentUser()` con **debounce** y emisión
+    `Authenticating → Authenticated/SessionError`.
+  - Constructor simplificado y *factory* `BlocSession.fromRepository(...)` para *quick start*.
+- **BD WebSocket (JSON-first)**
+  - Nuevo **`ServiceWsDb`** y **`GatewayWsDbImpl`** con **multiplexing** y *reference counting*; *
+    *`FakeServiceWsDb`** en memoria para pruebas.
+  - BLoC `BlocWsDatabase` con ciclo de vida documentado y helpers (`existsDoc`, `ensureDoc`,
+    `mutateDoc`, `patchDoc`).
+- **Dominio / Utils**
+  - `ModelAppVersion` inmutable (UTC, `meta` inmodificable, `deepEqualsMap`/`deepHash`).
+  - Utilidades de igualdad/`hash` profundas para mapas y listas.
+
+### Ejemplos incluidos
+
+- **Contacts CRUD (WebSocket DB):** `bloc_ws_db_example.dart` (form + visor de estado, colección en
+  vivo).
+- **Ledger 2024:** `ledger_example.dart` (torta y barras con `CustomPainter`, sin dependencias
+  externas).
+
+### Documentación
+
+- Contratos ampliados y ejemplos para **use cases de sesión**, `GatewayAuth/RepositoryAuth`,
+  `FacadeCrudDatabaseUsecases`, `BlocWsDatabase` y `ModelAppVersion`.
+- Aclaraciones de ciclo de vida (`dispose`, *watches* compartidos, “último evento gana”).
+
+### Pruebas
+
+- Suites completas para `GatewayAuthImpl`, `RepositoryAuthImpl`, `BlocSession` (hooks y
+  `getCurrentUser`), `GatewayWsDbImpl`, `FakeServiceWsDb`, `BlocWsDatabase` y `ModelAppVersion`.
+
+### Migración rápida
+
+1) **WS DB renombres**
+
+- `ServiceWsDatabase` → `ServiceWsDb`
+- `FakeServiceWsDatabase` → `FakeServiceWsDb`
+- `GatewayWsDatabaseImpl` → `GatewayWsDbImpl`
+
+2) **Contrato JSON-first**
+
+- Si usabas `ServiceWsDatabase<T>`, mueve el mapeo de tipos al **Repository/Gateway** y trabaja con
+  `Map<String, dynamic>`.
+
+3) **BlocSession**
+
+- Reemplaza constructores antiguos por el simplificado o `BlocSession.fromRepository`.
+- Si utilizas `authStateChanges`, consume `Either<ErrorItem, Map<String, dynamic>?>`.
+
+4) **Hooks de sesión**
+
+- Usa `addFunctionToProcessTValueOnStream(key, fn, executeNow)` para efectos en segundo plano sin
+  suscribirte al `Stream`.
+
+> **Notas:** Cambios no rompientes salvo renombres de WS DB y ajustes de constructor/streams en
+> sesión. Los ejemplos sirven como guía de integración inmediata.
+
 ## [1.30.5] - 2025-10-13
 
 ### Added
