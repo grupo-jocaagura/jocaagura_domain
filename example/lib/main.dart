@@ -2070,8 +2070,8 @@ class WsDatabaseUserDemoPage extends StatefulWidget {
 
 class _WsDatabaseUserDemoPageState extends State<WsDatabaseUserDemoPage> {
   // Capas (5): Service → Gateway → Repository → Facade → Bloc
-  late final FakeServiceWsDatabase _service;
-  late final GatewayWsDatabaseImpl _gateway;
+  late final FakeServiceWsDb _service;
+  late final GatewayWsDbImpl _gateway;
   late final RepositoryWsDatabaseImpl<UserModel> _repository;
   late final FacadeWsDatabaseUsecases<UserModel> _facade;
   late final BlocWsDatabase<UserModel> _bloc;
@@ -2094,11 +2094,11 @@ class _WsDatabaseUserDemoPageState extends State<WsDatabaseUserDemoPage> {
     super.initState();
 
     // (1) Service: fake WebSocket-like DB en memoria (streams por doc/colección).
-    _service = FakeServiceWsDatabase();
+    _service = FakeServiceWsDb();
 
     // (2) Gateway: mapea excepciones a ErrorItem, inyecta 'id',
     //     multiplexa watch por docId y maneja payload errors.
-    _gateway = GatewayWsDatabaseImpl(
+    _gateway = GatewayWsDbImpl(
       service: _service,
       collection: 'users',
       // idKey/readAfterWrite/treatEmptyAsMissing → defaults conservadores.
@@ -2536,7 +2536,7 @@ enum SeedMode {
 /// ajusta el merge en `_ensureCountField/_tick` y la vista `_RawCountView`.
 class WsDocTicker {
   WsDocTicker({
-    required ServiceWsDatabase<Map<String, dynamic>> service,
+    required ServiceWsDb service,
     required String collection,
     required String docId,
     this.interval = const Duration(seconds: 1),
@@ -2546,7 +2546,7 @@ class WsDocTicker {
         _collection = collection,
         _docId = docId;
 
-  final ServiceWsDatabase<Map<String, dynamic>> _service;
+  final ServiceWsDb _service;
   final String _collection;
   String _docId;
   final Duration interval;
@@ -2674,7 +2674,7 @@ class _RawCountView extends StatelessWidget {
     required this.docId,
   });
 
-  final ServiceWsDatabase<Map<String, dynamic>> service;
+  final ServiceWsDb service;
   final String collection;
   final String docId;
 
