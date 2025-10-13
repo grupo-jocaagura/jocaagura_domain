@@ -1,24 +1,75 @@
 part of '../../../../jocaagura_domain.dart';
 
-/// Minimal, transport-agnostic CRUD facade (no realtime/watch).
+/// Provide a transport-agnostic CRUD facade (no realtime/watch).
 ///
-/// Useful for REST or any synchronous database where you only need
-/// document-level CRUD, existence helpers, mutations, and batch ops.
+/// This facade wires the standard CRUD use cases on top of a
+/// `RepositoryWsDatabase<T>` and exposes both:
+/// - The **use case instances** (e.g., [read], [write], …), and
+/// - **Convenience methods** (e.g., [readDoc], [writeDoc], …).
 ///
-/// Exposes both the **use case instances** and **convenience methods**.
+/// When to use:
+/// - REST-like or synchronous databases where you do not need realtime streams.
+/// - Service layers that want a small, explicit surface for document-level ops.
 ///
-/// ### Example
+/// Design notes:
+/// - Batch operations are executed **sequentially** for determinism (helps
+///   testing and ordering). Consider repository-level bulk ops for throughput.
+/// - [existsDoc] relies on the repository mapping "not found" to
+///   `DatabaseErrorItems.notFound.code`.
+///
+/// Example:
 /// ```dart
-/// final crud = FacadeCrudDatabaseUsecases<UserModel>.fromRepository(
-///   repository: repo,
-///   fromJson: UserModel.fromJson,
-/// );
+/// void main() async {
+///   final RepositoryWsDatabase<UserModel> repo = MyRepo<UserModel>();
 ///
-/// final got = await crud.readDoc('u1');
-/// final saved = await crud.writeDoc('u1', someUser);
-/// final del = await crud.deleteDoc('u1');
+///   final FacadeCrudDatabaseUsecases<UserModel> crud =
+///       FacadeCrudDatabaseUsecases<UserModel>.fromRepository(
+///     repository: repo,
+///     fromJson: UserModel.fromJson,
+///   );
+///
+///   // Create/update
+///   final UserModel alice = UserModel(id: 'u1', email: 'a@b.com');
+///   final writeRes = await crud.writeDoc('u1', alice);
+///
+///   // Read
+///   final readRes = await crud.readDoc('u1');
+///
+///   // Exists
+///   final existsRes = await crud.existsDoc('u1');
+///
+///   // Patch (partial JSON)
+///   final patchRes = await crud.patchDoc('u1', <String, dynamic>{'displayName': 'Alice'});
+///
+///   // Mutate (read–modify–write)
+///   final mutateRes = await crud.mutateDoc('u1', (u) => u.copyWith(displayName: 'Alice+'));
+///
+///   // Ensure
+///   final ensureRes = await crud.ensureDoc(
+///     docId: 'u2',
+///     create: () => UserModel(id: 'u2', email: 'x@y.com'),
+///     updateIfExists: (u) => u.copyWith(flag: true),
+///   );
+///
+///   // Many
+///   final readManyRes  = await crud.readDocs(<String>['u1','u2']);
+///   final writeManyRes = await crud.writeDocs(<String, UserModel>{'u1': alice});
+///   final deleteManyRes= await crud.deleteDocs(<String>['u1','u2']);
+///
+///   // Delete
+///   final delRes = await crud.deleteDoc('u1');
+/// }
 /// ```
 class FacadeCrudDatabaseUsecases<T extends Model> {
+  /// Creates a CRUD facade by composing explicit use cases.
+  ///
+  /// Parameters:
+  /// - [repository]: underlying repository (WS/REST/etc.).
+  /// - [read]/[write]/[delete]/…: injected use case instances.
+  ///
+  /// Notes:
+  /// - Prefer [FacadeCrudDatabaseUsecases.fromRepository] unless you need
+  ///   custom wiring (e.g., specialized mappers or instrumentation).
   FacadeCrudDatabaseUsecases({
     required this.repository,
     required this.read,
@@ -33,7 +84,19 @@ class FacadeCrudDatabaseUsecases<T extends Model> {
     required this.deleteMany,
   });
 
-  /// Convenience factory wiring the common defaults from a repository.
+  /// Convenience factory that wires common defaults from a repository.
+  ///
+  /// Parameters:
+  /// - [repository]: the underlying repository.
+  /// - [fromJson]: factory used by [patchDoc] to rebuild `T` after merging JSON.
+  /// - [myMapper]: optional error mapper for *many* operations; defaults to
+  ///   [DefaultErrorMapper].
+  ///
+  /// Returns:
+  /// - A fully-wired CRUD facade with deterministic (sequential) *many* ops.
+  ///
+  /// Caveats:
+  /// - Ensure [fromJson] matches the JSON produced by `T.toJson()`.
   factory FacadeCrudDatabaseUsecases.fromRepository({
     required RepositoryWsDatabase<T> repository,
     required T Function(Map<String, dynamic>) fromJson,
@@ -56,10 +119,10 @@ class FacadeCrudDatabaseUsecases<T extends Model> {
     );
   }
 
-  /// Underlying repository (can be WS, REST, etc.).
+  /// Underlying repository (WS, REST, etc.).
   final RepositoryWsDatabase<T> repository;
 
-  // Use cases (instances)
+  /// Use case instances (single-document operations and helpers).
   final ReadDocUseCase<T> read;
   final WriteDocUseCase<T> write;
   final DeleteDocUseCase<T> delete;
