@@ -3,6 +3,48 @@
 This document follows the guidelines of [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.30.5] - 2025-10-13
+
+### Added
+
+- **Session – `BlocSession.getCurrentUser()`**
+    - Método público para consultar el **usuario actual** desde el repositorio.
+    - Emite `Authenticating` → `Authenticated` (éxito) o `SessionError` (falla).
+    - **Debounce** interno para evitar llamadas redundantes ante interacciones rápidas de UI.
+    - Lanza `StateError` si se invoca tras `dispose()`.
+- **Example – WebSocket DB (Contacts CRUD)**
+    - `bloc_ws_db_example.dart`: demo completa de CRUD + *realtime* con
+      `BlocWsDatabase<ContactModel>` y `ContactsCollectionBloc`.
+    - Muestra `WsDbState`, *transition log* y lista en vivo.
+    - Arquitectura ilustrada: `FakeServiceWsDb` → `GatewayWsDbImpl` → `RepositoryWsDatabaseImpl` →
+      `FacadeWsDatabaseUsecases` → `BlocWsDatabase`.
+
+### Changed
+
+- **Use Cases (Session):**
+    - `GetCurrentUserUsecase` ahora invoca correctamente `repository.getCurrentUser()` **sin
+      parámetros**.
+
+### Docs
+
+- **Session Usecases:** DartDoc ampliado con contratos, parámetros, valores de retorno y ejemplos
+  para:
+    - `GetCurrentUserUsecase`, `LogInSilentlyUsecase`, `LogInUserAndPasswordUsecase`,
+      `LoginWithGoogleUsecase`, `LogOutUsecase`, `RecoverPasswordUsecase`,
+      `RefreshSessionUsecase`, `SignInUserAndPasswordUsecase`,
+      `WatchAuthStateChangesUsecase`, y el agregador `SessionUsecases`.
+- **CRUD Facade:** documentación extendida de `FacadeCrudDatabaseUsecases`
+  (visión general, ejemplo integral, clarificación de constructores y distinción entre
+  *use cases* individuales y métodos de conveniencia).
+
+### Tests
+
+- **BlocSession:** `bloc_session_get_current_user_test.dart`
+    - Cubre éxito/falla, lógica de **debounce** y comportamiento post-`dispose()`.
+
+> **Notas:** Cambios no rompientes. Asegúrate de no invocar `getCurrentUser()` después de
+`dispose()` y considera el **debounce** al escribir pruebas o automatizaciones de UI.
+
 ## [1.30.4] - 2025-10-12
 
 ### Added
