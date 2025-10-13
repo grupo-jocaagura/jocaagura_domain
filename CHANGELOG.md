@@ -48,26 +48,27 @@ simplifica la **integración** en apps nuevas o existentes.
 
 ### Migración rápida
 
-1) **WS DB renombres**
+- **WS DB renombres**
 
-- `ServiceWsDatabase` → `ServiceWsDb`
-- `FakeServiceWsDatabase` → `FakeServiceWsDb`
-- `GatewayWsDatabaseImpl` → `GatewayWsDbImpl`
+  - `ServiceWsDatabase` → `ServiceWsDb`
+  - `FakeServiceWsDatabase` → `FakeServiceWsDb`
+  - `GatewayWsDatabaseImpl` → `GatewayWsDbImpl`
 
-2) **Contrato JSON-first**
+- **Contrato JSON-first**
 
-- Si usabas `ServiceWsDatabase<T>`, mueve el mapeo de tipos al **Repository/Gateway** y trabaja con
-  `Map<String, dynamic>`.
+  - Si usabas `ServiceWsDatabase<T>`, mueve el mapeo de tipos al **Repository/Gateway** y trabaja
+    con
+    `Map<String, dynamic>`.
 
-3) **BlocSession**
+- **BlocSession**
 
-- Reemplaza constructores antiguos por el simplificado o `BlocSession.fromRepository`.
-- Si utilizas `authStateChanges`, consume `Either<ErrorItem, Map<String, dynamic>?>`.
+  - Reemplaza constructores antiguos por el simplificado o `BlocSession.fromRepository`.
+  - Si utilizas `authStateChanges`, consume `Either<ErrorItem, Map<String, dynamic>?>`.
 
-4) **Hooks de sesión**
+- **Hooks de sesión**
 
-- Usa `addFunctionToProcessTValueOnStream(key, fn, executeNow)` para efectos en segundo plano sin
-  suscribirte al `Stream`.
+  - Usa `addFunctionToProcessTValueOnStream(key, fn, executeNow)` para efectos en segundo plano sin
+    suscribirte al `Stream`.
 
 > **Notas:** Cambios no rompientes salvo renombres de WS DB y ajustes de constructor/streams en
 > sesión. Los ejemplos sirven como guía de integración inmediata.
