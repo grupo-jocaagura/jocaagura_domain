@@ -50,19 +50,20 @@ simplifica la **integración** en apps nuevas o existentes.
 
 1) **WS DB renombres**
 
-- `ServiceWsDatabase` → `ServiceWsDb`
-- `FakeServiceWsDatabase` → `FakeServiceWsDb`
-- `GatewayWsDatabaseImpl` → `GatewayWsDbImpl`
+  - `ServiceWsDatabase` → `ServiceWsDb`
+  - `FakeServiceWsDatabase` → `FakeServiceWsDb`
+  - `GatewayWsDatabaseImpl` → `GatewayWsDbImpl`
 
 2) **Contrato JSON-first**
 
-- Si usabas `ServiceWsDatabase<T>`, mueve el mapeo de tipos al **Repository/Gateway** y trabaja con
-  `Map<String, dynamic>`.
+  - Si usabas `ServiceWsDatabase<T>`, mueve el mapeo de tipos al **Repository/Gateway** y trabaja
+    con
+    `Map<String, dynamic>`.
 
 3) **BlocSession**
 
-- Reemplaza constructores antiguos por el simplificado o `BlocSession.fromRepository`.
-- Si utilizas `authStateChanges`, consume `Either<ErrorItem, Map<String, dynamic>?>`.
+  - Reemplaza constructores antiguos por el simplificado o `BlocSession.fromRepository`.
+  - Si utilizas `authStateChanges`, consume `Either<ErrorItem, Map<String, dynamic>?>`.
 
 4) **Hooks de sesión**
 
