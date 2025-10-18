@@ -67,4 +67,81 @@ void main() {
       expect(defaultStoreModel.formatedPhoneNumber2, '000 078 9012');
     });
   });
+  group('StoreModel', () {
+    test('Given address When toJson Then address is a JSON map (not string)',
+        () {
+      const StoreModel s = StoreModel(
+        id: 'id',
+        nit: 12345,
+        photoUrl: 'https://x/p.jpg',
+        coverPhotoUrl: 'https://x/c.jpg',
+        email: 'e@x.com',
+        ownerEmail: 'o@x.com',
+        name: 'N',
+        alias: 'A',
+        address: defaultAddressModel,
+        phoneNumber1: 111,
+        phoneNumber2: 222,
+      );
+      final dynamic addr = s.toJson()['address'];
+      expect(addr, isA<Map<String, dynamic>>());
+    });
+
+    test('Given two equal stores When compare Then == true and hash equal', () {
+      const StoreModel a = StoreModel(
+        id: '1',
+        nit: 10,
+        photoUrl: 'p',
+        coverPhotoUrl: 'c',
+        email: 'a@x.com',
+        ownerEmail: 'o@x.com',
+        name: 'N',
+        alias: 'A',
+        address: defaultAddressModel,
+        phoneNumber1: 1,
+        phoneNumber2: 2,
+      );
+      const StoreModel b = StoreModel(
+        id: '1',
+        nit: 10,
+        photoUrl: 'p',
+        coverPhotoUrl: 'c',
+        email: 'a@x.com',
+        ownerEmail: 'o@x.com',
+        name: 'N',
+        alias: 'A',
+        address: defaultAddressModel,
+        phoneNumber1: 1,
+        phoneNumber2: 2,
+      );
+      expect(a == b, isTrue);
+      expect(a.hashCode, equals(b.hashCode));
+    });
+
+    test('Given nit When getVerificationNITNumber Then returns dv in [0,1..9]',
+        () {
+      final int dv = StoreModel.getVerificationNITNumber(900373106);
+      expect(dv, inInclusiveRange(0, 9));
+    });
+
+    test('Given fromJson Then roundtrip preserves shape and address map', () {
+      final Map<String, dynamic> json = <String, dynamic>{
+        'id': 'xyz',
+        'nit': 123,
+        'photoUrl': 'https://x/p.jpg',
+        'coverPhotoUrl': 'https://x/c.jpg',
+        'email': 'e@x.com',
+        'ownerEmail': 'o@x.com',
+        'name': 'Name',
+        'alias': 'Alias',
+        'address': defaultAddressModel.toJson(),
+        'phoneNumber1': 555,
+        'phoneNumber2': 666,
+      };
+      final StoreModel s = StoreModel.fromJson(json);
+      final Map<String, dynamic> out = s.toJson();
+      expect(out['address'], isA<Map<String, dynamic>>());
+      expect(out['id'], 'xyz');
+    });
+  });
 }
