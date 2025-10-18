@@ -1,6 +1,21 @@
 part of 'package:jocaagura_domain/jocaagura_domain.dart';
 
-/// Enumerates the field names used in [ModelItem].
+/// Enumerates the JSON field names used by [ModelItem].
+///
+/// Contracts:
+/// - Keys are serialized by `name`, making the enum order irrelevant.
+/// - Keep names stable to avoid breaking persisted data.
+///
+/// Example:
+/// ```dart
+/// void main() {
+///   final Map<String, dynamic> json = <String, dynamic>{
+///     ModelItemEnum.id.name: 'SKU-123',
+///     ModelItemEnum.name.name: 'Surgical Mask',
+///   };
+///   print(json.keys); // (id, name)
+/// }
+/// ```
 enum ModelItemEnum {
   id,
   name,
@@ -10,38 +25,52 @@ enum ModelItemEnum {
   attributes,
 }
 
-/// Represents a minimal and extensible item (product, service, etc).
+/// Represents an immutable item (product/service) with metadata, price and attributes.
 ///
-/// The [id] may be empty if coming from a new instance and should be
-/// assigned via repository or backend. If empty, the [type.category]
-/// will be used as a fallback logical identifier in certain contexts.
+/// The `attributes` list is exposed as **read-only**; attempting to mutate it
+/// at runtime will throw. Use [copyWith] to derive new instances.
 ///
-/// ### Example
+/// ### Contracts
+/// - **Immutability:** lists are wrapped with `List.unmodifiable`.
+/// - **Identifier fallback:** when `id` is empty, `toJson()` uses
+///   `ModelCategory.normalizeCategory(type.category)` as a logical identifier.
+/// - **Serialization:** `{ id, name, description, type, price, attributes }`.
+///   `name` and `description` are serialized **trimmed**.
+///
+/// ### Minimal runnable example
 /// ```dart
-/// final item = ModelItem(
-///   id: '',
-///   name: 'Surgical Mask',
-///   description: 'Disposable protective face mask',
-///   type: ModelCategory(category: 'health-supplies', description: 'Health-related items'),
-///   price: ModelPrice(amount: 2500, mathPrecision: 2, currency: CurrencyEnum.COP),
-///   attributes: [
-///     ModelAttribute.from<String>('Color', 'Blue')!,
-///     ModelAttribute.from<int>('Stock', 50)!,
-///   ],
-/// );
+/// void main() {
+///   final ModelItem item = ModelItem(
+///     id: '',
+///     name: '  Surgical Mask  ',
+///     description: '  Disposable protective face mask  ',
+///     type: ModelCategory(category: 'health-supplies', description: 'Health-related items'),
+///     price: ModelPrice(amount: 2500, currency: CurrencyEnum.COP),
+///     attributes: <ModelAttribute<dynamic>>[
+///       AttributeModel.from<String>('Color', 'Blue')!,
+///       AttributeModel.from<int>('Stock', 50)!,
+///     ],
+///   );
 ///
-/// print(item.toJson());
+///   print(item.attributes.length); // 2
+///   print(item.toJson()['id']);    // normalized category when original id is empty
+///   // item.attributes.add(...);   // will throw (unmodifiable)
+/// }
 /// ```
+///
+/// ### Notes
+/// - `toString()` displays minor units and currency code from [ModelPrice]; for a
+///   human-friendly decimal string consider using a currency helper/formatter.
 class ModelItem extends Model {
-  /// Creates a new immutable [ModelItem].
-  const ModelItem({
+  ModelItem({
     required this.id,
     required this.name,
     required this.description,
     required this.type,
     required this.price,
-    this.attributes = const <ModelAttribute<dynamic>>[],
-  });
+    List<ModelAttribute<dynamic>> attributes =
+        const <ModelAttribute<dynamic>>[],
+  }) : attributes = List<ModelAttribute<dynamic>>.unmodifiable(attributes);
 
   /// Builds a [ModelItem] from JSON.
   factory ModelItem.fromJson(Map<String, dynamic> json) {
@@ -65,24 +94,25 @@ class ModelItem extends Model {
     );
   }
 
-  /// Unique identifier for the item.
+  /// Unique identifier for the item. May be empty on new instances.
   final String id;
 
-  /// Name of the item.
+  /// Human-readable name.
   final String name;
 
-  /// Description or details of the item.
+  /// Long description or details.
   final String description;
 
-  /// Logical type or tag associated to the item.
+  /// Logical classification/category.
   final ModelCategory type;
 
-  /// Price configuration of the item.
+  /// Price configuration.
   final ModelPrice price;
 
-  /// Optional extensible list of attributes (e.g., size, color, stock).
+  /// Read-only attribute list (e.g., size, color, stock).
   final List<ModelAttribute<dynamic>> attributes;
 
+  /// Serializes this item to JSON using trimmed `name`/`description`.
   @override
   Map<String, dynamic> toJson() {
     return <String, dynamic>{
@@ -97,6 +127,9 @@ class ModelItem extends Model {
     };
   }
 
+  /// Derives a new [ModelItem] overriding selected fields.
+  ///
+  /// The resulting instance preserves the read-only `attributes` contract.
   @override
   ModelItem copyWith({
     String? id,
@@ -116,6 +149,7 @@ class ModelItem extends Model {
     );
   }
 
+  /// Structural equality including attributes (order-sensitive).
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -128,6 +162,7 @@ class ModelItem extends Model {
           price == other.price &&
           Utils.listEquals(attributes, other.attributes);
 
+  /// Hash code consistent with equality.
   @override
   int get hashCode => Object.hash(
         id,
@@ -138,13 +173,14 @@ class ModelItem extends Model {
         Utils.listHash(attributes),
       );
 
+  /// Human-readable summary.
   @override
   String toString() =>
       '📦 Item($id): $name — ${type.category}, ${price.amount} @ ${price.currency}';
 }
 
 /// Default instance of [ModelItem] useful for test/fallback.
-const ModelItem defaultModelItem = ModelItem(
+final ModelItem defaultModelItem = ModelItem(
   id: '',
   name: 'Default Item',
   description: 'This is a placeholder item',
