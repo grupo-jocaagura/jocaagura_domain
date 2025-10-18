@@ -1,7 +1,7 @@
 name: jocaagura_domain
 description: "A package with domain models for all transversal applications"
 
-version: 1.31.0
+version: 1.31.1
 
 homepage: https://github.com/jocaagura/jocaagura_domain
 repository: https://github.com/jocaagura/jocaagura_domain

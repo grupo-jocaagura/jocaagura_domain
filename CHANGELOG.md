@@ -3,6 +3,24 @@
 This document follows the guidelines of [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.31.1] - 2025-10-18
+
+### Docs
+
+- **Bloc / Extension (domain):** se clarifica el **semántico seed** del stream:
+  - `Bloc.stream` es **seeded**: captura el valor **en el momento del getter** y **cada suscripción
+    ** recibe primero ese *seed* y luego las actualizaciones.
+  - Suscripción **ansiosa** a la fuente, comportamiento **broadcast**, y notas de ciclo de vida.
+  - Caso fuente ya completada: el suscriptor se **cierra sin emitir** el seed.
+- **Contratos explícitos:** pre/postcondiciones documentadas:
+  - **Sin historial ni backpressure**; solo el *seed* actual y eventos futuros.
+  - Llamar `add/value` tras `dispose()` **lanza** desde el controlador.
+- **Ejemplos ejecutables:** se añaden `void main()` de referencia para uso correcto.
+- **Consistencia:** DartDoc alineada entre `bloc.dart` y `entity_bloc.dart` (punto de extensión y
+  notas de ciclo de vida).
+
+> **Notas:** Solo documentación. **Sin cambios funcionales ni de API**.
+
 ## [1.31.0] - 2025-10-13
 
 ### Resumen práctico
