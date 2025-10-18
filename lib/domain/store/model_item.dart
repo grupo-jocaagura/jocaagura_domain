@@ -24,6 +24,10 @@ enum ModelItemEnum {
 ///   description: 'Disposable protective face mask',
 ///   type: ModelCategory(category: 'health-supplies', description: 'Health-related items'),
 ///   price: ModelPrice(amount: 2500, mathPrecision: 2, currency: CurrencyEnum.COP),
+///   attributes: [
+///     ModelAttribute.from<String>('Color', 'Blue')!,
+///     ModelAttribute.from<int>('Stock', 50)!,
+///   ],
 /// );
 ///
 /// print(item.toJson());
@@ -36,7 +40,7 @@ class ModelItem extends Model {
     required this.description,
     required this.type,
     required this.price,
-    this.attributes = const <AttributeModel<dynamic>>[],
+    this.attributes = const <ModelAttribute<dynamic>>[],
   });
 
   /// Builds a [ModelItem] from JSON.
@@ -77,7 +81,7 @@ class ModelItem extends Model {
   final ModelPrice price;
 
   /// Optional extensible list of attributes (e.g., size, color, stock).
-  final List<AttributeModel<dynamic>> attributes;
+  final List<ModelAttribute<dynamic>> attributes;
 
   @override
   Map<String, dynamic> toJson() {
@@ -89,7 +93,7 @@ class ModelItem extends Model {
       ModelItemEnum.type.name: type.toJson(),
       ModelItemEnum.price.name: price.toJson(),
       ModelItemEnum.attributes.name:
-          attributes.map((AttributeModel<dynamic> e) => e.toJson()).toList(),
+          attributes.map((ModelAttribute<dynamic> e) => e.toJson()).toList(),
     };
   }
 
@@ -100,7 +104,7 @@ class ModelItem extends Model {
     String? description,
     ModelCategory? type,
     ModelPrice? price,
-    List<AttributeModel<dynamic>>? attributes,
+    List<ModelAttribute<dynamic>>? attributes,
   }) {
     return ModelItem(
       id: id ?? this.id,

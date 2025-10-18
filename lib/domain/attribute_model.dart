@@ -1,5 +1,8 @@
 part of '../jocaagura_domain.dart';
 
+/// Alias for backwards compatibility.
+typedef ModelAttribute<T> = AttributeModel<T>;
+
 enum AttributeEnum {
   name,
   value,
@@ -89,6 +92,29 @@ class AttributeModel<T> extends Model {
   @override
   String toString() {
     return jsonEncode(toJson());
+  }
+
+  /// Factory helper for safely creating typed attributes.
+  ///
+  /// Ensures value is valid and compatible with Firestore.
+  /// Returns null if type is not supported.
+  static AttributeModel<T>? from<T>(String name, T value) {
+    if (isDomanCompatible(value)) {
+      return AttributeModel<T>(name: name, value: value);
+    }
+    return null;
+  }
+
+  /// Internal check for Firestore-compatible types.
+  /// Supports: String, num, bool, DateTime, Map, List, Null, etc.
+  static bool isDomanCompatible(dynamic value) {
+    return value == null ||
+        value is String ||
+        value is num ||
+        value is bool ||
+        value is DateTime ||
+        value is Map ||
+        value is List;
   }
 }
 
