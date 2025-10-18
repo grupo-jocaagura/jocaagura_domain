@@ -37,18 +37,35 @@ abstract class EntityBloc {
   void dispose();
 }
 
-/// [RepeatLastValueExtension] Retorna un nuevo Stream que repite el último valor emitido por este Stream.
+/// Re-expose a stream as a broadcast stream that **seeds** each subscription with [lastValue],
+/// then forwards all subsequent events from the source.
 ///
-/// [lastValue] es el último valor emitido por este Stream, que se repetirá en el nuevo Stream.
-/// Si este Stream no emitió ningún valor, el [lastValue] será el primer valor emitido por el nuevo Stream.
+/// ### Semantics
+/// - The source is listened to **immediately** (eager) when this method is called,
+///   not when the returned stream gets its first subscriber.
+/// - The [lastValue] is the value captured **at call time**. Every subscription to the
+///   returned stream receives this captured value **first**, then all forwarded updates.
+/// - If the source stream has already completed by the time a subscriber attaches,
+///   the returned stream **closes without emitting** the seed.
 ///
-/// Si [onCancel] es llamado en el nuevo Stream, se quitará el controlador de este Stream de la lista de controladores actuales.
+/// ### Notes
+/// - Backpressure/pause/resume are not propagated to the source subscription.
+/// - Consider keeping a single returned stream per holder when feasible to avoid
+///   opening multiple source listeners.
 ///
-/// Si [onError] es llamado en este Stream, el error será propagado al nuevo Stream y se cerrará el controlador del nuevo Stream.
+/// ### Example
+/// ```dart
+/// void main() async {
+///   final StreamController<int> src = StreamController<int>.broadcast();
+///   final Stream<int> seeded = src.stream(42); // seed captured now
 ///
-/// Si [onDone] es llamado en este Stream, el nuevo Stream cerrará su controlador y no emitirá más eventos.
-/// Creates a new instance of the `Stream` that repeats the `lastValue` parameter
-/// whenever a new subscription is made.
+///   // Later ...
+///   seeded.listen(print); // prints: 42 (seed), then forwarded values
+///   src.add(43);          // prints: 43
+///
+///   await src.close();    // downstream completes
+/// }
+/// ```
 extension RepeatLastValueExtension<T> on Stream<T> {
   Stream<T> call(T lastValue) {
     bool done = false;

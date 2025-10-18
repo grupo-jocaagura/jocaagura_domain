@@ -1,6 +1,44 @@
 part of '../jocaagura_domain.dart';
 
-/// [Bloc] A generic class that implements a reactive programming pattern using Streams.
+/// Implement a lightweight reactive holder that exposes a value and a broadcast stream.
+///
+/// This base class keeps a current value of type `T` and notifies subscribers
+/// through a broadcast `Stream`. The stream is **seeded** using a custom extension
+/// so that each subscription receives an initial value followed by updates.
+///
+/// ### Stream seeding semantics
+/// - Accessing [stream] captures the **current** [value] at **getter time** (the "seed").
+/// - Every new subscription to that returned stream receives the **captured seed first**,
+///   then all subsequent updates.
+/// - Each access to [stream] creates a new forwarded stream with its **own** captured seed.
+/// - The forwarding is **eager**: the underlying source stream is listened to immediately,
+///   even if no downstream subscriber attaches to the returned stream.
+/// - If the underlying stream has already completed when a subscriber attaches,
+///   the returned stream closes **without emitting the seed**.
+///
+/// ### Example
+/// ```dart
+/// void main() {
+///   final MyBloc bloc = MyBloc(0);
+///
+///   final Stream<int> s1 = bloc.stream; // captures seed = 0
+///   bloc.value = 1;
+///
+///   s1.listen((int v) {
+///     // prints: 0 (seed captured at getter time), then 1, 2, ...
+///     print(v);
+///   });
+///
+///   bloc.value = 2;
+/// }
+/// ```
+///
+/// ### Contracts
+/// - Setting [value] emits the new value on the stream while the controller is open.
+/// - Adding to the stream after disposal will throw [StateError] from the underlying controller.
+/// - This class does not persist history nor provides backpressure.
+///
+/// Subclasses may build richer behaviors on top of this primitive.
 abstract class Bloc<T> {
   /// [Bloc] Constructs a new `Bloc` instance with the given `initialValue`.
   ///
@@ -31,6 +69,9 @@ abstract class Bloc<T> {
   /// final myBloc = MyBloc('initial value');
   /// myBloc.stream.listen((value) => print(value)); // 'initial value'
   /// ```
+  /// Expose a broadcast stream seeded with the [value] captured at getter time.
+  ///
+  /// See class-level docs for the exact seeding semantics and lifecycle notes.
   Stream<T> get stream => _streamController.stream(value);
 
   /// [isClosed] access granted to check if the current _streamController is
@@ -44,6 +85,10 @@ abstract class Bloc<T> {
   /// final myBloc = MyBloc('initial value');
   /// myBloc.value = 'new value'; // The stream will emit 'new value'
   /// ```
+  /// Set a new value and notify subscribers via the stream.
+  ///
+  /// Throws:
+  /// - [StateError] if the stream controller has been closed.
   set value(T val) {
     _streamController.sink.add(val);
     _value = val;
