@@ -46,8 +46,10 @@ void main() {
     });
 
     test('6️⃣ Default instance serializes correctly', () {
-      expect(defaultModelCategory.toJson()['category'],
-          equals('default-category'));
+      expect(
+        defaultModelCategory.toJson()['category'],
+        equals('default-category'),
+      );
     });
   });
 }
