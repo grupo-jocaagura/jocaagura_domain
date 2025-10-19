@@ -60,6 +60,7 @@ part 'domain/dentist_app/diagnosis_model.dart';
 part 'domain/dentist_app/medical_record_model.dart';
 part 'domain/dentist_app/medical_treatment_model.dart';
 part 'domain/dentist_app/treatment_plan_model.dart';
+part 'domain/education/competency_standard.dart';
 part 'domain/either.dart';
 part 'domain/entity_bloc.dart';
 part 'domain/entity_provider.dart';
@@ -98,9 +99,7 @@ part 'domain/states/onboarding_step.dart';
 part 'domain/states/session_state.dart';
 part 'domain/states/ws_db_state.dart';
 part 'domain/store/model_category.dart';
-
 part 'domain/store/model_item.dart';
-
 part 'domain/store/model_price.dart';
 part 'domain/store_model.dart';
 part 'domain/ui/model_main_menu_model.dart';

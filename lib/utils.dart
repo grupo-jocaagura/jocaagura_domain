@@ -321,9 +321,12 @@ class Utils extends EntityUtil {
   /// Utils.getIntegerFromDynamic(42.9);              // 42
   /// Utils.getIntegerFromDynamic(null);              // 0
   /// ```
-  static int getIntegerFromDynamic(dynamic value) {
+  static int getIntegerFromDynamic(
+    dynamic value, {
+    int defaultValue = 0,
+  }) {
     if (value == null) {
-      return 0;
+      return defaultValue;
     }
     if (value is int) {
       return value;

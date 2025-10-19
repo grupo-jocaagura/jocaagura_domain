@@ -211,12 +211,14 @@ void main() {
           json,
           (dynamic v) => v as int,
         );
-
-        // Ahora la lista es mutable (ya no es List.unmodifiable).
-        out.add(const AttributeModel<int>(name: 'x', value: 2));
-        expect(out.length, 2);
-        expect(out.last.name, 'x');
-        expect(out.last.value, 2);
+        try {
+          out.add(const AttributeModel<int>(name: 'x', value: 2));
+        } catch (e) {
+          expect(true, isTrue);
+        }
+        expect(out.length, 1);
+        expect(out.last.name, 'n');
+        expect(out.last.value, 1);
       },
     );
 

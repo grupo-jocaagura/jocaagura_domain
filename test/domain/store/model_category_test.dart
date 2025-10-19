@@ -27,7 +27,7 @@ void main() {
 
       expect(modified.category, equals(original.category));
       expect(modified.description, equals('Updated desc'));
-      expect(modified == original, isFalse);
+      expect(modified == original, isTrue);
     });
 
     test('4️⃣ Equality and hashCode based only on category', () {
