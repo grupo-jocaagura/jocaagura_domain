@@ -132,8 +132,7 @@ class ModelVector extends Model {
     final bool xOk = nearlyEqual('dx', dx, other.dx);
     final bool yOk = nearlyEqual('dy', dy, other.dy);
 
-    // ignore: avoid_print
-    print('[equalsApprox] result => ${xOk && yOk}');
+    debugPrint('[equalsApprox] result => ${xOk && yOk}');
     return xOk && yOk;
   }
 

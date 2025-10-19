@@ -14,6 +14,22 @@ enum LearningGoalEnum {
   authorId,
 }
 
+/// A default instance of [ModelLearningGoal] for tests or fallback scenarios.
+///
+/// Uses the `defaultCompetencyStandard` as its nested standard. Timestamps are
+/// `0` so it can be declared as `const`. Not intended for production data.
+const ModelLearningGoal defaultLearningGoal = ModelLearningGoal(
+  id: 'GOAL-DEFAULT',
+  standard: defaultCompetencyStandard,
+  label: 'Undefined learning goal',
+  code: 'GEN.LEARN.DEFAULT',
+  version: 1,
+  isActive: true,
+  createdAtMs: 0,
+  updatedAtMs: 0,
+  authorId: 'system',
+);
+
 /// Learning goal that refines a [ModelCompetencyStandard].
 ///
 /// Immutable model; JSON roundtrip uses [LearningGoalEnum] keys.
