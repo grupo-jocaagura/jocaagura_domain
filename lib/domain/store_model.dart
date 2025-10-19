@@ -1,5 +1,10 @@
-part of '../jocaagura_domain.dart';
+part of 'package:jocaagura_domain/jocaagura_domain.dart';
 
+/// Alias for domain compatibility.
+typedef ModelStore = StoreModel;
+
+/// Represents a store with identification, contact data, media URLs, and address.
+///
 /// Enumerates the JSON field names used by [StoreModel].
 ///
 /// Contracts:
