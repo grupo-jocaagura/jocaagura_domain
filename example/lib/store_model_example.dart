@@ -305,8 +305,8 @@ class CartPage extends StatelessWidget {
 
           final int minorTotal =
           cart.fold<int>(0, (int acc, ModelItem e) => acc + e.price.amount);
-          final double decimalTotal = minorTotal /
-              pow(10, ModelPrice.defaultMathprecision).toDouble();
+          final double decimalTotal =
+              minorTotal / pow(10, ModelPrice.defaultMathprecision).toDouble();
 
           return Column(
             children: <Widget>[
@@ -336,8 +336,9 @@ class CartPage extends StatelessWidget {
                     Row(
                       children: <Widget>[
                         const Expanded(child: Text('Total')),
-                        Text('💰 ${decimalTotal.toStringAsFixed(ModelPrice
-                            .defaultMathprecision)} COP'),
+                        Text(
+                            '💰 ${decimalTotal.toStringAsFixed(ModelPrice
+                                .defaultMathprecision)} COP'),
                       ],
                     ),
                     const SizedBox(height: 12),
@@ -351,8 +352,8 @@ class CartPage extends StatelessWidget {
                           if (context.mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
-                                content: Text(
-                                    'Compra registrada como ingreso.'),
+                                content:
+                                Text('Compra registrada como ingreso.'),
                               ),
                             );
                             Navigator.of(context).pop();
@@ -436,8 +437,8 @@ class PetStoreAppManager {
 
     await registerSale(
       concept: 'Venta',
-      decimalAmount: minorTotal /
-          pow(10, ModelPrice.defaultMathprecision).toDouble(),
+      decimalAmount:
+      minorTotal / pow(10, ModelPrice.defaultMathprecision).toDouble(),
       when: DateTime.now(),
     );
 
@@ -526,8 +527,7 @@ class RegisterSaleUseCase {
     required double decimalAmount,
     required DateTime when,
   }) async {
-    final FinancialMovementModel movement =
-    FinancialMovementModel.fromDecimal(
+    final FinancialMovementModel movement = FinancialMovementModel.fromDecimal(
       id: 'sale-${when.microsecondsSinceEpoch}',
       decimalAmount: decimalAmount,
       date: when,
@@ -538,8 +538,10 @@ class RegisterSaleUseCase {
     );
 
     final LedgerModel current = _ledgerBloc.value;
-    final List<FinancialMovementModel> incomes =
-    <FinancialMovementModel>[...current.incomeLedger, movement];
+    final List<FinancialMovementModel> incomes = <FinancialMovementModel>[
+      ...current.incomeLedger,
+      movement
+    ];
 
     _ledgerBloc.value = current.copyWith(
       incomeLedger: List<FinancialMovementModel>.unmodifiable(incomes),

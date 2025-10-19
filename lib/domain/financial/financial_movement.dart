@@ -2,6 +2,7 @@ part of 'package:jocaagura_domain/jocaagura_domain.dart';
 
 /// Alias for domain compatibility.
 typedef ModelFinancialMovement = FinancialMovementModel;
+
 /// Enumerates the JSON field names for [FinancialMovementModel].
 enum FinancialMovementEnum {
   /// Unique identifier of the financial transaction.

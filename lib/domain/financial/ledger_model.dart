@@ -2,6 +2,7 @@ part of 'package:jocaagura_domain/jocaagura_domain.dart';
 
 /// Alias for domain compatibility.
 typedef ModelLedger = LedgerModel;
+
 enum LedgerEnum { nameOfLedger, incomeLedger, expenseLedger }
 
 /// Represents a financial ledger composed of incomes and expenses.
