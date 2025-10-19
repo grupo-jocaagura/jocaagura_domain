@@ -104,4 +104,59 @@ void main() {
       expect(model.toString(), expectedString);
     });
   });
+  group('🔖 AttributeModel', () {
+    test('from<T> creates valid attribute when type is compatible', () {
+      final ModelAttribute<String>? attrStr =
+          ModelAttribute.from('Color', 'Red');
+      final ModelAttribute<int>? attrInt = ModelAttribute.from('Stock', 50);
+
+      expect(attrStr, isNotNull);
+      expect(attrStr!.value, equals('Red'));
+      expect(attrInt, isNotNull);
+      expect(attrInt!.value, equals(50));
+    });
+
+    test('from<T> returns null for unsupported types', () {
+      final ModelAttribute<Uri>? invalid = ModelAttribute.from('Link', Uri());
+      expect(invalid, isNull);
+    });
+
+    test('toJson ↔ fromJson roundtrip', () {
+      const ModelAttribute<String> original = ModelAttribute<String>(
+        name: 'Size',
+        value: 'Large',
+      );
+      final Map<String, dynamic> json = original.toJson();
+      final AttributeModel<String> parsed = attributeModelfromJson<String>(
+        json,
+        (dynamic v) => v as String,
+      );
+      expect(parsed, equals(original));
+    });
+
+    test('copyWith updates only provided fields', () {
+      const AttributeModel<String> attr =
+          ModelAttribute<String>(name: 'Material', value: 'Cotton');
+      final AttributeModel<String> copy = attr.copyWith(value: 'Linen');
+      expect(copy.name, equals('Material'));
+      expect(copy.value, equals('Linen'));
+    });
+
+    test('toString returns a valid JSON string', () {
+      const AttributeModel<int> attr =
+          ModelAttribute<int>(name: 'Stock', value: 25);
+      final String str = attr.toString();
+      expect(str, contains('"Stock"'));
+      expect(str, contains('25'));
+    });
+
+    test('Equality and hashCode are consistent', () {
+      const AttributeModel<String> a =
+          ModelAttribute<String>(name: 'Color', value: 'Blue');
+      const AttributeModel<String> b =
+          ModelAttribute<String>(name: 'Color', value: 'Blue');
+      expect(a, equals(b));
+      expect(a.hashCode, equals(b.hashCode));
+    });
+  });
 }

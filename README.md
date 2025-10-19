@@ -61,6 +61,8 @@ Para utilizar el paquete, se requiere la instalación del SDK de Flutter. No hay
 - [Connectivity](#Connectivity)
 - [BlocOnboarding](#BlocOnboarding)
 - [BlocResponsive](#BlocResponsive)
+-
+    - [Flujo Store (ModelStore + Item + Category + Price)](#ModelStore-Flow)
 
 Cada sección proporciona detalles sobre la implementación y el uso de las clases, ofreciendo ejemplos de código y explicaciones de cómo se integran dentro de tu arquitectura de dominio.
 
@@ -239,6 +241,136 @@ void main() {
   AddressModel updatedAddress = address.copyWith(city: 'Los Angeles', locality: 'Downtown');
   print('Updated AddressModel: ${updatedAddress.toString()}');
 }
+```
+
+#### ModelStore-Flow
+
+## Flujo Store (ModelStore) {#flujo-store-modelstore}
+
+Esta sección resume el **flujo mínimo** de tienda usando **solo modelos** del dominio:
+[StoreModel](#storemodel), [ModelItem](#modelitem), [ModelCategory](#modelcategory)
+y [ModelPrice](#modelprice).
+
+> **Contexto arquitectónico sugerido (Clean)**  
+> UI → AppManager → Bloc → UseCase → Repository → Gateway → Service  
+> (Este bloque documenta exclusivamente los **modelos** del flujo Store; el cableado a capas se
+> muestra en otras secciones del README).
+
+### Objetivos
+
+- Crear una tienda (`StoreModel`) con NIT y teléfonos formateados.
+- Definir categorías (`ModelCategory`) y precios (`ModelPrice`).
+- Construir ítems (`ModelItem`) que usen esas categorías y precios.
+- Demostrar **roundtrip JSON** y la **normalización de id** cuando `ModelItem.id` está vacío.
+
+### Notas clave de contrato
+
+- `StoreModel.nitNumber` calcula el dígito de verificación (Colombia).
+- `StoreModel.formatedPhoneNumber1/2` aplican formateo de teléfono.
+- `ModelPrice.defaultMathprecision == 2` y `toString()` muestra el valor decimal (ej.
+  `💰 12.50 COP`).
+- `ModelItem.id` vacío ⇒ en `toJson()` se usa `ModelCategory.normalizeCategory(type.category)` como
+  **id lógico** (útil para persistencia).
+
+### Ejemplo mínimo (copiar/pegar)
+
+```dart
+import 'package:jocaagura_domain/jocaagura_domain.dart';
+
+void main() {
+  // 1) Tienda (usa defaultAddressModel del dominio)
+  const StoreModel store = StoreModel(
+    id: 'store_001',
+    nit: 900123456,
+    // ejemplo CO
+    photoUrl: 'https://example.com/store.png',
+    coverPhotoUrl: 'https://example.com/cover.png',
+    email: 'store@example.com',
+    ownerEmail: 'owner@example.com',
+    name: 'Jocaagura Pet Store',
+    alias: 'Pet Store',
+    address: defaultAddressModel,
+    phoneNumber1: 3001234567,
+    phoneNumber2: 6017654321,
+  );
+
+  // 2) Categorías (se normalizan en toJson: espacios -> '-', minúsculas, etc.)
+  const ModelCategory catFood = ModelCategory(
+    category: 'Cat Food',
+    description: 'Food for cats',
+  );
+  const ModelCategory toys = ModelCategory(
+    category: 'Toys',
+    description: 'Pet toys and fun stuff',
+  );
+
+  // 3) Precios (minor units + precision=2 -> 1250 == 12.50)
+  const ModelPrice priceFood = ModelPrice(
+    amount: 42500,
+    currency: CurrencyEnum.COP,
+    mathPrecision: ModelPrice.defaultMathprecision, // 2
+  );
+  const ModelPrice priceToy = ModelPrice(
+    amount: 15000,
+    currency: CurrencyEnum.COP,
+  );
+
+  // 4) Ítems (si id='', toJson() usará la categoría normalizada como id)
+  final ModelItem itemFood = ModelItem(
+    id: '',
+    // <- demostración del fallback de id
+    name: 'Comida Premium Gato 1Kg',
+    description: 'Alimento balanceado para gato adulto',
+    type: catFood,
+    price: priceFood,
+  );
+
+  final ModelItem itemToy = ModelItem(
+    id: 'SKU-TOY-001',
+    name: 'Juguete Ratón',
+    description: 'Juguete interactivo para gato',
+    type: toys,
+    price: priceToy,
+  );
+
+  // 5) Roundtrip JSON + evidencias de contratos
+  final Map<String, dynamic> jsonFood = itemFood.toJson();
+  final ModelItem fromFood = ModelItem.fromJson(jsonFood);
+
+  print('--- STORE ---');
+  print('Nombre: ${store.name} (${store.alias})');
+  print('NIT: ${store.nitNumber}');
+  print('Tel 1: ${store.formatedPhoneNumber1}');
+  print('Tel 2: ${store.formatedPhoneNumber2}');
+
+  print('\n--- ITEMS ---');
+  print('Item A (id vacío → normalizado): ${jsonFood['id']}'); // ej. "cat-food"
+  print('Item A (precio): ${itemFood.price}'); // ej. 💰 425.00 COP si amount=42500
+  print('Item B (id): ${itemToy.id}');
+  print('Item B (precio): ${itemToy.price}');
+
+  // Verifica que el roundtrip conserve datos
+  assert(fromFood == itemFood.copyWith(id: itemFood.id)); // igualdad estructural
+}
+````
+
+### Referencias rápidas (solo modelos de este flujo)
+
+#### ModelItem {#modelitem}
+
+* Ítem inmutable con `id`, `name`, `description`, `type: ModelCategory`, `price: ModelPrice`.
+* `toJson()` aplica `trim` a `name/description` y serializa `type/price` como mapas JSON.
+
+#### ModelCategory {#modelcategory}
+
+* `category` funciona como **id lógico**.
+* `toJson()` usa `normalizeCategory(category)` (snake/kebab seguro y estable).
+
+#### ModelPrice {#modelprice}
+
+* `amount` en **unidades menores**; `decimalAmount = amount / 10^mathPrecision`.
+* `currency` serializa por `enum.name` (ej. `"COP"`). `toString()` ya devuelve texto legible.
+
 ```
 # AttributeModel
 

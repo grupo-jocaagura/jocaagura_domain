@@ -97,6 +97,11 @@ part 'domain/states/onboarding_state.dart';
 part 'domain/states/onboarding_step.dart';
 part 'domain/states/session_state.dart';
 part 'domain/states/ws_db_state.dart';
+part 'domain/store/model_category.dart';
+
+part 'domain/store/model_item.dart';
+
+part 'domain/store/model_price.dart';
 part 'domain/store_model.dart';
 part 'domain/ui/model_main_menu_model.dart';
 part 'domain/ui/screen_size_config.dart';
