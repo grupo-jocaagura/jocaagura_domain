@@ -3,6 +3,53 @@
 This document follows the guidelines of [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.31.2] - 2025-10-18
+
+### Added
+
+- **Domain – Productos y precios**
+  - `ModelItem`: entidad mínima y extensible (id, name, description, `type: ModelCategory`,
+    `price: ModelPrice`, `attributes` dinámicos).
+    - Lógica *fallback* de `id` cuando viene vacío (usa `category` normalizada).
+  - `ModelPrice`: valor monetario con `mathPrecision`, `CurrencyEnum` (COP, USD, MXN, …) y
+    `decimalAmount` para conversión precisa.
+  - **Constantes:** `defaultModelItem`, `defaultModelPrice`.
+- **Taxonomía**
+  - `ModelCategory` (+ `ModelCategoryEnum`): modelo inmutable con *slug* canónico.
+    - API pública: `fromJson`, `toJson`, `copyWith`, `normalizeCategory(String)`.
+    - Igualdad/`hashCode` basados **solo** en `category` normalizada.
+- **Atributos tipados**
+  - `ModelAttribute<T>` (*alias* de `AttributeModel<T>`): atributos genéricos **compatibles con
+    Firestore** (tipos soportados).
+    - Helper `ModelAttribute.from<T>()` para construcción tipada con validación.
+- **Demo end-to-end (Store)**
+  - Ejemplo **single-file** listo para copiar (sin paquetes externos) mostrando:  
+    `UI → AppManager → Bloc → UseCase → Repository → Gateway → Service`  
+    usando `StoreModel`, `ModelItem`, `ModelPrice`, `ModelCategory`, `FinancialMovementModel` y
+    `LedgerModel`.
+    - Alinea precisión financiera con `ModelPrice(mathPrecision: 2)`.
+
+### Tests
+
+- `model_item_test.dart`: *round-trip* JSON, *fallback* de `id`, `copyWith`, igualdad/`hashCode`,
+  `toString`.
+- `model_price_test.dart`: matemática decimal, *fallback* de moneda, *round-trip*, `copyWith`.
+- `attribute_model_test.dart`: `from<T>()`, seguridad de tipos, *round-trip*, igualdad.
+- `model_category_test.dart`: matriz de normalización (espacios/puntuación/caso), *round-trip*,
+  igualdad basada en `category` normalizada, `copyWith`, `toJson` (trim de `description`).
+
+### Docs
+
+- DartDoc en **inglés** con ejemplo ejecutable para `ModelCategory`.
+- Guía del ejemplo **pet store** con precisión financiera alineada a `ModelPrice`.
+
+### Notes
+
+- Todos los modelos son **inmutables** y **serializables** (compatibles con Firestore).
+- **Sin cambios rompientes**: nuevas entidades y helpers son *opt-in*.
+- Si tu lógica dependía del signo de montos para ingreso/egreso, usa el `category`/tipo del item en
+  lugar de valores negativos.
+
 ## [1.31.1] - 2025-10-18
 
 ### Docs
