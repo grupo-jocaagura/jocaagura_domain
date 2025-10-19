@@ -1,6 +1,6 @@
 part of 'package:jocaagura_domain/jocaagura_domain.dart';
 
-/// JSON keys for [CompetencyStandard]. Kept as enum to guarantee roundtrip
+/// JSON keys for [ModelCompetencyStandard]. Kept as enum to guarantee roundtrip
 /// stability (avoid string typos and allow `.name` usage).
 enum CompetencyStandardEnum {
   id,
@@ -15,12 +15,13 @@ enum CompetencyStandardEnum {
   authorId,
 }
 
-/// A default instance of [CompetencyStandard] for tests or fallback scenarios.
+/// A default instance of [ModelCompetencyStandard] for tests or fallback scenarios.
 ///
 /// This placeholder uses neutral values and a generic `ModelCategory`.
 /// Timestamps are set to `0` to avoid non-const expressions in a `const` context.
 /// Not intended for production data.
-const CompetencyStandard defaultCompetencyStandard = CompetencyStandard(
+const ModelCompetencyStandard defaultCompetencyStandard =
+    ModelCompetencyStandard(
   id: 'STD-DEFAULT',
   label: 'Undefined competency standard',
   area: ModelCategory(category: 'general', description: 'General'),
@@ -44,7 +45,7 @@ const CompetencyStandard defaultCompetencyStandard = CompetencyStandard(
 /// ### Minimal runnable example
 /// ```dart
 /// void main() {
-///   final CompetencyStandard std = CompetencyStandard(
+///   final ModelCompetencyStandard std = ModelCompetencyStandard(
 ///     id: 'STD-MATH-ALG-001',
 ///     label: 'Understands linear functions',
 ///     area: ModelCategory(category: 'math', description: 'Mathematics'),
@@ -62,8 +63,8 @@ const CompetencyStandard defaultCompetencyStandard = CompetencyStandard(
 ///   assert(std == copy); // roundtrip
 /// }
 /// ```
-class CompetencyStandard extends Model {
-  const CompetencyStandard({
+class ModelCompetencyStandard extends Model {
+  const ModelCompetencyStandard({
     required this.id,
     required this.label,
     required this.area,
@@ -77,12 +78,12 @@ class CompetencyStandard extends Model {
   })  : assert(version > 0, 'version must be > 0'),
         assert(cineLevel >= 0, 'cineLevel must be >= 0');
 
-  /// Builds a [CompetencyStandard] from a JSON-like [Map].
+  /// Builds a [ModelCompetencyStandard] from a JSON-like [Map].
   ///
   /// Missing fields fall back to neutral defaults (e.g., `''`, `0`, `true`).
   /// `area` must be a JSON object compatible with [ModelCategory.fromJson].
-  factory CompetencyStandard.fromJson(Map<String, dynamic> json) {
-    return CompetencyStandard(
+  factory ModelCompetencyStandard.fromJson(Map<String, dynamic> json) {
+    return ModelCompetencyStandard(
       id: Utils.getStringFromDynamic(json[CompetencyStandardEnum.id.name]),
       label:
           Utils.getStringFromDynamic(json[CompetencyStandardEnum.label.name]),
@@ -126,7 +127,7 @@ class CompetencyStandard extends Model {
 
   /// Returns a new instance replacing provided fields.
   @override
-  CompetencyStandard copyWith({
+  ModelCompetencyStandard copyWith({
     String? id,
     String? label,
     ModelCategory? area,
@@ -138,7 +139,7 @@ class CompetencyStandard extends Model {
     int? updatedAtMs,
     String? authorId,
   }) {
-    return CompetencyStandard(
+    return ModelCompetencyStandard(
       id: id ?? this.id,
       label: label ?? this.label,
       area: area ?? this.area,
@@ -183,7 +184,7 @@ class CompetencyStandard extends Model {
 
   @override
   bool operator ==(Object other) =>
-      other is CompetencyStandard &&
+      other is ModelCompetencyStandard &&
       other.id == id &&
       other.label == label &&
       other.area == area &&

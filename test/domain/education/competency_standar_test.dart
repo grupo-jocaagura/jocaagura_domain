@@ -5,7 +5,7 @@ import 'package:jocaagura_domain/jocaagura_domain.dart';
 
 void main() {
   group('CompetencyStandard', () {
-    CompetencyStandard buildSample({
+    ModelCompetencyStandard buildSample({
       String id = 'STD-MATH-ALG-001',
       String code = 'MATH.ALG.001',
       String label = 'Understands linear functions',
@@ -17,7 +17,7 @@ void main() {
       String author = 'teacher:ana',
     }) {
       final int now = DateTime.now().millisecondsSinceEpoch;
-      return CompetencyStandard(
+      return ModelCompetencyStandard(
         id: id,
         label: label,
         area: const ModelCategory(category: 'math', description: 'Mathematics'),
@@ -36,9 +36,10 @@ void main() {
       'When toJson->fromJson '
       'Then roundtrip preserves equality',
       () {
-        final CompetencyStandard std = buildSample();
+        final ModelCompetencyStandard std = buildSample();
         final Map<String, dynamic> json = std.toJson();
-        final CompetencyStandard copy = CompetencyStandard.fromJson(json);
+        final ModelCompetencyStandard copy =
+            ModelCompetencyStandard.fromJson(json);
         expect(copy, equals(std));
         // Asegura que usamos enum keys
         expect(json.containsKey(CompetencyStandardEnum.id.name), isTrue);
@@ -56,8 +57,9 @@ void main() {
                   .toJson(),
         };
 
-        final CompetencyStandard parsed = CompetencyStandard.fromJson(j);
-        final CompetencyStandard mimic = parsed.copyWith();
+        final ModelCompetencyStandard parsed =
+            ModelCompetencyStandard.fromJson(j);
+        final ModelCompetencyStandard mimic = parsed.copyWith();
         expect(parsed, equals(mimic));
         expect(parsed.hashCode, isA<int>());
         expect(parsed.id, '');
@@ -77,8 +79,8 @@ void main() {
       'When overriding some fields '
       'Then returns a modified instance leaving others intact',
       () {
-        final CompetencyStandard base = buildSample();
-        final CompetencyStandard changed = base.copyWith(
+        final ModelCompetencyStandard base = buildSample();
+        final ModelCompetencyStandard changed = base.copyWith(
           id: 'STD-NEW',
           version: 2,
           area: const ModelCategory(category: 'sci', description: 'Science'),
@@ -99,7 +101,7 @@ void main() {
       'When called '
       'Then returns JSON string with enum keys',
       () {
-        final CompetencyStandard std = buildSample();
+        final ModelCompetencyStandard std = buildSample();
         final String s = std.toString();
         expect(() => jsonDecode(s), returnsNormally);
         expect(s, contains(CompetencyStandardEnum.id.name));

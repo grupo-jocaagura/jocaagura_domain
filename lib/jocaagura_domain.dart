@@ -60,7 +60,10 @@ part 'domain/dentist_app/diagnosis_model.dart';
 part 'domain/dentist_app/medical_record_model.dart';
 part 'domain/dentist_app/medical_treatment_model.dart';
 part 'domain/dentist_app/treatment_plan_model.dart';
-part 'domain/education/competency_standard.dart';
+
+part 'domain/education/model_competency_standard.dart';
+
+part 'domain/education/model_learning_goal.dart';
 part 'domain/either.dart';
 part 'domain/entity_bloc.dart';
 part 'domain/entity_provider.dart';
