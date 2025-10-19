@@ -1,5 +1,5 @@
-// ignore_for_file: avoid_print
 import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:jocaagura_domain/jocaagura_domain.dart';
 
@@ -52,7 +52,7 @@ class _PetStoreAppState extends State<PetStoreApp> {
  * ────────────────────────────────────────────────────────────────────────── */
 
 class PetStoreHome extends StatefulWidget {
-  const PetStoreHome({super.key, required this.app});
+  const PetStoreHome({required this.app, super.key});
 
   final PetStoreAppManager app;
 
@@ -148,9 +148,9 @@ class _PetStoreHomeState extends State<PetStoreHome> {
                 final List<ModelItem> filtered = q.isEmpty
                     ? all
                     : all.where((ModelItem e) {
-                  return e.name.toLowerCase().contains(q) ||
-                      e.type.category.toLowerCase().contains(q);
-                }).toList();
+                        return e.name.toLowerCase().contains(q) ||
+                            e.type.category.toLowerCase().contains(q);
+                      }).toList();
 
                 if (filtered.isEmpty) {
                   return const Center(
@@ -200,7 +200,7 @@ class _PetStoreHomeState extends State<PetStoreHome> {
 }
 
 class StoreHeader extends StatelessWidget {
-  const StoreHeader({super.key, required this.store});
+  const StoreHeader({required this.store, super.key});
 
   final StoreModel store;
 
@@ -216,17 +216,11 @@ class StoreHeader extends StatelessWidget {
             // Nombre + Alias como subtítulo
             Text(
               store.name,
-              style: Theme
-                  .of(context)
-                  .textTheme
-                  .titleLarge,
+              style: Theme.of(context).textTheme.titleLarge,
             ),
             Text(
               store.alias,
-              style: Theme
-                  .of(context)
-                  .textTheme
-                  .bodySmall,
+              style: Theme.of(context).textTheme.bodySmall,
             ),
             const SizedBox(height: 8),
             // NIT con dígito de verificación
@@ -242,7 +236,7 @@ class StoreHeader extends StatelessWidget {
 }
 
 class ItemDetailPage extends StatelessWidget {
-  const ItemDetailPage({super.key, required this.app, required this.item});
+  const ItemDetailPage({required this.app, required this.item, super.key});
 
   final PetStoreAppManager app;
   final ModelItem item;
@@ -271,10 +265,7 @@ class ItemDetailPage extends StatelessWidget {
             const SizedBox(height: 12),
             Text(
               'Atributos',
-              style: Theme
-                  .of(context)
-                  .textTheme
-                  .titleMedium,
+              style: Theme.of(context).textTheme.titleMedium,
             ),
             const SizedBox(height: 4),
             for (final ModelAttribute<dynamic> a in item.attributes)
@@ -287,7 +278,7 @@ class ItemDetailPage extends StatelessWidget {
 }
 
 class CartPage extends StatelessWidget {
-  const CartPage({super.key, required this.app});
+  const CartPage({required this.app, super.key});
 
   final PetStoreAppManager app;
 
@@ -304,7 +295,7 @@ class CartPage extends StatelessWidget {
           }
 
           final int minorTotal =
-          cart.fold<int>(0, (int acc, ModelItem e) => acc + e.price.amount);
+              cart.fold<int>(0, (int acc, ModelItem e) => acc + e.price.amount);
           final double decimalTotal =
               minorTotal / pow(10, ModelPrice.defaultMathprecision).toDouble();
 
@@ -336,9 +327,9 @@ class CartPage extends StatelessWidget {
                     Row(
                       children: <Widget>[
                         const Expanded(child: Text('Total')),
-                        Text(
-                            '💰 ${decimalTotal.toStringAsFixed(ModelPrice
-                                .defaultMathprecision)} COP'),
+                        Text('💰 ${decimalTotal.toStringAsFixed(
+                          ModelPrice.defaultMathprecision,
+                        )} COP'),
                       ],
                     ),
                     const SizedBox(height: 12),
@@ -353,7 +344,7 @@ class CartPage extends StatelessWidget {
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
                                 content:
-                                Text('Compra registrada como ingreso.'),
+                                    Text('Compra registrada como ingreso.'),
                               ),
                             );
                             Navigator.of(context).pop();
@@ -430,15 +421,17 @@ class PetStoreAppManager {
   /// Confirms purchase: creates a single income FinancialMovement and updates ledger.
   Future<void> confirmPurchase() async {
     final List<ModelItem> cart = cartBloc.value;
-    if (cart.isEmpty) return;
+    if (cart.isEmpty) {
+      return;
+    }
 
     final int minorTotal =
-    cart.fold<int>(0, (int acc, ModelItem e) => acc + e.price.amount);
+        cart.fold<int>(0, (int acc, ModelItem e) => acc + e.price.amount);
 
     await registerSale(
       concept: 'Venta',
       decimalAmount:
-      minorTotal / pow(10, ModelPrice.defaultMathprecision).toDouble(),
+          minorTotal / pow(10, ModelPrice.defaultMathprecision).toDouble(),
       when: DateTime.now(),
     );
 
@@ -540,7 +533,7 @@ class RegisterSaleUseCase {
     final LedgerModel current = _ledgerBloc.value;
     final List<FinancialMovementModel> incomes = <FinancialMovementModel>[
       ...current.incomeLedger,
-      movement
+      movement,
     ];
 
     _ledgerBloc.value = current.copyWith(
@@ -621,7 +614,7 @@ class FakePetStoreService implements PetStoreService {
   @override
   Future<Map<String, dynamic>> getStoreJson() async {
     // Using defaultAddressModel from the domain.
-    final StoreModel store = StoreModel(
+    const StoreModel store = StoreModel(
       id: 'store_001',
       nit: 987654321,
       photoUrl: 'https://example.com/photo.jpg',
@@ -728,7 +721,6 @@ class FakePetStoreService implements PetStoreService {
       price: ModelPrice(
         amount: priceMinor,
         currency: CurrencyEnum.COP,
-        mathPrecision: ModelPrice.defaultMathprecision, // 2
       ),
       attributes: attrs,
     );
