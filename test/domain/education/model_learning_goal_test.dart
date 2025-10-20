@@ -24,11 +24,6 @@ void main() {
         area: ModelCategory(category: areaCat, description: areaDesc),
         cineLevel: cine,
         code: code,
-        version: version,
-        isActive: active,
-        createdAtMs: created,
-        updatedAtMs: updated,
-        authorId: author,
       );
     }
 
@@ -48,11 +43,6 @@ void main() {
         standard: std ?? mkStd(),
         label: label,
         code: code,
-        version: version,
-        isActive: isActive,
-        createdAtMs: createdAtMs,
-        updatedAtMs: updatedAtMs,
-        authorId: authorId,
       );
     }
 
@@ -65,7 +55,6 @@ void main() {
         final Map<String, dynamic> j = g.toJson();
         final ModelLearningGoal copy = ModelLearningGoal.fromJson(j);
         final ModelLearningGoal copyTwo = copy.copyWith();
-
         expect(copy, equals(g));
         expect(copy, equals(copyTwo));
         expect(j.containsKey(LearningGoalEnum.id.name), isTrue);
@@ -84,20 +73,16 @@ void main() {
         final ModelLearningGoal changed = base.copyWith(
           id: 'GOAL-2',
           code: 'SCI.MAT.G2',
-          version: 2,
           standard: newStd,
         );
 
         expect(changed.id, 'GOAL-2');
         expect(changed.code, 'SCI.MAT.G2');
-        expect(changed.version, 2);
+
         expect(changed.standard, same(newStd));
 
         // Invariantes preservadas
         expect(changed.label, base.label);
-        expect(changed.createdAtMs, base.createdAtMs);
-        expect(changed.updatedAtMs, base.updatedAtMs);
-        expect(changed.authorId, base.authorId);
       },
     );
 
@@ -119,11 +104,6 @@ void main() {
         expect(g.id, ''); // Utils.getStringFromDynamic(null) → ''
         expect(g.label, 'L');
         expect(g.code, 'C');
-        expect(g.version, 1); // defaultValue: 1 en getIntegerFromDynamic
-        expect(g.isActive, false, reason: 'getBoolFromDynamic(null) → false');
-        expect(g.createdAtMs, 0);
-        expect(g.updatedAtMs, 0);
-        expect(g.authorId, '');
 
         expect(g.standard, equals(defaultCompetencyStandard));
       },
@@ -146,48 +126,15 @@ void main() {
           LearningGoalEnum.standard.name: stdJson, // String JSON
           LearningGoalEnum.label.name: 'L',
           LearningGoalEnum.code.name: 'C',
-          LearningGoalEnum.version.name: '2', // String → int
-          LearningGoalEnum.isActive.name: true,
-          LearningGoalEnum.createdAtMs.name: '123',
-          LearningGoalEnum.updatedAtMs.name: 456.9, // double → truncate
-          LearningGoalEnum.authorId.name: 'auth',
         };
 
         final ModelLearningGoal g = ModelLearningGoal.fromJson(j);
 
         expect(g.id, 'GOAL-JSON');
-        expect(g.version, 2);
-        expect(g.isActive, true);
-        expect(g.createdAtMs, 123);
-        expect(g.updatedAtMs, 456);
-        expect(g.authorId, 'auth');
 
         expect(g.standard.id, 'STD-JSON');
         expect(g.standard.code, 'SCI.JSON');
         expect(g.standard.label, 'Std JSON');
-      },
-    );
-
-    test(
-      'Given constructor preconditions '
-      'When version <= 0 '
-      'Then throws AssertionError',
-      () {
-        expect(
-          () => ModelLearningGoal(
-            id: 'X',
-            standard: defaultCompetencyStandard,
-            label: 'L',
-            code: 'C',
-            version: 0,
-            // inválido
-            isActive: true,
-            createdAtMs: 0,
-            updatedAtMs: 0,
-            authorId: 'a',
-          ),
-          throwsA(isA<AssertionError>()),
-        );
       },
     );
 

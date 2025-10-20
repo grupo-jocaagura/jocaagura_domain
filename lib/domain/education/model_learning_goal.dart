@@ -7,34 +7,32 @@ enum LearningGoalEnum {
   standard,
   label,
   code,
-  version,
-  isActive,
-  createdAtMs,
-  updatedAtMs,
-  authorId,
 }
 
-/// A default instance of [ModelLearningGoal] for tests or fallback scenarios.
+/// A default instance for tests or placeholders.
 ///
-/// Uses the `defaultCompetencyStandard` as its nested standard. Timestamps are
-/// `0` so it can be declared as `const`. Not intended for production data.
+/// Uses [defaultCompetencyStandard] as nested standard.
+/// Not intended for production data.
 const ModelLearningGoal defaultLearningGoal = ModelLearningGoal(
   id: 'GOAL-DEFAULT',
   standard: defaultCompetencyStandard,
   label: 'Undefined learning goal',
   code: 'GEN.LEARN.DEFAULT',
-  version: 1,
-  isActive: true,
-  createdAtMs: 0,
-  updatedAtMs: 0,
-  authorId: 'system',
 );
 
-/// Learning goal that refines a [ModelCompetencyStandard].
+/// Represents a learning goal that refines a [ModelCompetencyStandard].
 ///
-/// Immutable model; JSON roundtrip uses [LearningGoalEnum] keys.
+/// Immutable value object with stable JSON roundtrip using
+/// [LearningGoalEnum] `.name` keys. Parsing is tolerant via `Utils.*`.
 ///
-/// ### Minimal runnable example
+/// Contracts:
+/// - [standard] is required and parsed via [Utils.mapFromDynamic]; if missing
+///   or invalid, it falls back to [defaultCompetencyStandard].
+/// - Equality compares all fields by value.
+/// - Using enum `.name` as JSON keys requires **stable case names**; renaming
+///   enum cases breaks persisted data.
+///
+/// Minimal runnable example:
 /// ```dart
 /// void main() {
 ///   final ModelLearningGoal g = ModelLearningGoal(
@@ -42,11 +40,6 @@ const ModelLearningGoal defaultLearningGoal = ModelLearningGoal(
 ///     standard: defaultCompetencyStandard,
 ///     label: 'Classify matter by composition',
 ///     code: 'SCI.MAT.G1',
-///     version: 1,
-///     isActive: true,
-///     createdAtMs: nowMs(),
-///     updatedAtMs: nowMs(),
-///     authorId: 'teacher:ana',
 ///   );
 ///
 ///   final Map<String, dynamic> json = g.toJson();
@@ -60,12 +53,7 @@ class ModelLearningGoal extends Model {
     required this.standard,
     required this.label,
     required this.code,
-    required this.version,
-    required this.isActive,
-    required this.createdAtMs,
-    required this.updatedAtMs,
-    required this.authorId,
-  }) : assert(version > 0, 'version must be > 0');
+  });
 
   /// Builds a [ModelLearningGoal] from a JSON-like [Map].
   ///
@@ -81,17 +69,6 @@ class ModelLearningGoal extends Model {
             ),
       label: Utils.getStringFromDynamic(json[LearningGoalEnum.label.name]),
       code: Utils.getStringFromDynamic(json[LearningGoalEnum.code.name]),
-      version: Utils.getIntegerFromDynamic(
-        json[LearningGoalEnum.version.name],
-        defaultValue: 1,
-      ),
-      isActive: Utils.getBoolFromDynamic(json[LearningGoalEnum.isActive.name]),
-      createdAtMs:
-          Utils.getIntegerFromDynamic(json[LearningGoalEnum.createdAtMs.name]),
-      updatedAtMs:
-          Utils.getIntegerFromDynamic(json[LearningGoalEnum.updatedAtMs.name]),
-      authorId:
-          Utils.getStringFromDynamic(json[LearningGoalEnum.authorId.name]),
     );
   }
 
@@ -99,11 +76,6 @@ class ModelLearningGoal extends Model {
   final ModelCompetencyStandard standard;
   final String label;
   final String code;
-  final int version;
-  final bool isActive;
-  final int createdAtMs;
-  final int updatedAtMs;
-  final String authorId;
 
   /// Returns a new instance replacing provided fields.
   @override
@@ -112,22 +84,12 @@ class ModelLearningGoal extends Model {
     ModelCompetencyStandard? standard,
     String? label,
     String? code,
-    int? version,
-    bool? isActive,
-    int? createdAtMs,
-    int? updatedAtMs,
-    String? authorId,
   }) {
     return ModelLearningGoal(
       id: id ?? this.id,
       standard: standard ?? this.standard,
       label: label ?? this.label,
       code: code ?? this.code,
-      version: version ?? this.version,
-      isActive: isActive ?? this.isActive,
-      createdAtMs: createdAtMs ?? this.createdAtMs,
-      updatedAtMs: updatedAtMs ?? this.updatedAtMs,
-      authorId: authorId ?? this.authorId,
     );
   }
 
@@ -138,11 +100,6 @@ class ModelLearningGoal extends Model {
         LearningGoalEnum.standard.name: standard.toJson(),
         LearningGoalEnum.label.name: label,
         LearningGoalEnum.code.name: code,
-        LearningGoalEnum.version.name: version,
-        LearningGoalEnum.isActive.name: isActive,
-        LearningGoalEnum.createdAtMs.name: createdAtMs,
-        LearningGoalEnum.updatedAtMs.name: updatedAtMs,
-        LearningGoalEnum.authorId.name: authorId,
       };
 
   @override
@@ -151,11 +108,6 @@ class ModelLearningGoal extends Model {
         standard,
         label,
         code,
-        version,
-        isActive,
-        createdAtMs,
-        updatedAtMs,
-        authorId,
       );
 
   @override
@@ -164,12 +116,7 @@ class ModelLearningGoal extends Model {
       other.id == id &&
       other.standard == standard &&
       other.label == label &&
-      other.code == code &&
-      other.version == version &&
-      other.isActive == isActive &&
-      other.createdAtMs == createdAtMs &&
-      other.updatedAtMs == updatedAtMs &&
-      other.authorId == authorId;
+      other.code == code;
 
   /// JSON string representation (useful for logs & diffs).
   @override

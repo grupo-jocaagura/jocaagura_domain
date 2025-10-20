@@ -15,11 +15,6 @@ void main() {
         standard: defaultCompetencyStandard,
         label: label,
         code: code,
-        version: 1,
-        isActive: true,
-        createdAtMs: 0,
-        updatedAtMs: 0,
-        authorId: 'teacher:ana',
       );
     }
 

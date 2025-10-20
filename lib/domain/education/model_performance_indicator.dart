@@ -1,10 +1,14 @@
 part of 'package:jocaagura_domain/jocaagura_domain.dart';
 
-/// Performance level aligned with common MEN usage.
+/// Performance level aligned with common MEN usage (Colombia).
 ///
-/// Typical levels in Colombia: **low**, **basic**, **high**, **superior**.
+/// Usual levels: **low**, **basic**, **high**, **superior**.
 ///
-/// ### Example
+/// Parsing behavior:
+/// - Strings are matched case-insensitively against [PerformanceLevel.name].
+/// - Unknown inputs fall back to [PerformanceLevel.basic].
+///
+/// Example:
 /// ```dart
 /// void main() {
 ///   final PerformanceLevel lvl = PerformanceLevel.basic;
@@ -24,21 +28,24 @@ enum PerformanceIndicatorEnum {
 
 /// Smallest performance indicator attached to a [ModelLearningGoal].
 ///
-/// The relationship can be represented either as:
-/// - `"goal"`: full nested object (preferred), or
-/// - `"goalId"`: flat ID reference (kept for compatibility).
+/// JSON shape:
+/// - `"goal"`: full nested object (preferred and **required**).
 ///
-/// This model is immutable, enum-keyed (roundtrip-safe), and tolerant to input
-/// shapes via `Utils.*`.
+/// Notes:
+/// - If `"goal"` is missing or invalid, the parser falls back to
+///   [defaultLearningGoal].
+/// - [PerformanceLevel] is parsed case-insensitively from string; unknown
+///   values fall back to [PerformanceLevel.basic].
+/// - Enum `.name` keys require stable case names; renaming breaks persisted data.
 ///
-/// ### Minimal runnable example
+/// Minimal runnable example:
 /// ```dart
 /// void main() {
 ///   const ModelLearningGoal goal = defaultLearningGoal;
 ///   final ModelPerformanceIndicator ind = ModelPerformanceIndicator(
 ///     id: 'IND-1',
 ///     modelLearningGoal: goal,
-///     label: 'Recognizes H2O',
+///     label: 'Recognizes H₂O',
 ///     level: PerformanceLevel.basic,
 ///     code: 'SCI.WAT.IND.1',
 ///   );
@@ -57,19 +64,14 @@ class ModelPerformanceIndicator extends Model {
   });
 
   /// Builds from JSON-like map (enum-keyed).
-  ///
-  /// - Accepts `"goal"` as `Map` or JSON string (normalized via [Utils.mapFromDynamic]).
-  /// - If `"goal"` is missing/null, falls back to `goalId` and uses a minimal default goal.
   factory ModelPerformanceIndicator.fromJson(Map<String, dynamic> json) {
     final String id =
         Utils.getStringFromDynamic(json[PerformanceIndicatorEnum.id.name]);
 
     // Nested goal parsing (preferred). If absent, synthesize a minimal goal.
-    ModelLearningGoal goal;
+    ModelLearningGoal goal = defaultLearningGoal;
     final dynamic rawGoal = json[PerformanceIndicatorEnum.goal.name];
-    if (rawGoal == null) {
-      goal = defaultLearningGoal;
-    } else {
+    if (rawGoal != null) {
       goal = ModelLearningGoal.fromJson(Utils.mapFromDynamic(rawGoal));
     }
 

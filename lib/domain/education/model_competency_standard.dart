@@ -8,17 +8,11 @@ enum CompetencyStandardEnum {
   area,
   cineLevel,
   code,
-  version,
-  isActive,
-  createdAtMs,
-  updatedAtMs,
-  authorId,
 }
 
-/// A default instance of [ModelCompetencyStandard] for tests or fallback scenarios.
+/// A default instance for tests or placeholders.
 ///
-/// This placeholder uses neutral values and a generic `ModelCategory`.
-/// Timestamps are set to `0` to avoid non-const expressions in a `const` context.
+/// Uses neutral text values and a generic [ModelCategory].
 /// Not intended for production data.
 const ModelCompetencyStandard defaultCompetencyStandard =
     ModelCompetencyStandard(
@@ -26,23 +20,27 @@ const ModelCompetencyStandard defaultCompetencyStandard =
   label: 'Undefined competency standard',
   area: ModelCategory(category: 'general', description: 'General'),
   cineLevel: 0,
-  // CINE difficulty floor
   code: 'GEN.DEFAULT',
-  // generic code
-  isActive: true,
-  createdAtMs: 0,
-  updatedAtMs: 0,
-  authorId: 'system',
 );
 
-/// Top-level competency standard (MEN reference).
+/// Represents a top-level competency standard (MEN reference).
 ///
-/// Represents what students should know/do, with CINE difficulty,
-/// area/category, versioning and lifecycle metadata.
+/// Immutable value object with stable JSON roundtrip using
+/// [CompetencyStandardEnum] `.name` keys. Parsing is tolerant via `Utils.*`.
 ///
-/// The model is immutable and JSON roundtrip friendly (via enum keys).
+/// Contracts:
+/// - [cineLevel] MUST be >= 0. This is enforced with an `assert` in debug
+///   builds; production builds must provide valid data.
+/// - [area] MUST be a JSON object compatible with [ModelCategory.fromJson].
+/// - Equality compares all fields by value.
 ///
-/// ### Minimal runnable example
+/// Defaults & parsing notes:
+/// - Missing or invalid fields are parsed with neutral defaults by `Utils.*`
+///   (e.g., empty string for text, `0` for numeric).
+/// - Using enum `.name` as JSON keys requires **stable case names**; renaming
+///   enum cases breaks persisted data.
+///
+/// Minimal runnable example:
 /// ```dart
 /// void main() {
 ///   final ModelCompetencyStandard std = ModelCompetencyStandard(
@@ -51,18 +49,16 @@ const ModelCompetencyStandard defaultCompetencyStandard =
 ///     area: ModelCategory(category: 'math', description: 'Mathematics'),
 ///     cineLevel: 2,
 ///     code: 'MATH.ALG.001',
-///     version: 1,
-///     isActive: true,
-///     createdAtMs: nowMs(),
-///     updatedAtMs: nowMs(),
-///     authorId: 'teacher:ana',
 ///   );
 ///
 ///   final Map<String, dynamic> json = std.toJson();
-///   final CompetencyStandard copy = CompetencyStandard.fromJson(json);
+///   final ModelCompetencyStandard copy = ModelCompetencyStandard.fromJson(json);
 ///   assert(std == copy); // roundtrip
 /// }
 /// ```
+///
+/// Debug-only:
+/// - Throws [AssertionError] if [cineLevel] is negative.
 class ModelCompetencyStandard extends Model {
   const ModelCompetencyStandard({
     required this.id,
@@ -70,13 +66,7 @@ class ModelCompetencyStandard extends Model {
     required this.area,
     required this.cineLevel,
     required this.code,
-    required this.isActive,
-    required this.createdAtMs,
-    required this.updatedAtMs,
-    required this.authorId,
-    this.version = 1,
-  })  : assert(version > 0, 'version must be > 0'),
-        assert(cineLevel >= 0, 'cineLevel must be >= 0');
+  }) : assert(cineLevel >= 0, 'cineLevel must be >= 0');
 
   /// Builds a [ModelCompetencyStandard] from a JSON-like [Map].
   ///
@@ -96,21 +86,6 @@ class ModelCompetencyStandard extends Model {
         json[CompetencyStandardEnum.cineLevel.name],
       ),
       code: Utils.getStringFromDynamic(json[CompetencyStandardEnum.code.name]),
-      version: Utils.getIntegerFromDynamic(
-        json[CompetencyStandardEnum.version.name],
-        defaultValue: 1,
-      ),
-      isActive:
-          Utils.getBoolFromDynamic(json[CompetencyStandardEnum.isActive.name]),
-      createdAtMs: Utils.getIntegerFromDynamic(
-        json[CompetencyStandardEnum.createdAtMs.name],
-      ),
-      updatedAtMs: Utils.getIntegerFromDynamic(
-        json[CompetencyStandardEnum.updatedAtMs.name],
-      ),
-      authorId: Utils.getStringFromDynamic(
-        json[CompetencyStandardEnum.authorId.name],
-      ),
     );
   }
 
@@ -119,11 +94,6 @@ class ModelCompetencyStandard extends Model {
   final ModelCategory area;
   final int cineLevel;
   final String code;
-  final int version;
-  final bool isActive;
-  final int createdAtMs;
-  final int updatedAtMs;
-  final String authorId;
 
   /// Returns a new instance replacing provided fields.
   @override
@@ -133,11 +103,6 @@ class ModelCompetencyStandard extends Model {
     ModelCategory? area,
     int? cineLevel,
     String? code,
-    int? version,
-    bool? isActive,
-    int? createdAtMs,
-    int? updatedAtMs,
-    String? authorId,
   }) {
     return ModelCompetencyStandard(
       id: id ?? this.id,
@@ -145,11 +110,6 @@ class ModelCompetencyStandard extends Model {
       area: area ?? this.area,
       cineLevel: cineLevel ?? this.cineLevel,
       code: code ?? this.code,
-      version: version ?? this.version,
-      isActive: isActive ?? this.isActive,
-      createdAtMs: createdAtMs ?? this.createdAtMs,
-      updatedAtMs: updatedAtMs ?? this.updatedAtMs,
-      authorId: authorId ?? this.authorId,
     );
   }
 
@@ -161,11 +121,6 @@ class ModelCompetencyStandard extends Model {
         CompetencyStandardEnum.area.name: area.toJson(),
         CompetencyStandardEnum.cineLevel.name: cineLevel,
         CompetencyStandardEnum.code.name: code,
-        CompetencyStandardEnum.version.name: version,
-        CompetencyStandardEnum.isActive.name: isActive,
-        CompetencyStandardEnum.createdAtMs.name: createdAtMs,
-        CompetencyStandardEnum.updatedAtMs.name: updatedAtMs,
-        CompetencyStandardEnum.authorId.name: authorId,
       };
 
   @override
@@ -175,11 +130,6 @@ class ModelCompetencyStandard extends Model {
         area,
         cineLevel,
         code,
-        version,
-        isActive,
-        createdAtMs,
-        updatedAtMs,
-        authorId,
       );
 
   @override
@@ -189,12 +139,7 @@ class ModelCompetencyStandard extends Model {
       other.label == label &&
       other.area == area &&
       other.cineLevel == cineLevel &&
-      other.code == code &&
-      other.version == version &&
-      other.isActive == isActive &&
-      other.createdAtMs == createdAtMs &&
-      other.updatedAtMs == updatedAtMs &&
-      other.authorId == authorId;
+      other.code == code;
 
   /// JSON string representation (useful for logs & diffs).
   @override

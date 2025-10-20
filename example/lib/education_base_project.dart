@@ -10,32 +10,23 @@ void main() {
   const ModelCategory science =
       ModelCategory(category: 'sci', description: 'Science');
 
-  final ModelCompetencyStandard std = ModelCompetencyStandard(
+  const ModelCompetencyStandard std = ModelCompetencyStandard(
     id: 'STD-SCI-001',
     label: 'Understands the composition of water molecules.',
     area: science,
     cineLevel: 2,
     // Example
     code: 'SCI.WAT.001',
-    isActive: true,
-    createdAtMs: DateTime.now().millisecondsSinceEpoch,
-    updatedAtMs: DateTime.now().millisecondsSinceEpoch,
-    authorId: 'teacher:ana',
   );
 
-  final ModelLearningGoal goal = ModelLearningGoal(
+  const ModelLearningGoal goal = ModelLearningGoal(
     id: 'GOAL-SCI-001',
     standard: std,
     label: 'Identify elements in common molecules.',
     code: 'SCI.WAT.GOAL.1',
-    version: 1,
-    isActive: true,
-    createdAtMs: nowMs(),
-    updatedAtMs: nowMs(),
-    authorId: 'teacher:ana',
   );
 
-  final ModelPerformanceIndicator ind = ModelPerformanceIndicator(
+  const ModelPerformanceIndicator ind = ModelPerformanceIndicator(
     id: 'IND-SCI-001',
     modelLearningGoal: goal,
     label: 'Recognizes that water is H2O (two hydrogens and one oxygen).',

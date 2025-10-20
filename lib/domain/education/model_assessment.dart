@@ -25,17 +25,24 @@ final ModelAssessment defaultModelAssessment = ModelAssessment(
   passScore: 0,
 );
 
-/// Assessment made of multiple [ModelLearningItem]s.
+/// Represents an immutable assessment composed of multiple [ModelLearningItem]s.
 ///
-/// Immutable; JSON roundtrip uses [AssessmentEnum] keys. Tolerant parsing via
-/// `Utils.*`.
+/// Uses [AssessmentEnum] `.name` keys for **stable JSON roundtrip**.
+/// Parsing is tolerant via `Utils.*`.
 ///
 /// Contracts:
-/// - `items` is stored unmodifiable.
-/// - `timeLimitMs` represents milliseconds; internally exposed as [Duration].
-/// - `passScore` is an integer in 0..100 (values outside are clamped).
+/// - `items` are stored as an **unmodifiable** list.
+/// - `timeLimitMs` is serialized as **milliseconds**; internally exposed as [Duration].
+/// - `passScore` is **clamped to 0..100** on construction and JSON parsing.
+/// - **Equality is order-sensitive** for [items].
 ///
-/// ### Minimal runnable example
+/// Defaults & notes:
+/// - Constructor default `timeLimit` is [defaultTimeLimit] (60 minutes).
+/// - `fromJson` default `timeLimit` is also [defaultTimeLimit] when `timeLimitMs` is
+///   missing or invalid (aligned with constructor).
+/// - Enum `.name` keys require stable case names; renaming enum cases breaks persisted data.
+///
+/// Minimal runnable example:
 /// ```dart
 /// void main() {
 ///   final ModelAssessment a = ModelAssessment(
@@ -60,10 +67,10 @@ class ModelAssessment extends Model {
     required this.shuffleItems,
     required this.shuffleOptions,
     required int passScore,
-    this.timeLimit = defaultTimeLimit,
+    Duration timeLimit = defaultTimeLimit,
   })  : items = List<ModelLearningItem>.unmodifiable(items),
         passScore = _clampPassScore(passScore),
-        assert(!timeLimit.isNegative, 'timeLimit must be >= 0');
+        _timeLimit = timeLimit;
 
   /// Builds a [ModelAssessment] from JSON-like input.
   ///
@@ -72,33 +79,34 @@ class ModelAssessment extends Model {
   /// - `shuffleOptions`: `true` if missing/invalid.
   /// - `timeLimitMs`: `Duration.zero` if missing/invalid.
   /// - `passScore`: `0` if missing/invalid (then clamped 0..100).
-  factory ModelAssessment.fromJson(Map<String, dynamic> map) {
+  factory ModelAssessment.fromJson(Map<String, dynamic> json) {
     final List<ModelLearningItem> parsedItems =
-        Utils.listFromDynamic(map[AssessmentEnum.items.name])
+        Utils.listFromDynamic(json[AssessmentEnum.items.name])
             .map<ModelLearningItem>(ModelLearningItem.fromJson)
             .toList();
 
     final bool parsedShuffleItems = Utils.getBoolFromDynamic(
-      map[AssessmentEnum.shuffleItems.name],
+      json[AssessmentEnum.shuffleItems.name],
       defaultValueIfNull: true,
     );
 
     final bool parsedShuffleOptions = Utils.getBoolFromDynamic(
-      map[AssessmentEnum.shuffleOptions.name],
+      json[AssessmentEnum.shuffleOptions.name],
       defaultValueIfNull: true,
     );
 
     final Duration parsedTimeLimit = Utils.durationFromJson(
-      map[AssessmentEnum.timeLimitMs.name],
+      json[AssessmentEnum.timeLimitMs.name],
+      defaultDuration: defaultTimeLimit,
     );
 
     final int parsedPassScore = _clampPassScore(
-      Utils.getIntegerFromDynamic(map[AssessmentEnum.passScore.name]),
+      Utils.getIntegerFromDynamic(json[AssessmentEnum.passScore.name]),
     );
 
     return ModelAssessment(
-      id: Utils.getStringFromDynamic(map[AssessmentEnum.id.name]),
-      title: Utils.getStringFromDynamic(map[AssessmentEnum.title.name]),
+      id: Utils.getStringFromDynamic(json[AssessmentEnum.id.name]),
+      title: Utils.getStringFromDynamic(json[AssessmentEnum.title.name]),
       items: parsedItems,
       shuffleItems: parsedShuffleItems,
       shuffleOptions: parsedShuffleOptions,
@@ -114,11 +122,12 @@ class ModelAssessment extends Model {
   final bool shuffleOptions;
 
   /// Time limit for the whole assessment.
-  final Duration timeLimit;
+  Duration get timeLimit => _timeLimit;
+  final Duration _timeLimit;
 
   static const Duration defaultTimeLimit = Duration(minutes: 60);
 
-  /// Passing score in percentage (0..100).
+  /// Passing score in int from (0..100).
   final int passScore;
 
   /// Returns a new instance replacing provided fields.

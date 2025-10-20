@@ -141,7 +141,7 @@ void main() {
       final ModelAssessment a = ModelAssessment.fromJson(j);
       expect(a.shuffleItems, isTrue);
       expect(a.shuffleOptions, isTrue);
-      expect(a.timeLimit, Duration.zero);
+      expect(a.timeLimit, ModelAssessment.defaultTimeLimit);
       expect(a.passScore, 50);
     });
 
@@ -188,25 +188,6 @@ void main() {
       expect(decoded, isA<Map<String, dynamic>>());
       expect(a.toString(), contains(AssessmentEnum.id.name));
       expect(a.toString(), contains(AssessmentEnum.timeLimitMs.name));
-    });
-
-    test(
-        'Given negative timeLimit '
-        'When constructing '
-        'Then assertion error (debug mode)', () {
-      expect(
-        () => ModelAssessment(
-          id: 'NEG',
-          title: 'Neg',
-          items: <ModelLearningItem>[defaultModelLearningItem],
-          shuffleItems: true,
-          shuffleOptions: true,
-          timeLimit: const Duration(seconds: -1),
-          // negativo
-          passScore: 50,
-        ),
-        throwsA(isA<AssertionError>()),
-      );
     });
   });
 }

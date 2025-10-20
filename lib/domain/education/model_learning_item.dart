@@ -20,12 +20,25 @@ enum LearningItemEnum {
 
 /// Multiple-choice learning item linked to performance indicators.
 ///
-/// Immutable; JSON roundtrip uses [LearningItemEnum] keys.
-/// Enforced domain invariants:
-/// - `achievementOne` is required; `achievementTwo/Three` are optional.
-/// - `0 <= cineLevel <= 11`
+/// Immutable value object; stable JSON roundtrip using [LearningItemEnum] `.name`
+/// keys. Parsing is tolerant via `Utils.*`.
 ///
-/// ### Minimal runnable example
+/// Contracts:
+/// - [achievementOne] is **required**; [achievementTwo]/[achievementThree] are optional.
+///   [ModelLearningItem.fromJson] throws [FormatException] if `achievementOne` is
+///   missing or invalid.
+/// - [cineLevel] MUST be in **0..11**. Enforced with an `assert` in debug builds.
+///   Production builds must provide valid data.
+/// - [attributes] are stored as an **unmodifiable** list. Use [copyWith] to derive changes.
+/// - Equality is **order-sensitive** for [attributes].
+/// - Using enum `.name` as JSON keys requires **stable case names**; renaming
+///   enum cases breaks persisted data.
+///
+/// Shuffling:
+/// - [optionsShuffled] returns a deterministic permutation when a [seed] is provided.
+///   It shuffles among `correctAnswer` + the three wrong answers without de-duplicating.
+///
+/// Minimal runnable example:
 /// ```dart
 /// void main() {
 ///   const ModelLearningItem item = ModelLearningItem(
@@ -40,7 +53,7 @@ enum LearningItemEnum {
 ///     achievementOne: ModelPerformanceIndicator(
 ///       id: 'PI-1',
 ///       modelLearningGoal: defaultLearningGoal,
-///       label: 'Recognizes H2O',
+///       label: 'Recognizes H₂O',
 ///       level: PerformanceLevel.basic,
 ///       code: 'SCI.WAT.IND.1',
 ///     ),
@@ -65,13 +78,13 @@ class ModelLearningItem extends Model {
     required this.explanation,
     required List<ModelAttribute<dynamic>> attributes,
     required this.achievementOne,
-    required this.cineLevel,
     required this.estimatedTimeForAnswer,
     required this.category,
+    int cineLevel = 0,
     this.achievementTwo,
     this.achievementThree,
-  })  : assert(cineLevel >= 0 && cineLevel <= 11, 'cineLevel must be in 0..11'),
-        attributes = List<ModelAttribute<dynamic>>.unmodifiable(attributes);
+  })  : attributes = List<ModelAttribute<dynamic>>.unmodifiable(attributes),
+        _cineLevel = cineLevel.clamp(0, 11);
 
   /// Builds a [ModelLearningItem] from JSON-like input (no legacy keys).
   ///
@@ -147,22 +160,20 @@ class ModelLearningItem extends Model {
   final ModelPerformanceIndicator? achievementTwo;
   final ModelPerformanceIndicator? achievementThree;
 
-  final int cineLevel; // 0..11
+  int get cineLevel => _cineLevel;
+
+  final int _cineLevel; // 0..11
   final Duration estimatedTimeForAnswer;
   final ModelCategory category;
 
   /// Deterministically shuffle options when [seed] is provided.
-  List<String> optionsShuffled([int? seed]) {
+  List<String> optionsShuffled([int seed = 5]) {
     final List<String> opts = <String>[
       correctAnswer,
       wrongAnswerOne,
       wrongAnswerTwo,
       wrongAnswerThree,
     ];
-    if (seed == null) {
-      opts.shuffle();
-      return opts;
-    }
     final List<String> result = List<String>.from(opts);
     int s = seed;
     for (int i = result.length - 1; i > 0; i--) {
@@ -203,8 +214,8 @@ class ModelLearningItem extends Model {
       explanation: explanation ?? this.explanation,
       attributes: attributes ?? this.attributes,
       achievementOne: achievementOne ?? this.achievementOne,
-      achievementTwo: achievementTwo ?? this.achievementTwo,
-      achievementThree: achievementThree ?? this.achievementThree,
+      achievementTwo: achievementTwo,
+      achievementThree: achievementThree,
       cineLevel: cineLevel ?? this.cineLevel,
       estimatedTimeForAnswer:
           estimatedTimeForAnswer ?? this.estimatedTimeForAnswer,
@@ -295,7 +306,6 @@ final ModelLearningItem defaultModelLearningItem = ModelLearningItem(
     level: PerformanceLevel.basic,
     code: 'GEN.PI.DEFAULT',
   ),
-  cineLevel: 0,
   estimatedTimeForAnswer: ModelLearningItem.defaultETA,
   category: const ModelCategory(category: 'general', description: 'General'),
 );

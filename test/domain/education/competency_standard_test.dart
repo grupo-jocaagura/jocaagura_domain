@@ -11,23 +11,16 @@ void main() {
       String label = 'Understands linear functions',
       int cine = 2,
       int ver = 1,
-      bool active = true,
       int? created,
       int? updated,
       String author = 'teacher:ana',
     }) {
-      final int now = DateTime.now().millisecondsSinceEpoch;
       return ModelCompetencyStandard(
         id: id,
         label: label,
         area: const ModelCategory(category: 'math', description: 'Mathematics'),
         cineLevel: cine,
         code: code,
-        version: ver,
-        isActive: active,
-        createdAtMs: created ?? now,
-        updatedAtMs: updated ?? now,
-        authorId: author,
       );
     }
 
@@ -66,11 +59,6 @@ void main() {
         expect(parsed.label, '');
         expect(parsed.cineLevel, 0);
         expect(parsed.code, '');
-        expect(parsed.version, 1);
-        expect(parsed.isActive, isFalse);
-        expect(parsed.createdAtMs, 0);
-        expect(parsed.updatedAtMs, 0);
-        expect(parsed.authorId, '');
       },
     );
 
@@ -82,17 +70,15 @@ void main() {
         final ModelCompetencyStandard base = buildSample();
         final ModelCompetencyStandard changed = base.copyWith(
           id: 'STD-NEW',
-          version: 2,
           area: const ModelCategory(category: 'sci', description: 'Science'),
         );
 
         expect(changed.id, 'STD-NEW');
-        expect(changed.version, 2);
+
         expect(changed.area.category, 'sci');
 
         // Invariantes
         expect(changed.code, base.code);
-        expect(changed.createdAtMs, base.createdAtMs);
       },
     );
 

@@ -97,7 +97,7 @@ class AttributeModel<T> extends Model {
   /// Factory helper that returns a typed [AttributeModel] if [value] is
   /// considered serializable for the domain; otherwise returns `null`.
   static AttributeModel<T>? from<T>(String name, T value) {
-    if (isDomanCompatible(value)) {
+    if (isDomainCompatible(value)) {
       return AttributeModel<T>(name: name, value: value);
     }
     return null;
@@ -107,7 +107,7 @@ class AttributeModel<T> extends Model {
   ///
   /// Supports: `String`, `num`, `bool`, `DateTime`, `Map`, `List`, and `null`.
   /// Does **not** validate nested elements.
-  static bool isDomanCompatible(dynamic value) {
+  static bool isDomainCompatible(dynamic value) {
     return value == null ||
         value is String ||
         value is num ||
@@ -125,7 +125,7 @@ class AttributeModel<T> extends Model {
   ///     `List<Map<String, dynamic>>`.
   ///
   /// - **Shallow validation:** Each item's `value` is included **only if**
-  ///   [AttributeModel.isDomanCompatible] returns `true` (supports `String`, `num`,
+  ///   [AttributeModel.isDomainCompatible] returns `true` (supports `String`, `num`,
   ///   `bool`, `DateTime`, `Map`, `List`, and `null`). Nested elements are **not**
   ///   validated.
   /// - **Missing keys:** If `"name"` is absent, an empty string `''` is used.
@@ -186,7 +186,7 @@ class AttributeModel<T> extends Model {
       final String name = m[AttributeEnum.name.name]?.toString() ?? '';
       final dynamic value = m[AttributeEnum.value.name];
 
-      if (AttributeModel.isDomanCompatible(value)) {
+      if (AttributeModel.isDomainCompatible(value)) {
         out.add(AttributeModel<dynamic>(name: name, value: value));
       }
     }
@@ -209,7 +209,7 @@ class AttributeModel<T> extends Model {
   ///
   /// - **Shallow domain check**
   ///   Only attributes whose converted `value` passes
-  ///   [AttributeModel.isDomanCompatible] (`String`, `num`, `bool`, `DateTime`,
+  ///   [AttributeModel.isDomainCompatible] (`String`, `num`, `bool`, `DateTime`,
   ///   `Map`, `List`, or `null`) are included. **Nested elements are not validated.**
   ///
   /// - **Missing keys**
@@ -299,7 +299,7 @@ class AttributeModel<T> extends Model {
       try {
         final AttributeModel<T> attr = attributeModelFromJson<T>(m, fromJsonT);
 
-        if (AttributeModel.isDomanCompatible(attr.value)) {
+        if (AttributeModel.isDomainCompatible(attr.value)) {
           out.add(attr);
         }
       } catch (_) {
