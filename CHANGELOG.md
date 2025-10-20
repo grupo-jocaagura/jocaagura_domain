@@ -66,19 +66,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `Assessment`/`LearningItem`: *round-trip*, Durations en ms, determinismo de `optionsShuffled`,
     listas inmutables.
 
-### BREAKING CHANGES
-
-- **ModelLearningGoal**
-  - El estándar anidado se serializa bajo `"standard"` como **objeto JSON completo** (
-    `ModelCompetencyStandard.toJson()`).
-  - Consumidores que antes usaban `"standardId"` o valores no-objeto deben **actualizar mapeos**.
-- **ModelLearningItem**
-  - `wrongAnswers: List<String>` → **`wrongAnswerOne/Two/Three`**.
-  - `achievements: List<ModelPerformanceIndicator>` → **campos** `achievementOne` (req.),
-    `achievementTwo/Three` (opt.).
-- **ModelAssessment**
-  - `timeLimitMinutes: int` → **`timeLimit: Duration`** (serializado como `timeLimitMs` en **ms**).
-
 ## [1.31.2] - 2025-10-18
 
 ### Added
