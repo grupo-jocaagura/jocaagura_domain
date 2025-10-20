@@ -3,6 +3,230 @@
 This document follows the guidelines of [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.32.0] - 2025-10-19
+
+> Publicación acumulada que **consolida** los cambios de **1.31.0 → 1.31.3**. No introduce cambios
+> funcionales nuevos; sincroniza documentación, ejemplos y *exports* del paquete.
+
+### Included from 1.31.3 (2025-10-19)
+
+**Added**
+
+- Parsers de atributos:
+  - `AttributeModel.listFromDynamicTyped<T>(input, fromJsonT)` (parseo tipado desde JSON/String o
+    dinámico; raíz `Iterable`; sólo objetos; omite fallas sin lanzar).
+  - `AttributeModel.listFromDynamicShallow(input)` (parseo superficial con filtro
+    `isDomainCompatible`).
+  - Listas retornadas **mutables** (puede cambiar a `List.unmodifiable` en futuras versiones).
+- Educación: nuevos modelos (`CompetencyStandard`, `LearningGoal`, `PerformanceIndicator`,
+  `AchievementTriple`, `LearningItem`, `Assessment`) y enums (`ActorRole`, `ContentState`,
+  `PerformanceLevel`). Ejemplo runnable `education_base_project.dart`.
+
+**Changed**
+
+- `ModelLearningGoal` con `LearningGoalEnum`, `extends Model`, `fromJson` robusto, `copyWith`,
+  `==/hashCode`, `standard` anidado como **objeto** (fallback a `defaultCompetencyStandard`).
+- Rediseño evaluación:
+  - `ModelAssessment extends Model` + `AssessmentEnum`, `timeLimit: Duration` (ms via
+    `timeLimitMs`), `items` inmutable.
+  - `ModelLearningItem extends Model` + `LearningItemEnum`; `wrongAnswers: List<String>` →
+    `wrongAnswerOne/Two/Three`; `achievements` → `achievementOne` (req.), `achievementTwo/Three` (
+    opt.).
+
+**Docs/Tests**
+
+- DartDoc exhaustivo de parsers y modelos; suites con *round-trip*, defaults, assertions,
+  determinismo e inmutabilidad de listas.
+
+**Breaking** (recordatorio)
+
+- `ModelLearningGoal.standard` serializa como **objeto** bajo `"standard"`.
+- `ModelLearningItem` cambia forma JSON; ver 1.31.3 para guía de migración.
+
+---
+
+### Included from 1.31.2 (2025-10-18)
+
+**Added**
+
+- `ModelItem` (id/name/description/`type: ModelCategory`/`price: ModelPrice`/`attributes`) con
+  *fallback* de `id`.
+- `ModelPrice` (`mathPrecision`, `CurrencyEnum`, `decimalAmount`).
+- `ModelCategory` (+ enum) con *slug* normalizado y `==/hashCode` por categoría canónica.
+- `ModelAttribute<T>` (alias `AttributeModel<T>`) con helper `from<T>()` y validación de tipos
+  soportados.
+- Demo end‑to‑end (Store) *single‑file* sin dependencias externas, precisión financiera alineada con
+  `ModelPrice`.
+
+**Tests**
+
+- `model_item_test.dart`, `model_price_test.dart`, `attribute_model_test.dart`,
+  `model_category_test.dart`.
+
+**Notes**
+
+- Modelos **inmutables**, **serializables** y compatibles con Firestore. **Sin cambios rompientes**.
+
+---
+
+### Included from 1.31.1 (2025-10-18)
+
+**Docs**
+
+- `Bloc`/extensión: semántica **seeded stream** y contratos de ciclo de vida (sin
+  historial/backpressure; `add/value` tras `dispose()` lanza). Ejemplos ejecutables; alineación
+  entre `bloc.dart` y `entity_bloc.dart`.
+
+> Documentación únicamente. **Sin cambios de API**.
+
+---
+
+### Included from 1.31.0 (2025-10-13)
+
+**Resumen**
+
+- Consolidación de **sesión**, **WS DB JSON‑first** y **utils** con ejemplos y suites de pruebas (
+  ver release 1.31.0 para detalle y notas de migración de WS DB).
+
+---
+
+### Migration notes
+
+- Esta versión **no añade** nuevas migraciones. Aplican las ya documentadas en **1.31.3** (
+  educación) y **1.31.0** (WS DB renombres/contrato JSON‑first).
+
+### Housekeeping
+
+- Sincronización de `README/DartDoc` y ejemplos; verificación de *exports* en el *barrel* público.
+
+## [1.31.3] - 2025-10-19
+
+### Added
+
+- **Domain/Model – Parsers de atributos tipados y superficiales**
+  - `AttributeModel.listFromDynamicTyped<T>(input, fromJsonT)`: parseo **tipado** desde `String` (
+    JSON) o entrada dinámica; decodifica, exige raíz `Iterable`, incluye solo objetos
+    `{String,dynamic}`, aplica convertidor `fromJsonT`, y salta fallas sin lanzar.
+  - `AttributeModel.listFromDynamicShallow(input)`: parseo **shallow** delegando en
+    `Utils.listFromDynamic` y filtrando por compatibilidad de dominio.
+  - Comportamientos clave:
+    - Faltante `"name"` → `''` (vacío).
+    - Entradas no objeto en arrays JSON → **ignoradas**.
+    - Entradas no-`String` → rama `Utils`.
+    - *Guard* superficial: incluir únicamente valores que pasen `isDomainCompatible`.
+    - **Listas retornadas son mutables** (posible cambio futuro a `List.unmodifiable`).
+- **Domain/Education – Nueva base curricular y evaluaciones**
+  - Modelos: `CompetencyStandard`, `LearningGoal`, `PerformanceIndicator`, `AchievementTriple`,
+    `LearningItem`, `Assessment`.
+  - Enums de soporte: `ActorRole`, `ContentState`, `PerformanceLevel`.
+  - Ejemplo runnable: `education_base_project.dart` con jerarquía completa hasta `Assessment`.
+
+### Changed
+
+- **Education – `ModelLearningGoal`**
+  - `LearningGoalEnum` para claves JSON estables.
+  - `ModelLearningGoal extends Model` con `fromJson` robusto (utilidades `Utils.*`), `copyWith`,
+    `==/hashCode`, `toString()` → JSON, y **precondición** `version > 0`.
+  - Anidado `standard` como **objeto completo** (usa `defaultCompetencyStandard` si falta).
+- **Education – Rediseño de evaluación y reactivos asociados**
+  - `ModelAssessment extends Model` con `AssessmentEnum`; `timeLimit: Duration` → serializa en **ms
+    ** (`timeLimitMs`); lista `items` inmutable; `defaultModelAssessment`.
+  - `ModelLearningItem extends Model` con `LearningItemEnum`:
+    - `wrongAnswers: List<String>` → **campos** `wrongAnswerOne/Two/Three`.
+    - `achievements: List<ModelPerformanceIndicator>` → **triple** `achievementOne` (req.),
+      `achievementTwo/Three` (opt.).
+    - `attributes` inmutables, `optionsShuffled([seed])`, `copyWith`, `==/hashCode`.
+
+### Docs
+
+- **Attribute parsers:** DartDoc exhaustivo para `listFromDynamicTyped<T>` (entradas aceptadas,
+  conversión, *shallow checks*, claves faltantes, manejo de errores, orden, ejemplo runnable y
+  limitaciones).
+- **Education:** documentación de modelos y demo de evaluación (sumas/restas 3°) basada en
+  `jocaagura_domain`.
+
+### Tests
+
+- **Atributos**
+  - `attribute_model_list_typed_test.dart`: conversión `int` desde `String`, `DateTime` ISO8601,
+    JSON inválido/objeto→vacío, rama `Utils` para no-`String`, `"name"` faltante→`''`, convertidor
+    que lanza→**salta ítem**, tipo no compatible→**omitido**, `Iterable` explícito, ignora elementos
+    no objeto.
+  - `attribute_model_list_shallow_test.dart`: preserva heterogeneidad, JSON inválido/objeto→vacío,
+    `"name"` faltante→`''`, valor no compatible→**omitido**, `null`→vacío, ignora no-objeto.
+- **Education**
+  - `ModelLearningGoal`: *round-trip*, `copyWith`, *defaults* (incluye `standard`), `standard` como
+    `String` JSON→`Utils.mapFromDynamic`, aserción `version <= 0` falla, igualdad/hash, `toString()`
+    parseable con claves enum.
+  - `CompetencyStandard`: *round-trip*, `copyWith`, *defaults*.
+  - `Assessment`/`LearningItem`: *round-trip*, Durations en ms, determinismo de `optionsShuffled`,
+    listas inmutables.
+
+## [1.31.2] - 2025-10-18
+
+### Added
+
+- **Domain – Productos y precios**
+  - `ModelItem`: entidad mínima y extensible (id, name, description, `type: ModelCategory`,
+    `price: ModelPrice`, `attributes` dinámicos).
+    - Lógica *fallback* de `id` cuando viene vacío (usa `category` normalizada).
+  - `ModelPrice`: valor monetario con `mathPrecision`, `CurrencyEnum` (COP, USD, MXN, …) y
+    `decimalAmount` para conversión precisa.
+  - **Constantes:** `defaultModelItem`, `defaultModelPrice`.
+- **Taxonomía**
+  - `ModelCategory` (+ `ModelCategoryEnum`): modelo inmutable con *slug* canónico.
+    - API pública: `fromJson`, `toJson`, `copyWith`, `normalizeCategory(String)`.
+    - Igualdad/`hashCode` basados **solo** en `category` normalizada.
+- **Atributos tipados**
+  - `ModelAttribute<T>` (*alias* de `AttributeModel<T>`): atributos genéricos **compatibles con
+    Firestore** (tipos soportados).
+    - Helper `ModelAttribute.from<T>()` para construcción tipada con validación.
+- **Demo end-to-end (Store)**
+  - Ejemplo **single-file** listo para copiar (sin paquetes externos) mostrando:  
+    `UI → AppManager → Bloc → UseCase → Repository → Gateway → Service`  
+    usando `StoreModel`, `ModelItem`, `ModelPrice`, `ModelCategory`, `FinancialMovementModel` y
+    `LedgerModel`.
+    - Alinea precisión financiera con `ModelPrice(mathPrecision: 2)`.
+
+### Tests
+
+- `model_item_test.dart`: *round-trip* JSON, *fallback* de `id`, `copyWith`, igualdad/`hashCode`,
+  `toString`.
+- `model_price_test.dart`: matemática decimal, *fallback* de moneda, *round-trip*, `copyWith`.
+- `attribute_model_test.dart`: `from<T>()`, seguridad de tipos, *round-trip*, igualdad.
+- `model_category_test.dart`: matriz de normalización (espacios/puntuación/caso), *round-trip*,
+  igualdad basada en `category` normalizada, `copyWith`, `toJson` (trim de `description`).
+
+### Docs
+
+- DartDoc en **inglés** con ejemplo ejecutable para `ModelCategory`.
+- Guía del ejemplo **pet store** con precisión financiera alineada a `ModelPrice`.
+
+### Notes
+
+- Todos los modelos son **inmutables** y **serializables** (compatibles con Firestore).
+- **Sin cambios rompientes**: nuevas entidades y helpers son *opt-in*.
+- Si tu lógica dependía del signo de montos para ingreso/egreso, usa el `category`/tipo del item en
+  lugar de valores negativos.
+
+## [1.31.1] - 2025-10-18
+
+### Docs
+
+- **Bloc / Extension (domain):** se clarifica el **semántico seed** del stream:
+  - `Bloc.stream` es **seeded**: captura el valor **en el momento del getter** y **cada suscripción
+    ** recibe primero ese *seed* y luego las actualizaciones.
+  - Suscripción **ansiosa** a la fuente, comportamiento **broadcast**, y notas de ciclo de vida.
+  - Caso fuente ya completada: el suscriptor se **cierra sin emitir** el seed.
+- **Contratos explícitos:** pre/postcondiciones documentadas:
+  - **Sin historial ni backpressure**; solo el *seed* actual y eventos futuros.
+  - Llamar `add/value` tras `dispose()` **lanza** desde el controlador.
+- **Ejemplos ejecutables:** se añaden `void main()` de referencia para uso correcto.
+- **Consistencia:** DartDoc alineada entre `bloc.dart` y `entity_bloc.dart` (punto de extensión y
+  notas de ciclo de vida).
+
+> **Notas:** Solo documentación. **Sin cambios funcionales ni de API**.
+
 ## [1.31.0] - 2025-10-13
 
 ### Resumen práctico

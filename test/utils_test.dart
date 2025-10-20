@@ -5,6 +5,122 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:jocaagura_domain/jocaagura_domain.dart';
 
 void main() {
+  group('Utils.duration (json/parse)', () {
+    test('durationToJson returns milliseconds', () {
+      const Duration d =
+          Duration(hours: 1, minutes: 2, seconds: 3, milliseconds: 4);
+      final int ms = Utils.durationToJson(d);
+      expect(ms, 3723004);
+    });
+
+    test('fromMap: int/double/String (ms)', () {
+      expect(Utils.durationFromJson(1500), const Duration(milliseconds: 1500));
+      expect(
+        Utils.durationFromJson(1500.9),
+        const Duration(milliseconds: 1500),
+      );
+      expect(
+        Utils.durationFromJson('2000'),
+        const Duration(milliseconds: 2000),
+      );
+      expect(
+        Utils.durationFromJson('2000.7'),
+        const Duration(milliseconds: 2000),
+      );
+    });
+
+    test('fromMap: HH:MM:SS[.fff] and MM:SS[.fff]', () {
+      expect(
+        Utils.durationFromJson('01:02:03'),
+        const Duration(hours: 1, minutes: 2, seconds: 3),
+      );
+      expect(
+        Utils.durationFromJson('00:01:30.250'),
+        const Duration(minutes: 1, seconds: 30, milliseconds: 250),
+      );
+      // MM:SS
+      expect(
+        Utils.durationFromJson('12:05'),
+        const Duration(minutes: 12, seconds: 5),
+      );
+      // Pad fractional digits to milliseconds
+      expect(
+        Utils.durationFromJson('00:00:00.5'),
+        const Duration(milliseconds: 500),
+      );
+      expect(
+        Utils.durationFromJson('00:00:00.12'),
+        const Duration(milliseconds: 120),
+      );
+    });
+
+    test('fromMap: ISO8601 subset P[nD]T[nH][nM][nS]', () {
+      expect(
+        Utils.durationFromJson('PT1H30M5S'),
+        const Duration(hours: 1, minutes: 30, seconds: 5),
+      );
+      expect(
+        Utils.durationFromJson('PT2H'),
+        const Duration(hours: 2),
+      );
+      expect(
+        Utils.durationFromJson('P1DT2H'), // 1 day + 2 hours = 26h
+        const Duration(hours: 26),
+      );
+      expect(
+        Utils.durationFromJson('PT0.25S'),
+        const Duration(milliseconds: 250),
+      );
+    });
+
+    test(
+        'fromMap: shorthand "2h45m", "90m", "30s", "1h2m3.5s" (case-insensitive)',
+        () {
+      expect(
+        Utils.durationFromJson('2h45m'),
+        const Duration(hours: 2, minutes: 45),
+      );
+      expect(
+        Utils.durationFromJson('90m'),
+        const Duration(minutes: 90),
+      );
+      expect(
+        Utils.durationFromJson('30s'),
+        const Duration(seconds: 30),
+      );
+      expect(
+        Utils.durationFromJson('1h2m3.5s'),
+        const Duration(hours: 1, minutes: 2, seconds: 3, milliseconds: 500),
+      );
+      expect(
+        Utils.durationFromJson('PT1H2M3S'.toLowerCase()),
+        const Duration(hours: 1, minutes: 2, seconds: 3),
+      );
+    });
+
+    test('fromMap: Duration input returned as-is', () {
+      const Duration d = Duration(minutes: 5);
+      expect(Utils.durationFromJson(d), same(d));
+    });
+
+    test('fromMap: invalid or null returns default', () {
+      expect(Utils.durationFromJson(null), Duration.zero);
+      expect(
+        Utils.durationFromJson(
+          'not a duration',
+          defaultDuration: const Duration(seconds: 7),
+        ),
+        const Duration(seconds: 7),
+      );
+      expect(
+        Utils.durationFromJson(
+          double.nan,
+          defaultDuration: const Duration(milliseconds: 123),
+        ),
+        const Duration(milliseconds: 123),
+      );
+    });
+  });
   group('Utils', () {
     test('mapToString should convert a map to a JSON string', () {
       final Map<String, String> inputMap = <String, String>{'key': 'value'};
