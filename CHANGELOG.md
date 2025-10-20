@@ -3,6 +3,102 @@
 This document follows the guidelines of [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.32.0] - 2025-10-19
+
+> Publicación acumulada que **consolida** los cambios de **1.31.0 → 1.31.3**. No introduce cambios
+> funcionales nuevos; sincroniza documentación, ejemplos y *exports* del paquete.
+
+### Included from 1.31.3 (2025-10-19)
+
+**Added**
+
+- Parsers de atributos:
+  - `AttributeModel.listFromDynamicTyped<T>(input, fromJsonT)` (parseo tipado desde JSON/String o
+    dinámico; raíz `Iterable`; sólo objetos; omite fallas sin lanzar).
+  - `AttributeModel.listFromDynamicShallow(input)` (parseo superficial con filtro
+    `isDomainCompatible`).
+  - Listas retornadas **mutables** (puede cambiar a `List.unmodifiable` en futuras versiones).
+- Educación: nuevos modelos (`CompetencyStandard`, `LearningGoal`, `PerformanceIndicator`,
+  `AchievementTriple`, `LearningItem`, `Assessment`) y enums (`ActorRole`, `ContentState`,
+  `PerformanceLevel`). Ejemplo runnable `education_base_project.dart`.
+
+**Changed**
+
+- `ModelLearningGoal` con `LearningGoalEnum`, `extends Model`, `fromJson` robusto, `copyWith`,
+  `==/hashCode`, `standard` anidado como **objeto** (fallback a `defaultCompetencyStandard`).
+- Rediseño evaluación:
+  - `ModelAssessment extends Model` + `AssessmentEnum`, `timeLimit: Duration` (ms via
+    `timeLimitMs`), `items` inmutable.
+  - `ModelLearningItem extends Model` + `LearningItemEnum`; `wrongAnswers: List<String>` →
+    `wrongAnswerOne/Two/Three`; `achievements` → `achievementOne` (req.), `achievementTwo/Three` (
+    opt.).
+
+**Docs/Tests**
+
+- DartDoc exhaustivo de parsers y modelos; suites con *round-trip*, defaults, assertions,
+  determinismo e inmutabilidad de listas.
+
+**Breaking** (recordatorio)
+
+- `ModelLearningGoal.standard` serializa como **objeto** bajo `"standard"`.
+- `ModelLearningItem` cambia forma JSON; ver 1.31.3 para guía de migración.
+
+---
+
+### Included from 1.31.2 (2025-10-18)
+
+**Added**
+
+- `ModelItem` (id/name/description/`type: ModelCategory`/`price: ModelPrice`/`attributes`) con
+  *fallback* de `id`.
+- `ModelPrice` (`mathPrecision`, `CurrencyEnum`, `decimalAmount`).
+- `ModelCategory` (+ enum) con *slug* normalizado y `==/hashCode` por categoría canónica.
+- `ModelAttribute<T>` (alias `AttributeModel<T>`) con helper `from<T>()` y validación de tipos
+  soportados.
+- Demo end‑to‑end (Store) *single‑file* sin dependencias externas, precisión financiera alineada con
+  `ModelPrice`.
+
+**Tests**
+
+- `model_item_test.dart`, `model_price_test.dart`, `attribute_model_test.dart`,
+  `model_category_test.dart`.
+
+**Notes**
+
+- Modelos **inmutables**, **serializables** y compatibles con Firestore. **Sin cambios rompientes**.
+
+---
+
+### Included from 1.31.1 (2025-10-18)
+
+**Docs**
+
+- `Bloc`/extensión: semántica **seeded stream** y contratos de ciclo de vida (sin
+  historial/backpressure; `add/value` tras `dispose()` lanza). Ejemplos ejecutables; alineación
+  entre `bloc.dart` y `entity_bloc.dart`.
+
+> Documentación únicamente. **Sin cambios de API**.
+
+---
+
+### Included from 1.31.0 (2025-10-13)
+
+**Resumen**
+
+- Consolidación de **sesión**, **WS DB JSON‑first** y **utils** con ejemplos y suites de pruebas (
+  ver release 1.31.0 para detalle y notas de migración de WS DB).
+
+---
+
+### Migration notes
+
+- Esta versión **no añade** nuevas migraciones. Aplican las ya documentadas en **1.31.3** (
+  educación) y **1.31.0** (WS DB renombres/contrato JSON‑first).
+
+### Housekeeping
+
+- Sincronización de `README/DartDoc` y ejemplos; verificación de *exports* en el *barrel* público.
+
 ## [1.31.3] - 2025-10-19
 
 ### Added
