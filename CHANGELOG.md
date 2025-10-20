@@ -3,6 +3,69 @@
 This document follows the guidelines of [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.31.3] - 2025-10-19
+
+### Added
+
+- **Domain/Model – Parsers de atributos tipados y superficiales**
+  - `AttributeModel.listFromDynamicTyped<T>(input, fromJsonT)`: parseo **tipado** desde `String` (
+    JSON) o entrada dinámica; decodifica, exige raíz `Iterable`, incluye solo objetos
+    `{String,dynamic}`, aplica convertidor `fromJsonT`, y salta fallas sin lanzar.
+  - `AttributeModel.listFromDynamicShallow(input)`: parseo **shallow** delegando en
+    `Utils.listFromDynamic` y filtrando por compatibilidad de dominio.
+  - Comportamientos clave:
+    - Faltante `"name"` → `''` (vacío).
+    - Entradas no objeto en arrays JSON → **ignoradas**.
+    - Entradas no-`String` → rama `Utils`.
+    - *Guard* superficial: incluir únicamente valores que pasen `isDomainCompatible`.
+    - **Listas retornadas son mutables** (posible cambio futuro a `List.unmodifiable`).
+- **Domain/Education – Nueva base curricular y evaluaciones**
+  - Modelos: `CompetencyStandard`, `LearningGoal`, `PerformanceIndicator`, `AchievementTriple`,
+    `LearningItem`, `Assessment`.
+  - Enums de soporte: `ActorRole`, `ContentState`, `PerformanceLevel`.
+  - Ejemplo runnable: `education_base_project.dart` con jerarquía completa hasta `Assessment`.
+
+### Changed
+
+- **Education – `ModelLearningGoal`**
+  - `LearningGoalEnum` para claves JSON estables.
+  - `ModelLearningGoal extends Model` con `fromJson` robusto (utilidades `Utils.*`), `copyWith`,
+    `==/hashCode`, `toString()` → JSON, y **precondición** `version > 0`.
+  - Anidado `standard` como **objeto completo** (usa `defaultCompetencyStandard` si falta).
+- **Education – Rediseño de evaluación y reactivos asociados**
+  - `ModelAssessment extends Model` con `AssessmentEnum`; `timeLimit: Duration` → serializa en **ms
+    ** (`timeLimitMs`); lista `items` inmutable; `defaultModelAssessment`.
+  - `ModelLearningItem extends Model` con `LearningItemEnum`:
+    - `wrongAnswers: List<String>` → **campos** `wrongAnswerOne/Two/Three`.
+    - `achievements: List<ModelPerformanceIndicator>` → **triple** `achievementOne` (req.),
+      `achievementTwo/Three` (opt.).
+    - `attributes` inmutables, `optionsShuffled([seed])`, `copyWith`, `==/hashCode`.
+
+### Docs
+
+- **Attribute parsers:** DartDoc exhaustivo para `listFromDynamicTyped<T>` (entradas aceptadas,
+  conversión, *shallow checks*, claves faltantes, manejo de errores, orden, ejemplo runnable y
+  limitaciones).
+- **Education:** documentación de modelos y demo de evaluación (sumas/restas 3°) basada en
+  `jocaagura_domain`.
+
+### Tests
+
+- **Atributos**
+  - `attribute_model_list_typed_test.dart`: conversión `int` desde `String`, `DateTime` ISO8601,
+    JSON inválido/objeto→vacío, rama `Utils` para no-`String`, `"name"` faltante→`''`, convertidor
+    que lanza→**salta ítem**, tipo no compatible→**omitido**, `Iterable` explícito, ignora elementos
+    no objeto.
+  - `attribute_model_list_shallow_test.dart`: preserva heterogeneidad, JSON inválido/objeto→vacío,
+    `"name"` faltante→`''`, valor no compatible→**omitido**, `null`→vacío, ignora no-objeto.
+- **Education**
+  - `ModelLearningGoal`: *round-trip*, `copyWith`, *defaults* (incluye `standard`), `standard` como
+    `String` JSON→`Utils.mapFromDynamic`, aserción `version <= 0` falla, igualdad/hash, `toString()`
+    parseable con claves enum.
+  - `CompetencyStandard`: *round-trip*, `copyWith`, *defaults*.
+  - `Assessment`/`LearningItem`: *round-trip*, Durations en ms, determinismo de `optionsShuffled`,
+    listas inmutables.
+
 ## [1.31.2] - 2025-10-18
 
 ### Added

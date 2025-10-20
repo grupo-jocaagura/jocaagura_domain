@@ -262,7 +262,10 @@ class Utils extends EntityUtil {
   ///
   /// - [json]: The dynamic value to convert.
   /// - Returns: `true` if the value is `true`, otherwise `false`.
-  static bool getBoolFromDynamic(dynamic json) {
+  static bool getBoolFromDynamic(dynamic json, {bool? defaultValueIfNull}) {
+    if (json == null && defaultValueIfNull != null) {
+      return defaultValueIfNull;
+    }
     return json == true;
   }
 
@@ -321,9 +324,12 @@ class Utils extends EntityUtil {
   /// Utils.getIntegerFromDynamic(42.9);              // 42
   /// Utils.getIntegerFromDynamic(null);              // 0
   /// ```
-  static int getIntegerFromDynamic(dynamic value) {
+  static int getIntegerFromDynamic(
+    dynamic value, {
+    int defaultValue = 0,
+  }) {
     if (value == null) {
-      return 0;
+      return defaultValue;
     }
     if (value is int) {
       return value;
@@ -753,5 +759,185 @@ class Utils extends EntityUtil {
       return Object.hashAll(value.map(deepHash));
     }
     return value.hashCode;
+  }
+
+  /// Serializes a [Duration] into JSON as **milliseconds** (int).
+  ///
+  /// This helper provides a storage-agnostic numeric representation of a
+  /// duration. It does not lose precision because [Duration] stores values
+  /// internally as microseconds, and converting to milliseconds is the common
+  /// interoperable format across APIs.
+  ///
+  /// ### Minimal runnable example
+  /// ```dart
+  /// void main() {
+  ///   final Duration d = const Duration(hours: 1, minutes: 2, seconds: 3, milliseconds: 4);
+  ///   final int ms = Utils.durationToJson(d);
+  ///   print(ms); // 3723004
+  /// }
+  /// ```
+  static int durationToJson(Duration duration) {
+    return duration.inMilliseconds;
+  }
+
+  /// Parses a duration from a dynamic input.
+  ///
+  /// **Accepted inputs:**
+  /// - `Duration` → returned as-is.
+  /// - `int` / `double` → interpreted as **milliseconds** (double is truncated toward zero).
+  /// - `String`:
+  ///   - Plain integer or decimal → milliseconds (e.g., `"1500"`, `"1500.7"`).
+  ///   - `HH:MM:SS[.fff]` or `MM:SS[.fff]` (fractional part up to 3 digits; `"5"` → 500ms, `"12"` → 120ms).
+  ///   - ISO 8601 duration subset: `P[nD][T[nH][nM][nS]]` (e.g., `"PT1H30M5.25S"`, `"P1DT2H"`).
+  ///   - Shorthand letters (case-insensitive): `"2h45m"`, `"90m"`, `"30s"`, `"1h2m3s"`.
+  ///
+  /// **Fallbacks:**
+  /// - On invalid/unknown input returns [defaultDuration] (defaults to [Duration.zero]).
+  ///
+  /// ### Minimal runnable example
+  /// ```dart
+  /// void main() {
+  ///   final Duration a = Utils.durationFromJson(1500);           // 1.5s
+  ///   final Duration b = Utils.durationFromJson('00:01:30.250'); // 1m30.250s
+  ///   final Duration c = Utils.durationFromJson('PT2H');         // 2h
+  ///   final Duration d = Utils.durationFromJson('2h45m');        // 2h45m
+  ///   print([a, b, c, d].map((e) => e.inMilliseconds).toList());
+  /// }
+  /// ```
+  static Duration durationFromJson(
+    dynamic value, {
+    Duration defaultDuration = Duration.zero,
+  }) {
+    // 1) Null
+    if (value == null) {
+      return defaultDuration;
+    }
+
+    // 2) Already a Duration
+    if (value is Duration) {
+      return value;
+    }
+
+    // 3) Numeric types → milliseconds
+    if (value is int) {
+      return Duration(milliseconds: value);
+    }
+    if (value is double) {
+      if (value.isNaN || value.isInfinite) {
+        return defaultDuration;
+      }
+      return Duration(milliseconds: value.truncate());
+    }
+
+    // 4) String parsing
+    final String s = Utils.getStringFromDynamic(value).trim();
+    if (s.isEmpty) {
+      return defaultDuration;
+    }
+
+    // 4.1) Try as integer milliseconds
+    final int? asInt = int.tryParse(s);
+    if (asInt != null) {
+      return Duration(milliseconds: asInt);
+    }
+
+    // 4.2) Try as decimal milliseconds
+    final double? asDouble = double.tryParse(s);
+    if (asDouble != null && !asDouble.isNaN && !asDouble.isInfinite) {
+      return Duration(milliseconds: asDouble.truncate());
+    }
+
+    // 4.3) HH:MM:SS[.fff] (hours required)
+    final RegExp hms = RegExp(r'^(\d+):([0-5]?\d):([0-5]?\d)(?:\.(\d{1,3}))?$');
+    final Match? mhms = hms.firstMatch(s);
+    if (mhms != null) {
+      final int hours = int.parse(mhms.group(1)!);
+      final int minutes = int.parse(mhms.group(2)!);
+      final int seconds = int.parse(mhms.group(3)!);
+      final String msPart = mhms.group(4) ?? '';
+      final int millis =
+          msPart.isEmpty ? 0 : int.parse(msPart.padRight(3, '0'));
+      return Duration(
+        hours: hours,
+        minutes: minutes,
+        seconds: seconds,
+        milliseconds: millis,
+      );
+    }
+
+    // 4.4) MM:SS[.fff] (no hours)
+    final RegExp msOnly = RegExp(r'^(\d+):([0-5]?\d)(?:\.(\d{1,3}))?$');
+    final Match? mms = msOnly.firstMatch(s);
+    if (mms != null) {
+      final int minutes = int.parse(mms.group(1)!);
+      final int seconds = int.parse(mms.group(2)!);
+      final String msPart = mms.group(3) ?? '';
+      final int millis =
+          msPart.isEmpty ? 0 : int.parse(msPart.padRight(3, '0'));
+      return Duration(
+        minutes: minutes,
+        seconds: seconds,
+        milliseconds: millis,
+      );
+    }
+
+    // 4.5) ISO8601 subset: P[nD]T[nH][nM][nS] (days optional; seconds may be decimal)
+    final RegExp iso = RegExp(
+      r'^P(?:(\d+)D)?(?:T(?:(\d+)H)?(?:(\d+)M)?(?:(\d+(?:\.\d+)?)S)?)?$',
+      caseSensitive: false,
+    );
+    final Match? miso = iso.firstMatch(s);
+    if (miso != null) {
+      final int days = miso.group(1) != null ? int.parse(miso.group(1)!) : 0;
+      final int hours = miso.group(2) != null ? int.parse(miso.group(2)!) : 0;
+      final int minutes = miso.group(3) != null ? int.parse(miso.group(3)!) : 0;
+
+      int seconds = 0;
+      int millis = 0;
+      if (miso.group(4) != null) {
+        final double sec = double.parse(miso.group(4)!);
+        seconds = sec.truncate();
+        millis = ((sec - seconds) * 1000).round();
+      }
+
+      final int totalHours = days * 24 + hours;
+      return Duration(
+        hours: totalHours,
+        minutes: minutes,
+        seconds: seconds,
+        milliseconds: millis,
+      );
+    }
+
+    // 4.6) Shorthand like "2h45m", "90m", "30s", "1h2m3.5s"
+    final RegExp short = RegExp(
+      r'^\s*(?:(-?\d+)\s*h)?\s*(?:(-?\d+)\s*m)?\s*(?:(-?\d+(?:\.\d+)?)\s*s)?\s*$',
+      caseSensitive: false,
+    );
+    final Match? mshort = short.firstMatch(s);
+    if (mshort != null) {
+      final int hours =
+          mshort.group(1) != null ? int.parse(mshort.group(1)!) : 0;
+      final int minutes =
+          mshort.group(2) != null ? int.parse(mshort.group(2)!) : 0;
+
+      int seconds = 0;
+      int millis = 0;
+      if (mshort.group(3) != null) {
+        final double sec = double.parse(mshort.group(3)!);
+        seconds = sec.truncate();
+        millis = ((sec - seconds) * 1000).round();
+      }
+
+      return Duration(
+        hours: hours,
+        minutes: minutes,
+        seconds: seconds,
+        milliseconds: millis,
+      );
+    }
+
+    // 5) Fallback
+    return defaultDuration;
   }
 }
