@@ -1,32 +1,3 @@
-// ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables
-// *****************************************************************************
-// * Jocaagura — Education Assessment Demo (Using jocaagura_domain models)
-// *
-// * This single-file Flutter app demonstrates how to BUILD and RUN an assessment
-// * using the education models that ALREADY exist in `jocaagura_domain`:
-// *   - ModelAssessment
-// *   - ModelLearningItem
-// *   - ModelLearningGoal
-// *   - ModelPerformanceIndicator
-// *   - ModelCompetencyStandard
-// *   - PerformanceLevel (enum)
-// *   - ModelCategory
-// *
-// * Scenario
-// * - 5 basic math questions (add/subtract) for ~3rd grade.
-// * - Items/options can be shuffled, progress is shown, result + review screen.
-// *
-// * How to run
-// * 1) Place this file as `lib/main.dart` in a Flutter app that depends on
-// *    `jocaagura_domain` (your local package or from source).
-// * 2) `flutter run`
-// *
-// * Clean Architecture alignment (Jocaagura style)
-// * UI → AppManager → Bloc → UseCase → Repository → Gateway → Service
-// * In this small demo we focus on UI + Domain models only. For production,
-// * plug these models into your UseCases/BLoCs and persistence layers.
-// *****************************************************************************
-
 import 'dart:math';
 
 import 'package:flutter/material.dart';
@@ -34,11 +5,6 @@ import 'package:jocaagura_domain/jocaagura_domain.dart';
 
 void main() => runApp(const JgEducationDemoApp());
 
-// -----------------------------------------------------------------------------
-// App Shell
-// -----------------------------------------------------------------------------
-
-/// Top-level app that wires a fixed [ModelAssessment] into a playable flow.
 class JgEducationDemoApp extends StatelessWidget {
   const JgEducationDemoApp({super.key});
 
@@ -47,39 +13,149 @@ class JgEducationDemoApp extends StatelessWidget {
     return MaterialApp(
       title: 'Jocaagura Education Demo',
       theme: ThemeData(useMaterial3: true, colorSchemeSeed: Colors.indigo),
-      home: AssessmentHome(assessment: _buildMathAssessment()),
+      home: const AssessmentChooserPage(),
     );
   }
 }
 
 // -----------------------------------------------------------------------------
-// Dataset (uses jocaagura_domain models exactly as defined in your library)
+// Selector de evaluación
 // -----------------------------------------------------------------------------
 
-/// Creates a 3rd-grade friendly math assessment (sums & subtracts).
-///
-/// Implementation notes:
-/// - Uses `ModelLearningItem.optionsShuffled([seed])` for deterministic shuffles.
-/// - Each item references a shared [ModelLearningGoal] and [ModelPerformanceIndicator].
-/// - `passScore` is 60.
+class AssessmentChooserPage extends StatelessWidget {
+  const AssessmentChooserPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final ModelAssessment math = _buildMathAssessment();
+    final ModelAssessment art = _buildDigitalArtAssessmentAdvanced();
+
+    return Scaffold(
+      appBar: AppBar(title: const Text('Elige una evaluación')),
+      body: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          children: <Widget>[
+            _AssessmentCard(
+              title: math.title,
+              subtitle: 'Preguntas: ${math.items.length} • '
+                  'Tiempo: ${math.timeLimit == Duration.zero ? 'sin límite' : '${math.timeLimit.inMinutes} min'} • '
+                  'Aprobación: ${math.passScore}%',
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) => AssessmentHome(assessment: math),
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+            _AssessmentCard(
+              title: art.title,
+              subtitle: 'Preguntas: ${art.items.length} • '
+                  'Tiempo: ${art.timeLimit.inMinutes} min • '
+                  'Aprobación: ${art.passScore}%',
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) => AssessmentHome(assessment: art),
+                ),
+              ),
+            ),
+            const Spacer(),
+            const _HelperNote(),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _AssessmentCard extends StatelessWidget {
+  const _AssessmentCard({
+    required this.title,
+    required this.subtitle,
+    required this.onTap,
+  });
+
+  final String title;
+  final String subtitle;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      elevation: 1,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(12),
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: <Widget>[
+              const Icon(Icons.quiz, size: 32),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Text(title, style: Theme.of(context).textTheme.titleLarge),
+                    const SizedBox(height: 4),
+                    Text(subtitle),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 12),
+              const Icon(Icons.arrow_forward_ios, size: 18),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _HelperNote extends StatelessWidget {
+  const _HelperNote();
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        border: Border.all(color: Theme.of(context).dividerColor),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: const Padding(
+        padding: EdgeInsets.all(12),
+        child: Text(
+          'Tip: Este demo usa los modelos existentes de jocaagura_domain.\n'
+          'Para producción, conéctalo a UseCases/BLoCs y persistencia.',
+          textAlign: TextAlign.center,
+          style: TextStyle(fontSize: 12),
+        ),
+      ),
+    );
+  }
+}
+
+// -----------------------------------------------------------------------------
+// Dataset #1 — Matemáticas (3°) — 5 sumas/restas
+// -----------------------------------------------------------------------------
+
 ModelAssessment _buildMathAssessment() {
-  // MEN-aligned competency (example; adjust to your mapping as needed).
-  final ModelCompetencyStandard std = ModelCompetencyStandard(
+  const ModelCompetencyStandard std = ModelCompetencyStandard(
     id: 'STD-MATH-OPS-3',
     label: 'Resuelve operaciones básicas de suma y resta (3°)',
-    area: const ModelCategory(category: 'math', description: 'Matemáticas'),
+    area: ModelCategory(category: 'math', description: 'Matemáticas'),
     cineLevel: 1,
     code: 'MATH.OPS.L1',
   );
 
-  final ModelLearningGoal goal = ModelLearningGoal(
+  const ModelLearningGoal goal = ModelLearningGoal(
     id: 'GOAL-MATH-OPS-3',
     standard: std,
     label: 'Aplica sumas y restas con números pequeños.',
     code: 'MATH.OPS.GOAL.3',
   );
 
-  final ModelPerformanceIndicator indicator = ModelPerformanceIndicator(
+  const ModelPerformanceIndicator indicator = ModelPerformanceIndicator(
     id: 'PI-ACCURACY',
     modelLearningGoal: goal,
     label: 'Selecciona respuestas correctas con consistencia.',
@@ -87,7 +163,6 @@ ModelAssessment _buildMathAssessment() {
     code: 'MATH.OPS.PI.1',
   );
 
-  // Helper to construct a learning item quickly.
   ModelLearningItem q({
     required String id,
     required String label,
@@ -140,20 +215,167 @@ ModelAssessment _buildMathAssessment() {
 }
 
 // -----------------------------------------------------------------------------
-// Home Page
+// Dataset #2 — Arte Digital (Avanzado) — 10 preguntas, 5 minutos
 // -----------------------------------------------------------------------------
 
-/// Landing page: shows a JSON snapshot and a button to start.
+ModelAssessment _buildDigitalArtAssessmentAdvanced() {
+  const ModelCompetencyStandard std = ModelCompetencyStandard(
+    id: 'STD-ART-DIG-ADV',
+    label:
+        'Domina conceptos avanzados de arte digital y gráficos por computadora',
+    area: ModelCategory(category: 'art', description: 'Arte Digital'),
+    cineLevel: 3,
+    code: 'ART.DIG.ADV',
+  );
+
+  const ModelLearningGoal goal = ModelLearningGoal(
+    id: 'GOAL-ART-DIG-ADV',
+    standard: std,
+    label: 'Aplica conocimientos avanzados en flujos de arte digital.',
+    code: 'ART.DIG.GOAL.ADV',
+  );
+
+  const ModelPerformanceIndicator indicator = ModelPerformanceIndicator(
+    id: 'PI-ADV-MASTERY',
+    modelLearningGoal: goal,
+    label: 'Domina terminología y decisiones técnicas correctas.',
+    level: PerformanceLevel.high,
+    code: 'ART.DIG.PI.MASTERY',
+  );
+
+  ModelLearningItem q({
+    required String id,
+    required String label,
+    required String correct,
+    required String w1,
+    required String w2,
+    required String w3,
+  }) {
+    return ModelLearningItem(
+      id: id,
+      label: label,
+      correctAnswer: correct,
+      wrongAnswerOne: w1,
+      wrongAnswerTwo: w2,
+      wrongAnswerThree: w3,
+      explanation: '',
+      attributes: const <ModelAttribute<dynamic>>[],
+      achievementOne: indicator,
+      estimatedTimeForAnswer: const Duration(seconds: 20),
+      category:
+          const ModelCategory(category: 'art', description: 'Arte Digital'),
+      cineLevel: 3,
+    );
+  }
+
+  final List<ModelLearningItem> items = <ModelLearningItem>[
+    q(
+      id: 'A1',
+      label: '¿Ventaja clave del vector frente al raster?',
+      correct: 'Escala sin pérdida',
+      w1: 'Mejor fotos',
+      w2: 'Más bits de color',
+      w3: 'Anti-aliasing automático',
+    ),
+    q(
+      id: 'A2',
+      label: 'Lienzo 300 DPI y 3000 px de alto ≈ ¿cuántas pulgadas?',
+      correct: '10 pulgadas',
+      w1: '5',
+      w2: '15',
+      w3: '30',
+    ),
+    q(
+      id: 'A3',
+      label: 'Modo de fusión que aclara sin afectar sombras:',
+      correct: 'Trama (Screen)',
+      w1: 'Multiplicar',
+      w2: 'Superponer',
+      w3: 'Luz dura',
+    ),
+    q(
+      id: 'A4',
+      label: 'Espacio de color adecuado para offset:',
+      correct: 'CMYK',
+      w1: 'RGB',
+      w2: 'HSV',
+      w3: 'LAB solo',
+    ),
+    q(
+      id: 'A5',
+      label: 'Anti-aliasing:',
+      correct: 'Suaviza bordes dentados',
+      w1: 'Sube saturación',
+      w2: 'BN automático',
+      w3: 'Duplica resolución',
+    ),
+    q(
+      id: 'A6',
+      label: 'Curva Bézier cúbica:',
+      correct: '2 controles + 2 extremos',
+      w1: '1 control + 1 extremo',
+      w2: '4 extremos',
+      w3: '3 controles + 1 extremo',
+    ),
+    q(
+      id: 'A7',
+      label: 'Alpha premultiplicado:',
+      correct: 'Colores ya multiplicados por alpha',
+      w1: 'Alpha separado',
+      w2: 'Sin transparencia',
+      w3: 'Sin corrección gamma',
+    ),
+    q(
+      id: 'A8',
+      label: '¿Cuál NO es ventaja de capas de ajuste?',
+      correct: 'Duplican píxeles y pesan más',
+      w1: 'No destructivas',
+      w2: 'Reordenables y enmascarables',
+      w3: 'Cambios globales rápidos',
+    ),
+    q(
+      id: 'A9',
+      label: '“Resolución independiente” se asocia con:',
+      correct: 'Vectorial',
+      w1: 'Raster 8-bit',
+      w2: 'Bitmap escalado',
+      w3: 'Spritesheet baja res',
+    ),
+    q(
+      id: 'A10',
+      label: 'En PBR, mapa que controla especular directo:',
+      correct: 'Rugosidad (Roughness)',
+      w1: 'Albedo',
+      w2: 'Normal',
+      w3: 'Altura',
+    ),
+  ];
+
+  return ModelAssessment(
+    id: 'ASMT-ART-DIG-ADV',
+    title: 'Arte Digital (Avanzado) — Conceptos Clave',
+    items: items,
+    shuffleItems: true,
+    shuffleOptions: true,
+    timeLimit: const Duration(minutes: 5),
+    // límite solicitado
+    passScore: 70,
+  );
+}
+
+// -----------------------------------------------------------------------------
+// Home por evaluación (snapshot + botón iniciar)
+// -----------------------------------------------------------------------------
+
 class AssessmentHome extends StatelessWidget {
   const AssessmentHome({required this.assessment, super.key});
 
-  /// Immutable assessment defined above.
   final ModelAssessment assessment;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Education Assessment (Domain Models)')),
+      appBar: AppBar(title: Text(assessment.title)),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -164,17 +386,23 @@ class AssessmentHome extends StatelessWidget {
               style: Theme.of(context).textTheme.headlineSmall,
             ),
             const SizedBox(height: 8),
-            Text(
-              'Preguntas: ${assessment.items.length} • Aprobación: ${assessment.passScore}%',
-            ),
+            Text('Preguntas: ${assessment.items.length} • '
+                'Tiempo: ${assessment.timeLimit == Duration.zero ? 'sin límite' : '${assessment.timeLimit.inMinutes} min'} • '
+                'Aprobación: ${assessment.passScore}%'),
             const SizedBox(height: 12),
             Card(
               elevation: 1,
               child: Padding(
                 padding: const EdgeInsets.all(12),
-                child: Text(
-                  'JSON (enum keys, roundtrip estable):\n${assessment.toJson()}',
-                  style: const TextStyle(fontSize: 12),
+                child: SingleChildScrollView(
+                  child: SizedBox(
+                    width: double.maxFinite,
+                    height: 250.0,
+                    child: Text(
+                      'JSON (enum.name estable):\n${assessment.toJson()}',
+                      style: const TextStyle(fontSize: 12),
+                    ),
+                  ),
                 ),
               ),
             ),
@@ -202,15 +430,11 @@ class AssessmentHome extends StatelessWidget {
 }
 
 // -----------------------------------------------------------------------------
-// Runner
+// Runner + Resultado (mínimo, sin forzar temporizador; solo informativo)
 // -----------------------------------------------------------------------------
 
-/// Step-by-step runner that uses:
-/// - `assessment.shuffleItems` to (optionally) shuffle questions, and
-/// - `item.optionsShuffled(seed)` to (optionally) shuffle options.
 class AssessmentRunnerPage extends StatefulWidget {
   const AssessmentRunnerPage({required this.assessment, super.key});
-
   final ModelAssessment assessment;
 
   @override
@@ -220,7 +444,7 @@ class AssessmentRunnerPage extends StatefulWidget {
 class _AssessmentRunnerPageState extends State<AssessmentRunnerPage> {
   late final List<ItemInstance> _instances;
   int _index = 0;
-  final Map<String, String> _answers = <String, String>{}; // itemId -> chosen
+  final Map<String, String> _answers = <String, String>{};
 
   @override
   void initState() {
@@ -234,7 +458,7 @@ class _AssessmentRunnerPageState extends State<AssessmentRunnerPage> {
       items.shuffle(Random(a.id.hashCode));
     }
     return items.map((ModelLearningItem it) {
-      final int seed = it.id.hashCode; // deterministic per item
+      final int seed = it.id.hashCode;
       final List<String> opts = it.optionsShuffled(seed);
       return ItemInstance(item: it, options: opts);
     }).toList(growable: false);
@@ -301,6 +525,13 @@ class _AssessmentRunnerPageState extends State<AssessmentRunnerPage> {
               'Pregunta ${_index + 1} de ${_instances.length}',
               style: Theme.of(context).textTheme.titleMedium,
             ),
+            if (widget.assessment.timeLimit != Duration.zero) ...<Widget>[
+              const SizedBox(height: 4),
+              Text(
+                'Tiempo límite: ${widget.assessment.timeLimit.inMinutes} min (informativo)',
+                style: const TextStyle(fontSize: 12),
+              ),
+            ],
             const SizedBox(height: 8),
             Card(
               elevation: 1,
@@ -364,7 +595,6 @@ class _AssessmentRunnerPageState extends State<AssessmentRunnerPage> {
 
 class ItemInstance {
   const ItemInstance({required this.item, required this.options});
-
   final ModelLearningItem item;
   final List<String> options;
 }
@@ -376,19 +606,12 @@ class Result {
     required this.percent,
     required this.passed,
   });
-
   final int correct;
   final int total;
   final int percent;
   final bool passed;
 }
 
-// -----------------------------------------------------------------------------
-// Result & Review
-// -----------------------------------------------------------------------------
-
-/// Shows pass/fail status, numeric score, and per-question review using
-/// the same domain objects (no copies).
 class AssessmentResultPage extends StatelessWidget {
   const AssessmentResultPage({
     required this.assessment,
@@ -485,7 +708,8 @@ class AssessmentResultPage extends StatelessWidget {
                 ),
                 const Spacer(),
                 FilledButton.icon(
-                  onPressed: () => Navigator.of(context).pop(),
+                  onPressed: () => Navigator.of(context)
+                      .popUntil((Route<dynamic> r) => r.isFirst),
                   icon: const Icon(Icons.home),
                   label: const Text('Inicio'),
                 ),
