@@ -3,6 +3,79 @@
 This document follows the guidelines of [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.32.1] - 2025-11-18
+
+### Added
+
+- **HTTP transversal (dominio)**
+  - **Modelos (`domain/http`):**
+    - `ModelConfigHttpRequest` (config inmutable, round-trip JSON).
+    - `StateHttpRequest` (ciclo: `Created/Running/Success/Failure/Cancelled`).
+    - `ModelTraceHttpRequest` (traza en memoria para depuración/telemetría).
+  - **Contratos:**
+    - `AdapterHttpClient` (cliente bajo nivel).
+    - `ServiceHttpRequest`, `GatewayHttpRequest` (*never-throws* con `ErrorItem`).
+    - `RepositoryHttpRequest` (retorna `ModelConfigHttpRequest` en éxito).
+  - **Implementaciones:**
+    - `GatewayHttpRequestImpl`, `RepositoryHttpRequestImpl`.
+    - `FakeHttpRequest` / `FakeHttpRequestConfig` (latencia, errores forzados, respuestas
+      enlatadas).
+  - **Use cases (`domain/usecases/http_request`):**
+    - GET/POST/PUT/DELETE y `retry`, más `FacadeHttpRequestUsecases`.
+  - **BLoC (`domain/blocs`):**
+    - `BlocHttpRequest` con `Set<String>` de **peticiones activas** para reaccionar en UI.
+  - **Enums/helpers:**
+    - `HttpMethodEnum`, `HttpRequestLifecycleEnum`, `HttpRequestFailureEnum`.
+
+- **Ejemplo end-to-end**
+  - `bloc_http_request_example.dart`: cableado completo **Service → Gateway → Repository →
+    Usecases → Facade → BlocHttpRequest**, ejecutando GET/POST/DELETE, mostrando set de activas y
+    resultado (`ErrorItem` / `ModelConfigHttpRequest`).
+
+- **Error mapping especializado**
+  - `DefaultHttpErrorMapper`:
+    - Envuelve `DefaultErrorMapper`.
+    - Mapea `TimeoutException` → `HTTP_TIMEOUT`.
+    - Añade `transport: 'http'` a `meta`.
+    - Ajusta `code` con base en `statusCode/httpStatus` (p.ej. 401 → `HTTP_UNAUTHORIZED`).
+
+### Changed
+
+- **`GatewayAuthImpl`** ahora usa `DefaultHttpErrorMapper` para enriquecer los errores de
+  autenticación basados en HTTP.
+- **`RepositoryHttpRequestImpl`** expone `normalizeBody` (mejor testabilidad).
+- **DartDoc** de `ModelConfigHttpRequest`: contratos de nulabilidad de `headers` y `body` aclarados.
+
+### Removed
+
+- **Exports del dominio**: se retiran `HelperHttpRequestId` y `ModelResponseHttpRaw` por **no uso**
+  en la API actual.
+
+### Tests
+
+- Cobertura amplia de todo el *stack* HTTP:
+  - **`BlocHttpRequest`**: seguimiento de activas, concurrencia, `retry`, emisiones de stream.
+  - **`GatewayHttpRequestImpl`**: adaptación de metadatos, transformación de cuerpo, mapeo de
+    errores.
+  - **`RepositoryHttpRequestImpl`**: delegación y construcción de configuración.
+  - **`FakeHttpRequest`**: respuestas enlatadas, eco, latencia y errores inyectados.
+  - **`DefaultHttpErrorMapper`**: excepciones y payloads → `ErrorItem` con `meta` correcto.
+  - **`ModelConfigHttpRequest`**: round-trip JSON, valores por defecto, `copyWith`.
+
+### Migration notes
+
+- **Error mapping**: si tu UI/presenters dependen de `code`/`meta`, revisa casos de
+  `TimeoutException` y errores 4xx/5xx (ahora vienen con códigos HTTP explícitos y
+  `meta.transport='http'`).
+- **Exports eliminados**: si importabas `HelperHttpRequestId` o `ModelResponseHttpRaw` desde el
+  *barrel*, migra a utilidades propias o a los modelos vigentes. (No afecta a la ruta estándar del
+  flujo.)
+- **`normalizeBody`** disponible públicamente en `RepositoryHttpRequestImpl` para pruebas finas.
+
+> **Notas:** La versión introduce el **stack HTTP transversal** con ejemplo listo para copiar,
+> mejora el **mapeo de errores** y eleva la **cobertura de pruebas**. Cambios no rompientes salvo
+> posibles imports a símbolos retirados del *barrel*.
+
 ## [1.32.0] - 2025-10-19
 
 > Publicación acumulada que **consolida** los cambios de **1.31.0 → 1.31.3**. No introduce cambios
