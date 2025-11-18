@@ -40,7 +40,6 @@ part 'domain/bloc_core.dart';
 part 'domain/bloc_general.dart';
 part 'domain/bloc_module.dart';
 part 'domain/blocs/bloc_connectivity.dart';
-
 part 'domain/blocs/bloc_http_request.dart';
 part 'domain/blocs/bloc_loading.dart';
 part 'domain/blocs/bloc_onboarding.dart';
@@ -81,32 +80,15 @@ part 'domain/financial/financial_movement.dart';
 part 'domain/financial/ledger_model.dart';
 part 'domain/gateways/gateway_auth.dart';
 part 'domain/gateways/gateway_connectivity.dart';
-
 part 'domain/gateways/gateway_http_request.dart';
 part 'domain/gateways/gateway_ws_database.dart';
 part 'domain/graphics/model_graph.dart';
 part 'domain/graphics/model_graph_axis_spec.dart';
 part 'domain/graphics/model_point.dart';
-
-part 'domain/http/adapter_http_client.dart';
-
 part 'domain/http/helper_http_request_id.dart';
-
 part 'domain/http/http_enums.dart';
-
-part 'domain/http/http_request_life_cycle.dart';
-
-part 'domain/http/http_request_state.dart';
-
 part 'domain/http/model_config_http_request.dart';
-
 part 'domain/http/model_response_raw.dart';
-
-part 'domain/http/model_trace_http_request.dart';
-
-part 'domain/http/model_trace_http_request_step.dart';
-
-part 'domain/http/telemetry_helper.dart';
 part 'domain/legal_id_model.dart';
 part 'domain/medical/medical_diagnosis_tab_model.dart';
 part 'domain/medical/medication_model.dart';
@@ -116,14 +98,12 @@ part 'domain/person_model.dart';
 part 'domain/pet_app/animal_model.dart';
 part 'domain/repositories/repository_auth.dart';
 part 'domain/repositories/repository_connectivity.dart';
-
 part 'domain/repositories/repository_http_request.dart';
 part 'domain/repositories/repository_ws_database.dart';
 part 'domain/services/service_connectivity.dart';
 part 'domain/services/service_geolocation.dart';
 part 'domain/services/service_gyroscope.dart';
 part 'domain/services/service_http.dart';
-
 part 'domain/services/service_http_request.dart';
 part 'domain/services/service_notifications.dart';
 part 'domain/services/service_preferences.dart';
@@ -144,7 +124,6 @@ part 'domain/usecases/connectivity/connectivity_usecases.dart';
 part 'domain/usecases/databases_crud/databases_crud_usecases.dart';
 part 'domain/usecases/databases_crud/facade_crud_database.dart';
 part 'domain/usecases/databases_crud/facade_ws_database_usecases.dart';
-
 part 'domain/usecases/http_request/http_request_usecases.dart';
 part 'domain/usecases/no_params.dart';
 part 'domain/usecases/session/get_current_user_usecase.dart';

@@ -5,7 +5,7 @@ import '../../jocaagura_domain.dart';
 /// domain-level [ErrorItem] instances.
 ///
 /// Responsabilidades:
-/// - Invocar al [ServiceHttpRequest] para cada método HTTP.
+/// - Invocar al [ServiceHttpRequest] para cada servicio.
 /// - Mapear errores de transporte (timeouts, sockets, etc.) vía
 ///   [ErrorMapper.fromException].
 /// - Inspeccionar payloads exitosos vía [ErrorMapper.fromPayload] para

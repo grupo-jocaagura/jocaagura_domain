@@ -43,7 +43,7 @@ part of 'package:jocaagura_domain/jocaagura_domain.dart';
 ///       await blocHttpRequest.get(
 ///     requestKey: requestKey,
 ///     uri: Uri.parse('https://api.example.com/v1/users/me'),
-///     metadata: <String, Object?>{
+///     metadata: <String, dynamic>{
 ///       'feature': 'userProfile',
 ///       'operation': 'fetchMe',
 ///     },
@@ -119,7 +119,7 @@ class BlocHttpRequest {
     required Uri uri,
     Map<String, String> headers = const <String, String>{},
     Duration? timeout,
-    Map<String, Object?> metadata = const <String, Object?>{},
+    Map<String, dynamic> metadata = const <String, dynamic>{},
   }) async {
     _markActive(requestKey);
     final Either<ErrorItem, ModelConfigHttpRequest> result = await _facade.get(
@@ -137,7 +137,7 @@ class BlocHttpRequest {
     required String requestKey,
     required Uri uri,
     Map<String, String> headers = const <String, String>{},
-    Map<String, String> body = const <String, String>{},
+    Map<String, dynamic> body = const <String, String>{},
     Duration? timeout,
     Map<String, dynamic> metadata = const <String, dynamic>{},
   }) async {

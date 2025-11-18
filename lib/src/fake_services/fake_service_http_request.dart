@@ -35,7 +35,7 @@ import '../../jocaagura_domain.dart';
 ///
 ///   final Map<String, dynamic> ok = await service.get(
 ///     Uri.parse('https://api.example.com/ping'),
-///     metadata: <String, Object?>{'feature': 'healthcheck'},
+///     metadata: <String, dynamic>{'feature': 'healthcheck'},
 ///   );
 ///
 ///   assert(ok['ok'] == true);
@@ -82,7 +82,7 @@ class FakeHttpRequest implements ServiceHttpRequest {
     Uri uri, {
     Map<String, String>? headers,
     Duration? timeout,
-    Map<String, Object?> metadata = const <String, Object?>{},
+    Map<String, dynamic> metadata = const <String, dynamic>{},
   }) async {
     _ensureNotDisposed();
     await _maybeDelay();
@@ -116,7 +116,7 @@ class FakeHttpRequest implements ServiceHttpRequest {
     Map<String, String>? headers,
     Object? body,
     Duration? timeout,
-    Map<String, Object?> metadata = const <String, Object?>{},
+    Map<String, dynamic> metadata = const <String, dynamic>{},
   }) async {
     _ensureNotDisposed();
     await _maybeDelay();
@@ -150,7 +150,7 @@ class FakeHttpRequest implements ServiceHttpRequest {
     Map<String, String>? headers,
     Object? body,
     Duration? timeout,
-    Map<String, Object?> metadata = const <String, Object?>{},
+    Map<String, dynamic> metadata = const <String, dynamic>{},
   }) async {
     _ensureNotDisposed();
     await _maybeDelay();
@@ -183,7 +183,7 @@ class FakeHttpRequest implements ServiceHttpRequest {
     Uri uri, {
     Map<String, String>? headers,
     Duration? timeout,
-    Map<String, Object?> metadata = const <String, Object?>{},
+    Map<String, dynamic> metadata = const <String, dynamic>{},
   }) async {
     _ensureNotDisposed();
     await _maybeDelay();
@@ -258,7 +258,7 @@ class FakeHttpRequest implements ServiceHttpRequest {
     Map<String, String>? headers,
     Object? body,
     Duration? timeout,
-    Map<String, Object?> metadata = const <String, Object?>{},
+    Map<String, dynamic> metadata = const <String, dynamic>{},
   }) {
     return <String, dynamic>{
       'method': method,

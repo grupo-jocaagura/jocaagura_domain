@@ -16,7 +16,7 @@ part of 'package:jocaagura_domain/jocaagura_domain.dart';
 ///     final Uri uri = Uri.parse('https://api.example.com/v1/users/me');
 ///     return _httpGet(
 ///       uri,
-///       metadata: <String, Object?>{
+///       metadata: <String, dynamic>{
 ///         'feature': 'userProfile',
 ///         'operation': 'fetchMe',
 ///       },
@@ -81,7 +81,7 @@ class UsecaseHttpRequestGet {
 ///     return _httpPost(
 ///       uri,
 ///       body: body,
-///       metadata: <String, Object?>{'feature': 'auth', 'operation': 'login'},
+///       metadata: <String, dynamic>{'feature': 'auth', 'operation': 'login'},
 ///     );
 ///   }
 /// }
@@ -141,7 +141,7 @@ class UsecaseHttpRequestPost {
 ///     return _httpPut(
 ///       uri,
 ///       body: patch,
-///       metadata: <String, Object?>{
+///       metadata: <String, dynamic>{
 ///         'feature': 'userProfile',
 ///         'operation': 'updateMe',
 ///       },
@@ -186,7 +186,7 @@ class UsecaseHttpRequestPut {
 ///     final Uri uri = Uri.parse('https://api.example.com/v1/sessions/current');
 ///     return _httpDelete(
 ///       uri,
-///       metadata: <String, Object?>{
+///       metadata: <String, dynamic>{
 ///         'feature': 'auth',
 ///         'operation': 'logout',
 ///       },
@@ -205,7 +205,7 @@ class UsecaseHttpRequestDelete {
     Uri uri, {
     Map<String, String> headers = const <String, String>{},
     Duration? timeout,
-    Map<String, Object?> metadata = const <String, Object?>{},
+    Map<String, dynamic> metadata = const <String, dynamic>{},
   }) {
     return _repository.delete(
       uri,
@@ -229,7 +229,7 @@ class UsecaseHttpRequestDelete {
 /// ) {
 ///   return retry(
 ///     lastConfig,
-///     extraMetadata: <String, Object?>{'retry': true},
+///     extraMetadata: <String, dynamic>{'retry': true},
 ///   );
 /// }
 /// ```
@@ -315,7 +315,7 @@ class UsecaseHttpRequestRetry {
 ///     final Uri uri = Uri.parse('https://api.example.com/v1/data');
 ///     final Either<ErrorItem, ModelConfigHttpRequest> result = await _http.get(
 ///       uri,
-///       metadata: <String, Object?>{'feature': 'someFeature'},
+///       metadata: <String, dynamic>{'feature': 'someFeature'},
 ///     );
 ///
 ///     result.fold(
