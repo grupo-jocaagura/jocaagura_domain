@@ -99,7 +99,7 @@ class RepositoryHttpRequestImpl implements RepositoryHttpRequest {
           method: HttpMethodEnum.post,
           uri: uri,
           headers: headers,
-          body: _normalizeBody(body),
+          body: normalizeBody(body),
           timeout: timeout,
           metadata: metadata,
         ),
@@ -130,7 +130,7 @@ class RepositoryHttpRequestImpl implements RepositoryHttpRequest {
           method: HttpMethodEnum.put,
           uri: uri,
           headers: headers,
-          body: _normalizeBody(body),
+          body: normalizeBody(body),
           timeout: timeout,
           metadata: metadata,
         ),
@@ -178,7 +178,7 @@ class RepositoryHttpRequestImpl implements RepositoryHttpRequest {
   /// - `null` → `null`.
   /// - `Map` → normalized via [Utils.mapFromDynamic].
   /// - Any other type → wrapped into `{'value': body}` for traceability.
-  Map<String, dynamic> _normalizeBody(Object? body) {
+  Map<String, dynamic> normalizeBody(Object? body) {
     if (body == null) {
       return <String, dynamic>{};
     }

@@ -163,16 +163,19 @@ class ModelConfigHttpRequest extends Model {
 
   /// Optional HTTP headers for the request.
   ///
-  /// When `null`, adapters may choose to apply default headers.
-  /// When an empty map, this can be interpreted as "no extra headers".
+  /// Semantics:
+  /// - At JSON level, the `headers` entry may be missing or `null`.
+  /// - At model level, this field is never `null`; absence is represented
+  ///   as an empty map.
+  /// Adapters may interpret an empty map as "no extra headers".
   final Map<String, String> headers;
 
   /// Optional HTTP body as a JSON object.
   ///
-  /// Contract:
-  /// - Represents a JSON object (`{ ... }`).
-  /// - Normalized from any JSON-like structure using [Utils.mapFromDynamic].
-  /// - `null` means "no body".
+  /// Semantics:
+  /// - At JSON level, the `body` entry may be missing or `null`.
+  /// - At model level, this field is never `null`; absence is represented
+  ///   as an empty map.
   final Map<String, dynamic> body;
 
   /// Optional per-request timeout.

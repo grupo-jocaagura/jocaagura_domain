@@ -137,7 +137,7 @@ class BlocHttpRequest {
     required String requestKey,
     required Uri uri,
     Map<String, String> headers = const <String, String>{},
-    Map<String, dynamic> body = const <String, String>{},
+    Map<String, dynamic> body = const <String, dynamic>{},
     Duration? timeout,
     Map<String, dynamic> metadata = const <String, dynamic>{},
   }) async {
