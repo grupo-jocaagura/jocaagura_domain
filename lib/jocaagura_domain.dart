@@ -87,6 +87,7 @@ part 'domain/graphics/model_graph_axis_spec.dart';
 part 'domain/graphics/model_point.dart';
 part 'domain/http/helper_http_request_id.dart';
 part 'domain/http/http_enums.dart';
+part 'domain/http/http_request_errors.dart';
 part 'domain/http/model_config_http_request.dart';
 part 'domain/http/model_response_raw.dart';
 part 'domain/legal_id_model.dart';
