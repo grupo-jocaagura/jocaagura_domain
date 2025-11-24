@@ -1,10 +1,17 @@
 part of 'package:jocaagura_domain/jocaagura_domain.dart';
 
-/// ===========================================================================
-/// CRUD METADATA
-/// ===========================================================================
-
 /// Enumerates the JSON keys used by [ModelCrudMetadata].
+///
+/// Using this enum avoids scattering raw string keys across the codebase.
+/// Each key is serialized/deserialized via its [name] property.
+///
+/// Minimal runnable example:
+/// ```dart
+/// void main() {
+///   // Prints "createdAt"
+///   print(ModelCrudMetadataEnum.createdAt.name);
+/// }
+/// ```
 enum ModelCrudMetadataEnum {
   recordId,
   createdBy,
@@ -19,21 +26,43 @@ enum ModelCrudMetadataEnum {
 
 /// Immutable audit metadata associated with a single record.
 ///
-/// Timestamps are represented as [DateTime] in UTC-safe format using
+/// This model centralizes who created/updated/deleted a record and when,
+/// plus an optional logical [version] used for optimistic locking or history.
+///
+/// JSON contract:
+/// - Required fields:
+///   - `recordId` (string)
+///   - `createdBy` (string)
+///   - `createdAt` (string; parsed by [DateUtils.dateTimeFromDynamic])
+///   - `updatedBy` (string)
+///   - `updatedAt` (string; parsed by [DateUtils.dateTimeFromDynamic])
+/// - Optional fields (only included when non-null):
+///   - `deleted` (bool)
+///   - `deletedBy` (string)
+///   - `deletedAt` (string; parsed by [DateUtils.dateTimeFromDynamic])
+///   - `version` (int)
+///
+/// Timestamps are represented as [DateTime] and converted using
 /// [DateUtils.dateTimeFromDynamic] and [DateUtils.dateTimeToString].
 ///
-/// Example:
+/// Minimal runnable example:
 /// ```dart
-/// final ModelCrudMetadata crud = ModelCrudMetadata.fromJson({
-///   'recordId': 'group-001',
-///   'createdBy': 'system@domain.com',
-///   'createdAt': '2025-01-01T10:00:00Z',
-///   'updatedBy': 'system@domain.com',
-///   'updatedAt': '2025-01-01T10:00:00Z',
-/// });
+/// void main() {
+///   final ModelCrudMetadata created = ModelCrudMetadata(
+///     recordId: 'group-001',
+///     createdBy: 'system@domain.com',
+///     createdAt: DateTime.utc(2025, 1, 1, 10, 0, 0),
+///     updatedBy: 'system@domain.com',
+///     updatedAt: DateTime.utc(2025, 1, 1, 10, 0, 0),
+///     version: 1,
+///   );
 ///
-/// print(crud.recordId);   // group-001
-/// print(crud.createdAt);  // DateTime instance
+///   final Map<String, dynamic> json = created.toJson();
+///   final ModelCrudMetadata roundtrip = ModelCrudMetadata.fromJson(json);
+///
+///   print(roundtrip.recordId); // group-001
+///   print(roundtrip.createdAt); // DateTime instance
+/// }
 /// ```
 class ModelCrudMetadata extends Model {
   const ModelCrudMetadata({
@@ -48,6 +77,15 @@ class ModelCrudMetadata extends Model {
     this.version,
   });
 
+  /// Creates a [ModelCrudMetadata] from a JSON-like map.
+  ///
+  /// Parsing rules:
+  /// - String fields are read with `toString()` and default to `''` when null.
+  /// - Timestamps are parsed through [DateUtils.dateTimeFromDynamic].
+  /// - [deleted] is parsed via [Utils.getBoolFromDynamic] when non-null.
+  /// - [version] is parsed via [Utils.getIntegerFromDynamic] when non-null.
+  ///
+  /// Extra keys are safely ignored.
   factory ModelCrudMetadata.fromJson(Map<String, dynamic> json) {
     return ModelCrudMetadata(
       recordId: json[ModelCrudMetadataEnum.recordId.name]?.toString() ?? '',
@@ -119,9 +157,6 @@ class ModelCrudMetadata extends Model {
     int? version,
     bool? Function()? versionOverrideNull,
   }) {
-    // For nullable fields we allow a small trick:
-    // - pass `deletedOverrideNull: () => true` to force `deleted = null`.
-    // - otherwise, use normal parameter if provided.
     return ModelCrudMetadata(
       recordId: recordId ?? this.recordId,
       createdBy: createdBy ?? this.createdBy,
@@ -135,6 +170,11 @@ class ModelCrudMetadata extends Model {
     );
   }
 
+  /// Serializes this metadata into a JSON-like map.
+  ///
+  /// Required timestamps are converted with [DateUtils.dateTimeToString].
+  /// Optional fields (`deleted`, `deletedBy`, `deletedAt`, `version`) are only
+  /// included when non-null to keep the JSON payload compact.
   @override
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> json = <String, dynamic>{
@@ -192,4 +232,143 @@ class ModelCrudMetadata extends Model {
 
   @override
   String toString() => 'ModelCrudMetadata(${toJson()})';
+
+  /// Initializes CRUD metadata for a newly created record.
+  ///
+  /// Behavior:
+  /// - Sets [recordId] and [createdBy] / [updatedBy] to [actor].
+  /// - Uses [timestamp] (converted to UTC) when provided; otherwise
+  ///   `DateTime.now().toUtc()`.
+  /// - Sets [createdAt] and [updatedAt] to the same timestamp.
+  /// - Sets [deleted], [deletedBy], [deletedAt] to `null`.
+  /// - Sets [version] to [initialVersion] (defaults to `1`).
+  ///
+  /// This is typically used at the moment a new record is inserted.
+  ///
+  /// Minimal runnable example:
+  /// ```dart
+  /// void main() {
+  ///   final ModelCrudMetadata crud = ModelCrudMetadata.initialize(
+  ///     recordId: 'group-001',
+  ///     actor: 'system@domain.com',
+  ///   );
+  ///   print(crud.version);   // 1
+  ///   print(crud.deleted);   // null
+  /// }
+  /// ```
+  static ModelCrudMetadata initialize({
+    required String recordId,
+    required String actor,
+    DateTime? timestamp,
+    int initialVersion = 1,
+  }) {
+    final DateTime t = (timestamp ?? DateTime.now()).toUtc();
+    return ModelCrudMetadata(
+      recordId: recordId,
+      createdBy: actor,
+      createdAt: t,
+      updatedBy: actor,
+      updatedAt: t,
+      version: initialVersion,
+    );
+  }
+
+  /// Updates audit metadata for an existing record on modification.
+  ///
+  /// Behavior:
+  /// - Keeps [recordId], [createdBy] and [createdAt] unchanged.
+  /// - Sets [updatedBy] to [actor].
+  /// - Sets [updatedAt] to [timestamp] (UTC) or `DateTime.now().toUtc()`.
+  /// - When [bumpVersion] is `true` (default), increments [version] as:
+  ///   `(current.version ?? 0) + 1`.
+  /// - When [bumpVersion] is `false`, preserves [current.version].
+  ///
+  /// This is typically used whenever the main record is updated.
+  ///
+  /// Minimal runnable example:
+  /// ```dart
+  /// void main() {
+  ///   final DateTime createdAt = DateTime.utc(2025, 1, 1, 10);
+  ///   final ModelCrudMetadata base = ModelCrudMetadata(
+  ///     recordId: 'group-001',
+  ///     createdBy: 'system@domain.com',
+  ///     createdAt: createdAt,
+  ///     updatedBy: 'system@domain.com',
+  ///     updatedAt: createdAt,
+  ///     version: 1,
+  ///   );
+  ///
+  ///   final ModelCrudMetadata updated = ModelCrudMetadata.touchOnUpdate(
+  ///     current: base,
+  ///     actor: 'admin@domain.com',
+  ///   );
+  ///
+  ///   print(updated.version);    // 2
+  ///   print(updated.updatedBy);  // admin@domain.com
+  /// }
+  /// ```
+  static ModelCrudMetadata touchOnUpdate({
+    required ModelCrudMetadata current,
+    required String actor,
+    DateTime? timestamp,
+    bool bumpVersion = true,
+  }) {
+    final DateTime t = (timestamp ?? DateTime.now()).toUtc();
+    final int? newVersion =
+        bumpVersion ? ((current.version ?? 0) + 1) : current.version;
+
+    return current.copyWith(
+      updatedBy: actor,
+      updatedAt: t,
+      version: newVersion,
+    );
+  }
+
+  /// Marks the record as soft-deleted, updating audit metadata.
+  ///
+  /// Behavior:
+  /// - Sets [deleted] to `true`.
+  /// - Sets [deletedBy] to [actor].
+  /// - Sets [deletedAt] to [timestamp] (UTC) or `DateTime.now().toUtc()`.
+  /// - When [bumpVersion] is `true` (default), increments [version] as:
+  ///   `(current.version ?? 0) + 1`.
+  /// - When [bumpVersion] is `false`, preserves [current.version].
+  ///
+  /// This helper does not perform a hard delete; it only updates the metadata
+  /// so that higher layers can decide how to handle soft-deleted records.
+  ///
+  /// Minimal runnable example:
+  /// ```dart
+  /// void main() {
+  ///   final ModelCrudMetadata base = ModelCrudMetadata.initialize(
+  ///     recordId: 'group-001',
+  ///     actor: 'system@domain.com',
+  ///   );
+  ///
+  ///   final ModelCrudMetadata deleted = ModelCrudMetadata.markDeleted(
+  ///     current: base,
+  ///     actor: 'admin@domain.com',
+  ///   );
+  ///
+  ///   print(deleted.deleted);   // true
+  ///   print(deleted.deletedBy); // admin@domain.com
+  /// }
+  /// ```
+  static ModelCrudMetadata markDeleted({
+    required ModelCrudMetadata current,
+    required String actor,
+    DateTime? timestamp,
+    bool bumpVersion = true,
+  }) {
+    final DateTime t = (timestamp ?? DateTime.now()).toUtc();
+    final int? newVersion =
+        bumpVersion ? ((current.version ?? 0) + 1) : current.version;
+
+    return current.copyWith(
+      deleted: true,
+      deletedBy: actor,
+      deletedAt: t,
+      version: newVersion,
+    );
+  }
 }

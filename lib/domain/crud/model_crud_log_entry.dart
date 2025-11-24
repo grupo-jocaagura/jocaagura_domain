@@ -5,6 +5,22 @@ part of 'package:jocaagura_domain/jocaagura_domain.dart';
 /// ===========================================================================
 
 /// Operation kind for a CRUD log entry.
+///
+/// Represents the type of change that was performed on a domain entity.
+/// Values are serialized using the enum [name] into JSON.
+///
+/// JSON contract:
+/// - Stored as a lowercase string (e.g. `"create"`, `"update"`, `"delete"`).
+/// - Parsed back using [Utils.enumFromJson], defaulting to [ModelCrudOperationKind.create]
+///   when the value is missing or unknown.
+///
+/// Minimal runnable example:
+/// ```dart
+/// void main() {
+///   final ModelCrudOperationKind op = ModelCrudOperationKind.update;
+///   print(op.name); // "update"
+/// }
+/// ```
 enum ModelCrudOperationKind {
   create,
   update,
@@ -12,6 +28,17 @@ enum ModelCrudOperationKind {
 }
 
 /// JSON keys for [ModelCrudLogEntry].
+///
+/// This enum centralizes the field names used when serializing and parsing
+/// `ModelCrudLogEntry` instances to/from JSON-like maps. Using [name] avoids
+/// hard-coded strings spread across the codebase.
+///
+/// Example:
+/// ```dart
+/// void main() {
+///   print(ModelCrudLogEntryEnum.performedAt.name); // "performedAt"
+/// }
+/// ```
 enum ModelCrudLogEntryEnum {
   id,
   entityType,
@@ -26,16 +53,46 @@ enum ModelCrudLogEntryEnum {
 
 /// Immutable log entry representing a CRUD operation on any entity.
 ///
-/// Example:
+/// Each instance models a single audited change in the system, including:
+/// - which entity was affected,
+/// - which operation was performed,
+/// - who performed it,
+/// - when it happened,
+/// - and an optional `diff` payload with additional metadata.
+///
+/// JSON contract:
+/// - Required fields:
+///   - `id` (string)
+///   - `entityType` (string)
+///   - `entityId` (string)
+///   - `operation` (string; matches [ModelCrudOperationKind.name])
+///   - `performedBy` (string)
+///   - `performedAt` (string; parsed by [DateUtils.dateTimeFromDynamic])
+/// - Optional fields:
+///   - `diff` (object; stored as `Map<String, dynamic>`)
+///   - `env` (string)
+///   - `errorItemId` (string)
+///
+/// Minimal runnable example:
 /// ```dart
-/// final ModelCrudLogEntry entry = ModelCrudLogEntry.fromJson({
-///   'id': 'log-1',
-///   'entityType': 'Group',
-///   'entityId': 'group-001',
-///   'operation': 'create',
-///   'performedBy': 'admin@domain.com',
-///   'performedAt': '2025-01-01T10:00:00Z',
-/// });
+/// void main() {
+///   final ModelCrudLogEntry original = ModelCrudLogEntry(
+///     id: 'log-1',
+///     entityType: 'Group',
+///     entityId: 'group-001',
+///     operation: ModelCrudOperationKind.create,
+///     performedBy: 'admin@domain.com',
+///     performedAt: DateTime.utc(2025, 1, 1, 10, 0, 0),
+///     diff: <String, dynamic>{'field': 'value'},
+///     env: 'dev',
+///     errorItemId: 'ERR-123',
+///   );
+///
+///   final Map<String, dynamic> json = original.toJson();
+///   final ModelCrudLogEntry roundtrip = ModelCrudLogEntry.fromJson(json);
+///
+///   print(roundtrip == original); // true (roundtrip-safe)
+/// }
 /// ```
 class ModelCrudLogEntry extends Model {
   const ModelCrudLogEntry({
@@ -50,6 +107,16 @@ class ModelCrudLogEntry extends Model {
     this.errorItemId,
   });
 
+  /// Creates a [ModelCrudLogEntry] from a JSON-like map.
+  ///
+  /// Parsing rules:
+  /// - Scalar fields are read using [toString] and default to `''` when missing.
+  /// - [operation] is resolved using [Utils.enumFromJson] with
+  ///   [ModelCrudOperationKind.create] as fallback.
+  /// - [performedAt] is parsed using [DateUtils.dateTimeFromDynamic].
+  /// - [diff] is normalized with [Utils.mapFromDynamic] when present.
+  ///
+  /// Unknown or extra keys in [json] are safely ignored.
   factory ModelCrudLogEntry.fromJson(Map<String, dynamic> json) {
     return ModelCrudLogEntry(
       id: json[ModelCrudLogEntryEnum.id.name]?.toString() ?? '',
@@ -111,6 +178,12 @@ class ModelCrudLogEntry extends Model {
     );
   }
 
+  /// Serializes this entry into a JSON-like map.
+  ///
+  /// Only non-null optional fields are included (`diff`, `env`, `errorItemId`),
+  /// keeping the payload compact and friendly for storage in logs.
+  ///
+  /// [performedAt] is converted to string using [DateUtils.dateTimeToString].
   @override
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> json = <String, dynamic>{
