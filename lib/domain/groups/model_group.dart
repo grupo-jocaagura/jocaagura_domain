@@ -4,6 +4,13 @@ part of 'package:jocaagura_domain/jocaagura_domain.dart';
 /// GROUPS – ENUMS
 /// ===========================================================================
 
+/// Lifecycle state for a [ModelGroup].
+///
+/// JSON contract:
+/// - Stored as a lowercase string using [name], e.g. `"active"`, `"archived"`,
+///   `"deleted"`.
+/// - Parsed via [Utils.enumFromJson], falling back to [ModelGroupState.active]
+///   when the value is missing or unknown.
 enum ModelGroupState {
   active,
   archived,
@@ -127,25 +134,20 @@ enum ModelGroupSyncJobStatus {
   error,
 }
 
-bool _listEquals<T>(List<T>? a, List<T>? b) {
-  if (identical(a, b)) {
-    return true;
-  }
-  if (a == null || b == null || a.length != b.length) {
-    return false;
-  }
-  for (int i = 0; i < a.length; i++) {
-    if (a[i] != b[i]) {
-      return false;
-    }
-  }
-  return true;
-}
-
 /// ===========================================================================
 /// GROUP
 /// ===========================================================================
-
+/// JSON keys for [ModelGroup].
+///
+/// This enum centralizes the string keys used on serialization and parsing,
+/// avoiding magic strings spread across the codebase.
+///
+/// Example:
+/// ```dart
+/// void main() {
+///   print(ModelGroupEnum.driveFolderId.name); // "driveFolderId"
+/// }
+/// ```
 enum ModelGroupEnum {
   id,
   name,
@@ -161,20 +163,61 @@ enum ModelGroupEnum {
 
 /// Logical group in the Bienvenido domain.
 ///
-/// Example:
+/// A group represents a logical container of people or resources such as:
+/// classes, families, teams, cohorts, projects or stores. It is always
+/// associated with audit metadata ([crud]) describing when and by whom it was
+/// created/updated.
+///
+/// JSON contract:
+/// - Required fields (always present in the JSON payload):
+///   - `id` (string)
+///   - `name` (string)
+///   - `state` (string; [ModelGroupState.name])
+///   - `crud` (object; [ModelCrudMetadata.toJson])
+/// - String fields that are always serialized but may be the empty string (`''`)
+///   when not set:
+///   - `description` (string, defaults to `''`)
+///   - `email` (string, defaults to `''`)
+///   - `courseId` (string, defaults to `''`)
+///   - `projectId` (string, defaults to `''`)
+///   - `driveFolderId` (string, defaults to `''`)
+/// - Optional object field:
+///   - `labels` (object; [ModelGroupLabels.toJson]) – omitted when `null`.
+///
+/// Parsing rules:
+/// - Missing or `null` values for the string fields above are normalized to
+///   `''` via [Utils.getStringFromDynamic].
+/// - `state` is parsed using [Utils.enumFromJson], defaulting to
+///   [ModelGroupState.active] when the value is missing or unknown.
+///
+/// Minimal runnable example:
 /// ```dart
-/// final ModelGroup group = ModelGroup.fromJson({
-///   'id': 'group-001',
-///   'name': '5A Matemáticas 2025',
-///   'state': 'active',
-///   'crud': {
-///     'recordId': 'group-001',
-///     'createdBy': 'system',
-///     'createdAt': '2025-01-01T10:00:00Z',
-///     'updatedBy': 'system',
-///     'updatedAt': '2025-01-01T10:00:00Z',
-///   },
-/// });
+/// void main() {
+///   final DateTime now = DateTime.utc(2025, 1, 1, 10, 0, 0);
+///
+///   final ModelCrudMetadata crud = ModelCrudMetadata(
+///     recordId: 'group-001',
+///     createdBy: 'system@domain.com',
+///     createdAt: now,
+///     updatedBy: 'system@domain.com',
+///     updatedAt: now,
+///     version: 1,
+///   );
+///
+///   final ModelGroup group = ModelGroup(
+///     id: 'group-001',
+///     name: '5A Matemáticas 2025',
+///     state: ModelGroupState.active,
+///     crud: crud,
+///   );
+///
+///   final Map<String, dynamic> json = group.toJson();
+///   final ModelGroup roundtrip = ModelGroup.fromJson(json);
+///
+///   print(roundtrip.id);          // group-001
+///   print(roundtrip.description); // '' (empty string by default)
+///   print(roundtrip.state);       // ModelGroupState.active
+/// }
 /// ```
 class ModelGroup extends Model {
   const ModelGroup({
@@ -182,20 +225,32 @@ class ModelGroup extends Model {
     required this.name,
     required this.state,
     required this.crud,
-    this.description,
-    this.email,
+    this.description = '',
+    this.email = '',
     this.labels,
-    this.courseId,
-    this.projectId,
-    this.driveFolderId,
+    this.courseId = '',
+    this.projectId = '',
+    this.driveFolderId = '',
   });
 
+  /// Creates a [ModelGroup] from a JSON-like map.
+  ///
+  /// Parsing rules:
+  /// - Required scalar fields (`id`, `name`) fall back to `''` when missing.
+  /// - [state] is resolved with [Utils.enumFromJson] and defaults to
+  ///   [ModelGroupState.active].
+  /// - [labels], when present, is normalized with [Utils.mapFromDynamic] and
+  ///   passed to [ModelGroupLabels.fromJson].
+  /// - [crud] is mandatory and must contain a valid [ModelCrudMetadata] payload.
+  ///
+  /// Extra keys are ignored safely.
   factory ModelGroup.fromJson(Map<String, dynamic> json) {
     return ModelGroup(
       id: json[ModelGroupEnum.id.name]?.toString() ?? '',
       name: json[ModelGroupEnum.name.name]?.toString() ?? '',
-      description: json[ModelGroupEnum.description.name]?.toString(),
-      email: json[ModelGroupEnum.email.name]?.toString(),
+      description:
+          Utils.getStringFromDynamic(json[ModelGroupEnum.description.name]),
+      email: Utils.getStringFromDynamic(json[ModelGroupEnum.email.name]),
       labels: json[ModelGroupEnum.labels.name] == null
           ? null
           : ModelGroupLabels.fromJson(
@@ -208,9 +263,11 @@ class ModelGroup extends Model {
         json[ModelGroupEnum.state.name]?.toString(),
         ModelGroupState.active,
       ),
-      courseId: json[ModelGroupEnum.courseId.name]?.toString(),
-      projectId: json[ModelGroupEnum.projectId.name]?.toString(),
-      driveFolderId: json[ModelGroupEnum.driveFolderId.name]?.toString(),
+      courseId: Utils.getStringFromDynamic(json[ModelGroupEnum.courseId.name]),
+      projectId:
+          Utils.getStringFromDynamic(json[ModelGroupEnum.projectId.name]),
+      driveFolderId:
+          Utils.getStringFromDynamic(json[ModelGroupEnum.driveFolderId.name]),
       crud: ModelCrudMetadata.fromJson(
         Utils.mapFromDynamic(json[ModelGroupEnum.crud.name]),
       ),
@@ -219,13 +276,13 @@ class ModelGroup extends Model {
 
   final String id;
   final String name;
-  final String? description;
-  final String? email;
+  final String description;
+  final String email;
   final ModelGroupLabels? labels;
   final ModelGroupState state;
-  final String? courseId;
-  final String? projectId;
-  final String? driveFolderId;
+  final String courseId;
+  final String projectId;
+  final String driveFolderId;
   final ModelCrudMetadata crud;
 
   @override
@@ -233,35 +290,24 @@ class ModelGroup extends Model {
     String? id,
     String? name,
     String? description,
-    bool? Function()? descriptionOverrideNull,
     String? email,
-    bool? Function()? emailOverrideNull,
     ModelGroupLabels? labels,
-    bool? Function()? labelsOverrideNull,
     ModelGroupState? state,
     String? courseId,
-    bool? Function()? courseIdOverrideNull,
     String? projectId,
-    bool? Function()? projectIdOverrideNull,
     String? driveFolderId,
-    bool? Function()? driveFolderIdOverrideNull,
     ModelCrudMetadata? crud,
   }) {
     return ModelGroup(
       id: id ?? this.id,
       name: name ?? this.name,
-      description: descriptionOverrideNull != null
-          ? null
-          : description ?? this.description,
-      email: emailOverrideNull != null ? null : email ?? this.email,
-      labels: labelsOverrideNull != null ? null : labels ?? this.labels,
+      description: description ?? this.description,
+      email: email ?? this.email,
+      labels: labels ?? this.labels,
       state: state ?? this.state,
-      courseId: courseIdOverrideNull != null ? null : courseId ?? this.courseId,
-      projectId:
-          projectIdOverrideNull != null ? null : projectId ?? this.projectId,
-      driveFolderId: driveFolderIdOverrideNull != null
-          ? null
-          : driveFolderId ?? this.driveFolderId,
+      courseId: courseId ?? this.courseId,
+      projectId: projectId ?? this.projectId,
+      driveFolderId: driveFolderId ?? this.driveFolderId,
       crud: crud ?? this.crud,
     );
   }
@@ -274,24 +320,14 @@ class ModelGroup extends Model {
       ModelGroupEnum.state.name: state.name,
       ModelGroupEnum.crud.name: crud.toJson(),
     };
-    if (description != null) {
-      json[ModelGroupEnum.description.name] = description;
-    }
-    if (email != null) {
-      json[ModelGroupEnum.email.name] = email;
-    }
+    json[ModelGroupEnum.description.name] = description;
+    json[ModelGroupEnum.email.name] = email;
     if (labels != null) {
       json[ModelGroupEnum.labels.name] = labels!.toJson();
     }
-    if (courseId != null) {
-      json[ModelGroupEnum.courseId.name] = courseId;
-    }
-    if (projectId != null) {
-      json[ModelGroupEnum.projectId.name] = projectId;
-    }
-    if (driveFolderId != null) {
-      json[ModelGroupEnum.driveFolderId.name] = driveFolderId;
-    }
+    json[ModelGroupEnum.courseId.name] = courseId;
+    json[ModelGroupEnum.projectId.name] = projectId;
+    json[ModelGroupEnum.driveFolderId.name] = driveFolderId;
     return json;
   }
 

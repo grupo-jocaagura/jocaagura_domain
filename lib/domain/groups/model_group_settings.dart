@@ -3,7 +3,17 @@ part of 'package:jocaagura_domain/jocaagura_domain.dart';
 /// ===========================================================================
 /// GROUP SETTINGS
 /// ===========================================================================
-
+/// JSON keys for [ModelGroupSettings].
+///
+/// This enum centralizes the string keys used for serialization and parsing,
+/// avoiding magic strings across the codebase.
+///
+/// Example:
+/// ```dart
+/// void main() {
+///   print(ModelGroupSettingsEnum.googleGroupId.name); // "googleGroupId"
+/// }
+/// ```
 enum ModelGroupSettingsEnum {
   id,
   groupId,
@@ -23,6 +33,74 @@ enum ModelGroupSettingsEnum {
 }
 
 /// Snapshot of provider-specific settings for a group.
+///
+/// This model represents the configuration returned by the provider
+/// (e.g. Google Groups settings) at a given point in time. It is designed
+/// as an immutable snapshot suitable for auditing, caching, or debugging.
+///
+/// JSON contract:
+/// - Required fields:
+///   - `id` (string)
+///   - `groupId` (string)
+///   - `googleGroupId` (string)
+///   - `whoCanViewGroup` (string)
+///   - `whoCanViewMembership` (string)
+///   - `whoCanJoin` (string)
+///   - `whoCanPostMessage` (string)
+///   - `messageModerationLevel` (string)
+///   - `spamModerationLevel` (string)
+///   - `includeInGlobalAddressList` (bool; defaults to `true` when missing)
+///   - `membersCanPostAsTheGroup` (bool; defaults to `false` when missing)
+///   - `isArchived` (bool; defaults to `false` when missing)
+///   - `isCollaborativeInbox` (bool; defaults to `false` when missing)
+///   - `fetchedAt` (string; ISO 8601, parsed by [DateUtils.dateTimeFromDynamic])
+/// - Optional field:
+///   - `rawSettings` (object) – provider-specific raw payload; if absent or
+///     invalid, defaults to an empty map.
+///
+/// Parsing rules:
+/// - All scalar strings use `?.toString() ?? ''`, ensuring non-null fields.
+/// - Boolean flags are normalized via [Utils.getBoolFromDynamic] with the
+///   defaults described above.
+/// - [rawSettings] is normalized through [Utils.mapFromDynamic] and cast to
+///   `Map<String, dynamic>`.
+/// - [fetchedAt] is required at the domain level and parsed with
+///   [DateUtils.dateTimeFromDynamic].
+///
+/// Minimal runnable example:
+/// ```dart
+/// void main() {
+///   final DateTime now = DateTime.utc(2025, 1, 1, 12, 0, 0);
+///
+///   final ModelGroupSettings settings = ModelGroupSettings(
+///     id: 'settings-1',
+///     groupId: 'group-001',
+///     googleGroupId: 'AAA-BBB-CCC',
+///     whoCanViewGroup: 'ALL_MEMBERS_CAN_VIEW',
+///     whoCanViewMembership: 'ALL_MEMBERS_CAN_VIEW',
+///     whoCanJoin: 'INVITED_CAN_JOIN',
+///     whoCanPostMessage: 'ALL_MEMBERS_CAN_POST',
+///     messageModerationLevel: 'MODERATE_NONE',
+///     spamModerationLevel: 'MODERATE',
+///     includeInGlobalAddressList: true,
+///     membersCanPostAsTheGroup: false,
+///     isArchived: false,
+///     isCollaborativeInbox: true,
+///     fetchedAt: now,
+///     rawSettings: <String, dynamic>{
+///       'whoCanViewGroup': 'ALL_MEMBERS_CAN_VIEW',
+///       'whoCanAssist': 'OWNERS_ONLY',
+///     },
+///   );
+///
+///   final Map<String, dynamic> json = settings.toJson();
+///   final ModelGroupSettings roundtrip = ModelGroupSettings.fromJson(json);
+///
+///   print(roundtrip.googleGroupId);           // AAA-BBB-CCC
+///   print(roundtrip.isCollaborativeInbox);    // true
+///   print(roundtrip.rawSettings['whoCanViewGroup']); // ALL_MEMBERS_CAN_VIEW
+/// }
+/// ```
 class ModelGroupSettings extends Model {
   const ModelGroupSettings({
     required this.id,
@@ -39,9 +117,12 @@ class ModelGroupSettings extends Model {
     required this.isArchived,
     required this.isCollaborativeInbox,
     required this.fetchedAt,
-    this.rawSettings,
+    this.rawSettings = const <String, dynamic>{},
   });
 
+  /// Creates a [ModelGroupSettings] from a JSON-like map.
+  ///
+  /// Extra keys are ignored safely.
   factory ModelGroupSettings.fromJson(Map<String, dynamic> json) {
     return ModelGroupSettings(
       id: json[ModelGroupSettingsEnum.id.name]?.toString() ?? '',
@@ -80,11 +161,9 @@ class ModelGroupSettings extends Model {
         json[ModelGroupSettingsEnum.isCollaborativeInbox.name],
         defaultValueIfNull: false,
       ),
-      rawSettings: json[ModelGroupSettingsEnum.rawSettings.name] == null
-          ? null
-          : Utils.mapFromDynamic(
-              json[ModelGroupSettingsEnum.rawSettings.name],
-            ).cast<String, dynamic>(),
+      rawSettings: Utils.mapFromDynamic(
+        json[ModelGroupSettingsEnum.rawSettings.name],
+      ).cast<String, dynamic>(),
       fetchedAt: DateUtils.dateTimeFromDynamic(
         json[ModelGroupSettingsEnum.fetchedAt.name],
       ),
@@ -104,7 +183,7 @@ class ModelGroupSettings extends Model {
   final bool membersCanPostAsTheGroup;
   final bool isArchived;
   final bool isCollaborativeInbox;
-  final Map<String, dynamic>? rawSettings;
+  final Map<String, dynamic> rawSettings;
   final DateTime fetchedAt;
 
   @override
@@ -123,7 +202,6 @@ class ModelGroupSettings extends Model {
     bool? isArchived,
     bool? isCollaborativeInbox,
     Map<String, dynamic>? rawSettings,
-    bool? Function()? rawSettingsOverrideNull,
     DateTime? fetchedAt,
   }) {
     return ModelGroupSettings(
@@ -143,9 +221,7 @@ class ModelGroupSettings extends Model {
           membersCanPostAsTheGroup ?? this.membersCanPostAsTheGroup,
       isArchived: isArchived ?? this.isArchived,
       isCollaborativeInbox: isCollaborativeInbox ?? this.isCollaborativeInbox,
-      rawSettings: rawSettingsOverrideNull != null
-          ? null
-          : rawSettings ?? this.rawSettings,
+      rawSettings: rawSettings ?? this.rawSettings,
       fetchedAt: fetchedAt ?? this.fetchedAt,
     );
   }
@@ -172,9 +248,7 @@ class ModelGroupSettings extends Model {
       ModelGroupSettingsEnum.fetchedAt.name:
           DateUtils.dateTimeToString(fetchedAt),
     };
-    if (rawSettings != null) {
-      json[ModelGroupSettingsEnum.rawSettings.name] = rawSettings;
-    }
+    json[ModelGroupSettingsEnum.rawSettings.name] = rawSettings;
     return json;
   }
 

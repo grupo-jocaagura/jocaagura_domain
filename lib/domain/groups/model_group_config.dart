@@ -3,7 +3,17 @@ part of 'package:jocaagura_domain/jocaagura_domain.dart';
 /// ===========================================================================
 /// GROUP CONFIG
 /// ===========================================================================
-
+/// JSON keys for [ModelGroupConfig].
+///
+/// This enum centralizes the string keys used on serialization and parsing,
+/// avoiding magic strings across the codebase.
+///
+/// Example:
+/// ```dart
+/// void main() {
+///   print(ModelGroupConfigEnum.googleGroupId.name); // "googleGroupId"
+/// }
+/// ```
 enum ModelGroupConfigEnum {
   id,
   groupId,
@@ -19,17 +29,65 @@ enum ModelGroupConfigEnum {
 
 /// Technical configuration binding a [ModelGroup] to the provider.
 ///
-/// Example:
+/// This model holds the technical identifiers and synchronization state for a
+/// group in the underlying provider (e.g. Google Directory / Cloud Identity),
+/// as well as the audit metadata in [crud].
+///
+/// JSON contract:
+/// - Required fields:
+///   - `id` (string)
+///   - `groupId` (string)
+///   - `googleGroupId` (string)
+///   - `email` (string)
+///   - `apiSource` (string; [ModelGroupConfigApiSource.name])
+///   - `lastSyncStatus` (string; [ModelGroupConfigLastSyncStatus.name])
+///   - `crud` (object; [ModelCrudMetadata.toJson])
+/// - Optional fields:
+///   - `resourceName` (string, defaults to `''` when missing or `null`)
+///   - `etagSettings` (string, defaults to `''` when missing or `null`)
+///   - `lastSyncAt` (string, ISO 8601; omitted when `null`)
+///
+/// Parsing rules:
+/// - Scalar required fields fall back to `''` when missing or `null`.
+/// - [apiSource] is resolved via [Utils.enumFromJson], defaulting to
+///   [ModelGroupConfigApiSource.directory] on unknown values.
+/// - [lastSyncStatus] is resolved via [Utils.enumFromJson], defaulting to
+///   [ModelGroupConfigLastSyncStatus.never] on unknown values.
+/// - [resourceName] and [etagSettings] are normalized using
+///   [Utils.getStringFromDynamic] (missing/null → `''`).
+/// - [lastSyncAt] uses [DateUtils.dateTimeFromDynamic] when present.
+/// - [crud] must contain a valid [ModelCrudMetadata] payload.
+///
+/// Minimal runnable example:
 /// ```dart
-/// final ModelGroupConfig config = ModelGroupConfig.fromJson({
-///   'id': 'cfg-1',
-///   'groupId': 'group-001',
-///   'googleGroupId': 'AAA...',
-///   'email': 'soporte@domain.com',
-///   'apiSource': 'directory',
-///   'lastSyncStatus': 'ok',
-///   'crud': {...},
-/// });
+/// void main() {
+///   final DateTime now = DateTime.utc(2025, 1, 1, 10, 0, 0);
+///
+///   final ModelCrudMetadata crud = ModelCrudMetadata(
+///     recordId: 'cfg-1',
+///     createdBy: 'system@domain.com',
+///     createdAt: now,
+///     updatedBy: 'system@domain.com',
+///     updatedAt: now,
+///     version: 1,
+///   );
+///
+///   final ModelGroupConfig config = ModelGroupConfig(
+///     id: 'cfg-1',
+///     groupId: 'group-001',
+///     googleGroupId: 'AAA...',
+///     email: 'soporte@domain.com',
+///     apiSource: ModelGroupConfigApiSource.directory,
+///     lastSyncStatus: ModelGroupConfigLastSyncStatus.never,
+///     crud: crud,
+///   );
+///
+///   final Map<String, dynamic> json = config.toJson();
+///   final ModelGroupConfig roundtrip = ModelGroupConfig.fromJson(json);
+///
+///   print(roundtrip.email);          // soporte@domain.com
+///   print(roundtrip.lastSyncStatus); // ModelGroupConfigLastSyncStatus.never
+/// }
 /// ```
 class ModelGroupConfig extends Model {
   const ModelGroupConfig({
@@ -40,11 +98,14 @@ class ModelGroupConfig extends Model {
     required this.apiSource,
     required this.lastSyncStatus,
     required this.crud,
-    this.resourceName,
-    this.etagSettings,
+    this.resourceName = '',
+    this.etagSettings = '',
     this.lastSyncAt,
   });
 
+  /// Creates a [ModelGroupConfig] from a JSON-like map.
+  ///
+  /// Extra keys are ignored safely.
   factory ModelGroupConfig.fromJson(Map<String, dynamic> json) {
     return ModelGroupConfig(
       id: json[ModelGroupConfigEnum.id.name]?.toString() ?? '',
@@ -52,13 +113,17 @@ class ModelGroupConfig extends Model {
       googleGroupId:
           json[ModelGroupConfigEnum.googleGroupId.name]?.toString() ?? '',
       email: json[ModelGroupConfigEnum.email.name]?.toString() ?? '',
-      resourceName: json[ModelGroupConfigEnum.resourceName.name]?.toString(),
+      resourceName: Utils.getStringFromDynamic(
+        json[ModelGroupConfigEnum.resourceName.name],
+      ),
       apiSource: Utils.enumFromJson<ModelGroupConfigApiSource>(
         ModelGroupConfigApiSource.values,
         json[ModelGroupConfigEnum.apiSource.name]?.toString(),
         ModelGroupConfigApiSource.directory,
       ),
-      etagSettings: json[ModelGroupConfigEnum.etagSettings.name]?.toString(),
+      etagSettings: Utils.getStringFromDynamic(
+        json[ModelGroupConfigEnum.etagSettings.name],
+      ),
       lastSyncStatus: Utils.enumFromJson<ModelGroupConfigLastSyncStatus>(
         ModelGroupConfigLastSyncStatus.values,
         json[ModelGroupConfigEnum.lastSyncStatus.name]?.toString(),
@@ -79,13 +144,14 @@ class ModelGroupConfig extends Model {
   final String groupId;
   final String googleGroupId;
   final String email;
-  final String? resourceName;
+  final String resourceName;
   final ModelGroupConfigApiSource apiSource;
-  final String? etagSettings;
+  final String etagSettings;
   final ModelGroupConfigLastSyncStatus lastSyncStatus;
   final DateTime? lastSyncAt;
   final ModelCrudMetadata crud;
 
+  /// Returns a new [ModelGroupConfig] with some fields updated.
   @override
   ModelGroupConfig copyWith({
     String? id,
@@ -93,13 +159,10 @@ class ModelGroupConfig extends Model {
     String? googleGroupId,
     String? email,
     String? resourceName,
-    bool? Function()? resourceNameOverrideNull,
     ModelGroupConfigApiSource? apiSource,
     String? etagSettings,
-    bool? Function()? etagSettingsOverrideNull,
     ModelGroupConfigLastSyncStatus? lastSyncStatus,
     DateTime? lastSyncAt,
-    bool? Function()? lastSyncAtOverrideNull,
     ModelCrudMetadata? crud,
   }) {
     return ModelGroupConfig(
@@ -107,16 +170,11 @@ class ModelGroupConfig extends Model {
       groupId: groupId ?? this.groupId,
       googleGroupId: googleGroupId ?? this.googleGroupId,
       email: email ?? this.email,
-      resourceName: resourceNameOverrideNull != null
-          ? null
-          : resourceName ?? this.resourceName,
+      resourceName: resourceName ?? this.resourceName,
       apiSource: apiSource ?? this.apiSource,
-      etagSettings: etagSettingsOverrideNull != null
-          ? null
-          : etagSettings ?? this.etagSettings,
+      etagSettings: etagSettings ?? this.etagSettings,
       lastSyncStatus: lastSyncStatus ?? this.lastSyncStatus,
-      lastSyncAt:
-          lastSyncAtOverrideNull != null ? null : lastSyncAt ?? this.lastSyncAt,
+      lastSyncAt: lastSyncAt ?? this.lastSyncAt,
       crud: crud ?? this.crud,
     );
   }
@@ -132,12 +190,8 @@ class ModelGroupConfig extends Model {
       ModelGroupConfigEnum.lastSyncStatus.name: lastSyncStatus.name,
       ModelGroupConfigEnum.crud.name: crud.toJson(),
     };
-    if (resourceName != null) {
-      json[ModelGroupConfigEnum.resourceName.name] = resourceName;
-    }
-    if (etagSettings != null) {
-      json[ModelGroupConfigEnum.etagSettings.name] = etagSettings;
-    }
+    json[ModelGroupConfigEnum.resourceName.name] = resourceName;
+    json[ModelGroupConfigEnum.etagSettings.name] = etagSettings;
     if (lastSyncAt != null) {
       json[ModelGroupConfigEnum.lastSyncAt.name] =
           DateUtils.dateTimeToString(lastSyncAt!);

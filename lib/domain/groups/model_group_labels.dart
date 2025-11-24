@@ -25,7 +25,7 @@ class ModelGroupLabels extends Model {
   const ModelGroupLabels({
     required this.pillar,
     required this.kind,
-    this.tags,
+    this.tags = const <String>[],
     this.attributes = const <String, dynamic>{},
   });
 
@@ -52,7 +52,7 @@ class ModelGroupLabels extends Model {
 
   final ModelGroupPillar pillar;
   final ModelGroupKind kind;
-  final List<String>? tags;
+  final List<String> tags;
   final Map<String, dynamic>? attributes;
 
   @override
@@ -60,16 +60,13 @@ class ModelGroupLabels extends Model {
     ModelGroupPillar? pillar,
     ModelGroupKind? kind,
     List<String>? tags,
-    bool? Function()? tagsOverrideNull,
     Map<String, String>? attributes,
-    bool? Function()? attributesOverrideNull,
   }) {
     return ModelGroupLabels(
       pillar: pillar ?? this.pillar,
       kind: kind ?? this.kind,
-      tags: tagsOverrideNull != null ? null : tags ?? this.tags,
-      attributes:
-          attributesOverrideNull != null ? null : attributes ?? this.attributes,
+      tags: tags ?? this.tags,
+      attributes: attributes ?? this.attributes,
     );
   }
 
@@ -79,9 +76,7 @@ class ModelGroupLabels extends Model {
       ModelGroupLabelsEnum.pillar.name: pillar.name,
       ModelGroupLabelsEnum.kind.name: kind.name,
     };
-    if (tags != null) {
-      json[ModelGroupLabelsEnum.tags.name] = tags;
-    }
+    json[ModelGroupLabelsEnum.tags.name] = tags;
     if (attributes != null) {
       json[ModelGroupLabelsEnum.attributes.name] = attributes;
     }
@@ -95,14 +90,14 @@ class ModelGroupLabels extends Model {
           runtimeType == other.runtimeType &&
           pillar == other.pillar &&
           kind == other.kind &&
-          _listEquals(tags, other.tags) &&
+          Utils.listEquals(tags, other.tags) &&
           attributes == other.attributes;
 
   @override
   int get hashCode => Object.hash(
         pillar,
         kind,
-        tags == null ? null : Object.hashAll(tags!),
+        Object.hashAll(tags),
         attributes,
       );
 

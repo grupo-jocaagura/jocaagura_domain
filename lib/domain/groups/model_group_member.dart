@@ -3,7 +3,17 @@ part of 'package:jocaagura_domain/jocaagura_domain.dart';
 /// ===========================================================================
 /// GROUP MEMBER
 /// ===========================================================================
-
+/// JSON keys for [ModelGroupMember].
+///
+/// This enum centralizes the string keys used on serialization and parsing,
+/// avoiding magic strings across the codebase.
+///
+/// Example:
+/// ```dart
+/// void main() {
+///   print(ModelGroupMemberEnum.membershipId.name); // "membershipId"
+/// }
+/// ```
 enum ModelGroupMemberEnum {
   id,
   groupId,
@@ -20,6 +30,73 @@ enum ModelGroupMemberEnum {
 }
 
 /// Represents a member bound to a group.
+///
+/// This model ties an identity (email/userId) to a [ModelGroup] with a role
+/// ([role]), entity type ([entityType]) and source of membership ([source]),
+/// along with subscription preferences and audit metadata ([crud]).
+///
+/// JSON contract:
+/// - Required fields:
+///   - `id` (string)
+///   - `groupId` (string)
+///   - `email` (string; validated by [Utils.getEmailFromDynamic])
+///   - `userId` (string)
+///   - `role` (string; [ModelGroupMemberRole.name])
+///   - `entityType` (string; [ModelGroupMemberEntityType.name])
+///   - `membershipId` (string)
+///   - `source` (string; [ModelGroupMemberSource.name])
+///   - `subscription` (string; [ModelGroupMemberSubscription.name])
+///   - `includeDerived` (bool; defaults to `false` when missing/`null`)
+///   - `active` (bool; defaults to `true` when missing/`null`)
+///   - `crud` (object; [ModelCrudMetadata.toJson])
+///
+/// Parsing rules:
+/// - Scalar strings fall back to `''` when missing or `null`.
+/// - [email] uses [Utils.getEmailFromDynamic]: any non-valid email yields `''`.
+/// - Enum fields use [Utils.enumFromJson] with these defaults:
+///   - [role] → [ModelGroupMemberRole.member]
+///   - [entityType] → [ModelGroupMemberEntityType.user]
+///   - [source] → [ModelGroupMemberSource.manual]
+///   - [subscription] → [ModelGroupMemberSubscription.allMail]
+/// - [includeDerived] and [active] are normalized with
+///   [Utils.getBoolFromDynamic] with respective defaults `false` and `true`.
+///
+/// Minimal runnable example:
+/// ```dart
+/// void main() {
+///   final DateTime now = DateTime.utc(2025, 1, 1, 10, 0, 0);
+///
+///   final ModelCrudMetadata crud = ModelCrudMetadata(
+///     recordId: 'member-1',
+///     createdBy: 'system@domain.com',
+///     createdAt: now,
+///     updatedBy: 'system@domain.com',
+///     updatedAt: now,
+///     version: 1,
+///   );
+///
+///   final ModelGroupMember member = ModelGroupMember(
+///     id: 'member-1',
+///     groupId: 'group-001',
+///     email: 'user@domain.com',
+///     userId: 'user-001',
+///     role: ModelGroupMemberRole.member,
+///     entityType: ModelGroupMemberEntityType.user,
+///     membershipId: 'm-001',
+///     source: ModelGroupMemberSource.manual,
+///     subscription: ModelGroupMemberSubscription.allMail,
+///     includeDerived: false,
+///     active: true,
+///     crud: crud,
+///   );
+///
+///   final Map<String, dynamic> json = member.toJson();
+///   final ModelGroupMember roundtrip = ModelGroupMember.fromJson(json);
+///
+///   print(roundtrip.email); // user@domain.com
+///   print(roundtrip.role);  // ModelGroupMemberRole.member
+/// }
+/// ```
 class ModelGroupMember extends Model {
   const ModelGroupMember({
     required this.id,
@@ -36,6 +113,9 @@ class ModelGroupMember extends Model {
     required this.crud,
   });
 
+  /// Creates a [ModelGroupMember] from a JSON-like map.
+  ///
+  /// Extra keys are ignored safely.
   factory ModelGroupMember.fromJson(Map<String, dynamic> json) {
     return ModelGroupMember(
       id: json[ModelGroupMemberEnum.id.name]?.toString() ?? '',
