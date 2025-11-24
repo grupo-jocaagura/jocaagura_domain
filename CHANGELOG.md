@@ -3,6 +3,52 @@
 This document follows the guidelines of [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.32.2] - 2025-11-24
+
+### Added
+
+- **Domain – Ecosistema de Grupos**
+    - `ModelGroup`: entidad núcleo con estado, labels y metadatos.
+    - `ModelGroupMember`: relación miembro–grupo (rol, tipo de entidad, suscripción) con validación
+      básica de correos.
+    - `ModelGroupAlias`: alias de correo con estado de *provisioning* y errores.
+    - `ModelGroupConfig` / `ModelGroupSettings`: configuración técnica y de proveedor (e.g., Google
+      Groups) y estado de sincronización.
+    - `ModelGroupDynamicMembershipRule`: reglas de membresía dinámica.
+    - `ModelGroupSyncConfig`: estrategia de sincronización desde fuentes externas (sheets/courses).
+    - `ModelGroupSyncJob`: historial de ejecuciones (timestamps, contadores de cambios, uso de API).
+    - `ModelGroupLabels`: garantiza `tags` como `List<String>` no nula.
+    - **Comportamiento compartido**: claves JSON respaldadas por *enums*, `fromJson` robustos con
+      *fallbacks*, `copyWith`, e igualdad por valor (`==`/`hashCode`).
+- **Auditoría CRUD**
+    - `ModelCrudMetadata`: metadatos de auditoría por registro (created/updated/deleted, actor/es,
+      `version`) con `fromJson/toJson`, `copyWith` e *helpers* estáticos: `initialize`,
+      `touchOnUpdate`, `markDeleted`.
+    - `ModelCrudLogEntry`: registro de operación CRUD (tipo/entidad/actor/fecha) con `diff`/`env`
+      opcionales; `copyWith` y serialización robusta.
+- **Utils**
+    - `enumFromJson<T>()`: parseo seguro de *enums* con *fallback*.
+    - `stringListFromDynamic()`: normalización de entradas dinámicas a `List<String>`.
+
+### Docs
+
+- Documentación de modelos y *enums* nuevos: propósito, contratos JSON y ejemplos ejecutables.
+
+### Tests
+
+- **Grupos**: baterías para cada modelo (`model_group*_test.dart`, etc.) con *round-trips* JSON,
+  `copyWith`, contratos de igualdad y manejo de campos faltantes/ inválidos.
+- **CRUD**: `model_crud_metadata_test.dart`, `model_crud_log_entry_test.dart` (JSON round-trip,
+  `copyWith`, *helpers* de ciclo de vida).
+- **Utils**: pruebas de `enumFromJson` y `stringListFromDynamic`.
+
+### Notes
+
+- **Sin cambios rompientes** previstos. Los nuevos modelos son *opt-in* y compatibles con
+  Firestore/JSON.
+- Se recomienda estandarizar auditoría usando `ModelCrudMetadata` anidado en las entidades y
+  registrar eventos transversales con `ModelCrudLogEntry`.
+
 ## [1.32.1] - 2025-11-18
 
 ### Added
