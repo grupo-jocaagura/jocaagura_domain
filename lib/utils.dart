@@ -940,4 +940,37 @@ class Utils extends EntityUtil {
     // 5) Fallback
     return defaultDuration;
   }
+
+  /// Small helper to decode enums from string safely.
+  static T enumFromJson<T extends Enum>(
+    List<T> values,
+    String? raw,
+    T fallback,
+  ) {
+    if (raw == null) {
+      return fallback;
+    }
+    for (final T value in values) {
+      if (value.name == raw) {
+        return value;
+      }
+    }
+    return fallback;
+  }
+
+  static List<String> stringListFromDynamic(dynamic value) {
+    if (value == null) {
+      return const <String>[];
+    }
+    if (value is List) {
+      return value.map((dynamic e) => e.toString()).toList();
+    }
+    // As a fallback, try to parse JSON string using Utils.convertJsonToList
+    final List<dynamic> raw =
+        convertJsonToList(value.toString()).cast<dynamic>();
+    if (raw.isEmpty) {
+      return const <String>[];
+    }
+    return raw.map((dynamic e) => e.toString()).toList();
+  }
 }
