@@ -106,7 +106,8 @@ class ModelGroupAlias extends Model {
         ModelGroupAliasStatus.active,
       ),
       errorItemId: Utils.getStringFromDynamic(
-          json[ModelGroupAliasEnum.errorItemId.name]),
+        json[ModelGroupAliasEnum.errorItemId.name],
+      ),
       crud: ModelCrudMetadata.fromJson(
         Utils.mapFromDynamic(json[ModelGroupAliasEnum.crud.name]),
       ),
