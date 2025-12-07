@@ -84,43 +84,41 @@ class ModelAppVersion extends Model {
   /// Never throws for unknown keys; missing values default to constructor defaults.
   /// Invalid `buildAt` values are delegated to `DateUtils.dateTimeFromDynamic`.
   factory ModelAppVersion.fromJson(Map<String, dynamic> json) {
-    final Map<String, dynamic> jsonCopy = Map<String, dynamic>.from(json);
-    final Object? rawBuildAt = jsonCopy[ModelAppVersionEnum.buildAt.name];
-
+    final Object? rawBuildAt = json[ModelAppVersionEnum.buildAt.name];
     return ModelAppVersion(
-      id: Utils.getStringFromDynamic(jsonCopy[ModelAppVersionEnum.id.name]),
+      id: Utils.getStringFromDynamic(json[ModelAppVersionEnum.id.name]),
       appName: Utils.getStringFromDynamic(
-        jsonCopy[ModelAppVersionEnum.appName.name],
+        json[ModelAppVersionEnum.appName.name],
       ),
       version: Utils.getStringFromDynamic(
-        jsonCopy[ModelAppVersionEnum.version.name],
+        json[ModelAppVersionEnum.version.name],
       ),
       buildNumber: Utils.getIntegerFromDynamic(
-        jsonCopy[ModelAppVersionEnum.buildNumber.name],
+        json[ModelAppVersionEnum.buildNumber.name],
       ),
       platform: Utils.getStringFromDynamic(
-        jsonCopy[ModelAppVersionEnum.platform.name],
+        json[ModelAppVersionEnum.platform.name],
       ),
       channel: Utils.getStringFromDynamic(
-        jsonCopy[ModelAppVersionEnum.channel.name],
+        json[ModelAppVersionEnum.channel.name],
       ),
       minSupportedVersion: Utils.getStringFromDynamic(
-        jsonCopy[ModelAppVersionEnum.minSupportedVersion.name],
+        json[ModelAppVersionEnum.minSupportedVersion.name],
       ),
       forceUpdate: Utils.getBoolFromDynamic(
-        jsonCopy[ModelAppVersionEnum.forceUpdate.name],
+        json[ModelAppVersionEnum.forceUpdate.name],
       ),
       artifactUrl: Utils.getStringFromDynamic(
-        jsonCopy[ModelAppVersionEnum.artifactUrl.name],
+        json[ModelAppVersionEnum.artifactUrl.name],
       ),
       changelogUrl: Utils.getStringFromDynamic(
-        jsonCopy[ModelAppVersionEnum.changelogUrl.name],
+        json[ModelAppVersionEnum.changelogUrl.name],
       ),
       commitSha: Utils.getStringFromDynamic(
-        jsonCopy[ModelAppVersionEnum.commitSha.name],
+        json[ModelAppVersionEnum.commitSha.name],
       ),
       buildAt: rawBuildAt,
-      meta: Utils.mapFromDynamic(jsonCopy[ModelAppVersionEnum.meta.name]),
+      meta: Utils.mapFromDynamic(json[ModelAppVersionEnum.meta.name]),
     );
   }
 
