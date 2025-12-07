@@ -9,10 +9,12 @@ import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
+export 'src/fake_services/fake_http_request_config.dart';
 export 'src/fake_services/fake_service_connectivity.dart';
 export 'src/fake_services/fake_service_geolocation.dart';
 export 'src/fake_services/fake_service_gyroscope.dart';
 export 'src/fake_services/fake_service_http.dart';
+export 'src/fake_services/fake_service_http_request.dart';
 export 'src/fake_services/fake_service_notifications.dart';
 export 'src/fake_services/fake_service_preferences.dart';
 export 'src/fake_services/fake_service_session.dart';
@@ -21,10 +23,12 @@ export 'src/fake_services/fake_service_ws_db.dart';
 export 'src/fake_services/ws_db_error_mini_mapper.dart';
 export 'src/gateways/gateway_auth_impl.dart';
 export 'src/gateways/gateway_connectivity_impl.dart';
+export 'src/gateways/gateway_http_request_impl.dart';
 export 'src/gateways/gateway_ws_database_impl.dart';
 export 'src/gateways/gateway_ws_db_impl.dart';
 export 'src/repositories/repository_auth_impl.dart';
 export 'src/repositories/repository_connectivity_impl.dart';
+export 'src/repositories/repository_http_request_impl.dart';
 export 'src/repositories/repository_ws_database_impl.dart';
 
 part 'date_utils.dart';
@@ -36,6 +40,7 @@ part 'domain/bloc_core.dart';
 part 'domain/bloc_general.dart';
 part 'domain/bloc_module.dart';
 part 'domain/blocs/bloc_connectivity.dart';
+part 'domain/blocs/bloc_http_request.dart';
 part 'domain/blocs/bloc_loading.dart';
 part 'domain/blocs/bloc_onboarding.dart';
 part 'domain/blocs/bloc_responsive.dart';
@@ -52,6 +57,10 @@ part 'domain/common_errors/session_error_items.dart';
 part 'domain/common_errors/web_socket_error_items.dart';
 part 'domain/configs/ws_db_config.dart';
 part 'domain/connectivity_model.dart';
+
+part 'domain/crud/model_crud_log_entry.dart';
+
+part 'domain/crud/model_crud_metadata.dart';
 part 'domain/death_record_model.dart';
 part 'domain/debouncer.dart';
 part 'domain/dentist_app/acceptance_clause_model.dart';
@@ -60,13 +69,10 @@ part 'domain/dentist_app/diagnosis_model.dart';
 part 'domain/dentist_app/medical_record_model.dart';
 part 'domain/dentist_app/medical_treatment_model.dart';
 part 'domain/dentist_app/treatment_plan_model.dart';
-
 part 'domain/education/model_assessment.dart';
 part 'domain/education/model_competency_standard.dart';
 part 'domain/education/model_learning_goal.dart';
-
 part 'domain/education/model_learning_item.dart';
-
 part 'domain/education/model_performance_indicator.dart';
 part 'domain/either.dart';
 part 'domain/entity_bloc.dart';
@@ -78,10 +84,32 @@ part 'domain/financial/financial_movement.dart';
 part 'domain/financial/ledger_model.dart';
 part 'domain/gateways/gateway_auth.dart';
 part 'domain/gateways/gateway_connectivity.dart';
+part 'domain/gateways/gateway_http_request.dart';
 part 'domain/gateways/gateway_ws_database.dart';
 part 'domain/graphics/model_graph.dart';
 part 'domain/graphics/model_graph_axis_spec.dart';
 part 'domain/graphics/model_point.dart';
+
+part 'domain/groups/model_group.dart';
+
+part 'domain/groups/model_group_alias.dart';
+
+part 'domain/groups/model_group_config.dart';
+
+part 'domain/groups/model_group_dynamic_membership_rule.dart';
+
+part 'domain/groups/model_group_labels.dart';
+
+part 'domain/groups/model_group_member.dart';
+
+part 'domain/groups/model_group_settings.dart';
+
+part 'domain/groups/model_group_sync_config.dart';
+
+part 'domain/groups/model_group_sync_job.dart';
+part 'domain/http/http_enums.dart';
+part 'domain/http/http_request_errors.dart';
+part 'domain/http/model_config_http_request.dart';
 part 'domain/legal_id_model.dart';
 part 'domain/medical/medical_diagnosis_tab_model.dart';
 part 'domain/medical/medication_model.dart';
@@ -91,11 +119,13 @@ part 'domain/person_model.dart';
 part 'domain/pet_app/animal_model.dart';
 part 'domain/repositories/repository_auth.dart';
 part 'domain/repositories/repository_connectivity.dart';
+part 'domain/repositories/repository_http_request.dart';
 part 'domain/repositories/repository_ws_database.dart';
 part 'domain/services/service_connectivity.dart';
 part 'domain/services/service_geolocation.dart';
 part 'domain/services/service_gyroscope.dart';
 part 'domain/services/service_http.dart';
+part 'domain/services/service_http_request.dart';
 part 'domain/services/service_notifications.dart';
 part 'domain/services/service_preferences.dart';
 part 'domain/services/service_session.dart';
@@ -115,6 +145,7 @@ part 'domain/usecases/connectivity/connectivity_usecases.dart';
 part 'domain/usecases/databases_crud/databases_crud_usecases.dart';
 part 'domain/usecases/databases_crud/facade_crud_database.dart';
 part 'domain/usecases/databases_crud/facade_ws_database_usecases.dart';
+part 'domain/usecases/http_request/http_request_usecases.dart';
 part 'domain/usecases/no_params.dart';
 part 'domain/usecases/session/get_current_user_usecase.dart';
 part 'domain/usecases/session/log_in_silently_usecase.dart';

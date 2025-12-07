@@ -3,6 +3,171 @@
 This document follows the guidelines of [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.33.0] - 2025-11-25
+
+> Versión **acumulada** que integra las entregas **1.32.2** (ecosistema de Grupos + auditoría CRUD) y **1.32.1** (stack HTTP transversal). No añade funcionalidades extra fuera de lo ya incluido.
+
+### Added
+- **Ecosistema de Grupos**
+    - `ModelGroup`, `ModelGroupMember`, `ModelGroupAlias`, `ModelGroupDynamicMembershipRule`.
+    - `ModelGroupConfig` / `ModelGroupSettings`, `ModelGroupSyncConfig`, `ModelGroupSyncJob`, `ModelGroupLabels`.
+    - Enfoque común: claves JSON con *enums*, `fromJson` robusto, `copyWith`, e igualdad por valor.
+- **Auditoría CRUD**
+    - `ModelCrudMetadata` (created/updated/deleted, actores, `version`) con helpers: `initialize`, `touchOnUpdate`, `markDeleted`.
+    - `ModelCrudLogEntry` (entidad, operación, actor, fecha, `diff/env` opcionales).
+- **Stack HTTP transversal (dominio)**
+    - **Modelos:** `ModelConfigHttpRequest`, `StateHttpRequest`, `ModelTraceHttpRequest`.
+    - **Contratos:** `AdapterHttpClient`, `ServiceHttpRequest`, `GatewayHttpRequest` (*never-throws*), `RepositoryHttpRequest`.
+    - **Implementaciones:** `GatewayHttpRequestImpl`, `RepositoryHttpRequestImpl`, `FakeHttpRequest`/`FakeHttpRequestConfig`.
+    - **Use cases:** GET/POST/PUT/DELETE, `retry`; **facade** `FacadeHttpRequestUsecases`.
+    - **BLoC:** `BlocHttpRequest` con `Set<String>` de peticiones activas.
+    - **Error mapping:** `DefaultHttpErrorMapper` (mapea `TimeoutException`→`HTTP_TIMEOUT`, añade `meta.transport='http'`, ajusta `code` según `statusCode/httpStatus`).
+- **Utils**
+    - `enumFromJson<T>()`, `stringListFromDynamic()`.
+
+### Changed
+- **Auth:** `GatewayAuthImpl` usa `DefaultHttpErrorMapper` para enriquecer errores basados en HTTP.
+- **Repository HTTP:** `RepositoryHttpRequestImpl` expone `normalizeBody` (mejor testabilidad).
+
+### Removed
+- **Exports del dominio:** se retiran `HelperHttpRequestId` y `ModelResponseHttpRaw` (obsoletos en la API vigente).
+
+### Docs
+- Modelos de Grupos y Auditoría CRUD: propósito, contratos JSON, ejemplos ejecutables.
+- Stack HTTP: guía y ejemplo `bloc_http_request_example.dart`; aclaraciones de nulabilidad en `ModelConfigHttpRequest`.
+
+### Tests
+- **Grupos:** baterías por modelo (round-trip JSON, `copyWith`, igualdad, campos faltantes/ inválidos).
+- **CRUD:** `model_crud_metadata_test.dart`, `model_crud_log_entry_test.dart`.
+- **HTTP:** cobertura amplia (BLoC, Gateway, Repository, Fake service, ErrorMapper, `ModelConfigHttpRequest`).
+
+### Migration notes
+- **HTTP errors:** si la UI depende de `code/meta`, contempla nuevos códigos estándar (`HTTP_TIMEOUT`, `HTTP_UNAUTHORIZED`, etc.) y `meta.transport='http'`.
+- **Imports:** si consumías `HelperHttpRequestId` o `ModelResponseHttpRaw` desde el *barrel*, elimina esos imports o sustituye por utilidades vigentes.
+- **Auditoría:** adopta `ModelCrudMetadata` embebido en entidades y registra eventos transversales con `ModelCrudLogEntry`.
+
+> **Notas:** Cambios no rompientes (salvo limpieza de exports). Los módulos son *opt-in* y compatibles con Firestore/JSON.
+
+
+## [1.32.2] - 2025-11-24
+
+### Added
+
+- **Domain – Ecosistema de Grupos**
+    - `ModelGroup`: entidad núcleo con estado, labels y metadatos.
+    - `ModelGroupMember`: relación miembro–grupo (rol, tipo de entidad, suscripción) con validación
+      básica de correos.
+    - `ModelGroupAlias`: alias de correo con estado de *provisioning* y errores.
+    - `ModelGroupConfig` / `ModelGroupSettings`: configuración técnica y de proveedor (e.g., Google
+      Groups) y estado de sincronización.
+    - `ModelGroupDynamicMembershipRule`: reglas de membresía dinámica.
+    - `ModelGroupSyncConfig`: estrategia de sincronización desde fuentes externas (sheets/courses).
+    - `ModelGroupSyncJob`: historial de ejecuciones (timestamps, contadores de cambios, uso de API).
+    - `ModelGroupLabels`: garantiza `tags` como `List<String>` no nula.
+    - **Comportamiento compartido**: claves JSON respaldadas por *enums*, `fromJson` robustos con
+      *fallbacks*, `copyWith`, e igualdad por valor (`==`/`hashCode`).
+- **Auditoría CRUD**
+    - `ModelCrudMetadata`: metadatos de auditoría por registro (created/updated/deleted, actor/es,
+      `version`) con `fromJson/toJson`, `copyWith` e *helpers* estáticos: `initialize`,
+      `touchOnUpdate`, `markDeleted`.
+    - `ModelCrudLogEntry`: registro de operación CRUD (tipo/entidad/actor/fecha) con `diff`/`env`
+      opcionales; `copyWith` y serialización robusta.
+- **Utils**
+    - `enumFromJson<T>()`: parseo seguro de *enums* con *fallback*.
+    - `stringListFromDynamic()`: normalización de entradas dinámicas a `List<String>`.
+
+### Docs
+
+- Documentación de modelos y *enums* nuevos: propósito, contratos JSON y ejemplos ejecutables.
+
+### Tests
+
+- **Grupos**: baterías para cada modelo (`model_group*_test.dart`, etc.) con *round-trips* JSON,
+  `copyWith`, contratos de igualdad y manejo de campos faltantes/ inválidos.
+- **CRUD**: `model_crud_metadata_test.dart`, `model_crud_log_entry_test.dart` (JSON round-trip,
+  `copyWith`, *helpers* de ciclo de vida).
+- **Utils**: pruebas de `enumFromJson` y `stringListFromDynamic`.
+
+### Notes
+
+- **Sin cambios rompientes** previstos. Los nuevos modelos son *opt-in* y compatibles con
+  Firestore/JSON.
+- Se recomienda estandarizar auditoría usando `ModelCrudMetadata` anidado en las entidades y
+  registrar eventos transversales con `ModelCrudLogEntry`.
+
+## [1.32.1] - 2025-11-18
+
+### Added
+
+- **HTTP transversal (dominio)**
+  - **Modelos (`domain/http`):**
+    - `ModelConfigHttpRequest` (config inmutable, round-trip JSON).
+    - `StateHttpRequest` (ciclo: `Created/Running/Success/Failure/Cancelled`).
+    - `ModelTraceHttpRequest` (traza en memoria para depuración/telemetría).
+  - **Contratos:**
+    - `AdapterHttpClient` (cliente bajo nivel).
+    - `ServiceHttpRequest`, `GatewayHttpRequest` (*never-throws* con `ErrorItem`).
+    - `RepositoryHttpRequest` (retorna `ModelConfigHttpRequest` en éxito).
+  - **Implementaciones:**
+    - `GatewayHttpRequestImpl`, `RepositoryHttpRequestImpl`.
+    - `FakeHttpRequest` / `FakeHttpRequestConfig` (latencia, errores forzados, respuestas
+      enlatadas).
+  - **Use cases (`domain/usecases/http_request`):**
+    - GET/POST/PUT/DELETE y `retry`, más `FacadeHttpRequestUsecases`.
+  - **BLoC (`domain/blocs`):**
+    - `BlocHttpRequest` con `Set<String>` de **peticiones activas** para reaccionar en UI.
+  - **Enums/helpers:**
+    - `HttpMethodEnum`, `HttpRequestLifecycleEnum`, `HttpRequestFailureEnum`.
+
+- **Ejemplo end-to-end**
+  - `bloc_http_request_example.dart`: cableado completo **Service → Gateway → Repository →
+    Usecases → Facade → BlocHttpRequest**, ejecutando GET/POST/DELETE, mostrando set de activas y
+    resultado (`ErrorItem` / `ModelConfigHttpRequest`).
+
+- **Error mapping especializado**
+  - `DefaultHttpErrorMapper`:
+    - Envuelve `DefaultErrorMapper`.
+    - Mapea `TimeoutException` → `HTTP_TIMEOUT`.
+    - Añade `transport: 'http'` a `meta`.
+    - Ajusta `code` con base en `statusCode/httpStatus` (p.ej. 401 → `HTTP_UNAUTHORIZED`).
+
+### Changed
+
+- **`GatewayAuthImpl`** ahora usa `DefaultHttpErrorMapper` para enriquecer los errores de
+  autenticación basados en HTTP.
+- **`RepositoryHttpRequestImpl`** expone `normalizeBody` (mejor testabilidad).
+- **DartDoc** de `ModelConfigHttpRequest`: contratos de nulabilidad de `headers` y `body` aclarados.
+
+### Removed
+
+- **Exports del dominio**: se retiran `HelperHttpRequestId` y `ModelResponseHttpRaw` por **no uso**
+  en la API actual.
+
+### Tests
+
+- Cobertura amplia de todo el *stack* HTTP:
+  - **`BlocHttpRequest`**: seguimiento de activas, concurrencia, `retry`, emisiones de stream.
+  - **`GatewayHttpRequestImpl`**: adaptación de metadatos, transformación de cuerpo, mapeo de
+    errores.
+  - **`RepositoryHttpRequestImpl`**: delegación y construcción de configuración.
+  - **`FakeHttpRequest`**: respuestas enlatadas, eco, latencia y errores inyectados.
+  - **`DefaultHttpErrorMapper`**: excepciones y payloads → `ErrorItem` con `meta` correcto.
+  - **`ModelConfigHttpRequest`**: round-trip JSON, valores por defecto, `copyWith`.
+
+### Migration notes
+
+- **Error mapping**: si tu UI/presenters dependen de `code`/`meta`, revisa casos de
+  `TimeoutException` y errores 4xx/5xx (ahora vienen con códigos HTTP explícitos y
+  `meta.transport='http'`).
+- **Exports eliminados**: si importabas `HelperHttpRequestId` o `ModelResponseHttpRaw` desde el
+  *barrel*, migra a utilidades propias o a los modelos vigentes. (No afecta a la ruta estándar del
+  flujo.)
+- **`normalizeBody`** disponible públicamente en `RepositoryHttpRequestImpl` para pruebas finas.
+
+> **Notas:** La versión introduce el **stack HTTP transversal** con ejemplo listo para copiar,
+> mejora el **mapeo de errores** y eleva la **cobertura de pruebas**. Cambios no rompientes salvo
+> posibles imports a símbolos retirados del *barrel*.
+
 ## [1.32.0] - 2025-10-19
 
 > Publicación acumulada que **consolida** los cambios de **1.31.0 → 1.31.3**. No introduce cambios

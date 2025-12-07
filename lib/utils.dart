@@ -940,4 +940,103 @@ class Utils extends EntityUtil {
     // 5) Fallback
     return defaultDuration;
   }
+
+  /// Decodes an enum value from a raw string representation.
+  ///
+  /// Looks up the first value in [values] whose [Enum.name] matches [raw].
+  /// If [raw] is `null` or no matching value is found, [fallback] is returned.
+  ///
+  /// Contract:
+  /// - Comparison is **case-sensitive** and uses the enum `name` property.
+  /// - [values] is usually the `.values` list of the enum type.
+  /// - [fallback] is always returned for unknown or `null` inputs.
+  ///
+  /// Minimal runnable example:
+  /// ```dart
+  /// enum PaymentStatus { pending, completed, failed }
+  ///
+  /// void main() {
+  ///   // Given a valid enum name
+  ///   final PaymentStatus ok = Utils.enumFromJson<PaymentStatus>(
+  ///     PaymentStatus.values,
+  ///     'completed',
+  ///     PaymentStatus.failed,
+  ///   );
+  ///   print(ok); // PaymentStatus.completed
+  ///
+  ///   // Given an unknown name, the fallback is used
+  ///   final PaymentStatus fallback = Utils.enumFromJson<PaymentStatus>(
+  ///     PaymentStatus.values,
+  ///     'unknown',
+  ///     PaymentStatus.failed,
+  ///   );
+  ///   print(fallback); // PaymentStatus.failed
+  /// }
+  /// ```
+  static T enumFromJson<T extends Enum>(
+    List<T> values,
+    String? raw,
+    T fallback,
+  ) {
+    if (raw == null) {
+      return fallback;
+    }
+    for (final T value in values) {
+      if (value.name == raw) {
+        return value;
+      }
+    }
+    return fallback;
+  }
+
+  /// Converts a dynamic value into a `List<String>`.
+  ///
+  /// Behavior:
+  /// - `null` → returns an empty list.
+  /// - `List` → each element is converted with `.toString()` and returned.
+  /// - Other values:
+  ///   - Tries to parse `value.toString()` as JSON using [convertJsonToList].
+  ///   - If parsing succeeds, the resulting list is stringified and returned.
+  ///   - If parsing fails or produces an empty list, returns an empty list.
+  ///
+  /// This helper is useful to normalize inputs that may arrive as a native
+  /// list, a JSON array string or a scalar value that should be wrapped in
+  /// a single-element list.
+  ///
+  /// Minimal runnable example:
+  /// ```dart
+  /// void main() {
+  ///   // From a native list
+  ///   final List<String> a =
+  ///       Utils.stringListFromDynamic(<Object>['x', 1, true]);
+  ///   print(a); // [x, 1, true]
+  ///
+  ///   // From a JSON array string
+  ///   final List<String> b =
+  ///       Utils.stringListFromDynamic('["a", 2, false]');
+  ///   print(b); // [a, 2, false]
+  ///
+  ///   // From a scalar value
+  ///   final List<String> c = Utils.stringListFromDynamic(42);
+  ///   print(c); // [42]
+  ///
+  ///   // From invalid JSON
+  ///   final List<String> d = Utils.stringListFromDynamic('oops');
+  ///   print(d); // []
+  /// }
+  /// ```
+  static List<String> stringListFromDynamic(dynamic value) {
+    if (value == null) {
+      return const <String>[];
+    }
+    if (value is List) {
+      return value.map((dynamic e) => e.toString()).toList();
+    }
+    final List<dynamic> raw =
+        convertJsonToList(value.toString()).cast<dynamic>();
+    if (raw.isEmpty) {
+      return const <String>[];
+    }
+    return raw.map((dynamic e) => e.toString()).toList();
+  }
 }
