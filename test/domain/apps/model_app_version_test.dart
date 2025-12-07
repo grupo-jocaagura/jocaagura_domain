@@ -13,6 +13,8 @@ void main() {
         9,
       ).toLocal();
       final bool isLocalUtc = local.isUtc; // sanity: should be false commonly
+      final String expectedIso =
+          DateUtils.dateTimeToString(local.toUtc());
 
       // Act
       final ModelAppVersion m = ModelAppVersion(
@@ -27,7 +29,8 @@ void main() {
 
       // Assert
       expect(isLocalUtc, isFalse);
-      expect(m.buildAt.isUtc, isTrue);
+      expect(m.buildAt, expectedIso);
+      expect(m.buildAtDateTime.isUtc, isTrue);
     });
 
     test('Given meta map When constructed Then meta is unmodifiable', () {
@@ -170,7 +173,8 @@ void main() {
 
       // Assert
       expect(back, equals(original));
-      expect(back.buildAt.isUtc, isTrue);
+      expect(back.buildAt, original.buildAt);
+      expect(back.buildAtDateTime.isUtc, isTrue);
     });
 
     test(
@@ -217,7 +221,8 @@ void main() {
       };
 
       final ModelAppVersion fromUtc = ModelAppVersion.fromJson(jsonUtc);
-      expect(fromUtc.buildAt.isUtc, isTrue);
+      expect(fromUtc.buildAt, utcStr);
+      expect(fromUtc.buildAtDateTime.isUtc, isTrue);
 
       final Map<String, dynamic> jsonLocal = <String, dynamic>{
         'id': 'a',
@@ -231,18 +236,22 @@ void main() {
       };
 
       final ModelAppVersion fromLocal = ModelAppVersion.fromJson(jsonLocal);
-      expect(fromLocal.buildAt.isUtc, isTrue);
+      expect(
+        fromLocal.buildAt,
+        DateUtils.dateTimeToString(DateTime(2025, 10, 12, 12).toUtc()),
+      );
+      expect(fromLocal.buildAtDateTime.isUtc, isTrue);
     });
   });
 
   group('ModelAppVersion – Defaults & Sentinels', () {
-    test('Given defaultModelAppVersion Then has sentinel values and UTC epoch',
-        () {
-      final ModelAppVersion d = ModelAppVersion.defaultModelAppVersion;
+    test('Given defaultModelAppVersion Then has sentinel ISO buildAt', () {
+      const ModelAppVersion d = ModelAppVersion.defaultModelAppVersion;
       expect(d.id, 'default');
       expect(d.version, '0.0.0');
       expect(d.buildNumber, 0);
-      expect(d.buildAt.isUtc, isTrue);
+      expect(d.buildAt, ModelAppVersion.kDefaultBuildAtIso);
+      expect(d.buildAtDateTime.isUtc, isTrue);
       expect(d.platform, 'shared');
       expect(d.channel, 'dev');
     });

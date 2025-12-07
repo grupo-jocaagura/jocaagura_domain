@@ -20,7 +20,8 @@ enum ModelAppVersionEnum {
 ///
 /// Guarantees:
 /// - Instances are **immutable**: all fields are `final`; `meta` is wrapped with
-///   `Map.unmodifiable`; `buildAt` is normalized to **UTC** on construction.
+///   `Map.unmodifiable`; `buildAt` is stored as a UTC ISO-8601 string, using
+///   `kDefaultBuildAtIso` (07 Dec 2025) when none is supplied.
 /// - JSON round-trip safety: `toJson()` and `fromJson(...)` preserve values,
 ///   coercing `buildAt` to UTC and normalizing `meta` keys via `Utils.mapFromDynamic`.
 ///
@@ -33,7 +34,7 @@ enum ModelAppVersionEnum {
 /// - `version` is expected to be a SemVer string (not validated here).
 /// - `platform`/`channel` are free strings (e.g., `android`/`dev`).
 /// - `buildNumber` is monotonic and non-negative in typical pipelines.
-/// - `buildAt` must be a valid `DateTime`; it is stored as **UTC**.
+/// - `buildAt` accepts `DateTime` or ISO strings and is stored as **UTC** text.
 /// - `meta` is a JSON-like map (string-keyed); raw maps will be normalized.
 ///
 /// Minimal example:
@@ -52,6 +53,7 @@ enum ModelAppVersionEnum {
 ///   final Map<String, dynamic> json = v.toJson();
 ///   final ModelAppVersion back = ModelAppVersion.fromJson(json);
 ///   assert(v == back);
+///   assert(v.buildAtDateTime.isUtc);
 /// }
 /// ```
 class ModelAppVersion extends Model {
@@ -62,14 +64,14 @@ class ModelAppVersion extends Model {
     required this.buildNumber,
     required this.platform,
     required this.channel,
-    required DateTime buildAt,
+    Object? buildAt = kDefaultBuildAtIso,
     this.minSupportedVersion = '',
     this.forceUpdate = false,
     this.artifactUrl = '',
     this.changelogUrl = '',
     this.commitSha = '',
     Map<String, dynamic> meta = const <String, dynamic>{},
-  })  : buildAt = buildAt.isUtc ? buildAt : buildAt.toUtc(),
+  })  : buildAt = _normalizeBuildAt(buildAt),
         meta = Map<String, dynamic>.unmodifiable(meta);
 
   /// Creates an instance from a JSON-like map.
@@ -83,10 +85,7 @@ class ModelAppVersion extends Model {
   /// Invalid `buildAt` values are delegated to `DateUtils.dateTimeFromDynamic`.
   factory ModelAppVersion.fromJson(Map<String, dynamic> json) {
     final Map<String, dynamic> jsonCopy = Map<String, dynamic>.from(json);
-    final DateTime dt = DateUtils.dateTimeFromDynamic(
-      jsonCopy[ModelAppVersionEnum.buildAt.name],
-    );
-    final DateTime buildAtUtc = dt.isUtc ? dt : dt.toUtc();
+    final Object? rawBuildAt = jsonCopy[ModelAppVersionEnum.buildAt.name];
 
     return ModelAppVersion(
       id: Utils.getStringFromDynamic(jsonCopy[ModelAppVersionEnum.id.name]),
@@ -120,10 +119,29 @@ class ModelAppVersion extends Model {
       commitSha: Utils.getStringFromDynamic(
         jsonCopy[ModelAppVersionEnum.commitSha.name],
       ),
-      buildAt: buildAtUtc,
+      buildAt: rawBuildAt,
       meta: Utils.mapFromDynamic(jsonCopy[ModelAppVersionEnum.meta.name]),
     );
   }
+
+  const ModelAppVersion._defaults()
+      : id = 'default',
+        appName = 'app',
+        version = '0.0.0',
+        buildNumber = 0,
+        platform = 'shared',
+        channel = 'dev',
+        buildAt = kDefaultBuildAtIso,
+        minSupportedVersion = '',
+        forceUpdate = false,
+        artifactUrl = '',
+        changelogUrl = '',
+        commitSha = '',
+        meta = const <String, dynamic>{};
+
+  static const String kDefaultBuildAtIso = '2025-12-07T00:00:00.000Z';
+  static const ModelAppVersion defaultModelAppVersion =
+      ModelAppVersion._defaults();
 
   final String id;
   final String appName;
@@ -136,23 +154,14 @@ class ModelAppVersion extends Model {
   final String artifactUrl;
   final String changelogUrl;
   final String commitSha;
-  final DateTime buildAt; // UTC
+  final String buildAt; // UTC ISO string
   final Map<String, dynamic> meta;
-
-  static final ModelAppVersion defaultModelAppVersion = ModelAppVersion(
-    id: 'default',
-    appName: 'app',
-    version: '0.0.0',
-    buildNumber: 0,
-    platform: 'shared',
-    channel: 'dev',
-    buildAt: DateTime.fromMillisecondsSinceEpoch(0, isUtc: true),
-  );
 
   /// Returns a copy with selected fields replaced.
   ///
   /// `meta` is wrapped with `Map.unmodifiable` to preserve immutability.
-  /// If `buildAt` is provided, it is stored as-is; ensure it is UTC if required.
+  /// If `buildAt` is provided, it can be a `DateTime` or ISO string and will
+  /// be normalized to UTC text via `_normalizeBuildAt`.
   @override
   ModelAppVersion copyWith({
     String? id,
@@ -166,7 +175,7 @@ class ModelAppVersion extends Model {
     String? artifactUrl,
     String? changelogUrl,
     String? commitSha,
-    DateTime? buildAt,
+    Object? buildAt,
     Map<String, dynamic>? meta,
   }) =>
       ModelAppVersion(
@@ -188,7 +197,7 @@ class ModelAppVersion extends Model {
   /// Serializes the model into a JSON map.
   ///
   /// Notes:
-  /// - `buildAt` is emitted as a string using `DateUtils.dateTimeToString(buildAt.toUtc())`.
+  /// - `buildAt` is emitted as the already-normalized UTC ISO string.
   /// - `meta` is emitted as stored (string-keyed, unmodifiable at runtime).
   ///
   /// Consumers should not mutate the returned map for long-lived sharing.
@@ -206,13 +215,12 @@ class ModelAppVersion extends Model {
         ModelAppVersionEnum.artifactUrl.name: artifactUrl,
         ModelAppVersionEnum.changelogUrl.name: changelogUrl,
         ModelAppVersionEnum.commitSha.name: commitSha,
-        ModelAppVersionEnum.buildAt.name:
-            DateUtils.dateTimeToString(buildAt.toUtc()),
+        ModelAppVersionEnum.buildAt.name: buildAt,
         ModelAppVersionEnum.meta.name: meta,
       };
 
-  /// Two instances are equal when all scalar fields match, `buildAt` represents
-  /// the same instant (`isAtSameMomentAs`) and `meta` is deep-equal via
+  /// Two instances are equal when all scalar fields match, `buildAt` encodes
+  /// the same normalized instant, and `meta` is deep-equal via
   /// `Utils.deepEqualsMap`.
   @override
   bool operator ==(Object other) {
@@ -231,7 +239,7 @@ class ModelAppVersion extends Model {
         other.artifactUrl == artifactUrl &&
         other.changelogUrl == changelogUrl &&
         other.commitSha == commitSha &&
-        other.buildAt.isAtSameMomentAs(buildAt) &&
+        other.buildAt == buildAt &&
         Utils.deepEqualsMap(other.meta, meta);
   }
 
@@ -251,7 +259,21 @@ class ModelAppVersion extends Model {
         artifactUrl,
         changelogUrl,
         commitSha,
-        buildAt.millisecondsSinceEpoch,
+        buildAt,
         Utils.deepHash(meta),
       );
+
+  /// Parsed `buildAt` as a UTC `DateTime`.
+  ///
+  /// Throws if `buildAt` is an invalid date.
+  DateTime get buildAtDateTime =>
+      DateUtils.dateTimeFromDynamic(buildAt).toUtc();
+
+  static String _normalizeBuildAt(Object? value) {
+    final DateTime dt = DateUtils.dateTimeFromDynamic(
+      value ?? kDefaultBuildAtIso,
+    );
+    final DateTime buildAtUtc = dt.isUtc ? dt : dt.toUtc();
+    return DateUtils.dateTimeToString(buildAtUtc);
+  }
 }
