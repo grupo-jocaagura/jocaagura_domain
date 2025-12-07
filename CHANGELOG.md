@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - hotfix para estabilizar el contrato de BlocHttpRequest para garantizar la correcta herencia de BlocModule.
 
 ## [1.33.1] - 2025-12-07
-
+### Fixed
 - Hotfix para estabilizar el contrato de `ModelAppVersion` al serializar `buildAt` y permitir `defaultModelAppVersion` totalmente constante.
 
 ### Fixed
