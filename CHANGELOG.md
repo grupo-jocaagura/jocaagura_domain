@@ -3,9 +3,13 @@
 This document follows the guidelines of [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.33.2] - 2025-12-07
+### Fixed
+- hotfix para estabilizar el contrato de BlocHttpRequest para garantizar la correcta herencia de BlocModule.
+
 ## [1.33.1] - 2025-12-07
 
-> Hotfix para estabilizar el contrato de `ModelAppVersion` al serializar `buildAt` y permitir `defaultModelAppVersion` totalmente constante.
+- Hotfix para estabilizar el contrato de `ModelAppVersion` al serializar `buildAt` y permitir `defaultModelAppVersion` totalmente constante.
 
 ### Fixed
 - `ModelAppVersion` ahora persiste `buildAt` como cadena ISO-8601 UTC con `kDefaultBuildAtIso` (07 Dic 2025) como valor por defecto, evitando drift entre plataformas y habilitando instancias const en tree-shaking.
