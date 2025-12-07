@@ -13,8 +13,7 @@ void main() {
         9,
       ).toLocal();
       final bool isLocalUtc = local.isUtc; // sanity: should be false commonly
-      final String expectedIso =
-          DateUtils.dateTimeToString(local.toUtc());
+      final String expectedIso = DateUtils.dateTimeToString(local.toUtc());
 
       // Act
       final ModelAppVersion m = ModelAppVersion(
