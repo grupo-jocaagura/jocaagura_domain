@@ -3,6 +3,20 @@
 This document follows the guidelines of [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.33.1] - 2025-12-07
+
+> Hotfix para estabilizar el contrato de `ModelAppVersion` al serializar `buildAt` y permitir `defaultModelAppVersion` totalmente constante.
+
+### Fixed
+- `ModelAppVersion` ahora persiste `buildAt` como cadena ISO-8601 UTC con `kDefaultBuildAtIso` (07 Dic 2025) como valor por defecto, evitando drift entre plataformas y habilitando instancias const en tree-shaking.
+- Se agregó el *getter* `buildAtDateTime` que utiliza `DateUtils` para exponer el valor en `DateTime` sin sacrificar el almacenamiento en texto.
+
+### Docs
+- Comentarios del modelo aclaran el nuevo flujo (`buildAt` string + getter) y el uso del `hotfix` para pipelines de lanzamiento.
+
+### Tests
+- `test/domain/apps/model_app_version_test.dart` actualizado para validar la cadena ISO, el getter `buildAtDateTime` y el valor centinela `kDefaultBuildAtIso`.
+
 ## [1.33.0] - 2025-11-25
 
 > Versión **acumulada** que integra las entregas **1.32.2** (ecosistema de Grupos + auditoría CRUD) y **1.32.1** (stack HTTP transversal). No añade funcionalidades extra fuera de lo ya incluido.
@@ -353,7 +367,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     `LedgerModel`.
     - Alinea precisión financiera con `ModelPrice(mathPrecision: 2)`.
 
-### Tests
+**Tests**
 
 - `model_item_test.dart`: *round-trip* JSON, *fallback* de `id`, `copyWith`, igualdad/`hashCode`,
   `toString`.
@@ -602,7 +616,7 @@ simplifica la **integración** en apps nuevas o existentes.
 ### Docs
 
 - **ModelAppVersion:** DartDoc detallada de contratos y comportamiento de JSON (UTC, `meta`
-  inmutable).
+  inmodificable).
 - **Utils:** documentación y ejemplos de uso para `deepEqualsDynamic`, `deepEqualsMap` y `deepHash`.
 
 ### Tests
