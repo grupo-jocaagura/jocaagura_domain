@@ -64,12 +64,15 @@ part of 'package:jocaagura_domain/jocaagura_domain.dart';
 ///   true,
 /// );
 /// ```
-class BlocHttpRequest {
+class BlocHttpRequest extends BlocModule {
   /// Creates a new [BlocHttpRequest] with the given [facade].
   BlocHttpRequest(this._facade) : _bloc = BlocGeneral<Set<String>>(<String>{});
 
   /// Facade that groups all HTTP-related use cases.
   final FacadeHttpRequestUsecases _facade;
+
+  /// BLoC identifier (useful for logs/registry).
+  static const String name = 'blocHttpRequest';
 
   /// Central reactive container for all **active** HTTP requests.
   ///
@@ -273,6 +276,7 @@ class BlocHttpRequest {
   }
 
   /// Disposes the internal [BlocGeneral].
+  @override
   void dispose() {
     _bloc.dispose();
   }
