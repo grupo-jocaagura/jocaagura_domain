@@ -57,6 +57,10 @@ part 'domain/common_errors/session_error_items.dart';
 part 'domain/common_errors/web_socket_error_items.dart';
 part 'domain/configs/ws_db_config.dart';
 part 'domain/connectivity_model.dart';
+
+part 'domain/crud/model_crud_log_entry.dart';
+
+part 'domain/crud/model_crud_metadata.dart';
 part 'domain/death_record_model.dart';
 part 'domain/debouncer.dart';
 part 'domain/dentist_app/acceptance_clause_model.dart';
@@ -85,6 +89,24 @@ part 'domain/gateways/gateway_ws_database.dart';
 part 'domain/graphics/model_graph.dart';
 part 'domain/graphics/model_graph_axis_spec.dart';
 part 'domain/graphics/model_point.dart';
+
+part 'domain/groups/model_group.dart';
+
+part 'domain/groups/model_group_alias.dart';
+
+part 'domain/groups/model_group_config.dart';
+
+part 'domain/groups/model_group_dynamic_membership_rule.dart';
+
+part 'domain/groups/model_group_labels.dart';
+
+part 'domain/groups/model_group_member.dart';
+
+part 'domain/groups/model_group_settings.dart';
+
+part 'domain/groups/model_group_sync_config.dart';
+
+part 'domain/groups/model_group_sync_job.dart';
 part 'domain/http/http_enums.dart';
 part 'domain/http/http_request_errors.dart';
 part 'domain/http/model_config_http_request.dart';

@@ -915,6 +915,163 @@ void main() {
       },
     );
   });
+
+  group('Utils.enumFromJson', () {
+    test(
+      'Given valid enum name When enumFromJson is called Then returns matching value',
+      () {
+        // Arrange
+        const _TestStatus fallback = _TestStatus.disabled;
+
+        // Act
+        final _TestStatus result = Utils.enumFromJson<_TestStatus>(
+          _TestStatus.values,
+          'active',
+          fallback,
+        );
+
+        // Assert
+        expect(result, _TestStatus.active);
+      },
+    );
+
+    test(
+      'Given null raw value When enumFromJson is called Then returns fallback',
+      () {
+        // Arrange
+        const _TestStatus fallback = _TestStatus.disabled;
+
+        // Act
+        final _TestStatus result = Utils.enumFromJson<_TestStatus>(
+          _TestStatus.values,
+          null,
+          fallback,
+        );
+
+        // Assert
+        expect(result, fallback);
+      },
+    );
+
+    test(
+      'Given unknown enum name When enumFromJson is called Then returns fallback',
+      () {
+        // Arrange
+        const _TestStatus fallback = _TestStatus.pending;
+
+        // Act
+        final _TestStatus result = Utils.enumFromJson<_TestStatus>(
+          _TestStatus.values,
+          'unknown_status',
+          fallback,
+        );
+
+        // Assert
+        expect(result, fallback);
+      },
+    );
+
+    test(
+      'Given same name with different case When enumFromJson is called Then returns fallback (case-sensitive)',
+      () {
+        // Arrange
+        const _TestStatus fallback = _TestStatus.pending;
+
+        // Act
+        final _TestStatus result = Utils.enumFromJson<_TestStatus>(
+          _TestStatus.values,
+          'ACTIVE', // different case
+          fallback,
+        );
+
+        // Assert
+        expect(result, fallback);
+      },
+    );
+  });
+
+  group('Utils.stringListFromDynamic', () {
+    test(
+      'Given null value When stringListFromDynamic is called Then returns empty list',
+      () {
+        // Act
+        final List<String> result = Utils.stringListFromDynamic(null);
+
+        // Assert
+        expect(result, isEmpty);
+      },
+    );
+
+    test(
+      'Given List<String> value When stringListFromDynamic is called Then returns same string contents',
+      () {
+        // Arrange
+        final List<String> source = <String>['a', 'b', 'c'];
+
+        // Act
+        final List<String> result = Utils.stringListFromDynamic(source);
+
+        // Assert
+        expect(result, <String>['a', 'b', 'c']);
+      },
+    );
+
+    test(
+      'Given List<dynamic> value When stringListFromDynamic is called Then converts all elements with toString',
+      () {
+        // Arrange
+        final List<dynamic> source = <dynamic>['x', 1, true, null];
+
+        // Act
+        final List<String> result = Utils.stringListFromDynamic(source);
+
+        // Assert
+        expect(result, <String>['x', '1', 'true', 'null']);
+      },
+    );
+
+    test(
+      'Given JSON array string When stringListFromDynamic is called Then parses and stringifies elements',
+      () {
+        // Arrange
+        const String jsonArray = '["foo", 2, false]';
+
+        // Act
+        final List<String> result = Utils.stringListFromDynamic(jsonArray);
+
+        // Assert
+        expect(result, <String>['foo', '2', 'false']);
+      },
+    );
+
+    test(
+      'Given scalar number When stringListFromDynamic is called Then wraps it into single-element list',
+      () {
+        // Arrange
+        const int scalar = 42;
+
+        // Act
+        final List<String> result = Utils.stringListFromDynamic(scalar);
+
+        // Assert
+        expect(result, <String>['42']);
+      },
+    );
+
+    test(
+      'Given non-JSON string When stringListFromDynamic is called Then returns empty list',
+      () {
+        // Arrange
+        const String invalidJson = 'not a json';
+
+        // Act
+        final List<String> result = Utils.stringListFromDynamic(invalidJson);
+
+        // Assert
+        expect(result, isEmpty);
+      },
+    );
+  });
 }
 
 class _JsonLikeToString {
@@ -934,3 +1091,6 @@ class Box {
   @override
   int get hashCode => v.hashCode ^ 0x9e3779b1;
 }
+
+/// Local enum used only for testing [Utils.enumFromJson].
+enum _TestStatus { pending, active, disabled }
