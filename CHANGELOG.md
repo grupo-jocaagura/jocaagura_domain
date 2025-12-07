@@ -3,6 +3,52 @@
 This document follows the guidelines of [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.33.0] - 2025-11-25
+
+> Versión **acumulada** que integra las entregas **1.32.2** (ecosistema de Grupos + auditoría CRUD) y **1.32.1** (stack HTTP transversal). No añade funcionalidades extra fuera de lo ya incluido.
+
+### Added
+- **Ecosistema de Grupos**
+    - `ModelGroup`, `ModelGroupMember`, `ModelGroupAlias`, `ModelGroupDynamicMembershipRule`.
+    - `ModelGroupConfig` / `ModelGroupSettings`, `ModelGroupSyncConfig`, `ModelGroupSyncJob`, `ModelGroupLabels`.
+    - Enfoque común: claves JSON con *enums*, `fromJson` robusto, `copyWith`, e igualdad por valor.
+- **Auditoría CRUD**
+    - `ModelCrudMetadata` (created/updated/deleted, actores, `version`) con helpers: `initialize`, `touchOnUpdate`, `markDeleted`.
+    - `ModelCrudLogEntry` (entidad, operación, actor, fecha, `diff/env` opcionales).
+- **Stack HTTP transversal (dominio)**
+    - **Modelos:** `ModelConfigHttpRequest`, `StateHttpRequest`, `ModelTraceHttpRequest`.
+    - **Contratos:** `AdapterHttpClient`, `ServiceHttpRequest`, `GatewayHttpRequest` (*never-throws*), `RepositoryHttpRequest`.
+    - **Implementaciones:** `GatewayHttpRequestImpl`, `RepositoryHttpRequestImpl`, `FakeHttpRequest`/`FakeHttpRequestConfig`.
+    - **Use cases:** GET/POST/PUT/DELETE, `retry`; **facade** `FacadeHttpRequestUsecases`.
+    - **BLoC:** `BlocHttpRequest` con `Set<String>` de peticiones activas.
+    - **Error mapping:** `DefaultHttpErrorMapper` (mapea `TimeoutException`→`HTTP_TIMEOUT`, añade `meta.transport='http'`, ajusta `code` según `statusCode/httpStatus`).
+- **Utils**
+    - `enumFromJson<T>()`, `stringListFromDynamic()`.
+
+### Changed
+- **Auth:** `GatewayAuthImpl` usa `DefaultHttpErrorMapper` para enriquecer errores basados en HTTP.
+- **Repository HTTP:** `RepositoryHttpRequestImpl` expone `normalizeBody` (mejor testabilidad).
+
+### Removed
+- **Exports del dominio:** se retiran `HelperHttpRequestId` y `ModelResponseHttpRaw` (obsoletos en la API vigente).
+
+### Docs
+- Modelos de Grupos y Auditoría CRUD: propósito, contratos JSON, ejemplos ejecutables.
+- Stack HTTP: guía y ejemplo `bloc_http_request_example.dart`; aclaraciones de nulabilidad en `ModelConfigHttpRequest`.
+
+### Tests
+- **Grupos:** baterías por modelo (round-trip JSON, `copyWith`, igualdad, campos faltantes/ inválidos).
+- **CRUD:** `model_crud_metadata_test.dart`, `model_crud_log_entry_test.dart`.
+- **HTTP:** cobertura amplia (BLoC, Gateway, Repository, Fake service, ErrorMapper, `ModelConfigHttpRequest`).
+
+### Migration notes
+- **HTTP errors:** si la UI depende de `code/meta`, contempla nuevos códigos estándar (`HTTP_TIMEOUT`, `HTTP_UNAUTHORIZED`, etc.) y `meta.transport='http'`.
+- **Imports:** si consumías `HelperHttpRequestId` o `ModelResponseHttpRaw` desde el *barrel*, elimina esos imports o sustituye por utilidades vigentes.
+- **Auditoría:** adopta `ModelCrudMetadata` embebido en entidades y registra eventos transversales con `ModelCrudLogEntry`.
+
+> **Notas:** Cambios no rompientes (salvo limpieza de exports). Los módulos son *opt-in* y compatibles con Firestore/JSON.
+
+
 ## [1.32.2] - 2025-11-24
 
 ### Added
