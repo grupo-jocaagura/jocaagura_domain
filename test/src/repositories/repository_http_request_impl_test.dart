@@ -4,22 +4,10 @@ import 'package:jocaagura_domain/jocaagura_domain.dart';
 /// Fake GatewayHttpRequest que permite controlar la respuesta y
 /// registrar los parámetros de la última llamada.
 class _FakeGatewayHttpRequest implements GatewayHttpRequest {
-  Either<ErrorItem, Map<String, dynamic>> getResult =
-      Right<ErrorItem, Map<String, dynamic>>(
-    const <String, dynamic>{'ok': true},
-  );
-  Either<ErrorItem, Map<String, dynamic>> postResult =
-      Right<ErrorItem, Map<String, dynamic>>(
-    const <String, dynamic>{'ok': true},
-  );
-  Either<ErrorItem, Map<String, dynamic>> putResult =
-      Right<ErrorItem, Map<String, dynamic>>(
-    const <String, dynamic>{'ok': true},
-  );
-  Either<ErrorItem, Map<String, dynamic>> deleteResult =
-      Right<ErrorItem, Map<String, dynamic>>(
-    const <String, dynamic>{'ok': true},
-  );
+  Either<ErrorItem, Map<String, dynamic>>? forcedGetResult;
+  Either<ErrorItem, Map<String, dynamic>>? forcedPostResult;
+  Either<ErrorItem, Map<String, dynamic>>? forcedPutResult;
+  Either<ErrorItem, Map<String, dynamic>>? forcedDeleteResult;
 
   // Parámetros registrados
   Uri? lastUri;
@@ -52,7 +40,16 @@ class _FakeGatewayHttpRequest implements GatewayHttpRequest {
     lastHeadersGet = headers;
     lastTimeoutGet = timeout;
     lastMetadataGet = metadata;
-    return getResult;
+    return forcedGetResult ??
+        Right<ErrorItem, Map<String, dynamic>>(
+          _buildConfigJson(
+            method: HttpMethodEnum.get,
+            uri: uri,
+            headers: headers,
+            timeout: timeout,
+            metadata: metadata,
+          ),
+        );
   }
 
   @override
@@ -68,7 +65,17 @@ class _FakeGatewayHttpRequest implements GatewayHttpRequest {
     lastTimeoutPost = timeout;
     lastMetadataPost = metadata;
     lastBodyPost = body;
-    return postResult;
+    return forcedPostResult ??
+        Right<ErrorItem, Map<String, dynamic>>(
+          _buildConfigJson(
+            method: HttpMethodEnum.post,
+            uri: uri,
+            headers: headers ?? const <String, String>{},
+            body: body,
+            timeout: timeout,
+            metadata: metadata,
+          ),
+        );
   }
 
   @override
@@ -84,7 +91,17 @@ class _FakeGatewayHttpRequest implements GatewayHttpRequest {
     lastTimeoutPut = timeout;
     lastMetadataPut = metadata;
     lastBodyPut = body;
-    return putResult;
+    return forcedPutResult ??
+        Right<ErrorItem, Map<String, dynamic>>(
+          _buildConfigJson(
+            method: HttpMethodEnum.put,
+            uri: uri,
+            headers: headers ?? const <String, String>{},
+            body: body,
+            timeout: timeout,
+            metadata: metadata,
+          ),
+        );
   }
 
   @override
@@ -98,7 +115,34 @@ class _FakeGatewayHttpRequest implements GatewayHttpRequest {
     lastHeadersDelete = headers;
     lastTimeoutDelete = timeout;
     lastMetadataDelete = metadata;
-    return deleteResult;
+    return forcedDeleteResult ??
+        Right<ErrorItem, Map<String, dynamic>>(
+          _buildConfigJson(
+            method: HttpMethodEnum.delete,
+            uri: uri,
+            headers: headers ?? const <String, String>{},
+            timeout: timeout,
+            metadata: metadata,
+          ),
+        );
+  }
+
+  Map<String, dynamic> _buildConfigJson({
+    required HttpMethodEnum method,
+    required Uri uri,
+    Map<String, String> headers = const <String, String>{},
+    Map<String, dynamic> body = const <String, dynamic>{},
+    Duration? timeout,
+    Map<String, dynamic> metadata = const <String, dynamic>{},
+  }) {
+    return <String, dynamic>{
+      'method': method.name,
+      'uri': uri.toString(),
+      'headers': headers,
+      'body': body,
+      'timeout': timeout?.inMilliseconds,
+      'metadata': metadata,
+    };
   }
 }
 
@@ -168,7 +212,8 @@ void main() {
         );
 
         final _FakeGatewayHttpRequest fakeGateway = _FakeGatewayHttpRequest()
-          ..getResult = Left<ErrorItem, Map<String, dynamic>>(gatewayError);
+          ..forcedGetResult =
+              Left<ErrorItem, Map<String, dynamic>>(gatewayError);
 
         final RepositoryHttpRequestImpl repository =
             RepositoryHttpRequestImpl(fakeGateway);
@@ -263,7 +308,8 @@ void main() {
         );
 
         final _FakeGatewayHttpRequest fakeGateway = _FakeGatewayHttpRequest()
-          ..postResult = Left<ErrorItem, Map<String, dynamic>>(gatewayError);
+          ..forcedPostResult =
+              Left<ErrorItem, Map<String, dynamic>>(gatewayError);
 
         final RepositoryHttpRequestImpl repository =
             RepositoryHttpRequestImpl(fakeGateway);
@@ -379,7 +425,8 @@ void main() {
         );
 
         final _FakeGatewayHttpRequest fakeGateway = _FakeGatewayHttpRequest()
-          ..putResult = Left<ErrorItem, Map<String, dynamic>>(gatewayError);
+          ..forcedPutResult =
+              Left<ErrorItem, Map<String, dynamic>>(gatewayError);
 
         final RepositoryHttpRequestImpl repository =
             RepositoryHttpRequestImpl(fakeGateway);
@@ -462,7 +509,8 @@ void main() {
         );
 
         final _FakeGatewayHttpRequest fakeGateway = _FakeGatewayHttpRequest()
-          ..deleteResult = Left<ErrorItem, Map<String, dynamic>>(gatewayError);
+          ..forcedDeleteResult =
+              Left<ErrorItem, Map<String, dynamic>>(gatewayError);
 
         final RepositoryHttpRequestImpl repository =
             RepositoryHttpRequestImpl(fakeGateway);
