@@ -64,14 +64,8 @@ class RepositoryHttpRequestImpl implements RepositoryHttpRequest {
 
     return result.fold(
       (ErrorItem error) => Left<ErrorItem, ModelConfigHttpRequest>(error),
-      (Map<String, dynamic> _) => Right<ErrorItem, ModelConfigHttpRequest>(
-        ModelConfigHttpRequest(
-          method: HttpMethodEnum.get,
-          uri: uri,
-          headers: headers,
-          timeout: timeout,
-          metadata: metadata,
-        ),
+      (Map<String, dynamic> json) => Right<ErrorItem, ModelConfigHttpRequest>(
+        ModelConfigHttpRequest.fromJson(json),
       ),
     );
   }
@@ -94,15 +88,8 @@ class RepositoryHttpRequestImpl implements RepositoryHttpRequest {
 
     return result.fold(
       (ErrorItem error) => Left<ErrorItem, ModelConfigHttpRequest>(error),
-      (Map<String, dynamic> _) => Right<ErrorItem, ModelConfigHttpRequest>(
-        ModelConfigHttpRequest(
-          method: HttpMethodEnum.post,
-          uri: uri,
-          headers: headers,
-          body: normalizeBody(body),
-          timeout: timeout,
-          metadata: metadata,
-        ),
+      (Map<String, dynamic> json) => Right<ErrorItem, ModelConfigHttpRequest>(
+        ModelConfigHttpRequest.fromJson(json),
       ),
     );
   }
@@ -125,15 +112,8 @@ class RepositoryHttpRequestImpl implements RepositoryHttpRequest {
 
     return result.fold(
       (ErrorItem error) => Left<ErrorItem, ModelConfigHttpRequest>(error),
-      (Map<String, dynamic> _) => Right<ErrorItem, ModelConfigHttpRequest>(
-        ModelConfigHttpRequest(
-          method: HttpMethodEnum.put,
-          uri: uri,
-          headers: headers,
-          body: normalizeBody(body),
-          timeout: timeout,
-          metadata: metadata,
-        ),
+      (Map<String, dynamic> json) => Right<ErrorItem, ModelConfigHttpRequest>(
+        ModelConfigHttpRequest.fromJson(json),
       ),
     );
   }
@@ -155,14 +135,8 @@ class RepositoryHttpRequestImpl implements RepositoryHttpRequest {
 
     return result.fold(
       (ErrorItem error) => Left<ErrorItem, ModelConfigHttpRequest>(error),
-      (Map<String, dynamic> _) => Right<ErrorItem, ModelConfigHttpRequest>(
-        ModelConfigHttpRequest(
-          method: HttpMethodEnum.delete,
-          uri: uri,
-          headers: headers,
-          timeout: timeout,
-          metadata: metadata,
-        ),
+      (Map<String, dynamic> json) => Right<ErrorItem, ModelConfigHttpRequest>(
+        ModelConfigHttpRequest.fromJson(json),
       ),
     );
   }

@@ -34,43 +34,191 @@ class _HttpRequestDemoAppState extends State<HttpRequestDemoApp> {
     // 1) Service: frontera con el mundo externo
     // En tu initState (antes de crear el Gateway):
 
-    const FakeHttpRequestConfig httpConfig = FakeHttpRequestConfig(
+    final FakeHttpRequestConfig httpConfig = FakeHttpRequestConfig(
       // Latencia artificial para que se note el loader global.
-      latency: Duration(milliseconds: 800),
+      latency: const Duration(milliseconds: 800),
 
       // Respuestas simuladas por ruta (METHOD + espacio + uri.toString()).
       cannedResponses: <String, Map<String, dynamic>>{
-        'GET https://example.com/profile': <String, dynamic>{
-          'ok': true,
-          'name': 'Alice',
-          'role': 'student',
-        },
-        'POST https://example.com/login': <String, dynamic>{
-          'ok': false,
-          'error': <String, dynamic>{
-            'code': 'AUTH_FAILED',
-            'message': 'Usuario o contraseña inválidos',
+        'GET https://example.com/profile':
+            FakeHttpRequestConfig.cannedHttpResponse(
+          method: HttpMethodEnum.get,
+          uri: Uri.parse('https://example.com/profile'),
+          body: const <String, dynamic>{
+            'data': <String, dynamic>{
+              'name': 'Alice',
+              'role': 'student',
+            },
           },
-        },
-        'DELETE https://example.com/session': <String, dynamic>{
-          'ok': true,
-          'deleted': true,
-        },
+          metadata: const <String, dynamic>{'requestId': 'req-profile-200'},
+          timeout: const Duration(seconds: 5),
+        ),
+        'GET https://example.com/profile-pending':
+            FakeHttpRequestConfig.cannedHttpResponse(
+          method: HttpMethodEnum.get,
+          uri: Uri.parse('https://example.com/profile-pending'),
+          statusCode: 202,
+          reasonPhrase: 'Accepted',
+          body: const <String, dynamic>{
+            'data': <String, dynamic>{
+              'status': 'pending_verification',
+              'etaSeconds': 30,
+            },
+          },
+        ),
+        'POST https://example.com/login':
+            FakeHttpRequestConfig.cannedHttpResponse(
+          method: HttpMethodEnum.post,
+          uri: Uri.parse('https://example.com/login'),
+          statusCode: 401,
+          reasonPhrase: 'Unauthorized',
+          body: const <String, dynamic>{
+            'error': <String, dynamic>{
+              'code': 'AUTH_FAILED',
+              'message': 'Usuario o contraseña inválidos',
+            },
+          },
+        ),
+        'POST https://example.com/form-invalid':
+            FakeHttpRequestConfig.cannedHttpResponse(
+          method: HttpMethodEnum.post,
+          uri: Uri.parse('https://example.com/form-invalid'),
+          statusCode: 400,
+          reasonPhrase: 'Bad Request',
+          body: const <String, dynamic>{
+            'error': <String, dynamic>{
+              'code': 'VALIDATION_ERROR',
+              'fields': <String, String>{
+                'email': 'Formato inválido',
+              },
+            },
+          },
+        ),
+        'GET https://example.com/admin':
+            FakeHttpRequestConfig.cannedHttpResponse(
+          method: HttpMethodEnum.get,
+          uri: Uri.parse('https://example.com/admin'),
+          statusCode: 403,
+          reasonPhrase: 'Forbidden',
+          body: const <String, dynamic>{
+            'error': <String, dynamic>{
+              'code': 'NOT_ALLOWED',
+              'message': 'Rol insuficiente para acceder al recurso',
+            },
+          },
+        ),
+        'GET https://example.com/missing':
+            FakeHttpRequestConfig.cannedHttpResponse(
+          method: HttpMethodEnum.get,
+          uri: Uri.parse('https://example.com/missing'),
+          statusCode: 404,
+          reasonPhrase: 'Not Found',
+          body: const <String, dynamic>{
+            'error': <String, dynamic>{
+              'code': 'NOT_FOUND',
+              'message': 'El recurso solicitado no existe',
+            },
+          },
+        ),
+        'POST https://example.com/orders':
+            FakeHttpRequestConfig.cannedHttpResponse(
+          method: HttpMethodEnum.post,
+          uri: Uri.parse('https://example.com/orders'),
+          statusCode: 409,
+          reasonPhrase: 'Conflict',
+          body: const <String, dynamic>{
+            'error': <String, dynamic>{
+              'code': 'ORDER_IN_PROGRESS',
+              'message': 'Ya existe una orden en curso para este usuario',
+            },
+          },
+        ),
+        'GET https://example.com/rate-limit':
+            FakeHttpRequestConfig.cannedHttpResponse(
+          method: HttpMethodEnum.get,
+          uri: Uri.parse('https://example.com/rate-limit'),
+          statusCode: 429,
+          reasonPhrase: 'Too Many Requests',
+          body: const <String, dynamic>{
+            'error': <String, dynamic>{
+              'code': 'RATE_LIMITED',
+              'retryAfterSeconds': 60,
+            },
+          },
+        ),
+        'PUT https://example.com/profile':
+            FakeHttpRequestConfig.cannedHttpResponse(
+          method: HttpMethodEnum.put,
+          uri: Uri.parse('https://example.com/profile'),
+          statusCode: 500,
+          reasonPhrase: 'Server Error',
+          body: const <String, dynamic>{
+            'error': <String, dynamic>{
+              'code': 'INTERNAL_ERROR',
+              'message': 'Ocurrió un fallo inesperado procesando el perfil',
+            },
+          },
+        ),
+        'DELETE https://example.com/session':
+            FakeHttpRequestConfig.cannedHttpResponse(
+          method: HttpMethodEnum.delete,
+          uri: Uri.parse('https://example.com/session'),
+          body: const <String, dynamic>{
+            'deleted': true,
+          },
+        ),
+        'GET https://example.com/slow-timeout':
+            FakeHttpRequestConfig.cannedHttpResponse(
+          method: HttpMethodEnum.get,
+          uri: Uri.parse('https://example.com/slow-timeout'),
+          statusCode: 504,
+          reasonPhrase: 'Gateway Timeout',
+          metadata: const <String, dynamic>{'simulate': 'timeout'},
+        ),
+        'GET https://example.com/offline':
+            FakeHttpRequestConfig.cannedHttpResponse(
+          method: HttpMethodEnum.get,
+          uri: Uri.parse('https://example.com/offline'),
+          metadata: const <String, dynamic>{'simulate': 'offline'},
+        ),
+        'GET https://example.com/unexpected-state':
+            FakeHttpRequestConfig.cannedHttpResponse(
+          method: HttpMethodEnum.get,
+          uri: Uri.parse('https://example.com/unexpected-state'),
+          metadata: const <String, dynamic>{'simulate': 'stateError'},
+        ),
+        'GET https://example.com/bad-json':
+            FakeHttpRequestConfig.cannedHttpResponse(
+          method: HttpMethodEnum.get,
+          uri: Uri.parse('https://example.com/bad-json'),
+          body: const <String, dynamic>{
+            'method': 'bad-json',
+            'uri': 123, // fuerza error al parsear URI
+          },
+        ),
+        'GET https://example.com/echo': <String, dynamic>{},
       },
-
-      // Para este demo no necesitamos preconfigurar ModelConfigHttpRequest
-      // ni rutas que lancen excepciones; dejamos los defaults:
-      // cannedConfigs: const <String, ModelConfigHttpRequest>{},
-      // errorRoutes: const <String, String>{},
+      cannedConfigs: <String, ModelConfigHttpRequest>{
+        'GET https://example.com/config-model': ModelConfigHttpRequest(
+          method: HttpMethodEnum.get,
+          uri: Uri.parse('https://example.com/config-model'),
+          headers: const <String, String>{'X-Config': 'fromModel'},
+          metadata: const <String, dynamic>{'source': 'cannedConfig'},
+        ),
+      },
+      errorRoutes: <String, String>{
+        'GET https://example.com/slow-timeout': 'timeout',
+        'GET https://example.com/offline': 'offline',
+        'GET https://example.com/unexpected-state': 'unexpected',
+        'GET https://example.com/bad-json': 'bad_json',
+      },
     );
 
-// Luego tu service queda así:
     final ServiceHttpRequest service = FakeHttpRequest(config: httpConfig);
 
-    // 2) Gateway: mapea excepciones/payload a ErrorItem
     final GatewayHttpRequest gateway = GatewayHttpRequestImpl(
       service: service,
-      errorMapper: const DefaultErrorMapper(),
+      errorMapper: const DefaultHttpErrorMapper(),
     );
 
     // 3) Repository: devuelve ModelConfigHttpRequest como resultado de dominio
@@ -118,6 +266,58 @@ class _HttpRequestDemoAppState extends State<HttpRequestDemoApp> {
     setState(() => _lastResult = result);
   }
 
+  Future<void> _doGetProfilePending() async {
+    final Either<ErrorItem, ModelConfigHttpRequest> result =
+        await _blocHttpRequest.get(
+      requestKey: 'demo.getProfilePending',
+      uri: Uri.parse('https://example.com/profile-pending'),
+      metadata: <String, dynamic>{
+        'feature': 'demo',
+        'operation': 'getProfilePending',
+      },
+    );
+    setState(() => _lastResult = result);
+  }
+
+  Future<void> _doGetAdminForbidden() async {
+    final Either<ErrorItem, ModelConfigHttpRequest> result =
+        await _blocHttpRequest.get(
+      requestKey: 'demo.getAdminForbidden',
+      uri: Uri.parse('https://example.com/admin'),
+      metadata: <String, dynamic>{
+        'feature': 'demo',
+        'operation': 'getAdminForbidden',
+      },
+    );
+    setState(() => _lastResult = result);
+  }
+
+  Future<void> _doGetMissingResource() async {
+    final Either<ErrorItem, ModelConfigHttpRequest> result =
+        await _blocHttpRequest.get(
+      requestKey: 'demo.getMissing',
+      uri: Uri.parse('https://example.com/missing'),
+      metadata: <String, dynamic>{
+        'feature': 'demo',
+        'operation': 'getMissing',
+      },
+    );
+    setState(() => _lastResult = result);
+  }
+
+  Future<void> _doGetRateLimited() async {
+    final Either<ErrorItem, ModelConfigHttpRequest> result =
+        await _blocHttpRequest.get(
+      requestKey: 'demo.getRateLimited',
+      uri: Uri.parse('https://example.com/rate-limit'),
+      metadata: <String, dynamic>{
+        'feature': 'demo',
+        'operation': 'getRateLimited',
+      },
+    );
+    setState(() => _lastResult = result);
+  }
+
   Future<void> _doPostLogin() async {
     final Either<ErrorItem, ModelConfigHttpRequest> result =
         await _blocHttpRequest.post(
@@ -135,6 +335,55 @@ class _HttpRequestDemoAppState extends State<HttpRequestDemoApp> {
     setState(() => _lastResult = result);
   }
 
+  Future<void> _doPostFormInvalid() async {
+    final Either<ErrorItem, ModelConfigHttpRequest> result =
+        await _blocHttpRequest.post(
+      requestKey: 'demo.postFormInvalid',
+      uri: Uri.parse('https://example.com/form-invalid'),
+      body: <String, dynamic>{
+        'email': 'not-an-email',
+      },
+      metadata: <String, dynamic>{
+        'feature': 'demo',
+        'operation': 'formInvalid',
+      },
+    );
+    setState(() => _lastResult = result);
+  }
+
+  Future<void> _doPostOrderConflict() async {
+    final Either<ErrorItem, ModelConfigHttpRequest> result =
+        await _blocHttpRequest.post(
+      requestKey: 'demo.postOrderConflict',
+      uri: Uri.parse('https://example.com/orders'),
+      body: <String, dynamic>{
+        'sku': 'SKU-123',
+        'quantity': 1,
+      },
+      metadata: <String, dynamic>{
+        'feature': 'demo',
+        'operation': 'orderConflict',
+      },
+    );
+    setState(() => _lastResult = result);
+  }
+
+  Future<void> _doPutProfileServerError() async {
+    final Either<ErrorItem, ModelConfigHttpRequest> result =
+        await _blocHttpRequest.put(
+      requestKey: 'demo.putProfile',
+      uri: Uri.parse('https://example.com/profile'),
+      body: <String, dynamic>{
+        'bio': 'New bio from demo',
+      },
+      metadata: <String, dynamic>{
+        'feature': 'demo',
+        'operation': 'updateProfile',
+      },
+    );
+    setState(() => _lastResult = result);
+  }
+
   Future<void> _doDeleteSession() async {
     final Either<ErrorItem, ModelConfigHttpRequest> result =
         await _blocHttpRequest.delete(
@@ -144,6 +393,84 @@ class _HttpRequestDemoAppState extends State<HttpRequestDemoApp> {
         'feature': 'demo',
         'operation': 'logout',
       },
+    );
+    setState(() => _lastResult = result);
+  }
+
+  Future<void> _doGetConfigFromModel() async {
+    final Either<ErrorItem, ModelConfigHttpRequest> result =
+        await _blocHttpRequest.get(
+      requestKey: 'demo.getConfigModel',
+      uri: Uri.parse('https://example.com/config-model'),
+      metadata: const <String, dynamic>{
+        'feature': 'demo',
+        'operation': 'config',
+      },
+    );
+    setState(() => _lastResult = result);
+  }
+
+  Future<void> _doRetryLastCall() async {
+    final Either<ErrorItem, ModelConfigHttpRequest>? previous = _lastResult;
+    if (previous == null) {
+      return;
+    }
+    previous.fold(
+      (_) => null,
+      (ModelConfigHttpRequest cfg) async {
+        final Either<ErrorItem, ModelConfigHttpRequest> retryResult =
+            await _blocHttpRequest.retry(
+          requestKey: 'demo.retry',
+          previousConfig: cfg,
+          extraMetadata: const <String, dynamic>{'retry': true},
+        );
+        setState(() => _lastResult = retryResult);
+      },
+    );
+  }
+
+  Future<void> _doGetEcho() async {
+    final Either<ErrorItem, ModelConfigHttpRequest> result =
+        await _blocHttpRequest.get(
+      requestKey: 'demo.getEcho',
+      uri: Uri.parse('https://example.com/echo'),
+      metadata: const <String, dynamic>{'feature': 'demo', 'operation': 'echo'},
+    );
+    setState(() => _lastResult = result);
+  }
+
+  Future<void> _simulateTimeout() async {
+    final Either<ErrorItem, ModelConfigHttpRequest> result =
+        await _blocHttpRequest.get(
+      requestKey: 'demo.timeout',
+      uri: Uri.parse('https://example.com/slow-timeout'),
+    );
+    setState(() => _lastResult = result);
+  }
+
+  Future<void> _simulateOffline() async {
+    final Either<ErrorItem, ModelConfigHttpRequest> result =
+        await _blocHttpRequest.get(
+      requestKey: 'demo.offline',
+      uri: Uri.parse('https://example.com/offline'),
+    );
+    setState(() => _lastResult = result);
+  }
+
+  Future<void> _simulateUnexpectedError() async {
+    final Either<ErrorItem, ModelConfigHttpRequest> result =
+        await _blocHttpRequest.get(
+      requestKey: 'demo.unexpected',
+      uri: Uri.parse('https://example.com/unexpected-state'),
+    );
+    setState(() => _lastResult = result);
+  }
+
+  Future<void> _simulateBadJson() async {
+    final Either<ErrorItem, ModelConfigHttpRequest> result =
+        await _blocHttpRequest.get(
+      requestKey: 'demo.badJson',
+      uri: Uri.parse('https://example.com/bad-json'),
     );
     setState(() => _lastResult = result);
   }
@@ -166,6 +493,19 @@ class _HttpRequestDemoAppState extends State<HttpRequestDemoApp> {
           'timeout: ${cfg.timeout}\n'
           'metadata: ${cfg.metadata}\n\n'
           'toJson():\n${cfg.toJson()}',
+    );
+  }
+
+  Widget _scenarioButton(String label, Future<void> Function() action) {
+    return SizedBox(
+      width: 220,
+      child: FilledButton(
+        onPressed: () => action(),
+        child: Text(
+          label,
+          textAlign: TextAlign.center,
+        ),
+      ),
     );
   }
 
@@ -194,40 +534,85 @@ class _HttpRequestDemoAppState extends State<HttpRequestDemoApp> {
             children: <Widget>[
               _ActiveRequestsPanel(active: _active),
               const SizedBox(height: 12),
-              Row(
-                children: <Widget>[
-                  Expanded(
-                    child: FilledButton(
-                      onPressed: _doGetProfile,
-                      child: const Text('GET /profile (ok)'),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: FilledButton(
-                      onPressed: _doPostLogin,
-                      child: const Text('POST /login (error)'),
-                    ),
-                  ),
-                ],
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  'Escenarios HTTP estandarizados',
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
               ),
               const SizedBox(height: 8),
-              Row(
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
                 children: <Widget>[
-                  Expanded(
-                    child: FilledButton(
-                      onPressed: _doDeleteSession,
-                      child: const Text('DELETE /session (ok)'),
-                    ),
+                  // Existing standard HTTP scenarios...
+                  _scenarioButton('GET /profile (200 OK)', _doGetProfile),
+                  _scenarioButton(
+                    'GET /profile-pending (202 Accepted)',
+                    _doGetProfilePending,
                   ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: OutlinedButton(
-                      onPressed: _blocHttpRequest.clearAll,
-                      child: const Text('Limpiar activos'),
-                    ),
+                  _scenarioButton(
+                    'POST /login (401 Unauthorized)',
+                    _doPostLogin,
                   ),
+                  _scenarioButton(
+                    'POST /form-invalid (400 Bad Request)',
+                    _doPostFormInvalid,
+                  ),
+                  _scenarioButton(
+                    'GET /admin (403 Forbidden)',
+                    _doGetAdminForbidden,
+                  ),
+                  _scenarioButton(
+                    'GET /missing (404 Not Found)',
+                    _doGetMissingResource,
+                  ),
+                  _scenarioButton(
+                    'POST /orders (409 Conflict)',
+                    _doPostOrderConflict,
+                  ),
+                  _scenarioButton(
+                    'GET /rate-limit (429 Too Many)',
+                    _doGetRateLimited,
+                  ),
+                  _scenarioButton(
+                    'PUT /profile (500 Server Error)',
+                    _doPutProfileServerError,
+                  ),
+                  _scenarioButton('DELETE /session (200 OK)', _doDeleteSession),
+                  const Divider(),
+                  _scenarioButton(
+                    'GET /slow-timeout (timeout)',
+                    _simulateTimeout,
+                  ),
+                  _scenarioButton(
+                    'GET /offline (no connection)',
+                    _simulateOffline,
+                  ),
+                  _scenarioButton(
+                    'GET /unexpected-state',
+                    _simulateUnexpectedError,
+                  ),
+                  _scenarioButton(
+                    'GET /bad-json (mapping error)',
+                    _simulateBadJson,
+                  ),
+                  _scenarioButton('GET /echo (sin canned)', _doGetEcho),
+                  _scenarioButton(
+                    'GET /config-model (cannedConfig)',
+                    _doGetConfigFromModel,
+                  ),
+                  _scenarioButton('Retry última llamada', _doRetryLastCall),
                 ],
+              ),
+              const SizedBox(height: 12),
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton(
+                  onPressed: _blocHttpRequest.clearAll,
+                  child: const Text('Limpiar activos'),
+                ),
               ),
               const SizedBox(height: 16),
               Expanded(

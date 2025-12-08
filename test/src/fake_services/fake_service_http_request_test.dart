@@ -61,32 +61,35 @@ void main() {
       'Then devuelve una copia del JSON esperado',
       () async {
         // Arrange
+        final Uri uri = Uri.parse('https://api.example.com/ping');
         const String routeKey = 'GET https://api.example.com/ping';
-        final Map<String, dynamic> cannedPayload = <String, dynamic>{
+        const Map<String, dynamic> cannedBody = <String, dynamic>{
           'ok': true,
           'nested': <String, dynamic>{'value': 1},
         };
 
-        const FakeHttpRequestConfig config = FakeHttpRequestConfig(
+        final FakeHttpRequestConfig config = FakeHttpRequestConfig(
           cannedResponses: <String, Map<String, dynamic>>{
-            routeKey: <String, dynamic>{
-              'ok': true,
-              'nested': <String, dynamic>{'value': 1},
-            },
+            routeKey: FakeHttpRequestConfig.cannedHttpResponse(
+              method: HttpMethodEnum.get,
+              uri: uri,
+              body: cannedBody,
+            ),
           },
         );
 
         final FakeHttpRequest service = FakeHttpRequest(config: config);
-        final Uri uri = Uri.parse('https://api.example.com/ping');
 
         // Act
         final Map<String, dynamic> result = await service.get(uri);
 
         // Assert
-        expect(result, equals(cannedPayload));
-        // Aseguramos que fake/source están ausentes en canned (solo echo los usa)
-        expect(result.containsKey('fake'), isFalse);
-        expect(result.containsKey('source'), isFalse);
+        expect(result['method'], equals('GET'));
+        expect(result['uri'], equals(uri.toString()));
+        expect(result['statusCode'], equals(200));
+        expect(result['body'], equals(cannedBody));
+        expect(result['fake'], isTrue);
+        expect(result['source'], equals('FakeHttpRequest'));
       },
     );
 
@@ -123,7 +126,12 @@ void main() {
         final Map<String, dynamic> result = await service.get(uri);
 
         // Assert
-        expect(result, equals(configModel.toJson()));
+        expect(result['method'], equals('GET'));
+        expect(result['uri'], equals(uri.toString()));
+        expect(result['headers'], equals(configModel.headers));
+        expect(result['body'], equals(configModel.body));
+        expect(result['metadata'], equals(configModel.metadata));
+        expect(result['timeout'], equals(configModel.timeout?.inMilliseconds));
       },
     );
   });
@@ -401,36 +409,44 @@ void main() {
       'Then una segunda llamada devuelve datos originales (deep copy)',
       () async {
         // Arrange
+        final Uri uri = Uri.parse('https://api.example.com/deep');
         const String key = 'GET https://api.example.com/deep';
-        const FakeHttpRequestConfig config = FakeHttpRequestConfig(
+        final FakeHttpRequestConfig config = FakeHttpRequestConfig(
           cannedResponses: <String, Map<String, dynamic>>{
-            key: <String, dynamic>{
-              'nested': <String, dynamic>{'value': 1},
-              'list': <dynamic>[
-                <String, dynamic>{'value': 2},
-              ],
-            },
+            key: FakeHttpRequestConfig.cannedHttpResponse(
+              method: HttpMethodEnum.get,
+              uri: uri,
+              body: <String, dynamic>{
+                'nested': <String, dynamic>{'value': 1},
+                'list': <dynamic>[
+                  <String, dynamic>{'value': 2},
+                ],
+              },
+            ),
           },
         );
         final FakeHttpRequest service = FakeHttpRequest(config: config);
-        final Uri uri = Uri.parse('https://api.example.com/deep');
 
         // Act - primera llamada
         final Map<String, dynamic> first = await service.get(uri);
-        (first['nested'] as Map<String, dynamic>)['value'] = 999;
-        ((first['list'] as List<dynamic>)[0] as Map<String, dynamic>)['value'] =
-            888;
+        final Map<String, dynamic> firstBody =
+            first['body'] as Map<String, dynamic>;
+        (firstBody['nested'] as Map<String, dynamic>)['value'] = 999;
+        ((firstBody['list'] as List<dynamic>)[0]
+            as Map<String, dynamic>)['value'] = 888;
 
         // Segunda llamada
         final Map<String, dynamic> second = await service.get(uri);
+        final Map<String, dynamic> secondBody =
+            second['body'] as Map<String, dynamic>;
 
         // Assert - el segundo resultado no fue afectado por las mutaciones
         expect(
-          (second['nested'] as Map<String, dynamic>)['value'],
+          (secondBody['nested'] as Map<String, dynamic>)['value'],
           equals(1),
         );
         expect(
-          ((second['list'] as List<dynamic>)[0]
+          ((secondBody['list'] as List<dynamic>)[0]
               as Map<String, dynamic>)['value'],
           equals(2),
         );
@@ -445,36 +461,38 @@ void main() {
       'Then it returns the canned JSON instead of echo',
       () async {
         // Arrange
+        final Uri uri = Uri.parse('https://api.example.com/post-canned');
         const String routeKey = 'POST https://api.example.com/post-canned';
-        const FakeHttpRequestConfig config = FakeHttpRequestConfig(
+        final FakeHttpRequestConfig config = FakeHttpRequestConfig(
           cannedResponses: <String, Map<String, dynamic>>{
-            routeKey: <String, dynamic>{
-              'status': 'created',
-              'id': 123,
-            },
+            routeKey: FakeHttpRequestConfig.cannedHttpResponse(
+              method: HttpMethodEnum.post,
+              uri: uri,
+              statusCode: 201,
+              body: const <String, dynamic>{
+                'status': 'created',
+                'id': 123,
+              },
+            ),
           },
         );
 
         final FakeHttpRequest service = FakeHttpRequest(config: config);
-        final Uri uri = Uri.parse('https://api.example.com/post-canned');
 
         // Act
         final Map<String, dynamic> result = await service.post(
           uri,
-          body: <String, dynamic>{'name': 'John'},
+          body: const <String, dynamic>{'name': 'John'},
         );
 
         // Assert
+        expect(result['method'], equals('POST'));
+        expect(result['uri'], equals(uri.toString()));
+        expect(result['statusCode'], equals(201));
         expect(
-          result,
-          equals(<String, dynamic>{
-            'status': 'created',
-            'id': 123,
-          }),
+          result['body'],
+          equals(const <String, dynamic>{'status': 'created', 'id': 123}),
         );
-        // Aseguramos que no es un echo
-        expect(result.containsKey('fake'), isFalse);
-        expect(result.containsKey('source'), isFalse);
       },
     );
 
@@ -484,47 +502,51 @@ void main() {
       'Then the first returns the canned JSON and the second returns an echo',
       () async {
         // Arrange
+        final Uri cannedUri = Uri.parse('https://api.example.com/put-canned');
         const String cannedKey = 'PUT https://api.example.com/put-canned';
-        const FakeHttpRequestConfig config = FakeHttpRequestConfig(
+        final FakeHttpRequestConfig config = FakeHttpRequestConfig(
           cannedResponses: <String, Map<String, dynamic>>{
-            cannedKey: <String, dynamic>{
-              'updated': true,
-              'version': 2,
-            },
+            cannedKey: FakeHttpRequestConfig.cannedHttpResponse(
+              method: HttpMethodEnum.put,
+              uri: cannedUri,
+              body: const <String, dynamic>{
+                'updated': true,
+                'version': 2,
+              },
+            ),
           },
         );
 
         final FakeHttpRequest service = FakeHttpRequest(config: config);
-        final Uri cannedUri = Uri.parse('https://api.example.com/put-canned');
         final Uri echoUri = Uri.parse('https://api.example.com/put-echo');
 
         // Act - ruta con canned
         final Map<String, dynamic> cannedResult = await service.put(
           cannedUri,
-          body: <String, dynamic>{'field': 'value'},
+          body: const <String, dynamic>{'field': 'value'},
         );
 
         // Act - ruta sin canned (echo)
         final Map<String, dynamic> echoResult = await service.put(
           echoUri,
-          headers: <String, String>{'X-Test': '1'},
+          headers: const <String, String>{'X-Test': '1'},
         );
 
         // Assert - canned
+        expect(cannedResult['method'], equals('PUT'));
+        expect(cannedResult['uri'], equals(cannedUri.toString()));
         expect(
-          cannedResult,
-          equals(<String, dynamic>{
-            'updated': true,
-            'version': 2,
-          }),
+          cannedResult['body'],
+          equals(const <String, dynamic>{'updated': true, 'version': 2}),
         );
-        expect(cannedResult.containsKey('fake'), isFalse);
-        expect(cannedResult.containsKey('source'), isFalse);
 
         // Assert - echo
         expect(echoResult['method'], equals('PUT'));
         expect(echoResult['uri'], equals('https://api.example.com/put-echo'));
-        expect(echoResult['headers'], equals(<String, String>{'X-Test': '1'}));
+        expect(
+          echoResult['headers'],
+          equals(const <String, String>{'X-Test': '1'}),
+        );
         expect(echoResult['fake'], isTrue);
         expect(echoResult['source'], equals('FakeHttpRequest'));
       },
@@ -536,19 +558,23 @@ void main() {
       'Then the first returns the canned JSON and the second returns an echo',
       () async {
         // Arrange
+        final Uri cannedUri =
+            Uri.parse('https://api.example.com/delete-canned');
         const String cannedKey = 'DELETE https://api.example.com/delete-canned';
-        const FakeHttpRequestConfig config = FakeHttpRequestConfig(
+        final FakeHttpRequestConfig config = FakeHttpRequestConfig(
           cannedResponses: <String, Map<String, dynamic>>{
-            cannedKey: <String, dynamic>{
-              'deleted': true,
-              'id': 99,
-            },
+            cannedKey: FakeHttpRequestConfig.cannedHttpResponse(
+              method: HttpMethodEnum.delete,
+              uri: cannedUri,
+              body: const <String, dynamic>{
+                'deleted': true,
+                'id': 99,
+              },
+            ),
           },
         );
 
         final FakeHttpRequest service = FakeHttpRequest(config: config);
-        final Uri cannedUri =
-            Uri.parse('https://api.example.com/delete-canned');
         final Uri echoUri = Uri.parse('https://api.example.com/delete-echo');
 
         // Act - ruta con canned
@@ -559,19 +585,16 @@ void main() {
         // Act - ruta sin canned (echo)
         final Map<String, dynamic> echoResult = await service.delete(
           echoUri,
-          metadata: <String, dynamic>{'feature': 'deleteEcho'},
+          metadata: const <String, dynamic>{'feature': 'deleteEcho'},
         );
 
         // Assert - canned
+        expect(cannedResult['method'], equals('DELETE'));
+        expect(cannedResult['uri'], equals(cannedUri.toString()));
         expect(
-          cannedResult,
-          equals(<String, dynamic>{
-            'deleted': true,
-            'id': 99,
-          }),
+          cannedResult['body'],
+          equals(const <String, dynamic>{'deleted': true, 'id': 99}),
         );
-        expect(cannedResult.containsKey('fake'), isFalse);
-        expect(cannedResult.containsKey('source'), isFalse);
 
         // Assert - echo
         expect(echoResult['method'], equals('DELETE'));
@@ -582,7 +605,7 @@ void main() {
         expect(echoResult['headers'], equals(<String, String>{}));
         expect(
           echoResult['metadata'],
-          equals(<String, dynamic>{'feature': 'deleteEcho'}),
+          equals(const <String, dynamic>{'feature': 'deleteEcho'}),
         );
         expect(echoResult['fake'], isTrue);
         expect(echoResult['source'], equals('FakeHttpRequest'));

@@ -59,6 +59,37 @@ class FakeHttpRequestConfig {
   /// [ErrorItem] via [ErrorMapper.fromException].
   final Map<String, String> errorRoutes;
 
+  /// Helper that builds a canned response emulating a typical `http.Response`.
+  ///
+  /// Use this factory to avoid shape mismatches when registering
+  /// [cannedResponses]. All fields default to sensible HTTP values and can be
+  /// overridden as needed.
+  static Map<String, dynamic> cannedHttpResponse({
+    required HttpMethodEnum method,
+    required Uri uri,
+    int statusCode = 200,
+    String reasonPhrase = 'OK',
+    Map<String, String> headers = const <String, String>{
+      'content-type': 'application/json; charset=utf-8',
+    },
+    Map<String, dynamic> body = const <String, dynamic>{},
+    Map<String, dynamic> metadata = const <String, dynamic>{},
+    Duration? timeout,
+  }) {
+    return <String, dynamic>{
+      'method': method.name,
+      'uri': uri.toString(),
+      'statusCode': statusCode,
+      'reasonPhrase': reasonPhrase,
+      'headers': Map<String, String>.from(headers),
+      'body': Map<String, dynamic>.from(body),
+      'metadata': Map<String, dynamic>.from(metadata),
+      'timeout': timeout?.inMilliseconds,
+      'fake': true,
+      'source': 'FakeHttpRequest',
+    };
+  }
+
   /// Default configuration with no latency and no canned routes.
   static const FakeHttpRequestConfig none = FakeHttpRequestConfig();
 }
