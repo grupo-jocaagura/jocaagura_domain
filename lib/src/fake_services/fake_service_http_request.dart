@@ -216,14 +216,70 @@ class FakeHttpRequest implements ServiceHttpRequest {
   static Map<String, Map<String, dynamic>> _buildCanned(
     FakeHttpRequestConfig config,
   ) {
+    Map<String, dynamic> normalizeRaw(Map<String, dynamic> raw) {
+      final String method = _pickMethod(raw) ?? 'GET';
+      final dynamic rawUri = raw['uri'] ?? raw['url'];
+      final String uri = rawUri is String
+          ? rawUri
+          : rawUri != null
+              ? rawUri.toString()
+              : '';
+
+      final Map<String, dynamic> headers = raw['headers'] is Map
+          ? Utils.mapFromDynamic(raw['headers'])
+          : <String, dynamic>{};
+      final Map<String, dynamic> body = raw['body'] is Map
+          ? Utils.mapFromDynamic(raw['body'])
+          : <String, dynamic>{};
+      final Map<String, dynamic> metadata = raw['metadata'] is Map
+          ? Utils.mapFromDynamic(raw['metadata'])
+          : <String, dynamic>{};
+
+      return <String, dynamic>{
+        'method': method,
+        'uri': uri,
+        'statusCode': raw['statusCode'] is int
+            ? raw['statusCode'] as int
+            : raw['httpStatus'] is int
+                ? raw['httpStatus'] as int
+                : 200,
+        'reasonPhrase': raw['reasonPhrase']?.toString() ?? 'OK',
+        'headers': headers,
+        'body': body,
+        'metadata': metadata,
+        'timeout': raw['timeout'] is int ? raw['timeout'] as int : null,
+        'fake': true,
+        'source': 'FakeHttpRequest',
+      };
+    }
+
     final Map<String, Map<String, dynamic>> fromResponses =
-        Map<String, Map<String, dynamic>>.from(config.cannedResponses);
+        Map<String, Map<String, dynamic>>.fromEntries(
+      config.cannedResponses.entries.map(
+        (MapEntry<String, Map<String, dynamic>> entry) =>
+            MapEntry<String, Map<String, dynamic>>(
+          entry.key,
+          normalizeRaw(entry.value),
+        ),
+      ),
+    );
 
     final Map<String, Map<String, dynamic>> fromConfigs =
         <String, Map<String, dynamic>>{};
     config.cannedConfigs.forEach(
       (String key, ModelConfigHttpRequest value) {
-        fromConfigs[key] = value.toJson();
+        fromConfigs[key] = normalizeRaw(
+          <String, dynamic>{
+            'method': value.method.name,
+            'uri': value.uri.toString(),
+            'statusCode': 200,
+            'reasonPhrase': 'OK',
+            'headers': value.headers,
+            'body': value.body,
+            'metadata': value.metadata,
+            'timeout': value.timeout?.inMilliseconds,
+          },
+        );
       },
     );
 
@@ -233,6 +289,14 @@ class FakeHttpRequest implements ServiceHttpRequest {
         ...fromConfigs,
       },
     );
+  }
+
+  static String? _pickMethod(Map<String, dynamic> raw) {
+    final dynamic method = raw['method'] ?? raw['httpMethod'];
+    if (method is String && method.isNotEmpty) {
+      return method.toUpperCase();
+    }
+    return null;
   }
 
   Future<void> _maybeDelay() async {
