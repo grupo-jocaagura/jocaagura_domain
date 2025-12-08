@@ -3,6 +3,39 @@
 This document follows the guidelines of [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.33.3] - 2025-12-08
+
+### Added
+- **HTTP testing helpers**
+    - Helper estandarizado para **respuestas enlatadas (canned)** en flujos HTTP, facilitando la
+      creación de fixtures repetibles para `GET/POST/PUT/DELETE`.
+    - **Escenarios simulados** adicionales:
+        - **Timeout**
+        - **Offline** (sin conectividad)
+        - **Unexpected error** (excepción no mapeada)
+        - **Bad JSON** (payload no parseable)
+
+### Changed
+- **Simulación HTTP**: refactor para unificar el esquema de respuestas enlatadas y
+  simplificar el **cableado de pruebas**.
+- **Normalización** del **raw response** (status, headers, body) antes de pasar por el
+  *mapper* de errores/éxitos, reduciendo casos borde de serialización y aserciones
+  frágiles en tests.
+
+### Tests
+- Suites ampliadas para cubrir los nuevos escenarios (timeout/offline/unexpected/bad-JSON),
+  verificando:
+    - Normalización del *raw response* previa al mapeo.
+    - Comportamiento consistente de los *mappers* de error del proyecto.
+    - Idempotencia de los *fixtures* con respuestas enlatadas.
+
+### Migration notes
+- Sustituye *fixtures* o *mocks* ad-hoc por el **helper de respuestas enlatadas** para
+  reducir duplicación y hacer las pruebas más declarativas.
+- Si tus pruebas dependían del formato previo del *raw response*, ajusta aserciones a la
+  **nueva normalización** (especialmente en `headers` y `body`).
+
+
 ## [1.33.2] - 2025-12-07
 ### Fixed
 - hotfix para estabilizar el contrato de BlocHttpRequest para garantizar la correcta herencia de BlocModule.

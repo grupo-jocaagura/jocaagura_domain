@@ -3,8 +3,7 @@
 > **Propósito:** Centralizar el flujo de peticiones HTTP en una arquitectura en capas, manteniendo:
 >
 > - Un único lugar para:
-    >
-- Mapear errores de transporte/backend a `ErrorItem`.
+>   - Mapear errores de transporte/backend a `ErrorItem`.
 >   - Exponer un estado agregador de peticiones activas (`BlocHttpRequest`).
 > - UseCases simples y testeables.
 > - Integración transparente con UIs Flutter (loaders, dashboards de red, etc.).
@@ -31,11 +30,9 @@ ServiceHttpRequest  →  GatewayHttpRequest  →  RepositoryHttpRequest
 * **Service**: frontera con el mundo externo (cliente HTTP real o `FakeHttpRequest`).
 * **Gateway**: captura excepciones / payloads de error y los traduce a `ErrorItem`.
 * **Repository**: convierte JSON + metadata en un modelo de dominio `ModelConfigHttpRequest`.
-* **Usecases + Facade**: exponen operaciones GET/POST/PUT/DELETE/RETRY para los casos de uso de
-  negocio.
+* **Usecases + Facade**: exponen operaciones GET/POST/PUT/DELETE/RETRY para los casos de uso de negocio.
 * **BlocHttpRequest**: orquestador transversal que solo sabe qué peticiones están **activas**.
-* **UI**: usa el `BlocHttpRequest` para loaders globales y consume los resultados (
-  `Either<ErrorItem, ModelConfigHttpRequest>`) de cada llamada.
+* **UI**: usa el `BlocHttpRequest` para loaders globales y consume los resultados (`Either<ErrorItem, ModelConfigHttpRequest>`) de cada llamada.
 
 ---
 
@@ -66,7 +63,8 @@ ServiceHttpRequest  →  GatewayHttpRequest  →  RepositoryHttpRequest
     * `body`: opcional (según método)
     * `timeout: Duration?`
     * `metadata: Map<String, dynamic>`
-* Es la **foto de la configuración** utilizada para la llamada (útil para:
+
+* Es la **foto de la configuración** utilizada para la llamada (útil para):
 
     * Logging / telemetry.
     * Reintentos (`UsecaseHttpRequestRetry`).
@@ -81,12 +79,9 @@ Either<ErrorItem, ModelConfigHttpRequest>
 ```
 
 * `Left(ErrorItem)`: fallo de transporte, de backend, negocio, etc.
-* `Right(ModelConfigHttpRequest)`: la llamada fue considerada exitosa (a nivel de transporte y
-  convención de payload).
+* `Right(ModelConfigHttpRequest)`: la llamada fue considerada exitosa (a nivel de transporte y convención de payload).
 
-Los errores HTTP/Red más comunes están definidos como constantes (`kHttpTimeoutErrorItem`,
-`kHttpNoConnectionErrorItem`, `kHttpServerErrorItem`, etc.) y son usados por
-`DefaultHttpErrorMapper`.
+Los errores HTTP/Red más comunes están definidos como constantes (`kHttpTimeoutErrorItem`, `kHttpNoConnectionErrorItem`, `kHttpServerErrorItem`, etc.) y son usados por `DefaultHttpErrorMapper`.
 
 ---
 
@@ -95,7 +90,7 @@ Los errores HTTP/Red más comunes están definidos como constantes (`kHttpTimeou
 ### 4.1 ¿Qué hace?
 
 * Mantiene un `BlocGeneral<Set<String>>` con los `requestKey` **actualmente activos**.
-* Exponen:
+* Expone:
 
 ```
 Set<String> get activeRequests;
@@ -115,10 +110,11 @@ Future<Either<ErrorItem, ModelConfigHttpRequest>> retry(...);
 * Para wiring adicional:
 
 ```dart
-void addFunctionToProcessActiveRequestsOnStream(String key,
-    void Function(Set<String> active) function, [
-      bool executeNow = false,
-    ]);
+void addFunctionToProcessActiveRequestsOnStream(
+  String key,
+  void Function(Set<String> active) function, [
+  bool executeNow = false,
+]);
 
 void deleteFunctionToProcessActiveRequestsOnStream(String key);
 
@@ -127,10 +123,9 @@ bool containsKeyFunction(String key);
 
 ### 4.2 ¿Qué **no** hace?
 
-* **No** guarda los resultados finales (ni los ErrorItem).
+* **No** guarda los resultados finales (ni los `ErrorItem`).
 * **No** decide qué hacer con el error (eso es responsabilidad de los BLoCs de features / UI).
-* **No** modela estados intermedios (loading, success, failure) por request; solo sabe si un
-  `requestKey` está activo o no.
+* **No** modela estados intermedios (loading, success, failure) por request; solo sabe si un `requestKey` está activo o no.
 
 ### 4.3 Ciclo de vida típico (GET)
 
@@ -143,8 +138,7 @@ bool containsKeyFunction(String key);
     * `_markInactive('user.fetchMe')` lo elimina del set activo.
     * Se retorna el `Either` al llamador.
 
-La UI, al escuchar `stream`, puede mostrar loaders globales o paneles de estado en función de
-`activeRequests`.
+La UI, al escuchar `stream`, puede mostrar loaders globales o paneles de estado en función de `activeRequests`.
 
 ---
 
@@ -197,13 +191,28 @@ const FakeHttpRequestConfig httpConfig = FakeHttpRequestConfig(
     ),
   },
 
+  // Rutas que fuerzan errores de transporte.
+  errorRoutes: <String, String>{
+    // Simula un timeout de transporte (TimeoutException).
+    'GET https://example.com/slow-timeout': 'timeout',
+
+    // Simula falta de conexión de red (SocketException).
+    'GET https://example.com/offline': 'offline',
+
+    // Cualquier otro string se propaga como StateError(message).
+    // 'GET https://example.com/unexpected': 'unexpected_state',
+  },
+
   // Opcionales:
   // cannedConfigs: <String, ModelConfigHttpRequest>{},
-  // errorRoutes: <String, String>{},
 );
 ```
 
-> `cannedHttpResponse` asegura que cada payload contenga el mismo shape que se obtendría al procesar un `http.Response`: `method`, `uri`, `statusCode`, `reasonPhrase`, `headers`, `body`, `metadata`, `timeout` (ms) y las banderas `fake/source`. Así evitamos respuestas inconsistentes y garantizamos que el Gateway pueda inspeccionar `statusCode` y que el `RepositoryHttpRequest` tenga toda la información necesaria para reconstruir `ModelConfigHttpRequest`.
+> `cannedHttpResponse` asegura que cada payload contenga el mismo shape que se obtendría al procesar un `http.Response` serializado: `method`, `uri`, `statusCode`, `reasonPhrase`, `headers`, `body`, `metadata`, `timeout` (ms) y las banderas `fake/source`.
+> El `FakeHttpRequest` normaliza internamente estos campos para que el `GatewayHttpRequest` y el `RepositoryHttpRequest` puedan:
+>
+> * Inspeccionar `statusCode` / `reasonPhrase`.
+> * Reconstruir `ModelConfigHttpRequest.timeout` desde el campo `timeout` (milisegundos).
 
 Luego se instancia el service:
 
@@ -211,11 +220,44 @@ Luego se instancia el service:
 final ServiceHttpRequest service = FakeHttpRequest(config: httpConfig);
 ```
 
-### 5.2 Cuándo usar el `FakeHttpRequest`
+### 5.2 Comportamiento de errores simulados
 
-* Demos / ejemplos educativos (como este).
-* Pruebas de UIs que quieren simular latencias y errores sin tocar la red real.
-* Entornos `dev` desconectados o con backend aún inexistente.
+`FakeHttpRequest` interpreta las entradas de `errorRoutes` así:
+
+* Si el valor es `'timeout'` → lanza un `TimeoutException('Simulated HTTP timeout for <key>')`.
+* Si el valor es `'offline'` → lanza un `SocketException('Simulated offline mode')`.
+* Para cualquier otro valor → lanza un `StateError(message)` con el texto configurado.
+
+Esto permite:
+
+* Probar el mapeo de timeouts (`kHttpTimeoutErrorItem`).
+* Probar fallos de red/offline (`kHttpNoConnectionErrorItem`).
+* Probar errores genéricos de transporte/backend mediante `StateError`.
+
+### 5.3 Echo por defecto
+
+Cuando una ruta **no** está registrada en `cannedResponses` ni en `cannedConfigs` y tampoco aparece en `errorRoutes`, `FakeHttpRequest` devuelve un **payload de eco**:
+
+```
+<Map<String, dynamic>>{
+  'method': 'GET' | 'POST' | ...,
+  'uri': uri.toString(),
+  'headers': <String, String>{...} // o vacío,
+  'body': body,                   // solo para métodos con body,
+  'timeoutMs': timeout?.inMilliseconds,
+  'metadata': metadata,
+  'fake': true,
+  'source': 'FakeHttpRequest',
+}
+```
+
+En particular, para `GET`:
+
+* La firma de `get` **no acepta `body` de request**, por lo que el eco tendrá `body: null`.
+* No se incluye `statusCode` ni `reasonPhrase` (no se simula una respuesta HTTP completa).
+
+> Recomendación: usa el echo solo para *smoke tests* rápidos (ver que el wiring funciona).
+> Para tests que validen comportamiento HTTP real (códigos de estado, errores de negocio, etc.) registra siempre la ruta en `cannedResponses` o `cannedConfigs`.
 
 ---
 
@@ -224,7 +266,6 @@ final ServiceHttpRequest service = FakeHttpRequest(config: httpConfig);
 `GatewayHttpRequestImpl` recibe un `ErrorMapper`. La implementación recomendada para HTTP es:
 
 ```dart
-
 final GatewayHttpRequest gateway = GatewayHttpRequestImpl(
   service: service,
   errorMapper: const DefaultHttpErrorMapper(),
@@ -237,7 +278,8 @@ Características de `DefaultHttpErrorMapper`:
 * Casos especiales:
 
     * `TimeoutException` → `HTTP_TIMEOUT` (`kHttpTimeoutErrorItem`).
-    * Payloads con `statusCode` / `httpStatus` → ajusta `code` según tabla:
+    * `SocketException` (ej. `'offline'` en `errorRoutes`) → `HTTP_NO_CONNECTION` (`kHttpNoConnectionErrorItem`).
+    * Payloads con `statusCode` / `httpStatus` → ajusta `code` según la tabla estándar:
 
 | Status | `ErrorItem.code`         | Recom. UI                               |
 |--------|--------------------------|-----------------------------------------|
@@ -264,7 +306,7 @@ Este demo minimalista muestra el flujo completo:
 
     * Loader global en AppBar.
     * Panel de peticiones activas.
-    * Resultado en texto (ErrorItem vs ModelConfigHttpRequest).
+    * Resultado en texto (`ErrorItem` vs `ModelConfigHttpRequest`).
 
 ```dart
 import 'dart:async';
@@ -300,12 +342,9 @@ class _HttpRequestDemoAppState extends State<HttpRequestDemoApp> {
   void initState() {
     super.initState();
 
-    // 1) Service: frontera con el mundo externo
+    // 1) Service: frontera con el mundo externo.
     const FakeHttpRequestConfig httpConfig = FakeHttpRequestConfig(
-      // Latencia artificial para que se note el loader global.
       latency: Duration(milliseconds: 800),
-
-      // Respuestas simuladas por ruta (METHOD + espacio + uri.toString()).
       cannedResponses: <String, Map<String, dynamic>>{
         'GET https://example.com/profile': FakeHttpRequestConfig.cannedHttpResponse(
           method: HttpMethodEnum.get,
@@ -343,22 +382,24 @@ class _HttpRequestDemoAppState extends State<HttpRequestDemoApp> {
           },
         ),
       },
+      errorRoutes: <String, String>{
+        'GET https://example.com/slow-timeout': 'timeout',
+        'GET https://example.com/offline': 'offline',
+      },
     );
 
     final ServiceHttpRequest service = FakeHttpRequest(config: httpConfig);
 
-    // 2) Gateway: mapea excepciones/payload a ErrorItem
+    // 2) Gateway: mapea excepciones/payload a ErrorItem.
     final GatewayHttpRequest gateway = GatewayHttpRequestImpl(
       service: service,
       errorMapper: const DefaultHttpErrorMapper(),
     );
 
-    // 3) Repository: devuelve ModelConfigHttpRequest como resultado de dominio
-    final RepositoryHttpRequest repository = RepositoryHttpRequestImpl(
-      gateway,
-    );
+    // 3) Repository: devuelve ModelConfigHttpRequest como resultado de dominio.
+    final RepositoryHttpRequest repository = RepositoryHttpRequestImpl(gateway);
 
-    // 4) Usecases + fachada
+    // 4) Usecases + fachada.
     final FacadeHttpRequestUsecases facade = FacadeHttpRequestUsecases(
       get: UsecaseHttpRequestGet(repository),
       post: UsecaseHttpRequestPost(repository),
@@ -367,14 +408,12 @@ class _HttpRequestDemoAppState extends State<HttpRequestDemoApp> {
       retry: UsecaseHttpRequestRetry(repository),
     );
 
-    // 5) BlocHttpRequest: orquestador centralizado
+    // 5) BlocHttpRequest: orquestador centralizado.
     _blocHttpRequest = BlocHttpRequest(facade);
 
-    // 6) Escuchamos el set de peticiones activas
+    // 6) Escuchamos el set de peticiones activas.
     _activeSub = _blocHttpRequest.stream.listen((Set<String> active) {
-      setState(() {
-        _active = active;
-      });
+      setState(() => _active = active);
     });
   }
 
@@ -387,7 +426,7 @@ class _HttpRequestDemoAppState extends State<HttpRequestDemoApp> {
 
   Future<void> _doGetProfile() async {
     final Either<ErrorItem, ModelConfigHttpRequest> result =
-    await _blocHttpRequest.get(
+        await _blocHttpRequest.get(
       requestKey: 'demo.getProfile',
       uri: Uri.parse('https://example.com/profile'),
       metadata: <String, dynamic>{
@@ -400,7 +439,7 @@ class _HttpRequestDemoAppState extends State<HttpRequestDemoApp> {
 
   Future<void> _doPostLogin() async {
     final Either<ErrorItem, ModelConfigHttpRequest> result =
-    await _blocHttpRequest.post(
+        await _blocHttpRequest.post(
       requestKey: 'demo.postLogin',
       uri: Uri.parse('https://example.com/login'),
       body: <String, dynamic>{
@@ -417,7 +456,7 @@ class _HttpRequestDemoAppState extends State<HttpRequestDemoApp> {
 
   Future<void> _doDeleteSession() async {
     final Either<ErrorItem, ModelConfigHttpRequest> result =
-    await _blocHttpRequest.delete(
+        await _blocHttpRequest.delete(
       requestKey: 'demo.deleteSession',
       uri: Uri.parse('https://example.com/session'),
       metadata: <String, dynamic>{
@@ -435,11 +474,12 @@ class _HttpRequestDemoAppState extends State<HttpRequestDemoApp> {
     }
 
     return r.fold(
-          (ErrorItem e) => '❌ ErrorItem:\ncode: ${e.code}\n'
+      (ErrorItem e) => '❌ ErrorItem:\n'
+          'code: ${e.code}\n'
           'title: ${e.title}\n'
           'description: ${e.description}\n'
           'meta: ${e.meta}',
-          (ModelConfigHttpRequest cfg) => '✅ ModelConfigHttpRequest:\n'
+      (ModelConfigHttpRequest cfg) => '✅ ModelConfigHttpRequest:\n'
           'method: ${cfg.method.name}\n'
           'uri: ${cfg.uri}\n'
           'headers: ${cfg.headers}\n'
@@ -534,7 +574,6 @@ class _HttpRequestDemoAppState extends State<HttpRequestDemoApp> {
   }
 }
 
-/// Panel que muestra el set de peticiones activas.
 class _ActiveRequestsPanel extends StatelessWidget {
   const _ActiveRequestsPanel({required this.active});
 
@@ -543,23 +582,14 @@ class _ActiveRequestsPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bool hasActive = active.isNotEmpty;
-    final String text = hasActive
-        ? 'Peticiones activas: ${active.join(', ')}'
-        : 'Sin peticiones activas';
+    final String text =
+        hasActive ? 'Peticiones activas: ${active.join(', ')}' : 'Sin peticiones activas';
 
     return DecoratedBox(
       decoration: BoxDecoration(
         color: hasActive
-            ? Theme
-            .of(context)
-            .colorScheme
-            .primary
-            .withValues(alpha: 0.94)
-            : Theme
-            .of(context)
-            .colorScheme
-            .surfaceContainerHighest
-            .withValues(alpha: 0.7),
+            ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.94)
+            : Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.7),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Padding(
@@ -570,14 +600,8 @@ class _ActiveRequestsPanel extends StatelessWidget {
               hasActive ? Icons.cloud_upload : Icons.cloud_done,
               size: 20,
               color: hasActive
-                  ? Theme
-                  .of(context)
-                  .colorScheme
-                  .primary
-                  : Theme
-                  .of(context)
-                  .colorScheme
-                  .outline,
+                  ? Theme.of(context).colorScheme.primary
+                  : Theme.of(context).colorScheme.outline,
             ),
             const SizedBox(width: 8),
             Expanded(
@@ -611,8 +635,7 @@ class _GlobalLoadingDotState extends State<_GlobalLoadingDot>
     _controller = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 700),
-    )
-      ..repeat(reverse: true);
+    )..repeat(reverse: true);
     _scale = Tween<double>(begin: 0.8, end: 1.2).animate(_controller);
   }
 
@@ -629,10 +652,7 @@ class _GlobalLoadingDotState extends State<_GlobalLoadingDot>
       child: Icon(
         Icons.circle,
         size: 10,
-        color: Theme
-            .of(context)
-            .colorScheme
-            .primary,
+        color: Theme.of(context).colorScheme.primary,
       ),
     );
   }
@@ -645,7 +665,7 @@ class _HelperNote extends StatelessWidget {
   Widget build(BuildContext context) {
     return const Text(
       'Tip: En producción, reemplaza el FakeServiceHttpRequest por tu client real.\n'
-          'Este ejemplo solo muestra el flujo transversal y el rol de BlocHttpRequest.',
+      'Este ejemplo solo muestra el flujo transversal y el rol de BlocHttpRequest.',
       textAlign: TextAlign.center,
       style: TextStyle(fontSize: 11),
     );
@@ -661,8 +681,7 @@ class _HelperNote extends StatelessWidget {
 2. **Instanciar `GatewayHttpRequestImpl`** con `DefaultHttpErrorMapper` o tu mapper custom.
 3. **Usar `RepositoryHttpRequestImpl`** como entry point de dominio.
 4. **Construir `FacadeHttpRequestUsecases`** con los UseCases estándar.
-5. **Crear un único `BlocHttpRequest`** y compartirlo (por ejemplo, vía InheritedWidget, Provider,
-   AppManager).
+5. **Crear un único `BlocHttpRequest`** y compartirlo (por ejemplo, vía `InheritedWidget`, `Provider`, `AppManager`).
 6. **En los BLoCs de features**:
 
     * Llamar a `_blocHttpRequest.get/post/...` con un `requestKey` semántico.
@@ -673,15 +692,6 @@ class _HelperNote extends StatelessWidget {
     * Usar `clear` / `clearAll` solo para recuperar estados atípicos (bugs, cancelaciones manuales).
 
 > **Nota importante (echo por defecto):**
-> Cuando una ruta **no** está registrada en `cannedResponses` ni en `cannedConfigs`,
-> `FakeHttpRequest` devuelve un **echo** de la llamada en lugar de una respuesta HTTP completa.
-> Ese payload incluye `method`, `uri`, `headers`, `body`, `metadata`, `fake` y `source`,
-> pero **no** siempre contiene `statusCode` ni `reasonPhrase`.
->
-> En particular, para `GET`:
-> - La firma de `get` **no acepta `body` de request**, por lo que el echo tendrá `body: null`.
-> - Si necesitas probar un `body` de respuesta (ej. JSON con datos) o inspeccionar `statusCode`,
-    >   es obligatorio registrar la ruta en `cannedResponses` o `cannedConfigs`.
->
-> Recomendación: usa el echo solo para *smoke tests* rápidos; para tests de flujo HTTP real
-> (Gateway/Repository/ErrorMapper) registra siempre respuestas canned.
+> Cuando una ruta **no** está registrada en `cannedResponses` ni en `cannedConfigs`, `FakeHttpRequest` devuelve un **echo** de la llamada en lugar de una respuesta HTTP completa.
+> Ese payload incluye `method`, `uri`, `headers`, `body`, `metadata`, `timeoutMs`, `fake` y `source`, pero **no** contiene necesariamente `statusCode` ni `reasonPhrase`.
+> Si necesitas probar un `body` de respuesta o inspeccionar `statusCode`, debes registrar la ruta en `cannedResponses` o `cannedConfigs`.

@@ -1,3 +1,6 @@
+import 'dart:async';
+import 'dart:io';
+
 import '../../jocaagura_domain.dart';
 
 /// In-memory fake implementation of [ServiceHttpRequest] for tests and POCs.
@@ -311,9 +314,18 @@ class FakeHttpRequest implements ServiceHttpRequest {
 
   void _maybeThrowRouteError(String key) {
     final String? message = _errors[key];
-    if (message != null) {
-      throw StateError(message);
+    if (message == null) {
+      return;
     }
+
+    if (message == 'timeout') {
+      throw TimeoutException('Simulated HTTP timeout for $key');
+    }
+    if (message == 'offline') {
+      throw const SocketException('Simulated offline mode');
+    }
+
+    throw StateError(message);
   }
 
   Map<String, dynamic> _buildEchoResponse({
