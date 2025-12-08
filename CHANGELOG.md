@@ -3,6 +3,45 @@
 This document follows the guidelines of [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.34.0] - 2025-12-08
+
+> **Release acumulada.** Consolida los cambios de **1.33.1** → **1.33.3** sin adiciones extra.  
+> Enfoque: estabilización de contratos, helpers de pruebas HTTP y consistencia en serialización.
+
+### Added
+- **HTTP – Testing helpers**
+    - Helper estandarizado para **respuestas enlatadas (canned)** en flujos `GET/POST/PUT/DELETE`.
+    - **Escenarios simulados**: `Timeout`, `Offline`, `Unexpected error`, `Bad JSON`.
+
+### Changed
+- **HTTP – Simulación y normalización**
+    - Refactor para unificar el esquema de respuestas enlatadas y simplificar el **cableado de pruebas**.
+    - **Normalización** de `raw response` (status/headers/body) antes del mapeo de éxito/error.
+
+### Fixed
+- **Domain – ModelAppVersion**
+    - `buildAt` ahora se **persiste como cadena ISO-8601 UTC** (centinela `kDefaultBuildAtIso`) y expone `buildAtDateTime` como *getter*. Esto permite **instancias `const`** y evita *drift* entre plataformas.
+- **Bloc – BlocHttpRequest**
+    - Estabilizado el contrato para garantizar la **herencia correcta de `BlocModule`**.
+
+### Docs
+- Comentarios y notas aclarando:
+    - El flujo `buildAt` (**string ISO + getter**).
+    - Uso de helpers en pruebas HTTP y normalización previa al *mapper*.
+
+### Tests
+- Suites ampliadas para cubrir:
+    - Escenarios HTTP simulados (timeout/offline/unexpected/bad-JSON).
+    - Verificación de **normalización** previa al mapeo.
+    - Casos de `ModelAppVersion` (ISO string + getter `buildAtDateTime`).
+
+### Migration notes
+- **HTTP tests**: reemplaza *fixtures* ad-hoc por el **helper de respuestas enlatadas**; ajusta aserciones si dependían del formato previo (especialmente en `headers`/`body` normalizados).
+- **ModelAppVersion**: si consumías `buildAt` como `DateTime` directo, usa el **string ISO** almacenado o el *getter* `buildAtDateTime` para conversión.
+- **BlocHttpRequest**: sin cambios de API pública; la corrección asegura tipado y ciclo de vida coherentes con `BlocModule`.
+
+
+
 ## [1.33.3] - 2025-12-08
 
 ### Added
