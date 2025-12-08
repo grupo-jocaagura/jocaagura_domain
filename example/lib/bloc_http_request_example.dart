@@ -167,21 +167,58 @@ class _HttpRequestDemoAppState extends State<HttpRequestDemoApp> {
             'deleted': true,
           },
         ),
+        'GET https://example.com/slow-timeout':
+            FakeHttpRequestConfig.cannedHttpResponse(
+          method: HttpMethodEnum.get,
+          uri: Uri.parse('https://example.com/slow-timeout'),
+          statusCode: 504,
+          reasonPhrase: 'Gateway Timeout',
+          metadata: const <String, dynamic>{'simulate': 'timeout'},
+        ),
+        'GET https://example.com/offline':
+            FakeHttpRequestConfig.cannedHttpResponse(
+          method: HttpMethodEnum.get,
+          uri: Uri.parse('https://example.com/offline'),
+          metadata: const <String, dynamic>{'simulate': 'offline'},
+        ),
+        'GET https://example.com/unexpected-state':
+            FakeHttpRequestConfig.cannedHttpResponse(
+          method: HttpMethodEnum.get,
+          uri: Uri.parse('https://example.com/unexpected-state'),
+          metadata: const <String, dynamic>{'simulate': 'stateError'},
+        ),
+        'GET https://example.com/bad-json':
+            FakeHttpRequestConfig.cannedHttpResponse(
+          method: HttpMethodEnum.get,
+          uri: Uri.parse('https://example.com/bad-json'),
+          body: const <String, dynamic>{
+            'method': 'bad-json',
+            'uri': 123, // fuerza error al parsear URI
+          },
+        ),
+        'GET https://example.com/echo': <String, dynamic>{},
       },
-
-      // Para este demo no necesitamos preconfigurar ModelConfigHttpRequest
-      // ni rutas que lancen excepciones; dejamos los defaults:
-      // cannedConfigs: const <String, ModelConfigHttpRequest>{},
-      // errorRoutes: const <String, String>{},
+      cannedConfigs: <String, ModelConfigHttpRequest>{
+        'GET https://example.com/config-model': ModelConfigHttpRequest(
+          method: HttpMethodEnum.get,
+          uri: Uri.parse('https://example.com/config-model'),
+          headers: const <String, String>{'X-Config': 'fromModel'},
+          metadata: const <String, dynamic>{'source': 'cannedConfig'},
+        ),
+      },
+      errorRoutes: <String, String>{
+        'GET https://example.com/slow-timeout': 'timeout',
+        'GET https://example.com/offline': 'offline',
+        'GET https://example.com/unexpected-state': 'unexpected',
+        'GET https://example.com/bad-json': 'bad_json',
+      },
     );
 
-// Luego tu service queda así:
     final ServiceHttpRequest service = FakeHttpRequest(config: httpConfig);
 
-    // 2) Gateway: mapea excepciones/payload a ErrorItem
     final GatewayHttpRequest gateway = GatewayHttpRequestImpl(
       service: service,
-      errorMapper: const DefaultErrorMapper(),
+      errorMapper: const DefaultHttpErrorMapper(),
     );
 
     // 3) Repository: devuelve ModelConfigHttpRequest como resultado de dominio
@@ -360,6 +397,84 @@ class _HttpRequestDemoAppState extends State<HttpRequestDemoApp> {
     setState(() => _lastResult = result);
   }
 
+  Future<void> _doGetConfigFromModel() async {
+    final Either<ErrorItem, ModelConfigHttpRequest> result =
+        await _blocHttpRequest.get(
+      requestKey: 'demo.getConfigModel',
+      uri: Uri.parse('https://example.com/config-model'),
+      metadata: const <String, dynamic>{
+        'feature': 'demo',
+        'operation': 'config',
+      },
+    );
+    setState(() => _lastResult = result);
+  }
+
+  Future<void> _doRetryLastCall() async {
+    final Either<ErrorItem, ModelConfigHttpRequest>? previous = _lastResult;
+    if (previous == null) {
+      return;
+    }
+    previous.fold(
+      (_) => null,
+      (ModelConfigHttpRequest cfg) async {
+        final Either<ErrorItem, ModelConfigHttpRequest> retryResult =
+            await _blocHttpRequest.retry(
+          requestKey: 'demo.retry',
+          previousConfig: cfg,
+          extraMetadata: const <String, dynamic>{'retry': true},
+        );
+        setState(() => _lastResult = retryResult);
+      },
+    );
+  }
+
+  Future<void> _doGetEcho() async {
+    final Either<ErrorItem, ModelConfigHttpRequest> result =
+        await _blocHttpRequest.get(
+      requestKey: 'demo.getEcho',
+      uri: Uri.parse('https://example.com/echo'),
+      metadata: const <String, dynamic>{'feature': 'demo', 'operation': 'echo'},
+    );
+    setState(() => _lastResult = result);
+  }
+
+  Future<void> _simulateTimeout() async {
+    final Either<ErrorItem, ModelConfigHttpRequest> result =
+        await _blocHttpRequest.get(
+      requestKey: 'demo.timeout',
+      uri: Uri.parse('https://example.com/slow-timeout'),
+    );
+    setState(() => _lastResult = result);
+  }
+
+  Future<void> _simulateOffline() async {
+    final Either<ErrorItem, ModelConfigHttpRequest> result =
+        await _blocHttpRequest.get(
+      requestKey: 'demo.offline',
+      uri: Uri.parse('https://example.com/offline'),
+    );
+    setState(() => _lastResult = result);
+  }
+
+  Future<void> _simulateUnexpectedError() async {
+    final Either<ErrorItem, ModelConfigHttpRequest> result =
+        await _blocHttpRequest.get(
+      requestKey: 'demo.unexpected',
+      uri: Uri.parse('https://example.com/unexpected-state'),
+    );
+    setState(() => _lastResult = result);
+  }
+
+  Future<void> _simulateBadJson() async {
+    final Either<ErrorItem, ModelConfigHttpRequest> result =
+        await _blocHttpRequest.get(
+      requestKey: 'demo.badJson',
+      uri: Uri.parse('https://example.com/bad-json'),
+    );
+    setState(() => _lastResult = result);
+  }
+
   String _formatResult() {
     final Either<ErrorItem, ModelConfigHttpRequest>? r = _lastResult;
     if (r == null) {
@@ -431,6 +546,7 @@ class _HttpRequestDemoAppState extends State<HttpRequestDemoApp> {
                 spacing: 8,
                 runSpacing: 8,
                 children: <Widget>[
+                  // Existing standard HTTP scenarios...
                   _scenarioButton('GET /profile (200 OK)', _doGetProfile),
                   _scenarioButton(
                     'GET /profile-pending (202 Accepted)',
@@ -465,6 +581,29 @@ class _HttpRequestDemoAppState extends State<HttpRequestDemoApp> {
                     _doPutProfileServerError,
                   ),
                   _scenarioButton('DELETE /session (200 OK)', _doDeleteSession),
+                  const Divider(),
+                  _scenarioButton(
+                    'GET /slow-timeout (timeout)',
+                    _simulateTimeout,
+                  ),
+                  _scenarioButton(
+                    'GET /offline (no connection)',
+                    _simulateOffline,
+                  ),
+                  _scenarioButton(
+                    'GET /unexpected-state',
+                    _simulateUnexpectedError,
+                  ),
+                  _scenarioButton(
+                    'GET /bad-json (mapping error)',
+                    _simulateBadJson,
+                  ),
+                  _scenarioButton('GET /echo (sin canned)', _doGetEcho),
+                  _scenarioButton(
+                    'GET /config-model (cannedConfig)',
+                    _doGetConfigFromModel,
+                  ),
+                  _scenarioButton('Retry última llamada', _doRetryLastCall),
                 ],
               ),
               const SizedBox(height: 12),
