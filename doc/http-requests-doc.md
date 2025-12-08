@@ -155,28 +155,46 @@ La UI, al escuchar `stream`, puede mostrar loaders globales o paneles de estado 
 Permite configurar el comportamiento del `FakeHttpRequest`:
 
 ```dart
-
 const FakeHttpRequestConfig httpConfig = FakeHttpRequestConfig(
   latency: Duration(milliseconds: 800), // Latencia artificial global
 
   // Respuestas simuladas por ruta: "METHOD <uri.toString()>".
   cannedResponses: <String, Map<String, dynamic>>{
-    'GET https://example.com/profile': <String, dynamic>{
-      'ok': true,
-      'name': 'Alice',
-      'role': 'student',
-    },
-    'POST https://example.com/login': <String, dynamic>{
-      'ok': false,
-      'error': <String, dynamic>{
-        'code': 'AUTH_FAILED',
-        'message': 'Usuario o contraseña inválidos',
+    'GET https://example.com/profile': FakeHttpRequestConfig.cannedHttpResponse(
+      method: HttpMethodEnum.get,
+      uri: Uri.parse('https://example.com/profile'),
+      statusCode: 200,
+      headers: const <String, String>{
+        'content-type': 'application/json; charset=utf-8',
       },
-    },
-    'DELETE https://example.com/session': <String, dynamic>{
-      'ok': true,
-      'deleted': true,
-    },
+      body: const <String, dynamic>{
+        'data': <String, dynamic>{
+          'name': 'Alice',
+          'role': 'student',
+        },
+      },
+      metadata: const <String, dynamic>{'requestId': 'req-123'},
+      timeout: const Duration(seconds: 5),
+    ),
+    'POST https://example.com/login': FakeHttpRequestConfig.cannedHttpResponse(
+      method: HttpMethodEnum.post,
+      uri: Uri.parse('https://example.com/login'),
+      statusCode: 401,
+      reasonPhrase: 'Unauthorized',
+      body: const <String, dynamic>{
+        'error': <String, dynamic>{
+          'code': 'AUTH_FAILED',
+          'message': 'Usuario o contraseña inválidos',
+        },
+      },
+    ),
+    'DELETE https://example.com/session': FakeHttpRequestConfig.cannedHttpResponse(
+      method: HttpMethodEnum.delete,
+      uri: Uri.parse('https://example.com/session'),
+      body: const <String, dynamic>{
+        'deleted': true,
+      },
+    ),
   },
 
   // Opcionales:
@@ -185,10 +203,11 @@ const FakeHttpRequestConfig httpConfig = FakeHttpRequestConfig(
 );
 ```
 
+> `cannedHttpResponse` asegura que cada payload contenga el mismo shape que se obtendría al procesar un `http.Response`: `method`, `uri`, `statusCode`, `reasonPhrase`, `headers`, `body`, `metadata`, `timeout` (ms) y las banderas `fake/source`. Así evitamos respuestas inconsistentes y garantizamos que el Gateway pueda inspeccionar `statusCode` y que el `RepositoryHttpRequest` tenga toda la información necesaria para reconstruir `ModelConfigHttpRequest`.
+
 Luego se instancia el service:
 
 ```dart
-
 final ServiceHttpRequest service = FakeHttpRequest(config: httpConfig);
 ```
 
@@ -288,22 +307,41 @@ class _HttpRequestDemoAppState extends State<HttpRequestDemoApp> {
 
       // Respuestas simuladas por ruta (METHOD + espacio + uri.toString()).
       cannedResponses: <String, Map<String, dynamic>>{
-        'GET https://example.com/profile': <String, dynamic>{
-          'ok': true,
-          'name': 'Alice',
-          'role': 'student',
-        },
-        'POST https://example.com/login': <String, dynamic>{
-          'ok': false,
-          'error': <String, dynamic>{
-            'code': 'AUTH_FAILED',
-            'message': 'Usuario o contraseña inválidos',
+        'GET https://example.com/profile': FakeHttpRequestConfig.cannedHttpResponse(
+          method: HttpMethodEnum.get,
+          uri: Uri.parse('https://example.com/profile'),
+          statusCode: 200,
+          headers: const <String, String>{
+            'content-type': 'application/json; charset=utf-8',
           },
-        },
-        'DELETE https://example.com/session': <String, dynamic>{
-          'ok': true,
-          'deleted': true,
-        },
+          body: const <String, dynamic>{
+            'data': <String, dynamic>{
+              'name': 'Alice',
+              'role': 'student',
+            },
+          },
+          metadata: const <String, dynamic>{'requestId': 'req-123'},
+          timeout: const Duration(seconds: 5),
+        ),
+        'POST https://example.com/login': FakeHttpRequestConfig.cannedHttpResponse(
+          method: HttpMethodEnum.post,
+          uri: Uri.parse('https://example.com/login'),
+          statusCode: 401,
+          reasonPhrase: 'Unauthorized',
+          body: const <String, dynamic>{
+            'error': <String, dynamic>{
+              'code': 'AUTH_FAILED',
+              'message': 'Usuario o contraseña inválidos',
+            },
+          },
+        ),
+        'DELETE https://example.com/session': FakeHttpRequestConfig.cannedHttpResponse(
+          method: HttpMethodEnum.delete,
+          uri: Uri.parse('https://example.com/session'),
+          body: const <String, dynamic>{
+            'deleted': true,
+          },
+        ),
       },
     );
 
@@ -633,3 +671,17 @@ class _HelperNote extends StatelessWidget {
 
     * Escuchar `blocHttpRequest.stream` para loaders, badges de red, etc.
     * Usar `clear` / `clearAll` solo para recuperar estados atípicos (bugs, cancelaciones manuales).
+
+> **Nota importante (echo por defecto):**
+> Cuando una ruta **no** está registrada en `cannedResponses` ni en `cannedConfigs`,
+> `FakeHttpRequest` devuelve un **echo** de la llamada en lugar de una respuesta HTTP completa.
+> Ese payload incluye `method`, `uri`, `headers`, `body`, `metadata`, `fake` y `source`,
+> pero **no** siempre contiene `statusCode` ni `reasonPhrase`.
+>
+> En particular, para `GET`:
+> - La firma de `get` **no acepta `body` de request**, por lo que el echo tendrá `body: null`.
+> - Si necesitas probar un `body` de respuesta (ej. JSON con datos) o inspeccionar `statusCode`,
+    >   es obligatorio registrar la ruta en `cannedResponses` o `cannedConfigs`.
+>
+> Recomendación: usa el echo solo para *smoke tests* rápidos; para tests de flujo HTTP real
+> (Gateway/Repository/ErrorMapper) registra siempre respuestas canned.
