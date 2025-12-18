@@ -90,8 +90,10 @@ void main() {
       );
 
       // Assert
-      expect(() => flow.stepsByIndex[2] = flow.stepsByIndex[1]!,
-          throwsUnsupportedError,);
+      expect(
+        () => flow.stepsByIndex[2] = flow.stepsByIndex[1]!,
+        throwsUnsupportedError,
+      );
       expect(() => flow.stepsByIndex.remove(1), throwsUnsupportedError);
     });
   });
@@ -171,8 +173,10 @@ void main() {
       expect(flow.stepsByIndex.containsKey(-1), isFalse);
 
       // Deep immutability (map itself)
-      expect(() => flow.stepsByIndex[99] = flow.stepsByIndex[10]!,
-          throwsUnsupportedError,);
+      expect(
+        () => flow.stepsByIndex[99] = flow.stepsByIndex[10]!,
+        throwsUnsupportedError,
+      );
     });
 
     test(
@@ -264,8 +268,10 @@ void main() {
       final List<ModelFlowStep> sorted = flow.stepsSorted;
 
       // Assert
-      expect(sorted.map((ModelFlowStep s) => s.index).toList(),
-          equals(<int>[10, 20]),);
+      expect(
+        sorted.map((ModelFlowStep s) => s.index).toList(),
+        equals(<int>[10, 20]),
+      );
       expect(() => sorted.add(sorted.first), throwsUnsupportedError);
     });
 

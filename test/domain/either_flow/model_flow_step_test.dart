@@ -244,7 +244,10 @@ void main() {
         failureCode: 'X',
         nextOnSuccessIndex: 2,
         nextOnFailureIndex: 3,
-        cost: const <String, double>{'bKb': 2, 'aMs': 1}, // different insertion order
+        cost: const <String, double>{
+          'bKb': 2,
+          'aMs': 1
+        }, // different insertion order
       );
 
       // Assert
