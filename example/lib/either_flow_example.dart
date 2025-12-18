@@ -77,8 +77,8 @@ class _CompleteFlowHomePageState extends State<CompleteFlowHomePage> {
           failureCode: 'AUTH_FAILED',
           nextOnSuccessIndex: 11,
           nextOnFailureIndex: -1,
-          constraints: <String>['requiresInternet'],
-          cost: <String, double>{'latencyMs': 250, 'networkKb': 12.5},
+          constraints: const <String>['requiresInternet'],
+          cost: const <String, double>{'latencyMs': 250, 'networkKb': 12.5},
         ),
         ModelFlowStep.immutable(
           index: 11,
@@ -87,7 +87,7 @@ class _CompleteFlowHomePageState extends State<CompleteFlowHomePage> {
           failureCode: 'PROFILE_FAILED',
           nextOnSuccessIndex: -1,
           nextOnFailureIndex: -1,
-          cost: <String, double>{'dbReadsCount': 2},
+          cost: const <String, double>{'dbReadsCount': 2},
         ),
       ],
     );
@@ -120,7 +120,9 @@ class _CompleteFlowHomePageState extends State<CompleteFlowHomePage> {
   void _updateExistingStep10() {
     final ModelCompleteFlow current = _flowBloc.value;
     final ModelFlowStep? step10 = current.stepAt(10);
-    if (step10 == null) return;
+    if (step10 == null) {
+      return;
+    }
 
     // We change only what we need, and upsert the new step.
     final ModelFlowStep updated = step10.copyWith(
@@ -136,7 +138,9 @@ class _CompleteFlowHomePageState extends State<CompleteFlowHomePage> {
 
   void _removeEntryStep() {
     final ModelCompleteFlow current = _flowBloc.value;
-    if (current.entryIndex < 0) return;
+    if (current.entryIndex < 0) {
+      return;
+    }
 
     _flowBloc.value = current.removeStepAt(current.entryIndex);
   }
@@ -154,8 +158,9 @@ class _CompleteFlowHomePageState extends State<CompleteFlowHomePage> {
         ),
         actions: <Widget>[
           TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Close')),
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Close'),
+          ),
         ],
       ),
     );
@@ -176,7 +181,8 @@ class _CompleteFlowHomePageState extends State<CompleteFlowHomePage> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
-            ok ? 'Roundtrip OK ✅ (== and hashCode)' : 'Roundtrip mismatch ❌'),
+          ok ? 'Roundtrip OK ✅ (== and hashCode)' : 'Roundtrip mismatch ❌',
+        ),
       ),
     );
   }
@@ -219,9 +225,11 @@ class _CompleteFlowHomePageState extends State<CompleteFlowHomePage> {
                   style: Theme.of(context).textTheme.headlineSmall,
                 ),
                 const SizedBox(height: 6),
-                Text(flow.description.isEmpty
-                    ? 'No description.'
-                    : flow.description),
+                Text(
+                  flow.description.isEmpty
+                      ? 'No description.'
+                      : flow.description,
+                ),
                 const SizedBox(height: 12),
                 _FlowStatsCard(flow: flow),
                 const SizedBox(height: 12),
@@ -280,11 +288,14 @@ class _FlowStatsCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
-                  Text('Entry index: ${flow.entryIndex}',
-                      style: const TextStyle(fontWeight: FontWeight.w600)),
+                  Text(
+                    'Entry index: ${flow.entryIndex}',
+                    style: const TextStyle(fontWeight: FontWeight.w600),
+                  ),
                   const SizedBox(height: 4),
                   Text(
-                      'Steps: ${flow.stepsByIndex.length} • JSON keys are indices as strings'),
+                    'Steps: ${flow.stepsByIndex.length} • JSON keys are indices as strings',
+                  ),
                 ],
               ),
             ),
@@ -321,14 +332,19 @@ class _FlowStepTile extends StatelessWidget {
           const SizedBox(height: 4),
           Text(step.description),
           const SizedBox(height: 6),
-          Text('Failure code: ${step.failureCode}',
-              style: const TextStyle(fontSize: 12)),
           Text(
-              'On Right → ${step.nextOnSuccessIndex}  |  On Left → ${step.nextOnFailureIndex}',
-              style: const TextStyle(fontSize: 12)),
+            'Failure code: ${step.failureCode}',
+            style: const TextStyle(fontSize: 12),
+          ),
+          Text(
+            'On Right → ${step.nextOnSuccessIndex}  |  On Left → ${step.nextOnFailureIndex}',
+            style: const TextStyle(fontSize: 12),
+          ),
           const SizedBox(height: 6),
-          Text('Cost (real units): $costLabel',
-              style: const TextStyle(fontSize: 12)),
+          Text(
+            'Cost (real units): $costLabel',
+            style: const TextStyle(fontSize: 12),
+          ),
         ],
       ),
       trailing: IconButton(

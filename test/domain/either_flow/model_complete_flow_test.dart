@@ -91,7 +91,7 @@ void main() {
 
       // Assert
       expect(() => flow.stepsByIndex[2] = flow.stepsByIndex[1]!,
-          throwsUnsupportedError);
+          throwsUnsupportedError,);
       expect(() => flow.stepsByIndex.remove(1), throwsUnsupportedError);
     });
   });
@@ -172,7 +172,7 @@ void main() {
 
       // Deep immutability (map itself)
       expect(() => flow.stepsByIndex[99] = flow.stepsByIndex[10]!,
-          throwsUnsupportedError);
+          throwsUnsupportedError,);
     });
 
     test(
@@ -190,7 +190,7 @@ void main() {
             failureCode: 'X',
             nextOnSuccessIndex: -1,
             nextOnFailureIndex: -1,
-            cost: <String, double>{'latencyMs': 10},
+            cost: const <String, double>{'latencyMs': 10},
           ),
           ModelFlowStep.immutable(
             index: 10,
@@ -265,7 +265,7 @@ void main() {
 
       // Assert
       expect(sorted.map((ModelFlowStep s) => s.index).toList(),
-          equals(<int>[10, 20]));
+          equals(<int>[10, 20]),);
       expect(() => sorted.add(sorted.first), throwsUnsupportedError);
     });
 

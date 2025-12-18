@@ -106,7 +106,9 @@ class ModelCompleteFlow extends Model {
     final Map<int, ModelFlowStep> tmp = <int, ModelFlowStep>{};
 
     for (final MapEntry<int, ModelFlowStep> entry in stepsByIndex.entries) {
-      if (entry.key < 0) continue;
+      if (entry.key < 0) {
+        continue;
+      }
       tmp[entry.key] = _asImmutableStep(entry.value);
     }
 
@@ -153,7 +155,9 @@ class ModelCompleteFlow extends Model {
 
         if (value is Map<String, dynamic>) {
           final ModelFlowStep step = ModelFlowStep.fromJson(value);
-          if (step.index < 0) continue;
+          if (step.index < 0) {
+            continue;
+          }
           tmp[step.index] =
               step; // fromJson already returns immutable in your design
           continue;
@@ -165,7 +169,9 @@ class ModelCompleteFlow extends Model {
             casted[e.key.toString()] = e.value;
           }
           final ModelFlowStep step = ModelFlowStep.fromJson(casted);
-          if (step.index < 0) continue;
+          if (step.index < 0) {
+            continue;
+          }
           tmp[step.index] = step;
         }
       }
@@ -193,7 +199,9 @@ class ModelCompleteFlow extends Model {
     final List<ModelFlowStep> out = <ModelFlowStep>[];
     for (final int k in keys) {
       final ModelFlowStep? step = stepsByIndex[k];
-      if (step != null) out.add(step);
+      if (step != null) {
+        out.add(step);
+      }
     }
     return List<ModelFlowStep>.unmodifiable(out);
   }
@@ -202,7 +210,9 @@ class ModelCompleteFlow extends Model {
   ///
   /// Convention: the smallest index in [stepsByIndex], or `-1` if empty.
   int get entryIndex {
-    if (stepsByIndex.isEmpty) return -1;
+    if (stepsByIndex.isEmpty) {
+      return -1;
+    }
     final List<int> keys = stepsByIndex.keys.toList(growable: false)..sort();
     return keys.first;
   }
@@ -214,7 +224,9 @@ class ModelCompleteFlow extends Model {
   ///
   /// If `step.index < 0`, this operation is ignored and returns `this`.
   ModelCompleteFlow upsertStep(ModelFlowStep step) {
-    if (step.index < 0) return this;
+    if (step.index < 0) {
+      return this;
+    }
 
     final ModelFlowStep frozen = _asImmutableStep(step);
     final ModelFlowStep? current = stepsByIndex[step.index];
@@ -267,7 +279,9 @@ class ModelCompleteFlow extends Model {
   }) {
     final bool noChanges =
         name == null && description == null && stepsByIndex == null;
-    if (noChanges) return this;
+    if (noChanges) {
+      return this;
+    }
 
     return ModelCompleteFlow.immutableFromMap(
       name: name ?? this.name,
@@ -297,7 +311,9 @@ class ModelCompleteFlow extends Model {
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other)) return true;
+    if (identical(this, other)) {
+      return true;
+    }
 
     return other is ModelCompleteFlow &&
         runtimeType == other.runtimeType &&

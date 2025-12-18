@@ -45,8 +45,8 @@ void main() {
         failureCode: 'X',
         nextOnSuccessIndex: -1,
         nextOnFailureIndex: -1,
-        constraints: <String>['a'],
-        cost: <String, double>{'latencyMs': 10},
+        constraints: const <String>['a'],
+        cost: const <String, double>{'latencyMs': 10},
       );
 
       // Assert
@@ -136,8 +136,8 @@ void main() {
         failureCode: 'AUTH_FAILED',
         nextOnSuccessIndex: 11,
         nextOnFailureIndex: 99,
-        constraints: <String>['requiresInternet'],
-        cost: <String, double>{'latencyMs': 250, 'networkKb': 12.5},
+        constraints: const <String>['requiresInternet'],
+        cost: const <String, double>{'latencyMs': 250, 'networkKb': 12.5},
       );
 
       // Act
@@ -203,8 +203,8 @@ void main() {
         failureCode: 'X',
         nextOnSuccessIndex: 2,
         nextOnFailureIndex: 3,
-        constraints: <String>['c1', 'c2'],
-        cost: <String, double>{'latencyMs': 10, 'networkKb': 1.5},
+        constraints: const <String>['c1', 'c2'],
+        cost: const <String, double>{'latencyMs': 10, 'networkKb': 1.5},
       );
 
       final ModelFlowStep b = ModelFlowStep.immutable(
@@ -214,8 +214,8 @@ void main() {
         failureCode: 'X',
         nextOnSuccessIndex: 2,
         nextOnFailureIndex: 3,
-        constraints: <String>['c1', 'c2'],
-        cost: <String, double>{'latencyMs': 10, 'networkKb': 1.5},
+        constraints: const <String>['c1', 'c2'],
+        cost: const <String, double>{'latencyMs': 10, 'networkKb': 1.5},
       );
 
       // Act + Assert
@@ -234,7 +234,7 @@ void main() {
         failureCode: 'X',
         nextOnSuccessIndex: 2,
         nextOnFailureIndex: 3,
-        cost: <String, double>{'aMs': 1, 'bKb': 2},
+        cost: const <String, double>{'aMs': 1, 'bKb': 2},
       );
 
       final ModelFlowStep b = ModelFlowStep.immutable(
@@ -244,7 +244,7 @@ void main() {
         failureCode: 'X',
         nextOnSuccessIndex: 2,
         nextOnFailureIndex: 3,
-        cost: <String, double>{'bKb': 2, 'aMs': 1}, // different insertion order
+        cost: const <String, double>{'bKb': 2, 'aMs': 1}, // different insertion order
       );
 
       // Assert
@@ -263,7 +263,7 @@ void main() {
         failureCode: 'X',
         nextOnSuccessIndex: 8,
         nextOnFailureIndex: 9,
-        cost: <String, double>{'latencyMs': 123},
+        cost: const <String, double>{'latencyMs': 123},
       );
 
       // Act
