@@ -246,7 +246,7 @@ void main() {
         nextOnFailureIndex: 3,
         cost: const <String, double>{
           'bKb': 2,
-          'aMs': 1
+          'aMs': 1,
         }, // different insertion order
       );
 
