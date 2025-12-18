@@ -3,6 +3,70 @@
 This document follows the guidelines of [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.35.0] - 2025-12-18
+
+### Added
+
+* Added `ModelCompleteFlow`, a new immutable domain model to represent a complete deterministic diagram composed of multiple `ModelFlowStep` items.
+* Added `CompleteFlowEnum` to guarantee stable JSON keys via `enum.name` for `ModelCompleteFlow`.
+* Added `defaultModelCompleteFlow` as a safe fallback/testing instance.
+
+### Features
+
+* Implemented canonical **Map-based** storage and JSON contract: `stepsByIndex` (`Map<int, ModelFlowStep>`), serialized as a JSON map keyed by step index as **string** (e.g., `"10"`).
+* Implemented deterministic, **roundtrip-safe** JSON serialization/deserialization:
+
+    * Defensive parsing using `Utils.*FromDynamic`.
+    * Stable emission order using `stepsSorted` (sorted by index).
+    * Lenient `fromJson` that never throws and applies safe defaults.
+
+### Immutability
+
+* Ensured deep immutability:
+
+    * `stepsByIndex` is stored as `Map<int, ModelFlowStep>.unmodifiable`.
+    * Inserted/updated steps are normalized through `ModelCompleteFlow.asImmutableStep(...)` (internally leveraging `ModelFlowStep.immutable`).
+
+### Helpers
+
+* Added ergonomic helpers for diagram manipulation (immutable copy semantics):
+
+    * `stepsSorted` for stable UI/export ordering.
+    * `entryIndex` to determine the diagram entry point (smallest index, or `-1` if empty).
+    * `stepAt(int index)` to retrieve a step by index.
+    * `upsertStep(ModelFlowStep step)` to insert/update by `step.index`.
+    * `removeStepAt(int index)` and `removeStep(ModelFlowStep step)` to delete steps.
+
+### Behavior and Contracts
+
+* Enforced END semantics:
+
+    * Steps with `index < 0` (including `-1`) are ignored and not stored.
+    * `index == -1` remains reserved exclusively as an END target for routing.
+
+### Equality & Hashing
+
+* Added value-based equality and hashing for `ModelCompleteFlow`:
+
+    * `operator ==` compares `name`, `description`, and deep equality for `stepsByIndex` via `Utils.deepEqualsDynamic`.
+    * `hashCode` uses `Object.hash(...)` plus `Utils.deepHash(stepsByIndex)`.
+
+### Documentation
+
+* Added comprehensive DartDoc to `ModelCompleteFlow` including usage guidance, immutability guarantees, JSON contract shape, and an executable `main()` example.
+
+### Tests
+
+* Added unit tests for `ModelCompleteFlow` covering:
+
+    * Map-based JSON roundtrip (toJson/fromJson).
+    * END semantics (`index < 0` ignored).
+    * Deep immutability (unmodifiable collections).
+    * `copyWith()` returning the same instance when no changes are requested.
+    * `upsertStep`/`removeStepAt` behaviors (including no-op returning `this`).
+    * `entryIndex`, `stepsSorted`, and `hashCode` consistency.
+
+
 ## [1.34.0] - 2025-12-08
 
 > **Release acumulada.** Consolida los cambios de **1.33.1** → **1.33.3** sin adiciones extra.  
