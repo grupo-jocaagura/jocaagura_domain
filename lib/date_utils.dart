@@ -61,4 +61,33 @@ class DateUtils {
   static String dateTimeToString(DateTime dateTime) {
     return dateTime.toIso8601String();
   }
+
+  static String normalizeIsoOrEmpty(Object? value) {
+    if (value == null) {
+      return '';
+    }
+
+    if (value is DateTime) {
+      final DateTime utc = value.isUtc ? value : value.toUtc();
+      return DateUtils.dateTimeToString(utc);
+    }
+
+    if (value is int) {
+      final DateTime utc = DateTime.fromMillisecondsSinceEpoch(value).toUtc();
+      return DateUtils.dateTimeToString(utc);
+    }
+
+    final String s = Utils.getStringFromDynamic(value).trim();
+    if (s.isEmpty) {
+      return '';
+    }
+
+    final DateTime? parsed = DateTime.tryParse(s);
+    if (parsed == null) {
+      return s;
+    }
+
+    final DateTime utc = parsed.isUtc ? parsed : parsed.toUtc();
+    return DateUtils.dateTimeToString(utc);
+  }
 }

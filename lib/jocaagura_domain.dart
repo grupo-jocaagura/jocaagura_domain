@@ -33,12 +33,15 @@ export 'src/repositories/repository_ws_database_impl.dart';
 
 part 'date_utils.dart';
 part 'domain/address_model.dart';
+part 'domain/apps/model_acl.dart';
 part 'domain/apps/model_app_version.dart';
 part 'domain/attribute_model.dart';
 part 'domain/bloc.dart';
 part 'domain/bloc_core.dart';
 part 'domain/bloc_general.dart';
 part 'domain/bloc_module.dart';
+part 'domain/blocs/bloc_acl_interface.dart';
+part 'domain/blocs/bloc_app_version_interface.dart';
 part 'domain/blocs/bloc_connectivity.dart';
 part 'domain/blocs/bloc_http_request.dart';
 part 'domain/blocs/bloc_loading.dart';
