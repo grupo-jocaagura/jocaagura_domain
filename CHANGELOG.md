@@ -3,6 +3,56 @@
 This document follows the guidelines of [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.36.0] - 2026-01-03
+
+### Added
+
+* **ACL domain model (`ModelAcl`)**
+
+    * New immutable `ModelAcl` with robust JSON round-trip (`toJson` / `fromJson`) using `Utils` and `DateUtils.normalizeIsoOrEmpty`.
+    * Trust helpers: `isValidAcl`, `autorizedAtDateTime`, `revokedAtDateTime` to let consumers verify authorization reliability.
+    * `copyWith` optimization: returns the same instance when called with all-`null` arguments (no new allocation).
+
+* **Date normalization helper**
+
+    * Added `DateUtils.normalizeIsoOrEmpty(Object? value)` to normalize `DateTime`/`int`/ISO strings to UTC ISO-8601 when parseable, keep empty as `''`, and preserve raw strings when not parseable.
+
+* **ACL BLoC contract (`BlocAclInterface`)**
+
+    * Introduced a minimal, implementation-agnostic interface for ACL management:
+
+        * `findAcl`, `resolveRoleType`, `upsertAcl`, `getAllAcls`.
+    * Built-in consistency helpers: `featureKey`, `canTrust`, `hasAtLeast` (with deterministic role ranking).
+
+* **App Version BLoC contract (`BlocAppVersionInterface`)**
+
+    * Introduced a minimal, implementation-agnostic interface for `ModelAppVersion` management with CRUD + listing:
+
+        * `findById`, `findByKey`, `listByAppName`, `listAll`, `upsert`, `readById`, `deleteById`.
+    * Built-in consistency helpers:
+
+        * `versionKey` (canonical index key)
+        * `latestByBuildNumber`
+        * force-update helpers:
+
+            * `shouldForceUpdate` (buildNumber strategy + optional `minSupportedBuildNumber`)
+            * `tryParseSemVer`
+            * `shouldForceUpdateBySemVerOrBuildNumber` (SemVer when parseable, otherwise buildNumber)
+
+### Tests
+
+* Added unit tests for `ModelAcl` covering:
+
+    * JSON parsing/serialization, date normalization behavior, trust validation (`isValidAcl`), DateTime getters, equality/hashCode, and `copyWith` optimization.
+* Added unit tests for `BlocAclInterface` defaults/helpers using a lightweight in-memory fake.
+* Added unit tests for `BlocAppVersionInterface` helpers using a lightweight in-memory fake:
+
+    * `versionKey`, `latestByBuildNumber`, force-update helpers, and SemVer parsing.
+
+### Notes
+
+* Interfaces remain storage-agnostic (Sheets/REST/cache/streams are implementation-defined) while providing deterministic helper behavior for consistent domain usage.
+
 ## [1.35.0] - 2025-12-18
 
 ### Added
