@@ -3,6 +3,30 @@
 This document follows the guidelines of [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.37.0] - 2026-01-14
+
+### Added
+- **REST – Advanced Simulation System**
+    - **Sim engine** para API REST con escenarios declarativos (JSON/Dart):
+        - *Matchers* por **método/ruta/query/headers/body** y prioridad de coincidencia.
+        - **Canned responses** con plantillas, variables y `seed` determinista.
+        - **Latencia** configurable (constante, rango, distribución) y **jitter**.
+        - **Fallos**: `timeout`, `offline`, `http 4xx/5xx`, `bad-json`, *disconnect mid-body*.
+        - **Estado**: secuencias stateful por *endpoint* (p. ej., login → token → expira).
+        - **Paginación** y **rate-limit** simulados (`429`, `Retry-After`).
+        - **Auth**: escenarios para `401/403`, expiración y *refresh* opcional.
+        - **Record/Replay** opcional para capturar respuestas reales y reusarlas en pruebas.
+    - **APIs públicas**
+        - `FakeRestService` / `FakeRestConfig`: motor y configuración de escenarios.
+        - `RestScenario`, `RestMatcher`, `RestAction`, `RestResponseTemplate`.
+        - *Hooks* para inspección y métricas (contador de invocaciones, último *match*).
+    - **Error mapping** integrado con `DefaultHttpErrorMapper` (añade `meta.transport='http'` y códigos HTTP canónicos).
+
+- **Example – REST Simulation**
+    - `bloc_rest_simulation_example.dart`: demo end-to-end (**Service → Gateway → Repository → Usecases → BlocHttpRequest**) que muestra:
+        - GET/POST/PUT/DELETE con paginación, `401→refresh→retry`, `429→Retry-After`, `timeout`, `bad-json`.
+        - Panel de **requests activas** (`BlocHttpRequest`) y *trace* por petición.
+        - Conmutador de escenarios en caliente (dev).
 ## [1.36.0] - 2026-01-03
 
 ### Added
