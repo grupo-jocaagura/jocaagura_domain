@@ -58,10 +58,13 @@
 // (throwOnPost/route error/StateError) or the mapper couldn't recognize the payload.
 // Start by forcing throwOnPost/Put/Delete to false in FakeHttpRequestConfig.
 
+// ignore_for_file: unnecessary_null_comparison
+
 import 'dart:async';
+import 'dart:convert';
 import 'dart:math';
 
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide DateUtils;
 import 'package:jocaagura_domain/jocaagura_domain.dart';
 
 void main() {
@@ -97,17 +100,20 @@ class ServiceHttpRequestAdapter implements ServiceHttpRequest {
     Duration? timeout,
     Map<String, dynamic> metadata = const <String, dynamic>{},
   }) {
-    // Metadata is "out-of-band" information used by the pipeline (feature, operation, ids, etc).
-    // In a real HTTP client you might forward it in headers or tracing context.
-    // Here we keep the URL clean and place it in an x-tags header just for demo visibility.
-    final Map<String, String> mergedHeaders = <String, String>{
+    final Map<String, String> metaHeaders =
+        Utils.mapFromDynamic(metadata['headers'])
+            .map((String k, dynamic v) => MapEntry<String, String>(k, '$v'));
+
+    final Map<String, dynamic> mergedHeaders = <String, dynamic>{
       ...?headers,
+      ...metaHeaders,
       if (metadata.isNotEmpty) 'x-tags': metadata.toString(),
     };
 
     return _service.get(
       url: uri.toString(),
-      headers: mergedHeaders.isEmpty ? null : mergedHeaders,
+      headers:
+          mergedHeaders.isEmpty ? null : mergedHeaders.cast<String, String>(),
     );
   }
 
@@ -118,19 +124,20 @@ class ServiceHttpRequestAdapter implements ServiceHttpRequest {
     Map<String, dynamic>? body,
     Duration? timeout,
     Map<String, dynamic> metadata = const <String, dynamic>{},
-  }) {
-    // We include metadata in-body to make it available to the VirtualCrudService
-    // during simulation. In real apps you might NOT do this.
+  }) async {
     final Map<String, dynamic> jsonBody = <String, dynamic>{
       ...?body,
       'metadata': metadata,
     };
 
-    return _service.post(
+    final Map<String, dynamic> res = await _service.post(
       url: uri.toString(),
       headers: headers,
       body: jsonBody,
     );
+
+    debugPrint('ServiceHttpRequestAdapter.post RESPONSE => $res');
+    return res;
   }
 
   @override
@@ -146,11 +153,13 @@ class ServiceHttpRequestAdapter implements ServiceHttpRequest {
       'metadata': metadata,
     };
 
-    return _service.put(
+    final Future<Map<String, dynamic>> res = _service.put(
       url: uri.toString(),
       headers: headers,
       body: jsonBody,
     );
+    debugPrint('ServiceHttpRequestAdapter.put RESPONSE => $res');
+    return res;
   }
 
   @override
@@ -160,11 +169,6 @@ class ServiceHttpRequestAdapter implements ServiceHttpRequest {
     Duration? timeout,
     Map<String, dynamic> metadata = const <String, dynamic>{},
   }) async {
-    // ServiceHttp.delete(...) is void.
-    // To keep the upper layers consistent (they expect a Map payload),
-    // we convert:
-    // - success -> a 204 canned response payload
-    // - failure (exception) -> a 5xx canned response payload (or a mapping you prefer)
     try {
       await _service.delete(url: uri.toString(), headers: headers);
 
@@ -177,19 +181,17 @@ class ServiceHttpRequestAdapter implements ServiceHttpRequest {
         timeout: timeout,
       );
     } catch (e) {
-      // In simulation, DELETE failures are best represented as exceptions thrown by:
-      // - FakeHttpRequestConfig throwOnDelete / errorRoutes
-      // - or the VirtualCrudService implementation
-      //
-      // If you want finer control, you can inspect the exception type and map codes.
       return FakeHttpRequestConfig.cannedHttpResponse(
         method: HttpMethodEnum.delete,
         uri: uri,
         statusCode: 500,
         reasonPhrase: 'Virtual Delete Error',
+        body: <String, dynamic>{
+          'code': 'delete_error',
+          'message': e.toString(),
+        },
         metadata: <String, dynamic>{
           ...metadata,
-          'exception': e.toString(),
           'source': 'ServiceHttpRequestAdapter.delete',
         },
         timeout: timeout,
@@ -203,139 +205,6 @@ class ServiceHttpRequestAdapter implements ServiceHttpRequest {
 // ============================================================================
 // 10) CatPatient REST virtual service + models
 // ============================================================================
-
-class CatPatient {
-  const CatPatient({
-    required this.id,
-    required this.name,
-    required this.animalType,
-    required this.gender,
-    required this.weightKg,
-    required this.createdAt,
-    required this.updatedAt,
-    this.breed,
-    this.color,
-    this.birthDate,
-    this.ageYears,
-    this.microchipId,
-    this.isSterilized,
-    this.status = 'active',
-    this.owner,
-    this.energy,
-    this.intelligence,
-    this.joyful,
-    this.hygiene,
-    this.clinical = const <String, dynamic>{},
-    this.vaccinations = const <Map<String, dynamic>>[],
-    this.visits = const <Map<String, dynamic>>[],
-    this.notes,
-  });
-
-  final String id;
-  final String name;
-  final String animalType; // 'feline'
-  final String gender; // 'male' | 'female'
-  final double weightKg;
-  final String createdAt; // date-time
-  final String updatedAt; // date-time
-
-  final String? breed;
-  final String? color;
-  final String? birthDate; // YYYY-MM-DD
-  final double? ageYears;
-  final String? microchipId;
-  final bool? isSterilized;
-  final String status; // active|inactive|deceased
-
-  final Map<String, dynamic>? owner;
-
-  final double? energy;
-  final double? intelligence;
-  final double? joyful;
-  final double? hygiene;
-
-  final Map<String, dynamic> clinical;
-  final List<Map<String, dynamic>> vaccinations;
-  final List<Map<String, dynamic>> visits;
-
-  final String? notes;
-
-  Map<String, dynamic> toJson() {
-    return <String, dynamic>{
-      'id': id,
-      'name': name,
-      'animalType': animalType,
-      'gender': gender,
-      'breed': breed,
-      'color': color,
-      'birthDate': birthDate,
-      'ageYears': ageYears,
-      'weightKg': weightKg,
-      'microchipId': microchipId,
-      'isSterilized': isSterilized,
-      'status': status,
-      'owner': owner == null ? null : Utils.mapFromDynamic(owner),
-      'energy': energy,
-      'intelligence': intelligence,
-      'joyful': joyful,
-      'hygiene': hygiene,
-      'clinical': Utils.mapFromDynamic(clinical),
-      'vaccinations': vaccinations
-          .map((Map<String, dynamic> e) => Utils.mapFromDynamic(e))
-          .toList(),
-      'visits': visits
-          .map((Map<String, dynamic> e) => Utils.mapFromDynamic(e))
-          .toList(),
-      'notes': notes,
-      'createdAt': createdAt,
-      'updatedAt': updatedAt,
-    };
-  }
-
-  static CatPatient fromJson(Map<String, dynamic> json) {
-    return CatPatient(
-      id: (json['id'] as String?) ?? '',
-      name: (json['name'] as String?) ?? '',
-      animalType: (json['animalType'] as String?) ?? 'feline',
-      gender: (json['gender'] as String?) ?? 'male',
-      weightKg: ((json['weightKg'] as num?) ?? 0).toDouble(),
-      createdAt:
-          (json['createdAt'] as String?) ?? DateTime.now().toIso8601String(),
-      updatedAt:
-          (json['updatedAt'] as String?) ?? DateTime.now().toIso8601String(),
-      breed: json['breed'] as String?,
-      color: json['color'] as String?,
-      birthDate: json['birthDate'] as String?,
-      ageYears: (json['ageYears'] as num?)?.toDouble(),
-      microchipId: json['microchipId'] as String?,
-      isSterilized: json['isSterilized'] as bool?,
-      status: (json['status'] as String?) ?? 'active',
-      owner: json['owner'] is Map
-          ? Utils.mapFromDynamic(json['owner'] as Map<dynamic, dynamic>)
-          : null,
-      energy: (json['energy'] as num?)?.toDouble(),
-      intelligence: (json['intelligence'] as num?)?.toDouble(),
-      joyful: (json['joyful'] as num?)?.toDouble(),
-      hygiene: (json['hygiene'] as num?)?.toDouble(),
-      clinical: json['clinical'] is Map
-          ? Utils.mapFromDynamic(json['clinical'] as Map<dynamic, dynamic>)
-          : const <String, dynamic>{},
-      vaccinations: (json['vaccinations'] is List)
-          ? (json['vaccinations'] as List<dynamic>)
-              .whereType<Map<dynamic, dynamic>>()
-              .map((Map<dynamic, dynamic> e) => Utils.mapFromDynamic(e))
-              .toList()
-          : const <Map<String, dynamic>>[],
-      visits: (json['visits'] is List)
-          ? (json['visits'] as List<dynamic>)
-              .whereType<Map<dynamic, dynamic>>()
-              .map((Map<dynamic, dynamic> e) => Utils.mapFromDynamic(e))
-              .toList()
-          : const <Map<String, dynamic>>[],
-      notes: json['notes'] as String?,
-    );
-  }
-}
 
 class VetCatsVirtualCrudService implements VirtualCrudService {
   VetCatsVirtualCrudService({required this.baseUri}) {
@@ -358,7 +227,9 @@ class VetCatsVirtualCrudService implements VirtualCrudService {
     // - It prevents this service from handling requests outside its baseUri scope.
     // - In bigger simulations you can register multiple VirtualCrudService instances
     //   (cats, dogs, billing, auth, etc.) and the fake will dispatch in order.
-
+    debugPrint(
+      'canHandle checking ${ctx.method} ${ctx.uri} against base $baseUri',
+    );
     final bool sameHost = ctx.uri.host == baseUri.host;
     final bool sameScheme = ctx.uri.scheme == baseUri.scheme;
 
@@ -367,18 +238,21 @@ class VetCatsVirtualCrudService implements VirtualCrudService {
     final bool samePort = ctx.uri.port == baseUri.port;
 
     if (!sameHost || !sameScheme || !samePort) {
+      debugPrint('canHandle: host/scheme/port mismatch');
       return false;
     }
 
     // Route namespace:
     // - /v1/cats...
     final List<String> seg = ctx.uri.pathSegments;
+    debugPrint('canHandle: path segments = $seg');
     if (seg.length < 2) {
       return false;
     }
     if (seg[0] != 'v1') {
       return false;
     }
+    debugPrint('canHandle: resource = ${seg[1]}');
     return seg[1] == 'cats';
   }
 
@@ -393,7 +267,9 @@ class VetCatsVirtualCrudService implements VirtualCrudService {
     //
     // If your real backend does NOT return a Jocaagura-friendly shape,
     // you can still model it here and swap the mapper above.
-
+    debugPrint(
+      'handle processing ${ctx.method} ${ctx.uri} with body=${ctx.body}',
+    );
     final String method = ctx.method.toUpperCase();
     final List<String> seg = ctx.uri.pathSegments;
 
@@ -409,6 +285,7 @@ class VetCatsVirtualCrudService implements VirtualCrudService {
         return _handleList(ctx);
       }
       if (method == 'POST') {
+        debugPrint('Handling CREATE cat patient - POST');
         return _handleCreate(ctx);
       }
     }
@@ -529,7 +406,7 @@ class VetCatsVirtualCrudService implements VirtualCrudService {
   }) {
     // Jocaagura-friendly response: designed to be mapped into ModelConfigHttpRequest
     // and then consumed as Either<ErrorItem, ModelConfigHttpRequest>.
-    return FakeHttpRequestConfig.cannedHttpResponse(
+    final Map<String, dynamic> raw = FakeHttpRequestConfig.cannedHttpResponse(
       method: method,
       uri: uri,
       statusCode: statusCode,
@@ -541,6 +418,14 @@ class VetCatsVirtualCrudService implements VirtualCrudService {
         'resource': 'cats',
       },
     );
+
+    try {
+      jsonEncode(raw);
+    } catch (e) {
+      debugPrint('WARNING: _okHttp produced non-JSON-safe payload: $e');
+    }
+
+    return Utils.mapFromDynamic(raw);
   }
 
   Map<String, dynamic> _failHttp({
@@ -551,26 +436,28 @@ class VetCatsVirtualCrudService implements VirtualCrudService {
     required String code,
     required String message,
   }) {
-    // Jocaagura-friendly error payload.
-    // IMPORTANT: This is an example contract. If you want "raw backend" style,
-    // return whatever your backend returns and adjust the mapper.
-    return <String, dynamic>{
-      'ok': false,
-      'code': code,
-      'message': message,
-      'statusCode': statusCode,
-      'reasonPhrase': reason,
-      'method': method.name,
-      'uri': uri.toString(),
-      'headers': const <String, String>{'content-type': 'application/json'},
-      'body': const <String, dynamic>{},
-      'metadata': const <String, dynamic>{
+    final Map<String, dynamic> base = FakeHttpRequestConfig.cannedHttpResponse(
+      method: method,
+      uri: uri,
+      statusCode: statusCode,
+      reasonPhrase: reason,
+      metadata: const <String, dynamic>{
         'source': 'VetCatsVirtualCrudService',
       },
-      'timeout': null,
-      'fake': true,
-      'source': 'FakeHttpRequest',
-    };
+    );
+
+    return Utils.mapFromDynamic(<String, dynamic>{
+      ...base,
+      'ok': false, // <- Case 3 del mapper
+      'code': code, // <- Case 2 del mapper
+      'message': message, // <- Case 2 del mapper
+      // opcional: también soporta Case 1
+      'error': <String, dynamic>{
+        'code': code,
+        'message': message,
+        'title': reason,
+      },
+    });
   }
 
   Map<String, dynamic> _handleList(RequestContext ctx) {
@@ -608,12 +495,15 @@ class VetCatsVirtualCrudService implements VirtualCrudService {
   }
 
   Map<String, dynamic> _handleCreate(RequestContext ctx) {
+    debugPrint('Creating new cat patient... started');
     final Map<String, dynamic> body = ctx.body ?? const <String, dynamic>{};
-    final String name = (body['name'] as String?)?.trim() ?? '';
-    final String gender = (body['gender'] as String?) ?? 'male';
-    final num? weight = body['weightKg'] as num?;
-    final String? birthDate = body['birthDate'] as String?;
-    final num? ageYears = body['ageYears'] as num?;
+    final String name = Utils.getStringFromDynamic(body['name']).trim();
+    debugPrint('Creating cat patient with name="$name"');
+    final String gender = Utils.getStringFromDynamic(body['gender']);
+    final double weight = Utils.getDouble(body['weightKg']);
+    final String birthDate = Utils.getStringFromDynamic(body['birthDate']);
+    final double ageYears = Utils.getDouble(body['ageYears']);
+    debugPrint('Creating cat patient with name="$name"');
     if (name.isEmpty) {
       return _failHttp(
         method: HttpMethodEnum.post,
@@ -635,7 +525,7 @@ class VetCatsVirtualCrudService implements VirtualCrudService {
       );
     }
 
-    if (weight == null || weight.toDouble() < 0.1) {
+    if (weight < 0.1) {
       return _failHttp(
         method: HttpMethodEnum.post,
         uri: ctx.uri,
@@ -664,27 +554,23 @@ class VetCatsVirtualCrudService implements VirtualCrudService {
       name: name,
       animalType: 'feline',
       gender: gender,
-      weightKg: weight.toDouble(),
+      weightKg: weight,
       createdAt: now.toIso8601String(),
       updatedAt: now.toIso8601String(),
-      breed: body['breed'] as String?,
-      color: body['color'] as String?,
+      breed: Utils.getStringFromDynamic(body['breed']),
+      color: Utils.getStringFromDynamic(body['color']),
       birthDate: birthDate,
-      ageYears: ageYears?.toDouble(),
-      microchipId: body['microchipId'] as String?,
-      isSterilized: body['isSterilized'] as bool?,
-      status: (body['status'] as String?) ?? 'active',
-      owner: body['owner'] is Map
-          ? Utils.mapFromDynamic(body['owner'] as Map<dynamic, dynamic>)
-          : null,
-      energy: (body['energy'] as num?)?.toDouble(),
-      intelligence: (body['intelligence'] as num?)?.toDouble(),
-      joyful: (body['joyful'] as num?)?.toDouble(),
-      hygiene: (body['hygiene'] as num?)?.toDouble(),
-      clinical: body['clinical'] is Map
-          ? Utils.mapFromDynamic(body['clinical'] as Map<dynamic, dynamic>)
-          : const <String, dynamic>{},
-      notes: body['notes'] as String?,
+      ageYears: ageYears,
+      microchipId: Utils.getStringFromDynamic(body['microchipId']),
+      isSterilized: Utils.getBoolFromDynamic(body['isSterilized']),
+      status: Utils.getStringFromDynamic(body['status']),
+      owner: Utils.mapFromDynamic(body['owner']),
+      energy: Utils.getDouble(body['energy']),
+      intelligence: Utils.getDouble(body['intelligence']),
+      joyful: Utils.getDouble(body['joyful']),
+      hygiene: Utils.getDouble(body['hygiene']),
+      clinical: Utils.mapFromDynamic(body['clinical']),
+      notes: Utils.getStringFromDynamic(body['notes']),
     );
 
     _db[id] = created;
@@ -713,8 +599,8 @@ class VetCatsVirtualCrudService implements VirtualCrudService {
     }
 
     final Map<String, dynamic> patch = ctx.body ?? const <String, dynamic>{};
-    final String name = (patch['name'] as String?)?.trim() ?? existing.name;
-    final num? weight = patch['weightKg'] as num?;
+    final String name = Utils.getStringFromDynamic(patch['name']);
+    final double weight = Utils.getDouble(patch['weightKg']);
 
     if (name.isEmpty) {
       return _failHttp(
@@ -726,7 +612,7 @@ class VetCatsVirtualCrudService implements VirtualCrudService {
         message: 'name cannot be empty',
       );
     }
-    if (weight != null && weight.toDouble() < 0.1) {
+    if (weight != null && weight < 0.1) {
       return _failHttp(
         method: HttpMethodEnum.put,
         uri: ctx.uri,
@@ -742,44 +628,43 @@ class VetCatsVirtualCrudService implements VirtualCrudService {
       id: existing.id,
       name: name,
       animalType: existing.animalType,
-      gender: (patch['gender'] as String?) ?? existing.gender,
-      weightKg: weight == null ? existing.weightKg : weight.toDouble(),
+      gender: Utils.getStringFromDynamic(patch['gender']),
+      weightKg: weight,
       createdAt: existing.createdAt,
       updatedAt: now.toIso8601String(),
       breed: patch.containsKey('breed')
-          ? patch['breed'] as String?
+          ? Utils.getStringFromDynamic(patch['breed'])
           : existing.breed,
       color: patch.containsKey('color')
-          ? patch['color'] as String?
+          ? Utils.getStringFromDynamic(patch['color'])
           : existing.color,
       birthDate: patch.containsKey('birthDate')
-          ? patch['birthDate'] as String?
+          ? Utils.getStringFromDynamic(patch['birthDate'])
           : existing.birthDate,
       ageYears: patch.containsKey('ageYears')
-          ? (patch['ageYears'] as num?)?.toDouble()
+          ? Utils.getDouble(patch['ageYears'])
           : existing.ageYears,
       microchipId: patch.containsKey('microchipId')
-          ? patch['microchipId'] as String?
+          ? Utils.getStringFromDynamic(patch['microchipId'])
           : existing.microchipId,
       isSterilized: patch.containsKey('isSterilized')
-          ? patch['isSterilized'] as bool?
+          ? Utils.getBoolFromDynamic(patch['isSterilized'])
           : existing.isSterilized,
-      status: (patch['status'] as String?) ?? existing.status,
+      status: Utils.getStringFromDynamic(patch['status']),
       owner: patch['owner'] is Map
-          ? Utils.mapFromDynamic(patch['owner'] as Map<dynamic, dynamic>)
+          ? Utils.mapFromDynamic(patch['owner'])
           : existing.owner,
-      energy: (patch['energy'] as num?)?.toDouble() ?? existing.energy,
-      intelligence:
-          (patch['intelligence'] as num?)?.toDouble() ?? existing.intelligence,
-      joyful: (patch['joyful'] as num?)?.toDouble() ?? existing.joyful,
-      hygiene: (patch['hygiene'] as num?)?.toDouble() ?? existing.hygiene,
+      energy: Utils.getDouble(patch['energy']),
+      intelligence: Utils.getDouble(patch['intelligence']),
+      joyful: Utils.getDouble(patch['joyful']),
+      hygiene: Utils.getDouble(patch['hygiene']),
       clinical: patch['clinical'] is Map
-          ? Utils.mapFromDynamic(patch['clinical'] as Map<dynamic, dynamic>)
+          ? Utils.mapFromDynamic(patch['clinical'])
           : existing.clinical,
       vaccinations: existing.vaccinations,
       visits: existing.visits,
       notes: patch.containsKey('notes')
-          ? patch['notes'] as String?
+          ? Utils.getStringFromDynamic(patch['notes'])
           : existing.notes,
     );
 
@@ -850,15 +735,16 @@ class _PetShopAppState extends State<PetShopApp> {
   late final RepositoryHttpRequest _repository;
   late final FacadeHttpRequestUsecases _facade;
   late final BlocHttpRequest _bloc;
-
+  late final VetCatsVirtualCrudService catsService;
+  late final AuthUsersVirtualCrudService usersService;
   final Uri _baseUri = Uri.parse('https://petshop.jocaagura.dev');
 
   @override
   void initState() {
     super.initState();
 
-    final VetCatsVirtualCrudService catsService =
-        VetCatsVirtualCrudService(baseUri: _baseUri);
+    catsService = VetCatsVirtualCrudService(baseUri: _baseUri);
+    usersService = AuthUsersVirtualCrudService(baseUri: _baseUri);
 
     // Optional: demonstrate per-route canned errors by config:
     // final FakeHttpRequestConfig config = FakeHttpRequestConfig(
@@ -868,12 +754,21 @@ class _PetShopAppState extends State<PetShopApp> {
     //   latency: const Duration(milliseconds: 250),
     // );
 
-    const FakeHttpRequestConfig config = FakeHttpRequestConfig(
-      latency: Duration(milliseconds: 200),
+    final FakeHttpRequestConfig config = FakeHttpRequestConfig(
+      latency: const Duration(milliseconds: 200),
+      errorRoutes: <String, String>{
+        'POST ${_baseUri.replace(path: '/v1/auth/login')}':
+            'Forced login route error',
+        'GET ${_baseUri.replace(path: '/v1/users/me')}':
+            'Forced me route error',
+      },
     );
 
     _fakeHttp = JocaaguraFakeHttpRequest(
-      services: <VirtualCrudService>[catsService],
+      services: <VirtualCrudService>[
+        catsService,
+        usersService,
+      ],
       config: config,
     );
 
@@ -907,7 +802,7 @@ class _PetShopAppState extends State<PetShopApp> {
       theme: ThemeData(useMaterial3: true, colorSchemeSeed: Colors.teal),
       home: VetCatsHome(
         baseUri: _baseUri,
-        bloc: _bloc,
+        blocHttpVet: _bloc,
       ),
     );
   }
@@ -916,12 +811,12 @@ class _PetShopAppState extends State<PetShopApp> {
 class VetCatsHome extends StatefulWidget {
   const VetCatsHome({
     required this.baseUri,
-    required this.bloc,
+    required this.blocHttpVet,
     super.key,
   });
 
   final Uri baseUri;
-  final BlocHttpRequest bloc;
+  final BlocHttpRequest blocHttpVet;
 
   @override
   State<VetCatsHome> createState() => _VetCatsHomeState();
@@ -952,6 +847,108 @@ class _VetCatsHomeState extends State<VetCatsHome> {
   final TextEditingController _genderCtrl =
       TextEditingController(text: 'female');
   final TextEditingController _ageYearsCtrl = TextEditingController(text: '1');
+  final TextEditingController _emailCtrl =
+      TextEditingController(text: 'albert@example.com');
+  final TextEditingController _passCtrl = TextEditingController(text: '1234');
+
+  String? _bearerToken;
+  UserModel? _currentUser;
+  Uri _loginUri() => widget.baseUri.replace(path: '/v1/auth/login');
+  Uri _meUri() => widget.baseUri.replace(path: '/v1/users/me');
+
+  Future<void> _login() async {
+    setState(() => _error = null);
+
+    final Map<String, dynamic> body = <String, dynamic>{
+      'email': _emailCtrl.text.trim(),
+      'password': _passCtrl.text.trim(),
+    };
+    final Either<ErrorItem, ModelConfigHttpRequest> r =
+        await widget.blocHttpVet.post(
+      requestKey: 'auth.login',
+      uri: _loginUri(),
+      body: body,
+      metadata: const <String, dynamic>{
+        'feature': 'auth',
+        'operation': 'login',
+      },
+    );
+
+    r.fold(
+      (ErrorItem e) => setState(() => _error = e.toString()),
+      (ModelConfigHttpRequest cfg) {
+        _lastConfig = cfg;
+
+        // Esperado desde el VirtualService:
+        // body: { user: <json>, jwt: <map> }
+        final Object? jwtObj = cfg.body['jwt'];
+        final Object? userObj = cfg.body['user'];
+
+        String? token;
+        if (jwtObj is Map) {
+          token = Utils.getStringFromDynamic(jwtObj['token']);
+        }
+
+        if (token == null || token.isEmpty) {
+          setState(
+            () => _error =
+                'Login OK pero no llegó token en cfg.body["jwt"].token',
+          );
+          return;
+        }
+
+        final UserModel? user = (userObj is Map)
+            ? UserModel.fromJson(Utils.mapFromDynamic(userObj))
+            : null;
+
+        setState(() {
+          _bearerToken = token;
+          _currentUser = user;
+        });
+      },
+    );
+  }
+
+  Future<void> _loadMe() async {
+    setState(() => _error = null);
+
+    final String? token = _bearerToken;
+    if (token == null) {
+      setState(() => _error = 'Primero haz Login para obtener token');
+      return;
+    }
+
+    final Either<ErrorItem, ModelConfigHttpRequest> r =
+        await widget.blocHttpVet.get(
+      requestKey: 'users.me',
+      uri: _meUri(),
+      metadata: <String, dynamic>{
+        'feature': 'auth',
+        'operation': 'me',
+        'headers': <String, String>{
+          'Authorization': 'Bearer $token',
+        },
+      },
+    );
+
+    r.fold(
+      (ErrorItem e) => setState(() => _error = e.toString()),
+      (ModelConfigHttpRequest cfg) {
+        _lastConfig = cfg;
+
+        final Object? userObj = cfg.body['user'];
+        if (userObj is Map) {
+          final UserModel user =
+              UserModel.fromJson(Utils.mapFromDynamic(userObj));
+          setState(() => _currentUser = user);
+        } else {
+          setState(
+            () => _error = 'Me OK pero no llegó user en cfg.body["user"]',
+          );
+        }
+      },
+    );
+  }
 
   @override
   void initState() {
@@ -965,6 +962,9 @@ class _VetCatsHomeState extends State<VetCatsHome> {
     _weightCtrl.dispose();
     _genderCtrl.dispose();
     _ageYearsCtrl.dispose();
+    _emailCtrl.dispose();
+    _passCtrl.dispose();
+
     super.dispose();
   }
 
@@ -978,7 +978,8 @@ class _VetCatsHomeState extends State<VetCatsHome> {
       _error = null;
     });
 
-    final Either<ErrorItem, ModelConfigHttpRequest> r = await widget.bloc.get(
+    final Either<ErrorItem, ModelConfigHttpRequest> r =
+        await widget.blocHttpVet.get(
       requestKey: 'vet.cats.list',
       uri: _catsUri(),
       metadata: const <String, dynamic>{
@@ -1025,7 +1026,8 @@ class _VetCatsHomeState extends State<VetCatsHome> {
       _error = null;
     });
 
-    final Either<ErrorItem, ModelConfigHttpRequest> r = await widget.bloc.get(
+    final Either<ErrorItem, ModelConfigHttpRequest> r =
+        await widget.blocHttpVet.get(
       requestKey: 'vet.cats.get.$id',
       uri: _catsUri(id),
       metadata: <String, dynamic>{
@@ -1072,7 +1074,8 @@ class _VetCatsHomeState extends State<VetCatsHome> {
       'notes': 'Created from Flutter demo',
     };
 
-    final Either<ErrorItem, ModelConfigHttpRequest> r = await widget.bloc.post(
+    final Either<ErrorItem, ModelConfigHttpRequest> r =
+        await widget.blocHttpVet.post(
       requestKey: 'vet.cats.create',
       uri: _catsUri(),
       body: body,
@@ -1114,7 +1117,8 @@ class _VetCatsHomeState extends State<VetCatsHome> {
       'updatedBy': 'flutter-demo',
     };
 
-    final Either<ErrorItem, ModelConfigHttpRequest> r = await widget.bloc.put(
+    final Either<ErrorItem, ModelConfigHttpRequest> r =
+        await widget.blocHttpVet.put(
       requestKey: 'vet.cats.update.$id',
       uri: _catsUri(id),
       body: patch,
@@ -1143,7 +1147,7 @@ class _VetCatsHomeState extends State<VetCatsHome> {
     setState(() => _error = null);
 
     final Either<ErrorItem, ModelConfigHttpRequest> r =
-        await widget.bloc.delete(
+        await widget.blocHttpVet.delete(
       requestKey: 'vet.cats.delete.$id',
       uri: _catsUri(id),
       metadata: <String, dynamic>{
@@ -1173,7 +1177,8 @@ class _VetCatsHomeState extends State<VetCatsHome> {
 
     setState(() => _error = null);
 
-    final Either<ErrorItem, ModelConfigHttpRequest> r = await widget.bloc.retry(
+    final Either<ErrorItem, ModelConfigHttpRequest> r =
+        await widget.blocHttpVet.retry(
       requestKey: 'vet.retry.${Random().nextInt(9999)}',
       previousConfig: last,
       extraMetadata: const <String, dynamic>{'retry': true},
@@ -1204,8 +1209,8 @@ class _VetCatsHomeState extends State<VetCatsHome> {
         title: const Text('Vet API • Cat Patients'),
         actions: <Widget>[
           StreamBuilder<Set<String>>(
-            stream: widget.bloc.stream,
-            initialData: widget.bloc.activeRequests,
+            stream: widget.blocHttpVet.stream,
+            initialData: widget.blocHttpVet.activeRequests,
             builder: (BuildContext context, AsyncSnapshot<Set<String>> snap) {
               final bool busy = (snap.data ?? const <String>{}).isNotEmpty;
               return Padding(
@@ -1338,6 +1343,63 @@ class _VetCatsHomeState extends State<VetCatsHome> {
                             ),
                           ],
                         ),
+                        Text(
+                          'Auth (demo)',
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
+                        const SizedBox(height: 8),
+                        Row(
+                          children: <Widget>[
+                            Expanded(
+                              child: TextField(
+                                controller: _emailCtrl,
+                                decoration: const InputDecoration(
+                                  labelText: 'Email',
+                                  border: OutlineInputBorder(),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            SizedBox(
+                              width: 140,
+                              child: TextField(
+                                controller: _passCtrl,
+                                decoration: const InputDecoration(
+                                  labelText: 'Password',
+                                  border: OutlineInputBorder(),
+                                ),
+                                obscureText: true,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        Wrap(
+                          spacing: 10,
+                          children: <Widget>[
+                            ElevatedButton.icon(
+                              onPressed: _login,
+                              icon: const Icon(Icons.login),
+                              label: const Text('Login'),
+                            ),
+                            OutlinedButton.icon(
+                              onPressed: _loadMe,
+                              icon: const Icon(Icons.person),
+                              label: const Text('Me'),
+                            ),
+                          ],
+                        ),
+                        if (_bearerToken != null) ...<Widget>[
+                          const SizedBox(height: 8),
+                          Text('Token: ${_bearerToken!.substring(0, 16)}...'),
+                        ],
+                        if (_currentUser != null) ...<Widget>[
+                          const SizedBox(height: 8),
+                          Text(
+                            'User: ${_currentUser!.displayName} • ${_currentUser!.email}',
+                          ),
+                        ],
+                        const SizedBox(height: 16),
                         const SizedBox(height: 16),
                         Text(
                           'Quick editor',
@@ -1478,4 +1540,450 @@ String _prettyJson(Map<String, dynamic> json) {
 
   writeAny(json, 0);
   return sb.toString();
+}
+
+class AuthUsersVirtualCrudService implements VirtualCrudService {
+  AuthUsersVirtualCrudService({required this.baseUri}) {
+    reset();
+  }
+
+  final Uri baseUri;
+
+  final Map<String, UserModel> _users = <String, UserModel>{};
+  final Map<String, Map<String, dynamic>> _tokens =
+      <String, Map<String, dynamic>>{};
+
+  @override
+  bool canHandle(RequestContext ctx) {
+    final bool sameHost = ctx.uri.host == baseUri.host;
+    final bool sameScheme = ctx.uri.scheme == baseUri.scheme;
+    final bool samePort = ctx.uri.port == baseUri.port;
+    if (!sameHost || !sameScheme || !samePort) {
+      return false;
+    }
+
+    final List<String> seg = ctx.uri.pathSegments;
+    if (seg.isEmpty) {
+      return false;
+    }
+    if (seg[0] != 'v1') {
+      return false;
+    }
+
+    // /v1/auth/...  o /v1/users...
+    return seg.length >= 2 && (seg[1] == 'auth' || seg[1] == 'users');
+  }
+
+  @override
+  Future<Map<String, dynamic>> handle(RequestContext ctx) async {
+    final String method = ctx.method.toUpperCase();
+    final List<String> seg = ctx.uri.pathSegments;
+
+    // POST /v1/auth/login
+    if (seg.length == 3 &&
+        seg[0] == 'v1' &&
+        seg[1] == 'auth' &&
+        seg[2] == 'login') {
+      if (method == 'POST') {
+        return _login(ctx);
+      }
+    }
+
+    // GET /v1/users/me
+    if (seg.length == 3 &&
+        seg[0] == 'v1' &&
+        seg[1] == 'users' &&
+        seg[2] == 'me') {
+      if (method == 'GET') {
+        return _me(ctx);
+      }
+    }
+
+    // GET /v1/users
+    if (seg.length == 2 && seg[0] == 'v1' && seg[1] == 'users') {
+      if (method == 'GET') {
+        return _list(ctx);
+      }
+    }
+
+    // GET /v1/users/:id
+    if (seg.length == 3 && seg[0] == 'v1' && seg[1] == 'users') {
+      if (method == 'GET') {
+        return _getById(seg[2], ctx);
+      }
+    }
+
+    throw StateError(
+      'AuthUsersVirtualCrudService cannot handle: ${ctx.method} ${ctx.uri}',
+    );
+  }
+
+  @override
+  void reset() {
+    _users.clear();
+    _tokens.clear();
+
+    final UserModel seeded = UserModel(
+      id: 'user-001',
+      displayName: 'Albert',
+      photoUrl: 'https://example.com/avatar.png',
+      email: 'albert@example.com',
+      jwt: <String, dynamic>{
+        'sub': 'user-001',
+        'roles': const <String>['ADMIN'],
+        'iat': DateTime.now().millisecondsSinceEpoch,
+      },
+    );
+
+    _users[seeded.id] = seeded;
+  }
+
+  // ---------------------------
+  // Helpers: ok/fail canned
+  // ---------------------------
+
+  Map<String, dynamic> _ok({
+    required HttpMethodEnum method,
+    required Uri uri,
+    required int statusCode,
+    required String reason,
+    required Map<String, dynamic> body,
+    Map<String, dynamic> metadata = const <String, dynamic>{},
+  }) {
+    return FakeHttpRequestConfig.cannedHttpResponse(
+      method: method,
+      uri: uri,
+      statusCode: statusCode,
+      reasonPhrase: reason,
+      body: body,
+      metadata: <String, dynamic>{
+        ...metadata,
+        'feature': 'auth',
+        'resource': 'users',
+      },
+    );
+  }
+
+  Map<String, dynamic> _fail({
+    required HttpMethodEnum method,
+    required Uri uri,
+    required int statusCode,
+    required String reason,
+    required String code,
+    required String message,
+  }) {
+    final Map<String, dynamic> base = FakeHttpRequestConfig.cannedHttpResponse(
+      method: method,
+      uri: uri,
+      statusCode: statusCode,
+      reasonPhrase: reason,
+      metadata: const <String, dynamic>{
+        'source': 'AuthUsersVirtualCrudService',
+      },
+    );
+
+    // Compatible con DefaultErrorMapper:
+    return <String, dynamic>{
+      ...base,
+      'ok': false,
+      'code': code,
+      'message': message,
+      'error': <String, dynamic>{
+        'code': code,
+        'message': message,
+        'title': reason,
+      },
+    };
+  }
+
+  // ---------------------------
+  // Endpoints
+  // ---------------------------
+
+  Map<String, dynamic> _login(RequestContext ctx) {
+    debugPrint('$ctx');
+    final Map<String, dynamic> body = ctx.body ?? const <String, dynamic>{};
+    final String email = Utils.getStringFromDynamic(body['email']);
+    final String password = Utils.getStringFromDynamic(body['password']);
+
+    if (email.isEmpty || password.isEmpty) {
+      return _fail(
+        method: HttpMethodEnum.post,
+        uri: ctx.uri,
+        statusCode: 422,
+        reason: 'Unprocessable Entity',
+        code: 'validation_error',
+        message: 'email and password are required',
+      );
+    }
+
+    // Demo rule:
+    // - password must be "1234"
+    if (password != '1234') {
+      return _fail(
+        method: HttpMethodEnum.post,
+        uri: ctx.uri,
+        statusCode: 401,
+        reason: 'Unauthorized',
+        code: 'invalid_credentials',
+        message: 'Invalid email or password',
+      );
+    }
+
+    // Find by email (simple)
+    final UserModel? user = _users.values
+        .cast<UserModel?>()
+        .firstWhere((UserModel? u) => u?.email == email, orElse: () => null);
+
+    if (user == null) {
+      return _fail(
+        method: HttpMethodEnum.post,
+        uri: ctx.uri,
+        statusCode: 404,
+        reason: 'Not Found',
+        code: 'user_not_found',
+        message: 'No user found for email=$email',
+      );
+    }
+
+    final String token =
+        'token-${DateTime.now().millisecondsSinceEpoch}-${user.id}';
+    final Map<String, dynamic> jwt = <String, dynamic>{
+      'token': token,
+      'sub': user.id,
+      'email': user.email,
+      'roles': <String>['ADMIN'],
+      'exp': DateTime.now().add(const Duration(hours: 2)).toIso8601String(),
+    };
+
+    _tokens[token] = jwt;
+
+    // devolvemos user con jwt “limpio” (o si prefieres, user.jwt = jwt)
+    final UserModel enriched = user.copyWith(jwt: jwt);
+
+    return _ok(
+      method: HttpMethodEnum.post,
+      uri: ctx.uri,
+      statusCode: 200,
+      reason: 'OK',
+      body: <String, dynamic>{
+        'user': enriched.toJson(),
+        'jwt': jwt,
+      },
+      metadata: <String, dynamic>{'issuedToken': token},
+    );
+  }
+
+  Map<String, dynamic> _me(RequestContext ctx) {
+    final String? token = _extractBearer(ctx.headers);
+    if (token == null) {
+      return _fail(
+        method: HttpMethodEnum.get,
+        uri: ctx.uri,
+        statusCode: 401,
+        reason: 'Unauthorized',
+        code: 'missing_token',
+        message: 'Authorization Bearer token is required',
+      );
+    }
+
+    final Map<String, dynamic>? jwt = _tokens[token];
+    if (jwt == null) {
+      return _fail(
+        method: HttpMethodEnum.get,
+        uri: ctx.uri,
+        statusCode: 401,
+        reason: 'Unauthorized',
+        code: 'invalid_token',
+        message: 'Token is invalid or expired (demo)',
+      );
+    }
+
+    final String userId = Utils.getStringFromDynamic(jwt['sub']);
+    final UserModel? user = _users[userId];
+    if (user == null) {
+      return _fail(
+        method: HttpMethodEnum.get,
+        uri: ctx.uri,
+        statusCode: 404,
+        reason: 'Not Found',
+        code: 'user_not_found',
+        message: 'No user found for sub=$userId',
+      );
+    }
+
+    final UserModel enriched = user.copyWith(jwt: jwt);
+
+    return _ok(
+      method: HttpMethodEnum.get,
+      uri: ctx.uri,
+      statusCode: 200,
+      reason: 'OK',
+      body: <String, dynamic>{'user': enriched.toJson()},
+    );
+  }
+
+  Map<String, dynamic> _list(RequestContext ctx) {
+    final List<Map<String, dynamic>> items =
+        _users.values.map((UserModel u) => u.toJson()).toList();
+
+    return _ok(
+      method: HttpMethodEnum.get,
+      uri: ctx.uri,
+      statusCode: 200,
+      reason: 'OK',
+      body: <String, dynamic>{'items': items},
+    );
+  }
+
+  Map<String, dynamic> _getById(String id, RequestContext ctx) {
+    final UserModel? user = _users[id];
+    if (user == null) {
+      return _fail(
+        method: HttpMethodEnum.get,
+        uri: ctx.uri,
+        statusCode: 404,
+        reason: 'Not Found',
+        code: 'user_not_found',
+        message: 'No user found with id=$id',
+      );
+    }
+
+    return _ok(
+      method: HttpMethodEnum.get,
+      uri: ctx.uri,
+      statusCode: 200,
+      reason: 'OK',
+      body: <String, dynamic>{'item': user.toJson()},
+    );
+  }
+
+  String? _extractBearer(Map<String, String>? headers) {
+    final String raw =
+        (headers?['Authorization'] ?? headers?['authorization'] ?? '').trim();
+    if (raw.isEmpty) {
+      return null;
+    }
+    if (!raw.toLowerCase().startsWith('bearer ')) {
+      return null;
+    }
+    return raw.substring(7).trim();
+  }
+}
+
+class CatPatient {
+  const CatPatient({
+    required this.id,
+    required this.name,
+    required this.animalType,
+    required this.gender,
+    required this.weightKg,
+    required this.createdAt,
+    required this.updatedAt,
+    this.breed,
+    this.color,
+    this.birthDate,
+    this.ageYears,
+    this.microchipId,
+    this.isSterilized,
+    this.status = 'active',
+    this.owner,
+    this.energy,
+    this.intelligence,
+    this.joyful,
+    this.hygiene,
+    this.clinical = const <String, dynamic>{},
+    this.vaccinations = const <Map<String, dynamic>>[],
+    this.visits = const <Map<String, dynamic>>[],
+    this.notes,
+  });
+
+  final String id;
+  final String name;
+  final String animalType; // 'feline'
+  final String gender; // 'male' | 'female'
+  final double weightKg;
+  final String createdAt; // date-time
+  final String updatedAt; // date-time
+
+  final String? breed;
+  final String? color;
+  final String? birthDate; // YYYY-MM-DD
+  final double? ageYears;
+  final String? microchipId;
+  final bool? isSterilized;
+  final String status; // active|inactive|deceased
+
+  final Map<String, dynamic>? owner;
+
+  final double? energy;
+  final double? intelligence;
+  final double? joyful;
+  final double? hygiene;
+
+  final Map<String, dynamic> clinical;
+  final List<Map<String, dynamic>> vaccinations;
+  final List<Map<String, dynamic>> visits;
+
+  final String? notes;
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'id': id,
+      'name': name,
+      'animalType': animalType,
+      'gender': gender,
+      'breed': breed,
+      'color': color,
+      'birthDate': birthDate,
+      'ageYears': ageYears,
+      'weightKg': weightKg,
+      'microchipId': microchipId,
+      'isSterilized': isSterilized,
+      'status': status,
+      'owner': owner == null ? null : Utils.mapFromDynamic(owner),
+      'energy': energy,
+      'intelligence': intelligence,
+      'joyful': joyful,
+      'hygiene': hygiene,
+      'clinical': Utils.mapFromDynamic(clinical),
+      'vaccinations': vaccinations
+          .map((Map<String, dynamic> e) => Utils.mapFromDynamic(e))
+          .toList(),
+      'visits': visits
+          .map((Map<String, dynamic> e) => Utils.mapFromDynamic(e))
+          .toList(),
+      'notes': notes,
+      'createdAt': createdAt,
+      'updatedAt': updatedAt,
+    };
+  }
+
+  static CatPatient fromJson(Map<String, dynamic> json) {
+    return CatPatient(
+      id: Utils.getStringFromDynamic(json['id']),
+      name: Utils.getStringFromDynamic(json['name']),
+      animalType: Utils.getStringFromDynamic(json['animalType']),
+      gender: Utils.getStringFromDynamic(json['gender']),
+      weightKg: Utils.getDouble(json['weightKg']),
+      createdAt: DateUtils.normalizeIsoOrEmpty(json['createdAt']),
+      updatedAt: DateUtils.normalizeIsoOrEmpty(json['updatedAt']),
+      breed: Utils.getStringFromDynamic(json['breed']),
+      color: Utils.getStringFromDynamic(json['color']),
+      birthDate: Utils.getStringFromDynamic(json['birthDate']),
+      ageYears: Utils.getDouble(json['ageYears']),
+      microchipId: Utils.getStringFromDynamic(json['microchipId']),
+      isSterilized: Utils.getBoolFromDynamic(json['isSterilized']),
+      status: Utils.getStringFromDynamic(json['status']),
+      owner: Utils.mapFromDynamic(json['owner']),
+      energy: Utils.getDouble(json['energy']),
+      intelligence: Utils.getDouble(json['intelligence']),
+      joyful: Utils.getDouble(json['joyful']),
+      hygiene: Utils.getDouble(json['hygiene']),
+      clinical: Utils.mapFromDynamic(json['clinical']),
+      vaccinations: Utils.listFromDynamic(json['vaccinations']),
+      visits: Utils.listFromDynamic(json['visits']),
+      notes: Utils.getStringFromDynamic(json['notes']),
+    );
+  }
 }
