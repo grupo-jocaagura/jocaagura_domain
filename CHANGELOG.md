@@ -3,6 +3,18 @@
 This document follows the guidelines of [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.38.0] - 2026-01-18
+
+### Added
+
+- Modelo ModelAclPolicy: política mínima de acceso por app/feature con serialización robusta y buildId.
+- Pruebas de ModelAclPolicy: buildId, jerarquía de roles, copyWith, fromJson/toJson y round-trip.
+- Suite de pruebas del ciclo de vida de Debouncer (cancelación, idempotencia y llamadas tras dispose()).
+
+### changed
+- Debouncer.dispose(): cancela timers pendientes y evita ejecuciones tras liberar la instancia.
+
+
 ## [1.37.0] - 2026-01-14
 
 ### Added
