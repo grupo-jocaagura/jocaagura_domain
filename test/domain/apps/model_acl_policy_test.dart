@@ -221,4 +221,191 @@ void main() {
       );
     });
   });
+  group('ModelAclPolicy.roleMeetsMin (full matrix)', () {
+    test(
+        'Given RoleType enum When used as hierarchy Then order is admin, editor, viewer',
+        () {
+      // Sentinel: if someone changes enum order, this should fail and force a conscious update.
+      expect(RoleType.values,
+          <RoleType>[RoleType.admin, RoleType.editor, RoleType.viewer]);
+    });
+
+    test('Given admin When min=admin Then meets', () {
+      expect(
+        ModelAclPolicy.roleMeetsMin(
+            userRole: RoleType.admin, minRole: RoleType.admin),
+        isTrue,
+      );
+    });
+
+    test('Given admin When min=editor Then meets', () {
+      expect(
+        ModelAclPolicy.roleMeetsMin(
+            userRole: RoleType.admin, minRole: RoleType.editor),
+        isTrue,
+      );
+    });
+
+    test('Given admin When min=viewer Then meets', () {
+      expect(
+        ModelAclPolicy.roleMeetsMin(
+            userRole: RoleType.admin, minRole: RoleType.viewer),
+        isTrue,
+      );
+    });
+
+    test('Given editor When min=admin Then does not meet', () {
+      expect(
+        ModelAclPolicy.roleMeetsMin(
+            userRole: RoleType.editor, minRole: RoleType.admin),
+        isFalse,
+      );
+    });
+
+    test('Given editor When min=editor Then meets', () {
+      expect(
+        ModelAclPolicy.roleMeetsMin(
+            userRole: RoleType.editor, minRole: RoleType.editor),
+        isTrue,
+      );
+    });
+
+    test('Given editor When min=viewer Then meets', () {
+      expect(
+        ModelAclPolicy.roleMeetsMin(
+            userRole: RoleType.editor, minRole: RoleType.viewer),
+        isTrue,
+      );
+    });
+
+    test('Given viewer When min=admin Then does not meet', () {
+      expect(
+        ModelAclPolicy.roleMeetsMin(
+            userRole: RoleType.viewer, minRole: RoleType.admin),
+        isFalse,
+      );
+    });
+
+    test('Given viewer When min=editor Then does not meet', () {
+      expect(
+        ModelAclPolicy.roleMeetsMin(
+            userRole: RoleType.viewer, minRole: RoleType.editor),
+        isFalse,
+      );
+    });
+
+    test('Given viewer When min=viewer Then meets', () {
+      expect(
+        ModelAclPolicy.roleMeetsMin(
+            userRole: RoleType.viewer, minRole: RoleType.viewer),
+        isTrue,
+      );
+    });
+  });
+
+  group('DateUtils.normalizeIsoOrEmpty (indirect via ModelAclPolicy)', () {
+    test('Given null upsertAtIsoDate When fromJson Then stores empty string',
+        () {
+      final Map<String, dynamic> json = <String, dynamic>{
+        ModelAclPolicyEnum.appName.name: 'bienvenido',
+        ModelAclPolicyEnum.feature.name: 'x',
+        ModelAclPolicyEnum.upsertAtIsoDate.name: null,
+      };
+
+      final ModelAclPolicy policy = ModelAclPolicy.fromJson(json);
+
+      expect(policy.upsertAtIsoDate, '');
+    });
+
+    test(
+        'Given DateTime upsertAtIsoDate When fromJson Then normalizes to UTC string',
+        () {
+      final DateTime local = DateTime(2026, 1, 18, 10, 30); // local time
+      final Map<String, dynamic> json = <String, dynamic>{
+        ModelAclPolicyEnum.appName.name: 'bienvenido',
+        ModelAclPolicyEnum.feature.name: 'x',
+        ModelAclPolicyEnum.upsertAtIsoDate.name: local,
+      };
+
+      final ModelAclPolicy policy = ModelAclPolicy.fromJson(json);
+
+      expect(policy.upsertAtIsoDate, DateUtils.normalizeIsoOrEmpty(local));
+    });
+
+    test('Given int epoch millis When fromJson Then normalizes to UTC string',
+        () {
+      final int epochMillis =
+          DateTime.utc(2026, 1, 18, 10, 30).millisecondsSinceEpoch;
+      final Map<String, dynamic> json = <String, dynamic>{
+        ModelAclPolicyEnum.appName.name: 'bienvenido',
+        ModelAclPolicyEnum.feature.name: 'x',
+        ModelAclPolicyEnum.upsertAtIsoDate.name: epochMillis,
+      };
+
+      final ModelAclPolicy policy = ModelAclPolicy.fromJson(json);
+
+      expect(
+          policy.upsertAtIsoDate, DateUtils.normalizeIsoOrEmpty(epochMillis));
+    });
+
+    test('Given empty string When fromJson Then stores empty string', () {
+      final Map<String, dynamic> json = <String, dynamic>{
+        ModelAclPolicyEnum.appName.name: 'bienvenido',
+        ModelAclPolicyEnum.feature.name: 'x',
+        ModelAclPolicyEnum.upsertAtIsoDate.name: '   ',
+      };
+
+      final ModelAclPolicy policy = ModelAclPolicy.fromJson(json);
+
+      expect(policy.upsertAtIsoDate, '');
+    });
+
+    test(
+        'Given invalid date string When fromJson Then returns trimmed original string',
+        () {
+      final Map<String, dynamic> json = <String, dynamic>{
+        ModelAclPolicyEnum.appName.name: 'bienvenido',
+        ModelAclPolicyEnum.feature.name: 'x',
+        ModelAclPolicyEnum.upsertAtIsoDate.name: '  not-a-date  ',
+      };
+
+      final ModelAclPolicy policy = ModelAclPolicy.fromJson(json);
+
+      // normalizeIsoOrEmpty returns the original trimmed string if DateTime.tryParse fails.
+      expect(policy.upsertAtIsoDate, 'not-a-date');
+    });
+
+    test(
+        'Given parseable non-UTC string When fromJson Then converts to UTC output format',
+        () {
+      // No 'Z' => treated as local by DateTime.parse/tryParse, then .toUtc() is applied.
+      const String input = '2026-01-18T10:30:00';
+      final Map<String, dynamic> json = <String, dynamic>{
+        ModelAclPolicyEnum.appName.name: 'bienvenido',
+        ModelAclPolicyEnum.feature.name: 'x',
+        ModelAclPolicyEnum.upsertAtIsoDate.name: input,
+      };
+
+      final ModelAclPolicy policy = ModelAclPolicy.fromJson(json);
+
+      expect(policy.upsertAtIsoDate, DateUtils.normalizeIsoOrEmpty(input));
+      // Optional sanity: it should not equal the raw input if your dateTimeToString includes 'Z' or normalized format.
+      // expect(policy.upsertAtIsoDate, isNot(input));
+    });
+
+    test(
+        'Given parseable UTC string When fromJson Then keeps as UTC-normalized output',
+        () {
+      final String input = '2026-01-18T10:30:00.000Z';
+      final Map<String, dynamic> json = <String, dynamic>{
+        ModelAclPolicyEnum.appName.name: 'bienvenido',
+        ModelAclPolicyEnum.feature.name: 'x',
+        ModelAclPolicyEnum.upsertAtIsoDate.name: input,
+      };
+
+      final ModelAclPolicy policy = ModelAclPolicy.fromJson(json);
+
+      expect(policy.upsertAtIsoDate, DateUtils.normalizeIsoOrEmpty(input));
+    });
+  });
 }
