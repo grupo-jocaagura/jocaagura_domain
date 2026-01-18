@@ -226,14 +226,18 @@ void main() {
         'Given RoleType enum When used as hierarchy Then order is admin, editor, viewer',
         () {
       // Sentinel: if someone changes enum order, this should fail and force a conscious update.
-      expect(RoleType.values,
-          <RoleType>[RoleType.admin, RoleType.editor, RoleType.viewer]);
+      expect(
+        RoleType.values,
+        <RoleType>[RoleType.admin, RoleType.editor, RoleType.viewer],
+      );
     });
 
     test('Given admin When min=admin Then meets', () {
       expect(
         ModelAclPolicy.roleMeetsMin(
-            userRole: RoleType.admin, minRole: RoleType.admin),
+          userRole: RoleType.admin,
+          minRole: RoleType.admin,
+        ),
         isTrue,
       );
     });
@@ -241,7 +245,9 @@ void main() {
     test('Given admin When min=editor Then meets', () {
       expect(
         ModelAclPolicy.roleMeetsMin(
-            userRole: RoleType.admin, minRole: RoleType.editor),
+          userRole: RoleType.admin,
+          minRole: RoleType.editor,
+        ),
         isTrue,
       );
     });
@@ -249,7 +255,9 @@ void main() {
     test('Given admin When min=viewer Then meets', () {
       expect(
         ModelAclPolicy.roleMeetsMin(
-            userRole: RoleType.admin, minRole: RoleType.viewer),
+          userRole: RoleType.admin,
+          minRole: RoleType.viewer,
+        ),
         isTrue,
       );
     });
@@ -257,7 +265,9 @@ void main() {
     test('Given editor When min=admin Then does not meet', () {
       expect(
         ModelAclPolicy.roleMeetsMin(
-            userRole: RoleType.editor, minRole: RoleType.admin),
+          userRole: RoleType.editor,
+          minRole: RoleType.admin,
+        ),
         isFalse,
       );
     });
@@ -265,7 +275,9 @@ void main() {
     test('Given editor When min=editor Then meets', () {
       expect(
         ModelAclPolicy.roleMeetsMin(
-            userRole: RoleType.editor, minRole: RoleType.editor),
+          userRole: RoleType.editor,
+          minRole: RoleType.editor,
+        ),
         isTrue,
       );
     });
@@ -273,7 +285,9 @@ void main() {
     test('Given editor When min=viewer Then meets', () {
       expect(
         ModelAclPolicy.roleMeetsMin(
-            userRole: RoleType.editor, minRole: RoleType.viewer),
+          userRole: RoleType.editor,
+          minRole: RoleType.viewer,
+        ),
         isTrue,
       );
     });
@@ -281,7 +295,9 @@ void main() {
     test('Given viewer When min=admin Then does not meet', () {
       expect(
         ModelAclPolicy.roleMeetsMin(
-            userRole: RoleType.viewer, minRole: RoleType.admin),
+          userRole: RoleType.viewer,
+          minRole: RoleType.admin,
+        ),
         isFalse,
       );
     });
@@ -289,7 +305,9 @@ void main() {
     test('Given viewer When min=editor Then does not meet', () {
       expect(
         ModelAclPolicy.roleMeetsMin(
-            userRole: RoleType.viewer, minRole: RoleType.editor),
+          userRole: RoleType.viewer,
+          minRole: RoleType.editor,
+        ),
         isFalse,
       );
     });
@@ -297,7 +315,9 @@ void main() {
     test('Given viewer When min=viewer Then meets', () {
       expect(
         ModelAclPolicy.roleMeetsMin(
-            userRole: RoleType.viewer, minRole: RoleType.viewer),
+          userRole: RoleType.viewer,
+          minRole: RoleType.viewer,
+        ),
         isTrue,
       );
     });
@@ -345,7 +365,9 @@ void main() {
       final ModelAclPolicy policy = ModelAclPolicy.fromJson(json);
 
       expect(
-          policy.upsertAtIsoDate, DateUtils.normalizeIsoOrEmpty(epochMillis));
+        policy.upsertAtIsoDate,
+        DateUtils.normalizeIsoOrEmpty(epochMillis),
+      );
     });
 
     test('Given empty string When fromJson Then stores empty string', () {
@@ -396,7 +418,7 @@ void main() {
     test(
         'Given parseable UTC string When fromJson Then keeps as UTC-normalized output',
         () {
-      final String input = '2026-01-18T10:30:00.000Z';
+      const String input = '2026-01-18T10:30:00.000Z';
       final Map<String, dynamic> json = <String, dynamic>{
         ModelAclPolicyEnum.appName.name: 'bienvenido',
         ModelAclPolicyEnum.feature.name: 'x',
