@@ -1,5 +1,10 @@
 part of 'jocaagura_domain.dart';
 
+/// Public alias to avoid name collision with Flutter's `DateUtils` (material).
+///
+/// Use [JocaDateUtils] in Flutter apps to prevent ambiguous references.
+typedef JocaDateUtils = DateUtils;
+
 /// Utility class for handling common date and time operations.
 ///
 /// This class provides methods to safely parse, format, and manipulate date
@@ -62,6 +67,17 @@ class DateUtils {
     return dateTime.toIso8601String();
   }
 
+  /// Normalize a date-like value into a valid UTC ISO-8601 string or return empty.
+  ///
+  /// Returns `''` when:
+  /// - [value] is `null`
+  /// - [value] is an empty/blank string
+  /// - [value] cannot be parsed as a valid date/time
+  ///
+  /// Accepts:
+  /// - [DateTime]
+  /// - epoch milliseconds as [int]
+  /// - ISO-8601 strings (with or without timezone; timezone-less is treated as local by Dart)
   static String normalizeIsoOrEmpty(Object? value) {
     if (value == null) {
       return '';
@@ -84,7 +100,7 @@ class DateUtils {
 
     final DateTime? parsed = DateTime.tryParse(s);
     if (parsed == null) {
-      return s;
+      return '';
     }
 
     final DateTime utc = parsed.isUtc ? parsed : parsed.toUtc();

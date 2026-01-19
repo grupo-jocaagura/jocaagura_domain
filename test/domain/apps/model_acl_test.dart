@@ -150,7 +150,7 @@ void main() {
       final ModelAcl acl = ModelAcl.fromJson(json);
 
       // Assert
-      expect(acl.autorizedAtIsoDate, 'not-a-date');
+      expect(acl.autorizedAtIsoDate, '');
       expect(acl.isValidAcl, false);
       expect(acl.autorizedAtDateTime, isNull);
     });
@@ -235,7 +235,7 @@ void main() {
       final Map<String, dynamic> json = acl.toJson();
 
       // Assert
-      expect(json[ModelAclEnum.autorizedAtIsoDate.name], 'not-a-date');
+      expect(json[ModelAclEnum.autorizedAtIsoDate.name], '');
     });
 
     test(
