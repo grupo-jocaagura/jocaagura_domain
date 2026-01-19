@@ -3,6 +3,54 @@
 This document follows the guidelines of [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.38.1] - 2026-01-19
+
+### Fixed
+- **DateUtils.normalizeIsoOrEmpty**
+  - **Patch prioritario**: corrige el caso de fechas mal formadas que antes devolvía el **string original**.  
+    Ahora, cuando el valor no puede parsearse de forma segura, retorna **`''`** (cadena vacía).
+  - Comportamientos garantizados:
+    - `DateTime` → se normaliza a **UTC ISO-8601**.
+    - `int` (epoch ms) → se convierte y normaliza a **UTC ISO-8601**.
+    - `String` (ISO válido) → se parsea y normaliza a **UTC ISO-8601**.
+    - `String` vacío o inválido → **`''`**.
+    - `null` → **`''`**.
+  - Se mantiene el *trim* de entradas `String` antes del parseo.
+
+### Added
+- **Alias público para evitar colisión con Flutter Material**
+```dart
+  /// Public alias to avoid name collision with Flutter's `DateUtils` (material).
+  ///
+  /// Use [JocaDateUtils] in Flutter apps to prevent ambiguous references.
+  typedef JocaDateUtils = DateUtils;
+```
+
+* Permite usar `JocaDateUtils` en apps Flutter y evitar referencias ambiguas con `material/DateUtils`.
+
+### Docs
+
+* Actualización de DartDoc en `DateUtils.normalizeIsoOrEmpty` detallando:
+
+    * Tipos admitidos.
+    * Normalización a UTC.
+    * Política de *fallback* a cadena vacía en entradas inválidas.
+* Nota de uso recomendando **`JocaDateUtils`** en proyectos Flutter.
+
+### Tests
+
+* Casos nuevos y ajustados para cubrir:
+
+    * `null`, `''`, strings inválidos → `''`.
+    * `int` epoch ms → ISO-UTC.
+    * `DateTime` local/UTC → ISO-UTC.
+    * `String` ISO válido → ISO-UTC.
+
+### Migration notes
+
+* Si tu lógica dependía de que `normalizeIsoOrEmpty` devolviera el **string original** ante parseo fallido, ajusta las verificaciones para contemplar **`''`**.
+* En proyectos Flutter, **importa** el paquete y usa **`JocaDateUtils`** para evitar conflictos con `material/DateUtils`.
+
 ## [1.38.0] - 2026-01-18
 
 ### Added

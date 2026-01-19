@@ -394,7 +394,7 @@ void main() {
       final ModelAclPolicy policy = ModelAclPolicy.fromJson(json);
 
       // normalizeIsoOrEmpty returns the original trimmed string if DateTime.tryParse fails.
-      expect(policy.upsertAtIsoDate, 'not-a-date');
+      expect(policy.upsertAtIsoDate, '');
     });
 
     test(
