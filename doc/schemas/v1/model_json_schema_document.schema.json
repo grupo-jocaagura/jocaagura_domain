@@ -1,0 +1,120 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://jocaagura.dev/schemas/jocaagura_domain/v1/model_json_schema_document.schema.json",
+  "title": "ModelJsonSchemaDocument",
+  "description": "Canonical JSON contract for storing a complete JSON Schema document as domain data in jocaagura_domain.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Internal identifier of the schema document record."
+    },
+    "schemaId": {
+      "type": "string",
+      "format": "uri",
+      "description": "Canonical identifier of the stored schema document, usually aligned with $id."
+    },
+    "schemaTitle": {
+      "type": "string",
+      "description": "Human-readable title of the stored schema contract."
+    },
+    "domainModel": {
+      "type": "string",
+      "description": "Domain model represented by the schema."
+    },
+    "version": {
+      "type": "string",
+      "description": "Version label of the contract line."
+    },
+    "schemaDescription": {
+      "type": "string",
+      "description": "Functional description of the stored schema contract."
+    },
+    "schema": {
+      "type": "object",
+      "description": "Complete JSON Schema document stored as JSON.",
+      "additionalProperties": true
+    },
+    "example": {
+      "type": "object",
+      "description": "Canonical example payload associated with the stored contract.",
+      "additionalProperties": true
+    },
+    "tags": {
+      "type": "array",
+      "description": "Tags used to classify the contract.",
+      "items": {
+        "type": "string"
+      }
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Creation timestamp as ISO-8601 string."
+    },
+    "updatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Last update timestamp as ISO-8601 string."
+    },
+    "isActive": {
+      "type": "boolean",
+      "description": "Whether this schema document is active."
+    }
+  },
+  "required": [
+    "id",
+    "schemaId",
+    "schemaTitle",
+    "domainModel",
+    "version",
+    "schemaDescription",
+    "schema",
+    "example",
+    "tags",
+    "createdAt",
+    "updatedAt",
+    "isActive"
+  ],
+  "examples": [
+    {
+      "id": "schema-doc-001",
+      "schemaId": "https://jocaagura.dev/schemas/jocaagura_domain/v1/address_model.schema.json",
+      "schemaTitle": "AddressModel",
+      "domainModel": "AddressModel",
+      "version": "v1",
+      "schemaDescription": "Canonical schema document for AddressModel.",
+      "schema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "$id": "https://jocaagura.dev/schemas/jocaagura_domain/v1/address_model.schema.json",
+        "title": "AddressModel",
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "examples": [
+          {
+            "id": "addr_001"
+          }
+        ]
+      },
+      "example": {
+        "id": "addr_001"
+      },
+      "tags": [
+        "base",
+        "address"
+      ],
+      "createdAt": "2026-03-14T12:00:00.000Z",
+      "updatedAt": "2026-03-14T13:00:00.000Z",
+      "isActive": true
+    }
+  ]
+}

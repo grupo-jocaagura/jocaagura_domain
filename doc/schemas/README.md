@@ -88,6 +88,7 @@ npm run validate:schemas
 - `AttributeModel.value` representa un valor JSON interoperable, no un tipo Dart.
 - `PersonModel.attributes` se representa como diccionario de atributos nombrados.
 - `ModelItem.attributes` se representa como arreglo ordenado de `AttributeModel`.
+- El módulo `json_schema` almacena contratos completos como `Map<String, dynamic>`, sin modelar keyword por keyword en Dart en esta fase.
 
 ## Brechas conocidas con la implementación Dart
 

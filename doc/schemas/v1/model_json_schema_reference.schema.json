@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://jocaagura.dev/schemas/jocaagura_domain/v1/model_json_schema_reference.schema.json",
+  "title": "ModelJsonSchemaReference",
+  "description": "Canonical JSON contract for an explicit dependency between two stored schema documents in jocaagura_domain.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Internal identifier of the reference record."
+    },
+    "sourceSchemaId": {
+      "type": "string",
+      "format": "uri",
+      "description": "Canonical identifier of the source schema."
+    },
+    "targetSchemaId": {
+      "type": "string",
+      "format": "uri",
+      "description": "Canonical identifier of the target schema."
+    },
+    "referenceType": {
+      "type": "string",
+      "description": "Kind of relation between source and target schema.",
+      "enum": [
+        "ref",
+        "allOf",
+        "anyOf",
+        "oneOf",
+        "items",
+        "property"
+      ]
+    },
+    "path": {
+      "type": "string",
+      "description": "Path inside the source schema where the relationship appears."
+    },
+    "referenceDescription": {
+      "type": "string",
+      "description": "Functional explanation of the dependency."
+    }
+  },
+  "required": [
+    "id",
+    "sourceSchemaId",
+    "targetSchemaId",
+    "referenceType",
+    "path",
+    "referenceDescription"
+  ],
+  "examples": [
+    {
+      "id": "schema-ref-001",
+      "sourceSchemaId": "https://jocaagura.dev/schemas/jocaagura_domain/v1/medical_record_model.schema.json",
+      "targetSchemaId": "https://jocaagura.dev/schemas/jocaagura_domain/v1/person_model.schema.json",
+      "referenceType": "ref",
+      "path": "/properties/patient",
+      "referenceDescription": "Medical record references the person contract for patient."
+    }
+  ]
+}
