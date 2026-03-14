@@ -1,0 +1,19 @@
+{
+  "id": "cfg-1",
+  "groupId": "group-001",
+  "googleGroupId": "AAA-BBB-CCC",
+  "email": "soporte@domain.com",
+  "resourceName": "groups/AAA-BBB-CCC",
+  "apiSource": "directory",
+  "etagSettings": "etag-123",
+  "lastSyncStatus": "never",
+  "lastSyncAt": "2025-01-01T10:00:00.000Z",
+  "crud": {
+    "recordId": "cfg-1",
+    "createdBy": "system@domain.com",
+    "createdAt": "2025-01-01T10:00:00.000Z",
+    "updatedBy": "system@domain.com",
+    "updatedAt": "2025-01-01T10:00:00.000Z",
+    "version": 1
+  }
+}

@@ -5,6 +5,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.38.1] - 2026-01-19
 
+### Added
+- **JSON Schema contracts for `jocaagura_domain`**
+  - Se crea la carpeta versionada `doc/schemas/v1/` como fuente formal del contrato JSON interoperable.
+  - Se agregan contratos JSON Schema canonicos y examples validados para los modelos agnosticos principales del dominio:
+    - base y transversales: `AddressModel`, `AttributeModel`, `UserModel`, `PersonModel`, `StoreModel`, `ConnectivityModel`, `ErrorItem`, `LegalIdModel`, `SignatureModel`
+    - store: `ModelCategory`, `ModelPrice`, `ModelItem`
+    - apps / auditoria / flows: `ModelAppVersion`, `ModelAcl`, `ModelAclPolicy`, `ModelCrudMetadata`, `ModelCrudLogEntry`, `ModelFlowStep`, `ModelCompleteFlow`
+    - financial / graphics / groups / education
+    - dentist / medical: `AcceptanceClauseModel`, `DentalConditionModel`, `DiagnosisModel`, `MedicalTreatmentModel`, `TreatmentPlanModel`, `MedicalRecordModel`, `MedicalDiagnosisTabModel`
+    - configs / estados serializables: `WsDbConfig`, `ModelConfigHttpRequest`, `OnboardingState`
+  - Se agrega `doc/schemas/v1/examples/` con un example canonico por schema.
+
 ### Fixed
 - **DateUtils.normalizeIsoOrEmpty**
   - **Patch prioritario**: corrige el caso de fechas mal formadas que antes devolvía el **string original**.  
@@ -30,12 +42,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Docs
 
+- **JSON Schema**
+  - Se documenta la estrategia de contratos canonicos en `doc/schemas/README.md`.
+  - Se documenta `v1` en `doc/schemas/v1/README.md`, incluyendo:
+    - reglas contractuales
+    - setup local de validacion
+    - dependencias entre schemas
+    - criterio de exclusión
+    - brechas conocidas entre contrato canónico y la implementación Dart actual
+  - Se referencia la capa JSON Schema desde `README.md`.
+
 * Actualización de DartDoc en `DateUtils.normalizeIsoOrEmpty` detallando:
 
     * Tipos admitidos.
     * Normalización a UTC.
     * Política de *fallback* a cadena vacía en entradas inválidas.
 * Nota de uso recomendando **`JocaDateUtils`** en proyectos Flutter.
+
+### Dev tooling
+
+- Se agrega tooling local reproducible para validar schemas:
+  - `package.json`
+  - `package-lock.json`
+  - `tools/validate-schemas.ps1`
+  - `tools/jq/jq.exe`
+- Se agrega exclusión de `node_modules/` en `.gitignore`.
 
 ### Tests
 

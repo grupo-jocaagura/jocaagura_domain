@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://jocaagura.dev/schemas/jocaagura_domain/v1/user_model.schema.json",
+  "title": "UserModel",
+  "description": "Canonical JSON contract for UserModel in jocaagura_domain.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique identifier of the user."
+    },
+    "displayName": {
+      "type": "string",
+      "description": "Display name of the user."
+    },
+    "photoUrl": {
+      "type": "string",
+      "format": "uri",
+      "description": "Profile photo URL of the user."
+    },
+    "email": {
+      "type": "string",
+      "format": "email",
+      "description": "Primary email address of the user."
+    },
+    "jwt": {
+      "type": "object",
+      "description": "JWT payload or token-related structured claims represented as a JSON object.",
+      "additionalProperties": true
+    }
+  },
+  "required": [
+    "id",
+    "displayName",
+    "photoUrl",
+    "email",
+    "jwt"
+  ],
+  "examples": [
+    {
+      "id": "user_001",
+      "displayName": "John Doe",
+      "photoUrl": "https://example.com/profile.jpg",
+      "email": "john.doe@example.com",
+      "jwt": {
+        "token": "abc123",
+        "exp": 1735689600
+      }
+    }
+  ]
+}

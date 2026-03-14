@@ -1,0 +1,111 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://jocaagura.dev/schemas/jocaagura_domain/v1/obituary_model.schema.json",
+  "title": "ObituaryModel",
+  "description": "Canonical JSON contract for ObituaryModel in jocaagura_domain.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique identifier of the obituary."
+    },
+    "photoUrl": {
+      "type": "string",
+      "format": "uri",
+      "description": "Photo URL associated with the obituary."
+    },
+    "person": {
+      "$ref": "./person_model.schema.json",
+      "description": "Person associated with the obituary."
+    },
+    "creationDate": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Creation timestamp as ISO-8601 string."
+    },
+    "vigilAddress": {
+      "$ref": "./address_model.schema.json",
+      "description": "Address of the vigil."
+    },
+    "burialAddress": {
+      "$ref": "./address_model.schema.json",
+      "description": "Address of the burial."
+    },
+    "vigilDate": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Vigil timestamp as ISO-8601 string."
+    },
+    "burialDate": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Burial timestamp as ISO-8601 string."
+    },
+    "message": {
+      "type": "string",
+      "description": "Custom memorial message."
+    },
+    "deathRecord": {
+      "description": "Optional death record associated with the obituary.",
+      "anyOf": [
+        {
+          "$ref": "./death_record_model.schema.json"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "required": [
+    "id",
+    "photoUrl",
+    "person",
+    "creationDate",
+    "vigilAddress",
+    "burialAddress",
+    "vigilDate",
+    "burialDate",
+    "message",
+    "deathRecord"
+  ],
+  "examples": [
+    {
+      "id": "qwerty",
+      "photoUrl": "https://example.com/photo.jpg",
+      "person": {
+        "id": "person_001",
+        "names": "John",
+        "photoUrl": "https://example.com/photo.jpg",
+        "lastNames": "Doe",
+        "attributes": {}
+      },
+      "creationDate": "2023-12-18T00:00:00.000Z",
+      "vigilAddress": {
+        "id": "1",
+        "postalCode": 12345,
+        "country": "USA",
+        "administrativeArea": "CA",
+        "city": "San Francisco",
+        "locality": "SOMA",
+        "address": "123 Main St",
+        "notes": "Near the corner"
+      },
+      "burialAddress": {
+        "id": "1",
+        "postalCode": 12345,
+        "country": "USA",
+        "administrativeArea": "CA",
+        "city": "San Francisco",
+        "locality": "SOMA",
+        "address": "123 Main St",
+        "notes": "Near the corner"
+      },
+      "vigilDate": "2023-07-05T14:30:00.000Z",
+      "burialDate": "2023-07-05T16:30:00.000Z",
+      "message": "Celebramos la vida de alguien especial.",
+      "deathRecord": null
+    }
+  ]
+}

@@ -1,0 +1,80 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://jocaagura.dev/schemas/jocaagura_domain/v1/model_flow_step.schema.json",
+  "title": "ModelFlowStep",
+  "description": "Canonical JSON contract for ModelFlowStep in jocaagura_domain.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "indexNumber": {
+      "type": "integer",
+      "description": "Unique step index within the flow. Use -1 only as END target outside stored steps."
+    },
+    "title": {
+      "type": "string",
+      "description": "Short label of the step."
+    },
+    "description": {
+      "type": "string",
+      "description": "Human-readable description of the step."
+    },
+    "failureCode": {
+      "type": "string",
+      "description": "Standardized failure code used for traceability."
+    },
+    "nextOnSuccessIndex": {
+      "type": "integer",
+      "description": "Next step index when execution succeeds. Use -1 to represent END."
+    },
+    "nextOnFailureIndex": {
+      "type": "integer",
+      "description": "Next step index when execution fails. Use -1 to represent END."
+    },
+    "constraints": {
+      "type": "array",
+      "description": "Ordered list of textual constraints applied to the step.",
+      "items": {
+        "type": "string"
+      }
+    },
+    "cost": {
+      "type": "object",
+      "description": "Per-metric numeric costs expressed in real units.",
+      "propertyNames": {
+        "type": "string"
+      },
+      "additionalProperties": {
+        "type": "number",
+        "minimum": 0
+      }
+    }
+  },
+  "required": [
+    "indexNumber",
+    "title",
+    "description",
+    "failureCode",
+    "nextOnSuccessIndex",
+    "nextOnFailureIndex",
+    "constraints",
+    "cost"
+  ],
+  "examples": [
+    {
+      "indexNumber": 10,
+      "title": "Authenticate",
+      "description": "Runs auth use case and returns Either result",
+      "failureCode": "AUTH_FAILED",
+      "nextOnSuccessIndex": 11,
+      "nextOnFailureIndex": -1,
+      "constraints": [
+        "requiresInternet"
+      ],
+      "cost": {
+        "latencyMs": 250,
+        "networkKb": 12.5,
+        "dbReadsCount": 2
+      }
+    }
+  ]
+}

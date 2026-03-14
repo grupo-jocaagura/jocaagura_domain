@@ -1,0 +1,8 @@
+{
+  "id": "appt001",
+  "date": "2024-07-24T00:00:00.000Z",
+  "odontologist": "Dr. Juan Pérez",
+  "purpose": "Consulta General",
+  "status": "Pendiente",
+  "notes": "Revisar dolor en la muela"
+}

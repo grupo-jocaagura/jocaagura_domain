@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://jocaagura.dev/schemas/jocaagura_domain/v1/signature_model.schema.json",
+  "title": "SignatureModel",
+  "description": "Canonical JSON contract for SignatureModel in jocaagura_domain.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique identifier of the signature."
+    },
+    "created": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Creation timestamp as ISO-8601 string."
+    },
+    "appId": {
+      "type": "string",
+      "description": "Identifier of the application associated with the signature."
+    },
+    "png64Image": {
+      "type": "string",
+      "description": "Base64-encoded PNG image of the signature."
+    }
+  },
+  "required": [
+    "id",
+    "created",
+    "appId",
+    "png64Image"
+  ],
+  "examples": [
+    {
+      "id": "sig001",
+      "created": "2024-07-07T00:00:00.000Z",
+      "appId": "myApp",
+      "png64Image": "iVBORw0KGgoAAAANSUhEUgAAAAEAAAAB"
+    }
+  ]
+}

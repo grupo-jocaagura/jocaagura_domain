@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://jocaagura.dev/schemas/jocaagura_domain/v1/model_group.schema.json",
+  "title": "ModelGroup",
+  "description": "Canonical JSON contract for ModelGroup in jocaagura_domain.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "id": { "type": "string" },
+    "name": { "type": "string" },
+    "description": { "type": "string" },
+    "email": {
+      "description": "Group email. May be empty when not configured yet.",
+      "anyOf": [
+        { "const": "" },
+        { "type": "string", "format": "email" }
+      ]
+    },
+    "labels": { "$ref": "./model_group_labels.schema.json" },
+    "state": { "type": "string", "enum": ["active", "archived", "deleted"] },
+    "courseId": { "type": "string" },
+    "projectId": { "type": "string" },
+    "driveFolderId": { "type": "string" },
+    "crud": { "$ref": "./model_crud_metadata.schema.json" }
+  },
+  "required": ["id", "name", "description", "email", "state", "courseId", "projectId", "driveFolderId", "crud"],
+  "examples": [
+    {
+      "id": "group-001",
+      "name": "5A Matemáticas 2025",
+      "description": "",
+      "email": "",
+      "labels": {
+        "pillar": "education",
+        "kind": "course",
+        "tags": ["primary"],
+        "attributes": { "grade": "5A" }
+      },
+      "state": "active",
+      "courseId": "course-001",
+      "projectId": "",
+      "driveFolderId": "folder-123",
+      "crud": {
+        "recordId": "group-001",
+        "createdBy": "system@domain.com",
+        "createdAt": "2025-01-01T10:00:00.000Z",
+        "updatedBy": "system@domain.com",
+        "updatedAt": "2025-01-01T10:00:00.000Z",
+        "version": 1
+      }
+    }
+  ]
+}

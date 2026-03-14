@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://jocaagura.dev/schemas/jocaagura_domain/v1/diagnosis_model.schema.json",
+  "title": "DiagnosisModel",
+  "description": "Canonical JSON contract for DiagnosisModel in jocaagura_domain.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique identifier of the diagnosis."
+    },
+    "title": {
+      "type": "string",
+      "description": "Title of the diagnosis."
+    },
+    "description": {
+      "type": "string",
+      "description": "Detailed description of the diagnosis."
+    }
+  },
+  "required": [
+    "id",
+    "title",
+    "description"
+  ],
+  "examples": [
+    {
+      "id": "xox",
+      "title": "Diagnostico periodontal",
+      "description": "Descripcion detallada del diagnostico."
+    }
+  ]
+}

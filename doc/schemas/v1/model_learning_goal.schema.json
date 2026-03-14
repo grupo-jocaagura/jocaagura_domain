@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://jocaagura.dev/schemas/jocaagura_domain/v1/model_learning_goal.schema.json",
+  "title": "ModelLearningGoal",
+  "description": "Canonical JSON contract for ModelLearningGoal in jocaagura_domain.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "id": { "type": "string" },
+    "standard": { "$ref": "./model_competency_standard.schema.json" },
+    "label": { "type": "string" },
+    "code": { "type": "string" }
+  },
+  "required": ["id", "standard", "label", "code"]
+}

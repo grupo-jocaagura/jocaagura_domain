@@ -1,0 +1,43 @@
+{
+  "id": "gx86GyNM",
+  "notaria": {
+    "id": "store_001",
+    "nit": 98765,
+    "photoUrl": "https://example.com/photo.jpg",
+    "coverPhotoUrl": "https://example.com/cover.jpg",
+    "email": "store@example.com",
+    "ownerEmail": "owner@example.com",
+    "name": "Super Store",
+    "alias": "SS",
+    "address": {
+      "id": "1",
+      "postalCode": 12345,
+      "country": "USA",
+      "administrativeArea": "CA",
+      "city": "San Francisco",
+      "locality": "SOMA",
+      "address": "123 Main St",
+      "notes": "Near the corner"
+    },
+    "phoneNumber1": 123456789,
+    "phoneNumber2": 987654321
+  },
+  "person": {
+    "id": "person_001",
+    "names": "John",
+    "photoUrl": "https://example.com/photo.jpg",
+    "lastNames": "Doe",
+    "attributes": {}
+  },
+  "address": {
+    "id": "1",
+    "postalCode": 12345,
+    "country": "USA",
+    "administrativeArea": "CA",
+    "city": "San Francisco",
+    "locality": "SOMA",
+    "address": "123 Main St",
+    "notes": "Near the corner"
+  },
+  "recordId": "9807666"
+}

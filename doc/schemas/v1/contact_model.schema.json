@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://jocaagura.dev/schemas/jocaagura_domain/v1/contact_model.schema.json",
+  "title": "ContactModel",
+  "description": "Canonical JSON contract for ContactModel in jocaagura_domain.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique identifier for the contact."
+    },
+    "name": {
+      "type": "string",
+      "description": "Name of the contact person."
+    },
+    "relationship": {
+      "type": "string",
+      "description": "Relationship of the contact person to the patient."
+    },
+    "phoneNumber": {
+      "type": "string",
+      "description": "Phone number of the contact person."
+    },
+    "email": {
+      "type": "string",
+      "format": "email",
+      "description": "Email address of the contact person."
+    }
+  },
+  "required": [
+    "id",
+    "name",
+    "relationship",
+    "phoneNumber",
+    "email"
+  ],
+  "examples": [
+    {
+      "id": "contact001",
+      "name": "Maria Garcia",
+      "relationship": "Madre",
+      "phoneNumber": "123-456-7890",
+      "email": "maria.garcia@example.com"
+    }
+  ]
+}

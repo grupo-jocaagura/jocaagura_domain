@@ -1,0 +1,27 @@
+{
+  "nameOfLedger": "My Ledger",
+  "incomeLedger": [
+    {
+      "id": "inc-salary-1",
+      "amount": 3500000,
+      "date": "2024-01-25T00:00:00.000Z",
+      "concept": "Salario",
+      "detailedDescription": "Salario mensual",
+      "category": "Salario",
+      "createdAt": "2024-01-25T00:00:00.000Z",
+      "mathPrecision": 4
+    }
+  ],
+  "expenseLedger": [
+    {
+      "id": "exp-rent-1",
+      "amount": 1500000,
+      "date": "2024-01-01T00:00:00.000Z",
+      "concept": "Arriendo",
+      "detailedDescription": "Arriendo mensual",
+      "category": "Arriendo",
+      "createdAt": "2024-01-01T00:00:00.000Z",
+      "mathPrecision": 4
+    }
+  ]
+}

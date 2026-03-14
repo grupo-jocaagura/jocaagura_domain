@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://jocaagura.dev/schemas/jocaagura_domain/v1/model_crud_metadata.schema.json",
+  "title": "ModelCrudMetadata",
+  "description": "Canonical JSON contract for ModelCrudMetadata in jocaagura_domain.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "recordId": {
+      "type": "string",
+      "description": "Logical identifier of the owning record."
+    },
+    "createdBy": {
+      "type": "string",
+      "description": "Actor that created the record."
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Creation timestamp as ISO-8601 string."
+    },
+    "updatedBy": {
+      "type": "string",
+      "description": "Actor that last updated the record."
+    },
+    "updatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Last update timestamp as ISO-8601 string."
+    },
+    "deleted": {
+      "type": "boolean",
+      "description": "Soft-delete flag."
+    },
+    "deletedBy": {
+      "type": "string",
+      "description": "Actor that marked the record as deleted."
+    },
+    "deletedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Deletion timestamp as ISO-8601 string."
+    },
+    "version": {
+      "type": "integer",
+      "description": "Logical version of the record.",
+      "minimum": 0
+    }
+  },
+  "required": [
+    "recordId",
+    "createdBy",
+    "createdAt",
+    "updatedBy",
+    "updatedAt"
+  ],
+  "examples": [
+    {
+      "recordId": "group-001",
+      "createdBy": "system@domain.com",
+      "createdAt": "2025-01-01T10:00:00.000Z",
+      "updatedBy": "system@domain.com",
+      "updatedAt": "2025-01-01T10:00:00.000Z",
+      "version": 1
+    }
+  ]
+}

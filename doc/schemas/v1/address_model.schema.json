@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://jocaagura.dev/schemas/jocaagura_domain/v1/address_model.schema.json",
+  "title": "AddressModel",
+  "description": "Canonical JSON contract for AddressModel in jocaagura_domain.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique identifier of the address."
+    },
+    "postalCode": {
+      "type": "integer",
+      "description": "Postal code represented as a JSON integer.",
+      "minimum": 0
+    },
+    "country": {
+      "type": "string",
+      "description": "Country where the address is located."
+    },
+    "administrativeArea": {
+      "type": "string",
+      "description": "Administrative area, state, or province."
+    },
+    "city": {
+      "type": "string",
+      "description": "City where the address is located."
+    },
+    "locality": {
+      "type": "string",
+      "description": "Neighborhood, district, or locality."
+    },
+    "address": {
+      "type": "string",
+      "description": "Street address or main address line."
+    },
+    "notes": {
+      "type": "string",
+      "description": "Additional address notes."
+    }
+  },
+  "required": [
+    "country",
+    "administrativeArea",
+    "city",
+    "locality",
+    "address"
+  ],
+  "examples": [
+    {
+      "id": "1",
+      "postalCode": 12345,
+      "country": "USA",
+      "administrativeArea": "CA",
+      "city": "San Francisco",
+      "locality": "SOMA",
+      "address": "123 Main St",
+      "notes": "Near the corner"
+    }
+  ]
+}

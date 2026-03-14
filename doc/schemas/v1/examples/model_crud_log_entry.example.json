@@ -1,0 +1,13 @@
+{
+  "id": "log-1",
+  "entityType": "Group",
+  "entityId": "group-001",
+  "operation": "create",
+  "performedBy": "admin@domain.com",
+  "performedAt": "2025-01-01T10:00:00.000Z",
+  "diff": {
+    "field": "value"
+  },
+  "env": "dev",
+  "errorItemId": "ERR-123"
+}

@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://jocaagura.dev/schemas/jocaagura_domain/v1/ledger_model.schema.json",
+  "title": "LedgerModel",
+  "description": "Canonical JSON contract for LedgerModel in jocaagura_domain.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "nameOfLedger": {
+      "type": "string",
+      "description": "Name of the ledger."
+    },
+    "incomeLedger": {
+      "type": "array",
+      "description": "Ordered list of income movements.",
+      "items": {
+        "$ref": "./financial_movement_model.schema.json"
+      }
+    },
+    "expenseLedger": {
+      "type": "array",
+      "description": "Ordered list of expense movements.",
+      "items": {
+        "$ref": "./financial_movement_model.schema.json"
+      }
+    }
+  },
+  "required": [
+    "nameOfLedger",
+    "incomeLedger",
+    "expenseLedger"
+  ],
+  "examples": [
+    {
+      "nameOfLedger": "My Ledger",
+      "incomeLedger": [
+        {
+          "id": "inc-salary-1",
+          "amount": 3500000,
+          "date": "2024-01-25T00:00:00.000Z",
+          "concept": "Salario",
+          "detailedDescription": "Salario mensual",
+          "category": "Salario",
+          "createdAt": "2024-01-25T00:00:00.000Z",
+          "mathPrecision": 4
+        }
+      ],
+      "expenseLedger": [
+        {
+          "id": "exp-rent-1",
+          "amount": 1500000,
+          "date": "2024-01-01T00:00:00.000Z",
+          "concept": "Arriendo",
+          "detailedDescription": "Arriendo mensual",
+          "category": "Arriendo",
+          "createdAt": "2024-01-01T00:00:00.000Z",
+          "mathPrecision": 4
+        }
+      ]
+    }
+  ]
+}

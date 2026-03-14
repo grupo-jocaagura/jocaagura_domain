@@ -1,0 +1,30 @@
+{
+  "name": "AuthFlow",
+  "description": "Login and session validation diagram.",
+  "stepsByIndex": {
+    "10": {
+      "indexNumber": 10,
+      "title": "Authenticate",
+      "description": "Runs auth use case",
+      "failureCode": "AUTH_FAILED",
+      "nextOnSuccessIndex": 11,
+      "nextOnFailureIndex": -1,
+      "constraints": [],
+      "cost": {
+        "latencyMs": 250
+      }
+    },
+    "11": {
+      "indexNumber": 11,
+      "title": "PersistSession",
+      "description": "Stores session data",
+      "failureCode": "SESSION_PERSIST_FAILED",
+      "nextOnSuccessIndex": -1,
+      "nextOnFailureIndex": -1,
+      "constraints": [],
+      "cost": {
+        "dbReadsCount": 1
+      }
+    }
+  }
+}

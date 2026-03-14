@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://jocaagura.dev/schemas/jocaagura_domain/v1/model_category.schema.json",
+  "title": "ModelCategory",
+  "description": "Canonical JSON contract for ModelCategory in jocaagura_domain.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "category": {
+      "type": "string",
+      "description": "Stable normalized category identifier."
+    },
+    "description": {
+      "type": "string",
+      "description": "Human-readable description of the category."
+    }
+  },
+  "required": [
+    "category",
+    "description"
+  ],
+  "examples": [
+    {
+      "category": "health-supplies",
+      "description": "Health-related items"
+    }
+  ]
+}

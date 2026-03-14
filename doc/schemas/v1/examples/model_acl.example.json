@@ -1,0 +1,12 @@
+{
+  "id": "acl-1",
+  "roleType": "admin",
+  "appName": "sat-p",
+  "feature": "router",
+  "email": "user@pragma.com.co",
+  "isActive": true,
+  "emailAutorizedBy": "admin@pragma.com.co",
+  "autorizedAtIsoDate": "2026-01-03T00:00:00.000Z",
+  "revokedAtIsoDate": "2026-02-01T00:00:00.000Z",
+  "note": "Seed permission"
+}

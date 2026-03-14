@@ -1,0 +1,10 @@
+{
+  "id": "fm001",
+  "amount": 1000,
+  "date": "2024-07-20T00:00:00.000Z",
+  "concept": "Salary",
+  "detailedDescription": "Monthly salary deposit",
+  "category": "Income",
+  "createdAt": "2024-07-25T00:00:00.000Z",
+  "mathPrecision": 4
+}

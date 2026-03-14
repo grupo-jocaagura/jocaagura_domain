@@ -1,0 +1,13 @@
+{
+  "name": "jocaagura-domain-schema-tools",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Local tooling for validating JSON Schema contracts in jocaagura_domain",
+  "scripts": {
+    "validate:schemas": "powershell -ExecutionPolicy Bypass -File tools/validate-schemas.ps1"
+  },
+  "devDependencies": {
+    "ajv-cli": "^5.0.0",
+    "ajv-formats": "^3.0.1"
+  }
+}
