@@ -3,6 +3,50 @@
 This document follows the guidelines of [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.38.2] - 2026-03-14
+
+### Added
+- **JSON Schema domain module**
+  - Nuevo módulo `lib/domain/json_schema/` para tratar contratos JSON Schema como dato dentro del dominio.
+  - Nuevo `ModelJsonSchemaDocument` como entidad principal para almacenar:
+    - identificador del documento
+    - identificador canónico del schema
+    - metadata funcional
+    - schema JSON completo como `Map<String, dynamic>`
+    - example canónico
+    - tags, timestamps y estado activo
+  - Nuevo `ModelJsonSchemaReference` para modelar relaciones explícitas entre contratos, pensado para composición, anidamiento y futuros grafos de dependencias.
+
+### Added
+- **Contratos del propio módulo**
+  - Nuevos schemas y examples en `doc/schemas/v1/` para:
+    - `model_json_schema_document.schema.json`
+    - `model_json_schema_reference.schema.json`
+  - Los examples asociados validan correctamente dentro del flujo local de `npm run validate:schemas`.
+
+### Tests
+- Nuevas pruebas unitarias para el módulo `json_schema` cubriendo:
+  - roundtrip `fromJson(toJson(model))`
+  - roundtrip `toJson(fromJson(jsonCanonico))`
+  - `copyWith`
+  - igualdad por valor
+
+### Changed
+- **Ajuste semántico de nombres en el contenedor de schemas**
+  - Se renombran campos del modelo y del contrato para evitar colisión conceptual con keywords nativas de JSON Schema:
+    - `title` -> `schemaTitle`
+    - `description` -> `schemaDescription`
+    - `ModelJsonSchemaReference.description` -> `referenceDescription`
+  - Esto aclara la diferencia entre:
+    - metadata del documento contenedor
+    - y contenido del schema almacenado dentro del campo `schema`
+
+### Docs
+- Se actualiza la documentación de schemas para dejar explícito que:
+  - el módulo `json_schema` almacena contratos completos como `Map<String, dynamic>`
+  - en esta fase no se modelan keyword por keyword las estructuras internas de JSON Schema
+  - `ModelJsonSchemaReference` existe para representar composición y anidamiento entre contratos
+
 ## [1.38.1] - 2026-01-19
 
 ### Added
