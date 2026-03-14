@@ -23,6 +23,8 @@ Esta carpeta contiene la primera version de contratos JSON canonicos para `jocaa
 - `medical_treatment_model.schema.json`
 - `model_config_http_request.schema.json`
 - `model_assessment.schema.json`
+- `model_json_schema_document.schema.json`
+- `model_json_schema_reference.schema.json`
 - `model_competency_standard.schema.json`
 - `model_graph.schema.json`
 - `model_graph_axis_spec.schema.json`
@@ -69,6 +71,7 @@ Esta carpeta contiene la primera version de contratos JSON canonicos para `jocaa
 - `treatment_plan_model.schema.json` referencia `medical_treatment_model.schema.json`
 - `medical_record_model.schema.json` referencia `person_model.schema.json`, `diagnosis_model.schema.json`, `dental_condition_model.schema.json`, `treatment_plan_model.schema.json`, `acceptance_clause_model.schema.json`, `address_model.schema.json`, `legal_id_model.schema.json`, `user_model.schema.json`, `appointment_model.schema.json`, `medication_model.schema.json` y `contact_model.schema.json`
 - `onboarding_state.schema.json` referencia `error_item_model.schema.json`
+- `model_json_schema_document.schema.json` almacena un JSON Schema completo como dato y no fija referencias cerradas dentro de `schema`
 - `model_competency_standard.schema.json` referencia `model_category.schema.json`
 - `model_learning_goal.schema.json` referencia `model_competency_standard.schema.json`
 - `model_performance_indicator.schema.json` referencia `model_learning_goal.schema.json`
@@ -141,6 +144,10 @@ Resultado esperado:
   - `DentalConditionModel.fromJson()` acepta strings y normaliza a entero.
 - `medical_record_model.schema.json`
   - el example se alinea deliberadamente con los contratos canónicos de `UserModel`, `AppointmentModel` y `ContactModel`, no con formas legacy que puedan existir en ejemplos Dart antiguos.
+- `model_json_schema_document.schema.json`
+  - almacena un JSON Schema completo como `Map<String, dynamic>`.
+  - usa `schemaTitle` y `schemaDescription` para evitar colisión semántica con las keywords nativas `title` y `description` del schema almacenado.
+  - en esta fase no se modelan internamente las keywords de JSON Schema como clases Dart separadas.
 
 ## Compatibilidad esperada
 
