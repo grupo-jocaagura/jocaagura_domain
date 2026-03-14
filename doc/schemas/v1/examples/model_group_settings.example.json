@@ -1,0 +1,19 @@
+{
+  "id": "settings-1",
+  "groupId": "group-001",
+  "googleGroupId": "AAA-BBB-CCC",
+  "whoCanViewGroup": "ALL_MEMBERS_CAN_VIEW",
+  "whoCanViewMembership": "ALL_MEMBERS_CAN_VIEW",
+  "whoCanJoin": "INVITED_CAN_JOIN",
+  "whoCanPostMessage": "ALL_MEMBERS_CAN_POST",
+  "messageModerationLevel": "MODERATE_NONE",
+  "spamModerationLevel": "MODERATE",
+  "includeInGlobalAddressList": true,
+  "membersCanPostAsTheGroup": false,
+  "isArchived": false,
+  "isCollaborativeInbox": true,
+  "rawSettings": {
+    "whoCanAssist": "OWNERS_ONLY"
+  },
+  "fetchedAt": "2025-01-01T12:00:00.000Z"
+}

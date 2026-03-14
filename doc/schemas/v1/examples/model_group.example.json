@@ -1,0 +1,26 @@
+{
+  "id": "group-001",
+  "name": "5A Matemáticas 2025",
+  "description": "",
+  "email": "",
+  "labels": {
+    "pillar": "education",
+    "kind": "course",
+    "tags": ["primary"],
+    "attributes": {
+      "grade": "5A"
+    }
+  },
+  "state": "active",
+  "courseId": "course-001",
+  "projectId": "",
+  "driveFolderId": "folder-123",
+  "crud": {
+    "recordId": "group-001",
+    "createdBy": "system@domain.com",
+    "createdAt": "2025-01-01T10:00:00.000Z",
+    "updatedBy": "system@domain.com",
+    "updatedAt": "2025-01-01T10:00:00.000Z",
+    "version": 1
+  }
+}

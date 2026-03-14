@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://jocaagura.dev/schemas/jocaagura_domain/v1/connectivity_model.schema.json",
+  "title": "ConnectivityModel",
+  "description": "Canonical JSON contract for ConnectivityModel in jocaagura_domain.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "connectionType": {
+      "type": "string",
+      "description": "Type of network connection.",
+      "enum": [
+        "none",
+        "wifi",
+        "wired",
+        "sim",
+        "bluetooth",
+        "ethernet",
+        "mobile",
+        "satellite",
+        "vpn",
+        "hotspot",
+        "usb",
+        "nfc",
+        "other"
+      ]
+    },
+    "internetSpeed": {
+      "type": "number",
+      "description": "Internet speed in Mbps."
+    }
+  },
+  "required": [
+    "connectionType",
+    "internetSpeed"
+  ],
+  "examples": [
+    {
+      "connectionType": "wifi",
+      "internetSpeed": 100.5
+    }
+  ]
+}

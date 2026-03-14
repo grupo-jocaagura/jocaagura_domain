@@ -1,0 +1,10 @@
+{
+  "id": "bienvenido.user.creation",
+  "minRoleType": "editor",
+  "appName": "bienvenido",
+  "feature": "user.creation",
+  "isActive": true,
+  "note": "Controls user creation flow",
+  "upsertAtIsoDate": "2026-01-18T00:00:00.000Z",
+  "upsertBy": "admin@corp.com"
+}

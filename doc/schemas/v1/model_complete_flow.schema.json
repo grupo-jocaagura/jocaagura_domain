@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://jocaagura.dev/schemas/jocaagura_domain/v1/model_complete_flow.schema.json",
+  "title": "ModelCompleteFlow",
+  "description": "Canonical JSON contract for ModelCompleteFlow in jocaagura_domain.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Logical or human-readable name of the flow."
+    },
+    "description": {
+      "type": "string",
+      "description": "Human-readable description of the complete flow."
+    },
+    "stepsByIndex": {
+      "type": "object",
+      "description": "Dictionary of steps keyed by step index serialized as JSON string keys.",
+      "propertyNames": {
+        "pattern": "^[0-9]+$"
+      },
+      "additionalProperties": {
+        "$ref": "./model_flow_step.schema.json"
+      }
+    }
+  },
+  "required": [
+    "name",
+    "description",
+    "stepsByIndex"
+  ],
+  "examples": [
+    {
+      "name": "AuthFlow",
+      "description": "Login and session validation diagram.",
+      "stepsByIndex": {
+        "10": {
+          "indexNumber": 10,
+          "title": "Authenticate",
+          "description": "Runs auth use case",
+          "failureCode": "AUTH_FAILED",
+          "nextOnSuccessIndex": 11,
+          "nextOnFailureIndex": -1,
+          "constraints": [],
+          "cost": {
+            "latencyMs": 250
+          }
+        },
+        "11": {
+          "indexNumber": 11,
+          "title": "PersistSession",
+          "description": "Stores session data",
+          "failureCode": "SESSION_PERSIST_FAILED",
+          "nextOnSuccessIndex": -1,
+          "nextOnFailureIndex": -1,
+          "constraints": [],
+          "cost": {
+            "dbReadsCount": 1
+          }
+        }
+      }
+    }
+  ]
+}

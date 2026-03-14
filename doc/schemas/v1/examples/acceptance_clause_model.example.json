@@ -1,0 +1,17 @@
+{
+  "id": "acm789",
+  "odontologistSignature": {
+    "id": "sig123",
+    "created": "2024-07-28T00:00:00.000Z",
+    "appId": "appOdonto123",
+    "png64Image": "iVBORw0KGgoAAAANSUhEUgAAAAEAAAAB"
+  },
+  "patientPrint": "Juan Perez",
+  "patientSignature": {
+    "id": "sig456",
+    "created": "2024-07-28T00:00:00.000Z",
+    "appId": "appPatient456",
+    "png64Image": "iVBORw0KGgoAAAANSUhEUgAAAAEAAAAB"
+  },
+  "stringAcceptanceLeyend": "Acepto los terminos y condiciones del tratamiento odontologico."
+}

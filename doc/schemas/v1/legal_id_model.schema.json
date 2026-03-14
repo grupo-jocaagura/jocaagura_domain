@@ -1,0 +1,73 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://jocaagura.dev/schemas/jocaagura_domain/v1/legal_id_model.schema.json",
+  "title": "LegalIdModel",
+  "description": "Canonical JSON contract for LegalIdModel in jocaagura_domain.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique identifier of the legal identification record."
+    },
+    "idType": {
+      "type": "string",
+      "description": "Human-readable legal identification type as currently serialized by the domain.",
+      "enum": [
+        "Registro Civil",
+        "Tarjeta de Identidad",
+        "Cédula de Ciudadanía",
+        "Cédula de Extranjería",
+        "Pasaporte",
+        "Licencia de Conducción",
+        "Certificado de Nacido Vivo"
+      ]
+    },
+    "names": {
+      "type": "string",
+      "description": "Given names of the person."
+    },
+    "lastNames": {
+      "type": "string",
+      "description": "Family names of the person."
+    },
+    "legalIdNumber": {
+      "type": "string",
+      "description": "Legal identification number."
+    },
+    "attributes": {
+      "type": "object",
+      "description": "Named attribute dictionary associated with the legal identification.",
+      "additionalProperties": {
+        "$ref": "./attribute_model.schema.json"
+      }
+    }
+  },
+  "required": [
+    "id",
+    "idType",
+    "names",
+    "lastNames",
+    "legalIdNumber",
+    "attributes"
+  ],
+  "examples": [
+    {
+      "id": "vHi05635G",
+      "idType": "Cédula de Ciudadanía",
+      "names": "pedro luis",
+      "lastNames": "manjarrez paez",
+      "legalIdNumber": "123456",
+      "attributes": {
+        "rh": {
+          "name": "rh",
+          "value": "O+"
+        },
+        "fechaExpedición": {
+          "name": "fechaExpedición",
+          "value": "1979-09-04T00:00:00.000"
+        }
+      }
+    }
+  ]
+}

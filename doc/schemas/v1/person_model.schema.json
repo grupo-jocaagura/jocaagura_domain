@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://jocaagura.dev/schemas/jocaagura_domain/v1/person_model.schema.json",
+  "title": "PersonModel",
+  "description": "Canonical JSON contract for PersonModel in jocaagura_domain.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique identifier of the person."
+    },
+    "names": {
+      "type": "string",
+      "description": "Given names of the person."
+    },
+    "photoUrl": {
+      "type": "string",
+      "format": "uri",
+      "description": "Profile photo URL of the person."
+    },
+    "lastNames": {
+      "type": "string",
+      "description": "Family names or surnames of the person."
+    },
+    "attributes": {
+      "type": "object",
+      "description": "Named attribute dictionary for extensible person metadata.",
+      "additionalProperties": {
+        "$ref": "./attribute_model.schema.json"
+      }
+    }
+  },
+  "required": [
+    "id",
+    "names",
+    "photoUrl",
+    "lastNames",
+    "attributes"
+  ],
+  "examples": [
+    {
+      "id": "person_001",
+      "names": "John",
+      "photoUrl": "https://example.com/photo.jpg",
+      "lastNames": "Doe",
+      "attributes": {
+        "age": {
+          "name": "age",
+          "value": 30
+        },
+        "gender": {
+          "name": "gender",
+          "value": "male"
+        }
+      }
+    }
+  ]
+}

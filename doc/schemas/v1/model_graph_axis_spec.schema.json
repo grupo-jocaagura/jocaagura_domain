@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://jocaagura.dev/schemas/jocaagura_domain/v1/model_graph_axis_spec.schema.json",
+  "title": "ModelGraphAxisSpec",
+  "description": "Canonical JSON contract for ModelGraphAxisSpec in jocaagura_domain.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Human-readable axis title."
+    },
+    "min": {
+      "type": "number",
+      "description": "Inclusive minimum bound of the axis range."
+    },
+    "max": {
+      "type": "number",
+      "description": "Inclusive maximum bound of the axis range."
+    }
+  },
+  "required": [
+    "title",
+    "min",
+    "max"
+  ],
+  "examples": [
+    {
+      "title": "Month",
+      "min": 1.0,
+      "max": 12.0
+    }
+  ]
+}

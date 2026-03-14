@@ -1,0 +1,84 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://jocaagura.dev/schemas/jocaagura_domain/v1/dental_condition_model.schema.json",
+  "title": "DentalConditionModel",
+  "description": "Canonical JSON contract for DentalConditionModel in jocaagura_domain.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique identifier of the dental condition record."
+    },
+    "dentalId": {
+      "type": "integer",
+      "description": "Canonical numeric identifier of the affected tooth.",
+      "enum": [
+        11, 12, 13, 14, 15, 16, 17, 18,
+        21, 22, 23, 24, 25, 26, 27, 28,
+        31, 32, 33, 34, 35, 36, 37, 38,
+        41, 42, 43, 44, 45, 46, 47, 48
+      ]
+    },
+    "dentalRegion": {
+      "type": "string",
+      "description": "Affected region of the tooth.",
+      "enum": [
+        "occlusal",
+        "vestibular",
+        "mesial",
+        "distal",
+        "palatal",
+        "lingual",
+        "buccal",
+        "labial",
+        "incisal",
+        "gingival",
+        "periodontal",
+        "maxillary",
+        "mandibular",
+        "none"
+      ]
+    },
+    "condition": {
+      "type": "string",
+      "description": "Serialized tooth condition value.",
+      "enum": [
+        "healthy",
+        "cavity",
+        "filled",
+        "missing",
+        "broken",
+        "sensitive",
+        "impacted",
+        "decayed",
+        "rootCanal",
+        "crown",
+        "extractionNeeded",
+        "orthodonticIssue",
+        "none"
+      ]
+    },
+    "dateTimeOfRecord": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Record timestamp as ISO-8601 string."
+    }
+  },
+  "required": [
+    "id",
+    "dentalId",
+    "dentalRegion",
+    "condition",
+    "dateTimeOfRecord"
+  ],
+  "examples": [
+    {
+      "id": "xxiv",
+      "dentalId": 11,
+      "dentalRegion": "gingival",
+      "condition": "healthy",
+      "dateTimeOfRecord": "2024-07-24T00:00:00.000Z"
+    }
+  ]
+}

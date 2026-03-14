@@ -1,0 +1,17 @@
+{
+  "id": "vHi05635G",
+  "idType": "Cédula de Ciudadanía",
+  "names": "pedro luis",
+  "lastNames": "manjarrez paez",
+  "legalIdNumber": "123456",
+  "attributes": {
+    "rh": {
+      "name": "rh",
+      "value": "O+"
+    },
+    "fechaExpedición": {
+      "name": "fechaExpedición",
+      "value": "1979-09-04T00:00:00.000"
+    }
+  }
+}

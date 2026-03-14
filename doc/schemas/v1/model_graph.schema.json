@@ -1,0 +1,85 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://jocaagura.dev/schemas/jocaagura_domain/v1/model_graph.schema.json",
+  "title": "ModelGraph",
+  "description": "Canonical JSON contract for ModelGraph in jocaagura_domain.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "xAxis": {
+      "$ref": "./model_graph_axis_spec.schema.json",
+      "description": "Metadata for the X axis."
+    },
+    "yAxis": {
+      "$ref": "./model_graph_axis_spec.schema.json",
+      "description": "Metadata for the Y axis."
+    },
+    "points": {
+      "type": "array",
+      "description": "Ordered list of labeled points.",
+      "items": {
+        "$ref": "./model_point.schema.json"
+      }
+    },
+    "title": {
+      "type": "string",
+      "description": "Optional graph title."
+    },
+    "subtitle": {
+      "type": "string",
+      "description": "Optional graph subtitle."
+    },
+    "description": {
+      "type": "string",
+      "description": "Optional graph description."
+    }
+  },
+  "required": [
+    "xAxis",
+    "yAxis",
+    "points",
+    "title",
+    "subtitle",
+    "description"
+  ],
+  "examples": [
+    {
+      "xAxis": {
+        "title": "Mes (índice)",
+        "min": 1.0,
+        "max": 3.0
+      },
+      "yAxis": {
+        "title": "Valor",
+        "min": 55000.0,
+        "max": 65000.0
+      },
+      "points": [
+        {
+          "label": "Enero",
+          "vector": {
+            "dx": 1.0,
+            "dy": 60000.0
+          }
+        },
+        {
+          "label": "Febrero",
+          "vector": {
+            "dx": 2.0,
+            "dy": 55000.0
+          }
+        },
+        {
+          "label": "Marzo",
+          "vector": {
+            "dx": 3.0,
+            "dy": 65000.0
+          }
+        }
+      ],
+      "title": "Precio Pizza",
+      "subtitle": "Serie mensual",
+      "description": "Valores de ejemplo"
+    }
+  ]
+}

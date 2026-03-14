@@ -1,0 +1,69 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://jocaagura.dev/schemas/jocaagura_domain/v1/financial_movement_model.schema.json",
+  "title": "FinancialMovementModel",
+  "description": "Canonical JSON contract for FinancialMovementModel in jocaagura_domain.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique identifier of the financial movement."
+    },
+    "amount": {
+      "type": "integer",
+      "description": "Non-negative scaled integer amount.",
+      "minimum": 0
+    },
+    "date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Transaction timestamp as ISO-8601 string."
+    },
+    "concept": {
+      "type": "string",
+      "description": "High-level concept of the transaction."
+    },
+    "detailedDescription": {
+      "type": "string",
+      "description": "Optional detailed description."
+    },
+    "category": {
+      "type": "string",
+      "description": "Category of the transaction."
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Record creation timestamp as ISO-8601 string."
+    },
+    "mathPrecision": {
+      "type": "integer",
+      "description": "Fractional digits used to scale amount.",
+      "minimum": 0,
+      "maximum": 6
+    }
+  },
+  "required": [
+    "id",
+    "amount",
+    "date",
+    "concept",
+    "detailedDescription",
+    "category",
+    "createdAt",
+    "mathPrecision"
+  ],
+  "examples": [
+    {
+      "id": "fm001",
+      "amount": 1000,
+      "date": "2024-07-20T00:00:00.000Z",
+      "concept": "Salary",
+      "detailedDescription": "Monthly salary deposit",
+      "category": "Income",
+      "createdAt": "2024-07-25T00:00:00.000Z",
+      "mathPrecision": 4
+    }
+  ]
+}

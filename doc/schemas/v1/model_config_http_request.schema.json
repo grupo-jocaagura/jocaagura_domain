@@ -1,0 +1,77 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://jocaagura.dev/schemas/jocaagura_domain/v1/model_config_http_request.schema.json",
+  "title": "ModelConfigHttpRequest",
+  "description": "Canonical JSON contract for ModelConfigHttpRequest in jocaagura_domain.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "method": {
+      "type": "string",
+      "description": "HTTP method serialized by enum name.",
+      "enum": [
+        "get",
+        "post",
+        "put",
+        "patch",
+        "delete"
+      ]
+    },
+    "uri": {
+      "type": "string",
+      "format": "uri",
+      "description": "Target request URI."
+    },
+    "headers": {
+      "type": "object",
+      "description": "HTTP headers map.",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "body": {
+      "type": "object",
+      "description": "JSON object payload.",
+      "additionalProperties": true
+    },
+    "timeout": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "description": "Timeout in milliseconds."
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Free-form diagnostics or telemetry metadata.",
+      "additionalProperties": true
+    }
+  },
+  "required": [
+    "method",
+    "uri",
+    "headers",
+    "body",
+    "timeout",
+    "metadata"
+  ],
+  "examples": [
+    {
+      "method": "post",
+      "uri": "https://api.example.com/users",
+      "headers": {
+        "Authorization": "Bearer token",
+        "Content-Type": "application/json"
+      },
+      "body": {
+        "name": "John",
+        "active": true
+      },
+      "timeout": 5000,
+      "metadata": {
+        "feature": "createUser",
+        "retryPolicy": "default"
+      }
+    }
+  ]
+}

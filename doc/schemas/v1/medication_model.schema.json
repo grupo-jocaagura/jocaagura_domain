@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://jocaagura.dev/schemas/jocaagura_domain/v1/medication_model.schema.json",
+  "title": "MedicationModel",
+  "description": "Canonical JSON contract for MedicationModel in jocaagura_domain.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique identifier for the medication."
+    },
+    "name": {
+      "type": "string",
+      "description": "Name of the medication."
+    },
+    "dosage": {
+      "type": "string",
+      "description": "Dosage of the medication."
+    },
+    "frequency": {
+      "type": "string",
+      "description": "Frequency of administration."
+    },
+    "startDate": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Start date of the medication as ISO-8601 string."
+    },
+    "endDate": {
+      "type": "string",
+      "format": "date-time",
+      "description": "End date of the medication as ISO-8601 string."
+    }
+  },
+  "required": [
+    "id",
+    "name",
+    "dosage",
+    "frequency",
+    "startDate",
+    "endDate"
+  ],
+  "examples": [
+    {
+      "id": "med001",
+      "name": "Ibuprofeno",
+      "dosage": "200mg",
+      "frequency": "Cada 8 horas",
+      "startDate": "2024-07-20T00:00:00.000Z",
+      "endDate": "2024-07-25T00:00:00.000Z"
+    }
+  ]
+}

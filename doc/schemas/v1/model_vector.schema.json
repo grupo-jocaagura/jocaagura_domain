@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://jocaagura.dev/schemas/jocaagura_domain/v1/model_vector.schema.json",
+  "title": "ModelVector",
+  "description": "Canonical JSON contract for ModelVector in jocaagura_domain.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "dx": {
+      "type": "number",
+      "description": "X component of the vector."
+    },
+    "dy": {
+      "type": "number",
+      "description": "Y component of the vector."
+    }
+  },
+  "required": [
+    "dx",
+    "dy"
+  ],
+  "examples": [
+    {
+      "dx": 3.0,
+      "dy": 4.0
+    }
+  ]
+}

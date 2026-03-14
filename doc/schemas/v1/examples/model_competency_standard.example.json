@@ -1,0 +1,10 @@
+{
+  "id": "STD-MATH-ALG-001",
+  "label": "Understands linear functions",
+  "area": {
+    "category": "math",
+    "description": "Mathematics"
+  },
+  "cineLevel": 2,
+  "code": "MATH.ALG.001"
+}

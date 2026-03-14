@@ -1,0 +1,16 @@
+{
+  "id": "person_001",
+  "names": "John",
+  "photoUrl": "https://example.com/photo.jpg",
+  "lastNames": "Doe",
+  "attributes": {
+    "age": {
+      "name": "age",
+      "value": 30
+    },
+    "gender": {
+      "name": "gender",
+      "value": "male"
+    }
+  }
+}

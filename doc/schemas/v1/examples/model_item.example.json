@@ -1,0 +1,24 @@
+{
+  "id": "sku-123",
+  "name": "Surgical Mask",
+  "description": "Disposable protective face mask",
+  "type": {
+    "category": "health-supplies",
+    "description": "Health-related items"
+  },
+  "price": {
+    "amount": 2500,
+    "mathPrecision": 2,
+    "currency": "COP"
+  },
+  "attributes": [
+    {
+      "name": "color",
+      "value": "blue"
+    },
+    {
+      "name": "stock",
+      "value": 50
+    }
+  ]
+}

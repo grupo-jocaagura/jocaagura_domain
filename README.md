@@ -13,6 +13,22 @@ El paquete Jocaagura Domain ofrece una serie de abstracciones de lógica de nego
 - **Independencia**: No tiene dependencias externas más allá del SDK de Flutter.
 - **Diagramas UML**: Proporciona diagramas UML para entender las relaciones entre clases.
 
+## Contratos JSON Schema
+El repositorio incluye contratos JSON canonicos y versionados en `doc/schemas/`.
+
+- Guia general: `doc/schemas/README.md`
+- Version actual: `doc/schemas/v1/`
+
+Estos schemas documentan el contrato JSON interoperable del dominio y sirven como base para validacion externa, tooling y futuras integraciones backend.
+
+Puntos clave:
+
+- el schema describe el contrato canonico de intercambio, no todas las tolerancias legacy de `fromJson()`
+- los examples en `doc/schemas/v1/examples/` son payloads canonicos validos
+- el setup local del ambiente de validacion esta documentado en `doc/schemas/README.md`
+- la validacion local se ejecuta con `npm run validate:schemas`
+- las brechas conocidas entre contrato canónico y mappers Dart actuales estan documentadas en `doc/schemas/README.md` y `doc/schemas/v1/README.md`
+
 ## Prerrequisitos y Comienzo Rápido
 Para utilizar el paquete, se requiere la instalación del SDK de Flutter. No hay dependencias de terceros y todas las clases necesarias están contenidas dentro del paquete. Se sigue un enfoque "plug and play" para una fácil integración.
 

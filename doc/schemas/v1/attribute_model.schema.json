@@ -1,0 +1,73 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://jocaagura.dev/schemas/jocaagura_domain/v1/attribute_model.schema.json",
+  "title": "AttributeModel",
+  "description": "Canonical JSON contract for AttributeModel in jocaagura_domain.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Logical name of the attribute."
+    },
+    "value": {
+      "description": "Generic JSON value associated with the attribute.",
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "number"
+        },
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "object",
+          "additionalProperties": true
+        },
+        {
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "required": [
+    "name",
+    "value"
+  ],
+  "examples": [
+    {
+      "name": "color",
+      "value": "blue"
+    },
+    {
+      "name": "stock",
+      "value": 50
+    },
+    {
+      "name": "active",
+      "value": true
+    },
+    {
+      "name": "tags",
+      "value": [
+        "a",
+        "b"
+      ]
+    },
+    {
+      "name": "meta",
+      "value": {
+        "source": "import"
+      }
+    },
+    {
+      "name": "nullableField",
+      "value": null
+    }
+  ]
+}

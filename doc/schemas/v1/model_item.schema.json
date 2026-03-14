@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://jocaagura.dev/schemas/jocaagura_domain/v1/model_item.schema.json",
+  "title": "ModelItem",
+  "description": "Canonical JSON contract for ModelItem in jocaagura_domain.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Stable identifier of the item."
+    },
+    "name": {
+      "type": "string",
+      "description": "Human-readable name of the item."
+    },
+    "description": {
+      "type": "string",
+      "description": "Detailed description of the item."
+    },
+    "type": {
+      "$ref": "./model_category.schema.json",
+      "description": "Category of the item."
+    },
+    "price": {
+      "$ref": "./model_price.schema.json",
+      "description": "Price definition of the item."
+    },
+    "attributes": {
+      "type": "array",
+      "description": "Ordered list of extensible item attributes.",
+      "items": {
+        "$ref": "./attribute_model.schema.json"
+      }
+    }
+  },
+  "required": [
+    "id",
+    "name",
+    "description",
+    "type",
+    "price",
+    "attributes"
+  ],
+  "examples": [
+    {
+      "id": "sku-123",
+      "name": "Surgical Mask",
+      "description": "Disposable protective face mask",
+      "type": {
+        "category": "health-supplies",
+        "description": "Health-related items"
+      },
+      "price": {
+        "amount": 2500,
+        "mathPrecision": 2,
+        "currency": "COP"
+      },
+      "attributes": [
+        {
+          "name": "color",
+          "value": "blue"
+        },
+        {
+          "name": "stock",
+          "value": 50
+        }
+      ]
+    }
+  ]
+}

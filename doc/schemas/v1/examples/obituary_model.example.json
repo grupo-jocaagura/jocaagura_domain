@@ -1,0 +1,36 @@
+{
+  "id": "qwerty",
+  "photoUrl": "https://example.com/photo.jpg",
+  "person": {
+    "id": "person_001",
+    "names": "John",
+    "photoUrl": "https://example.com/photo.jpg",
+    "lastNames": "Doe",
+    "attributes": {}
+  },
+  "creationDate": "2023-12-18T00:00:00.000Z",
+  "vigilAddress": {
+    "id": "1",
+    "postalCode": 12345,
+    "country": "USA",
+    "administrativeArea": "CA",
+    "city": "San Francisco",
+    "locality": "SOMA",
+    "address": "123 Main St",
+    "notes": "Near the corner"
+  },
+  "burialAddress": {
+    "id": "1",
+    "postalCode": 12345,
+    "country": "USA",
+    "administrativeArea": "CA",
+    "city": "San Francisco",
+    "locality": "SOMA",
+    "address": "123 Main St",
+    "notes": "Near the corner"
+  },
+  "vigilDate": "2023-07-05T14:30:00.000Z",
+  "burialDate": "2023-07-05T16:30:00.000Z",
+  "message": "Celebramos la vida de alguien especial.",
+  "deathRecord": null
+}

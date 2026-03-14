@@ -1,0 +1,16 @@
+{
+  "id": "job-1",
+  "groupId": "group-001",
+  "source": "sheet",
+  "type": "full",
+  "status": "ok",
+  "startedAt": "2025-01-01T10:00:00.000Z",
+  "finishedAt": "2025-01-01T10:05:00.000Z",
+  "addedCount": 10,
+  "removedCount": 2,
+  "updatedCount": 3,
+  "directoryApiCalls": 5,
+  "groupSettingsApiCalls": 1,
+  "errorItemId": "",
+  "createdBy": "system@domain.com"
+}

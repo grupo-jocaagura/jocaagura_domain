@@ -1,0 +1,17 @@
+{
+  "id": "42",
+  "appName": "Pixel",
+  "version": "1.2.3",
+  "buildNumber": 1203,
+  "platform": "android",
+  "channel": "prod",
+  "minSupportedVersion": "1.0.0",
+  "forceUpdate": false,
+  "artifactUrl": "https://example.com/app.apk",
+  "changelogUrl": "https://example.com/changelog",
+  "commitSha": "abc123",
+  "buildAt": "2025-12-07T00:00:00.000Z",
+  "meta": {
+    "size": 4200
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "pillar": "education",
+  "kind": "course",
+  "tags": ["primary", "virtual"],
+  "attributes": {
+    "campus": "north"
+  }
+}

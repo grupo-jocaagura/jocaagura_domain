@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://jocaagura.dev/schemas/jocaagura_domain/v1/model_price.schema.json",
+  "title": "ModelPrice",
+  "description": "Canonical JSON contract for ModelPrice in jocaagura_domain.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "amount": {
+      "type": "integer",
+      "description": "Monetary amount in minor units.",
+      "minimum": 0
+    },
+    "mathPrecision": {
+      "type": "integer",
+      "description": "Number of decimal places used to scale amount.",
+      "minimum": 0,
+      "default": 2
+    },
+    "currency": {
+      "type": "string",
+      "description": "Currency code serialized by enum name.",
+      "enum": [
+        "COP",
+        "USD",
+        "MXN",
+        "PEN",
+        "CLP",
+        "ARS",
+        "BRL",
+        "EUR",
+        "BTC",
+        "USDT",
+        "BOB",
+        "CRC",
+        "DOP",
+        "GTQ",
+        "HNL",
+        "NIO",
+        "PAB",
+        "PYG",
+        "UYU",
+        "VES"
+      ]
+    }
+  },
+  "required": [
+    "amount",
+    "mathPrecision",
+    "currency"
+  ],
+  "examples": [
+    {
+      "amount": 1250,
+      "mathPrecision": 2,
+      "currency": "COP"
+    }
+  ]
+}

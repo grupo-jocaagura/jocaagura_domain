@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://jocaagura.dev/schemas/jocaagura_domain/v1/model_competency_standard.schema.json",
+  "title": "ModelCompetencyStandard",
+  "description": "Canonical JSON contract for ModelCompetencyStandard in jocaagura_domain.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "id": { "type": "string" },
+    "label": { "type": "string" },
+    "area": { "$ref": "./model_category.schema.json" },
+    "cineLevel": { "type": "integer", "minimum": 0 },
+    "code": { "type": "string" }
+  },
+  "required": ["id", "label", "area", "cineLevel", "code"]
+}
