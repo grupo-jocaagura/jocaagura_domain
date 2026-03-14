@@ -3,7 +3,7 @@ import 'package:jocaagura_domain/jocaagura_domain.dart';
 
 void main() {
   group('ModelJsonSchemaReference', () {
-    final ModelJsonSchemaReference reference = ModelJsonSchemaReference(
+    const ModelJsonSchemaReference reference = ModelJsonSchemaReference(
       id: 'schema-ref-001',
       sourceSchemaId:
           'https://jocaagura.dev/schemas/jocaagura_domain/v1/medical_record_model.schema.json',
