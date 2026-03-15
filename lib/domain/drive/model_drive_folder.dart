@@ -28,7 +28,8 @@ class ModelDriveFolder extends ModelDriveItem {
     return ModelDriveFolder(
       id: Utils.getStringFromDynamic(json[ModelDriveItemEnum.id.name]),
       name: Utils.getStringFromDynamic(json[ModelDriveItemEnum.name.name]),
-      parentId: _nullableStringFromDynamic(json[ModelDriveItemEnum.parentId.name]),
+      parentId:
+          _nullableStringFromDynamic(json[ModelDriveItemEnum.parentId.name]),
       path: Utils.getStringFromDynamic(json[ModelDriveItemEnum.path.name]),
       webUrl: _nullableUrlFromDynamic(json[ModelDriveItemEnum.webUrl.name]),
       createdAt: DateUtils.dateTimeFromDynamic(
@@ -40,7 +41,8 @@ class ModelDriveFolder extends ModelDriveItem {
       trashed: Utils.getBoolFromDynamic(json[ModelDriveItemEnum.trashed.name]),
       meta: _nullableMapFromDynamic(json[ModelDriveItemEnum.meta.name]),
       childrenCount: json.containsKey(ModelDriveFolderEnum.childrenCount.name)
-          ? Utils.getIntegerFromDynamic(json[ModelDriveFolderEnum.childrenCount.name])
+          ? Utils.getIntegerFromDynamic(
+              json[ModelDriveFolderEnum.childrenCount.name])
           : null,
     );
   }
@@ -65,13 +67,17 @@ class ModelDriveFolder extends ModelDriveItem {
     return ModelDriveFolder(
       id: id ?? this.id,
       name: name ?? this.name,
-      parentId: identical(parentId, _driveUnset) ? this.parentId : parentId as String?,
+      parentId: identical(parentId, _driveUnset)
+          ? this.parentId
+          : parentId as String?,
       path: path ?? this.path,
       webUrl: identical(webUrl, _driveUnset) ? this.webUrl : webUrl as String?,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       trashed: trashed ?? this.trashed,
-      meta: identical(meta, _driveUnset) ? this.meta : meta as Map<String, dynamic>?,
+      meta: identical(meta, _driveUnset)
+          ? this.meta
+          : meta as Map<String, dynamic>?,
       childrenCount: identical(childrenCount, _driveUnset)
           ? this.childrenCount
           : childrenCount as int?,

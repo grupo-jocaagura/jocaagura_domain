@@ -13,7 +13,8 @@ void main() {
       mimeType: 'application/vnd.jocaagura.folder',
       parentId: 'folder-clients',
       path: '/clients/acme',
-      webUrl: 'https://workspace.jocaagura.dev/drive/folders/folder-clients-acme',
+      webUrl:
+          'https://workspace.jocaagura.dev/drive/folders/folder-clients-acme',
       createdAt: createdAt,
       updatedAt: updatedAt,
       trashed: false,

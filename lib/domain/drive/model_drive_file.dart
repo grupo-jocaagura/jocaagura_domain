@@ -31,7 +31,8 @@ class ModelDriveFile extends ModelDriveItem {
       mimeType: Utils.getStringFromDynamic(
         json[ModelDriveItemEnum.mimeType.name],
       ),
-      parentId: _nullableStringFromDynamic(json[ModelDriveItemEnum.parentId.name]),
+      parentId:
+          _nullableStringFromDynamic(json[ModelDriveItemEnum.parentId.name]),
       path: Utils.getStringFromDynamic(json[ModelDriveItemEnum.path.name]),
       webUrl: _nullableUrlFromDynamic(json[ModelDriveItemEnum.webUrl.name]),
       createdAt: DateUtils.dateTimeFromDynamic(
@@ -42,8 +43,10 @@ class ModelDriveFile extends ModelDriveItem {
       ),
       trashed: Utils.getBoolFromDynamic(json[ModelDriveItemEnum.trashed.name]),
       meta: _nullableMapFromDynamic(json[ModelDriveItemEnum.meta.name]),
-      sizeBytes: Utils.getIntegerFromDynamic(json[ModelDriveFileEnum.sizeBytes.name]),
-      extension: _nullableStringFromDynamic(json[ModelDriveFileEnum.extension.name]),
+      sizeBytes:
+          Utils.getIntegerFromDynamic(json[ModelDriveFileEnum.sizeBytes.name]),
+      extension:
+          _nullableStringFromDynamic(json[ModelDriveFileEnum.extension.name]),
     );
   }
 
@@ -70,13 +73,17 @@ class ModelDriveFile extends ModelDriveItem {
       id: id ?? this.id,
       name: name ?? this.name,
       mimeType: mimeType ?? this.mimeType,
-      parentId: identical(parentId, _driveUnset) ? this.parentId : parentId as String?,
+      parentId: identical(parentId, _driveUnset)
+          ? this.parentId
+          : parentId as String?,
       path: path ?? this.path,
       webUrl: identical(webUrl, _driveUnset) ? this.webUrl : webUrl as String?,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       trashed: trashed ?? this.trashed,
-      meta: identical(meta, _driveUnset) ? this.meta : meta as Map<String, dynamic>?,
+      meta: identical(meta, _driveUnset)
+          ? this.meta
+          : meta as Map<String, dynamic>?,
       sizeBytes: sizeBytes ?? this.sizeBytes,
       extension: identical(extension, _driveUnset)
           ? this.extension
