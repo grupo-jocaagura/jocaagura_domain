@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://jocaagura.dev/schemas/jocaagura_domain/v1/model_ai_response.schema.json",
+  "title": "ModelAiResponse",
+  "description": "Canonical JSON contract for a final agnostic AI response in jocaagura_domain.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "requestId": {
+      "type": "string",
+      "description": "Identifier of the request that originated this response."
+    },
+    "provider": {
+      "type": "string",
+      "description": "Provider identifier that produced the response."
+    },
+    "modelId": {
+      "type": "string",
+      "description": "Concrete model identifier that produced the response."
+    },
+    "content": {
+      "type": "string",
+      "description": "Final textual content returned by the model."
+    },
+    "parsedJson": {
+      "type": "object",
+      "description": "Optional parsed JSON payload when the response is meant to satisfy a structured contract.",
+      "additionalProperties": true
+    },
+    "finishReason": {
+      "type": "string",
+      "description": "Provider finish reason normalized as a free string."
+    },
+    "usage": {
+      "type": "object",
+      "description": "Optional usage metadata returned by the provider.",
+      "additionalProperties": true
+    }
+  },
+  "required": [
+    "requestId",
+    "provider",
+    "modelId",
+    "content"
+  ],
+  "examples": [
+    {
+      "requestId": "ai_req_customer_summary_001",
+      "provider": "gemini",
+      "modelId": "gemini-2.5-pro",
+      "content": "{\"summary\":\"El dominio prioriza interoperabilidad y contratos JSON canonicos.\",\"highlights\":[\"Schemas versionados en v1\",\"Roundtrip JSON en modelos Dart\",\"Base agnostica para backend y Apps Script\"]}",
+      "parsedJson": {
+        "summary": "El dominio prioriza interoperabilidad y contratos JSON canonicos.",
+        "highlights": [
+          "Schemas versionados en v1",
+          "Roundtrip JSON en modelos Dart",
+          "Base agnostica para backend y Apps Script"
+        ]
+      },
+      "finishReason": "stop",
+      "usage": {
+        "inputTokens": 312,
+        "outputTokens": 97
+      }
+    }
+  ]
+}
