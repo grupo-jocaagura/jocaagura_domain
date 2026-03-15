@@ -5,6 +5,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.38.5] - 2026-03-14
 
+
 ### Added
 - **Drive domain module**
   - Nuevo módulo `lib/domain/drive/` con:
