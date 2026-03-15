@@ -1,0 +1,103 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://jocaagura.dev/schemas/jocaagura_domain/v1/model_drive_folder.schema.json",
+  "title": "ModelDriveFolder",
+  "description": "Canonical JSON contract for a drive folder resource in jocaagura_domain.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique identifier of the folder resource."
+    },
+    "name": {
+      "type": "string",
+      "description": "Visible name of the folder."
+    },
+    "kind": {
+      "type": "string",
+      "const": "folder",
+      "description": "Domain classification of the resource."
+    },
+    "mimeType": {
+      "type": "string",
+      "const": "application/vnd.jocaagura.folder",
+      "description": "Canonical MIME type for folders in the Jocaagura logical drive domain."
+    },
+    "parentId": {
+      "description": "Identifier of the parent folder. Null represents the root of the logical tree.",
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "path": {
+      "type": "string",
+      "pattern": "^/",
+      "description": "Canonical absolute path of the folder in the logical drive tree."
+    },
+    "webUrl": {
+      "type": "string",
+      "format": "uri",
+      "description": "Optional web URL that opens the folder."
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Creation timestamp in ISO-8601 date-time format."
+    },
+    "updatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Last update timestamp in ISO-8601 date-time format."
+    },
+    "trashed": {
+      "type": "boolean",
+      "description": "Whether the folder is currently marked as trashed."
+    },
+    "meta": {
+      "type": "object",
+      "description": "Optional open metadata bag for provider-specific or indexing details.",
+      "additionalProperties": true
+    },
+    "childrenCount": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Optional number of immediate children currently known for the folder."
+    }
+  },
+  "required": [
+    "id",
+    "name",
+    "kind",
+    "mimeType",
+    "parentId",
+    "path",
+    "createdAt",
+    "updatedAt",
+    "trashed"
+  ],
+  "examples": [
+    {
+      "id": "folder-clients",
+      "name": "clients",
+      "kind": "folder",
+      "mimeType": "application/vnd.jocaagura.folder",
+      "parentId": null,
+      "path": "/clients",
+      "webUrl": "https://workspace.jocaagura.dev/drive/folders/folder-clients",
+      "createdAt": "2026-03-14T09:00:00.000Z",
+      "updatedAt": "2026-03-14T10:00:00.000Z",
+      "trashed": false,
+      "meta": {
+        "indexed": true,
+        "source": "workspace-backend"
+      },
+      "childrenCount": 12
+    }
+  ]
+}

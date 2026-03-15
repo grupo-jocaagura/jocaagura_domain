@@ -1,0 +1,18 @@
+{
+  "id": "file-contract-pdf",
+  "name": "contract.pdf",
+  "kind": "file",
+  "mimeType": "application/pdf",
+  "parentId": "folder-clients-acme",
+  "path": "/clients/acme/contract.pdf",
+  "webUrl": "https://workspace.jocaagura.dev/drive/files/file-contract-pdf",
+  "createdAt": "2026-03-14T10:20:00.000Z",
+  "updatedAt": "2026-03-14T10:45:00.000Z",
+  "trashed": false,
+  "meta": {
+    "indexed": true,
+    "source": "workspace-backend"
+  },
+  "sizeBytes": 245760,
+  "extension": "pdf"
+}

@@ -1,0 +1,17 @@
+{
+  "id": "folder-clients",
+  "name": "clients",
+  "kind": "folder",
+  "mimeType": "application/vnd.jocaagura.folder",
+  "parentId": null,
+  "path": "/clients",
+  "webUrl": "https://workspace.jocaagura.dev/drive/folders/folder-clients",
+  "createdAt": "2026-03-14T09:00:00.000Z",
+  "updatedAt": "2026-03-14T10:00:00.000Z",
+  "trashed": false,
+  "meta": {
+    "indexed": true,
+    "source": "workspace-backend"
+  },
+  "childrenCount": 12
+}

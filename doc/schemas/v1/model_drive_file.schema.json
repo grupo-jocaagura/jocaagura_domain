@@ -1,0 +1,108 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://jocaagura.dev/schemas/jocaagura_domain/v1/model_drive_file.schema.json",
+  "title": "ModelDriveFile",
+  "description": "Canonical JSON contract for a drive file resource in jocaagura_domain.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique identifier of the file resource."
+    },
+    "name": {
+      "type": "string",
+      "description": "Visible name of the file."
+    },
+    "kind": {
+      "type": "string",
+      "const": "file",
+      "description": "Domain classification of the resource."
+    },
+    "mimeType": {
+      "type": "string",
+      "description": "Interoperable MIME type of the file content."
+    },
+    "parentId": {
+      "description": "Identifier of the parent folder. Null represents a file located at the root of the logical tree.",
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "path": {
+      "type": "string",
+      "pattern": "^/",
+      "description": "Canonical absolute path of the file in the logical drive tree."
+    },
+    "webUrl": {
+      "type": "string",
+      "format": "uri",
+      "description": "Optional web URL that opens the file."
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Creation timestamp in ISO-8601 date-time format."
+    },
+    "updatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Last update timestamp in ISO-8601 date-time format."
+    },
+    "trashed": {
+      "type": "boolean",
+      "description": "Whether the file is currently marked as trashed."
+    },
+    "meta": {
+      "type": "object",
+      "description": "Optional open metadata bag for provider-specific or indexing details.",
+      "additionalProperties": true
+    },
+    "sizeBytes": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Size of the file in bytes."
+    },
+    "extension": {
+      "type": "string",
+      "description": "Optional file extension without changing the canonical file name."
+    }
+  },
+  "required": [
+    "id",
+    "name",
+    "kind",
+    "mimeType",
+    "parentId",
+    "path",
+    "createdAt",
+    "updatedAt",
+    "trashed",
+    "sizeBytes"
+  ],
+  "examples": [
+    {
+      "id": "file-contract-pdf",
+      "name": "contract.pdf",
+      "kind": "file",
+      "mimeType": "application/pdf",
+      "parentId": "folder-clients-acme",
+      "path": "/clients/acme/contract.pdf",
+      "webUrl": "https://workspace.jocaagura.dev/drive/files/file-contract-pdf",
+      "createdAt": "2026-03-14T10:20:00.000Z",
+      "updatedAt": "2026-03-14T10:45:00.000Z",
+      "trashed": false,
+      "meta": {
+        "indexed": true,
+        "source": "workspace-backend"
+      },
+      "sizeBytes": 245760,
+      "extension": "pdf"
+    }
+  ]
+}
