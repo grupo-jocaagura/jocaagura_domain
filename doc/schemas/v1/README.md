@@ -21,6 +21,9 @@ Esta carpeta contiene la primera version de contratos JSON canonicos para `jocaa
 - `medical_diagnosis_tab_model.schema.json`
 - `medical_record_model.schema.json`
 - `medical_treatment_model.schema.json`
+- `model_drive_file.schema.json`
+- `model_drive_folder.schema.json`
+- `model_drive_item.schema.json`
 - `model_config_http_request.schema.json`
 - `model_assessment.schema.json`
 - `model_json_schema_document.schema.json`
@@ -62,6 +65,7 @@ Esta carpeta contiene la primera version de contratos JSON canonicos para `jocaa
 
 ## Dependencias entre schemas
 
+- `model_drive_file.schema.json`, `model_drive_folder.schema.json` y `model_drive_item.schema.json` forman una familia contractual alineada, pero en `v1` se mantienen como contratos completos independientes para preservar validación simple con `additionalProperties: false`
 - `store_model.schema.json` referencia `address_model.schema.json`
 - `legal_id_model.schema.json` referencia `attribute_model.schema.json`
 - `death_record_model.schema.json` referencia `store_model.schema.json`, `person_model.schema.json` y `address_model.schema.json`
@@ -118,6 +122,10 @@ Resultado esperado:
 ## Convenciones relevantes de v1
 
 - Las fechas se representan como `string` con `format: date-time`
+- En contratos Drive, `ModelDriveItem` es un payload base real y no un tipo abstracto
+- En contratos Drive, `kind` y `mimeType` son complementarios y no equivalentes
+- En contratos Drive, `path` debe ser absoluto, iniciar con `/` y representar una ruta lógica, no una ruta física del sistema operativo
+- En contratos Drive, la raíz documental se representa con `parentId: null`
 - `UserModel.jwt` se representa como `object`
 - `PersonModel.attributes` se representa como diccionario de atributos
 - `ModelItem.attributes` se representa como arreglo de atributos
@@ -130,6 +138,7 @@ Resultado esperado:
 - Los mapas abiertos se usan solo cuando el contrato necesita extensibilidad real, por ejemplo `jwt`, `meta`, `diff`, `body`, `metadata` o diccionarios nombrados.
 - Cuando un modelo reutiliza otro contrato ya definido, debe hacerlo mediante `$ref` y no duplicando shape.
 - Los examples deben ser internamente consistentes con el resto de contratos reutilizados.
+- En la familia Drive, `mimeType` canónico de carpeta es `application/vnd.jocaagura.folder`.
 
 ## Brechas conocidas entre contrato y Dart actual
 
@@ -148,6 +157,10 @@ Resultado esperado:
   - almacena un JSON Schema completo como `Map<String, dynamic>`.
   - usa `schemaTitle` y `schemaDescription` para evitar colisión semántica con las keywords nativas `title` y `description` del schema almacenado.
   - en esta fase no se modelan internamente las keywords de JSON Schema como clases Dart separadas.
+- `model_drive_item.schema.json`, `model_drive_file.schema.json` y `model_drive_folder.schema.json`
+  - formalizan contratos JSON y examples para el dominio documental base.
+  - el paquete ya incluye una primera implementación Dart en `lib/domain/drive/`.
+  - la taxonomía documental más amplia (`drive`, `docs`, `sheets`, etc.) sigue abierta para futuras iteraciones.
 
 ## Compatibilidad esperada
 

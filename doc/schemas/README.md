@@ -89,6 +89,9 @@ npm run validate:schemas
 - `PersonModel.attributes` se representa como diccionario de atributos nombrados.
 - `ModelItem.attributes` se representa como arreglo ordenado de `AttributeModel`.
 - El módulo `json_schema` almacena contratos completos como `Map<String, dynamic>`, sin modelar keyword por keyword en Dart en esta fase.
+- El dominio documental tipo Drive usa `ModelDriveItem` como payload base real y consumible.
+- En contratos Drive, `kind` y `mimeType` no son equivalentes: `kind` clasifica la naturaleza del recurso y `mimeType` describe su tipo interoperable de contenido o contenedor.
+- En contratos Drive, `path` representa una ruta canónica absoluta del árbol lógico y siempre usa `/` como separador.
 
 ## Brechas conocidas con la implementación Dart
 
