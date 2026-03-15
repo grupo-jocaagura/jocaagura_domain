@@ -3,6 +3,44 @@
 This document follows the guidelines of [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.38.4] - 2026-03-14
+
+### Added
+- **Drive domain module**
+  - Nuevo módulo `lib/domain/drive/` con:
+    - `ModelDriveItem`
+    - `ModelDriveFile`
+    - `ModelDriveFolder`
+  - Los modelos siguen el contrato canónico de exploración/indexación documental tipo Drive ya definido en `doc/schemas/v1/`.
+  - `ModelDriveItem` se implementa como payload base real y consumible.
+  - `ModelDriveFile` y `ModelDriveFolder` materializan especializaciones contractuales del recurso documental base.
+- **Drive unit tests**
+  - Nuevas pruebas unitarias para:
+    - roundtrip `fromJson(toJson(model))`
+    - roundtrip `toJson(fromJson(jsonCanonico))`
+    - `copyWith`
+  - Cobertura inicial para:
+    - `drive_model_item_test.dart`
+    - `drive_model_file_test.dart`
+    - `drive_model_folder_test.dart`
+- **Drive JSON contracts**
+  - Nuevos schemas y examples canónicos en `doc/schemas/v1/` para:
+    - `model_drive_item.schema.json`
+    - `model_drive_file.schema.json`
+    - `model_drive_folder.schema.json`
+  - Se formaliza:
+    - `kind` como clasificación de dominio
+    - `mimeType` como tipo interoperable del recurso
+    - `path` como ruta lógica absoluta
+    - `application/vnd.jocaagura.folder` como mime canónico de carpeta
+
+### Changed
+- **Drive documentation**
+  - Se actualizan `doc/schemas/README.md` y `doc/schemas/v1/README.md` para reflejar:
+    - la distinción entre `kind` y `mimeType`
+    - la semántica mínima de `path`
+    - la disponibilidad del nuevo módulo `lib/domain/drive/`
+
 ## [1.38.2] - 2026-03-14
 
 ### Added
@@ -16,8 +54,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - example canónico
     - tags, timestamps y estado activo
   - Nuevo `ModelJsonSchemaReference` para modelar relaciones explícitas entre contratos, pensado para composición, anidamiento y futuros grafos de dependencias.
-
-### Added
 - **Contratos del propio módulo**
   - Nuevos schemas y examples en `doc/schemas/v1/` para:
     - `model_json_schema_document.schema.json`

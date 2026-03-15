@@ -1,0 +1,16 @@
+{
+  "id": "folder-clients-acme",
+  "name": "acme",
+  "kind": "folder",
+  "mimeType": "application/vnd.jocaagura.folder",
+  "parentId": "folder-clients",
+  "path": "/clients/acme",
+  "webUrl": "https://workspace.jocaagura.dev/drive/folders/folder-clients-acme",
+  "createdAt": "2026-03-14T10:00:00.000Z",
+  "updatedAt": "2026-03-14T10:15:00.000Z",
+  "trashed": false,
+  "meta": {
+    "indexed": true,
+    "source": "workspace-backend"
+  }
+}

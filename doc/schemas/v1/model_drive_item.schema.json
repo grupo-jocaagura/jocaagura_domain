@@ -1,0 +1,99 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://jocaagura.dev/schemas/jocaagura_domain/v1/model_drive_item.schema.json",
+  "title": "ModelDriveItem",
+  "description": "Canonical JSON contract for a base drive resource in jocaagura_domain.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique identifier of the drive resource."
+    },
+    "name": {
+      "type": "string",
+      "description": "Visible name of the resource."
+    },
+    "kind": {
+      "type": "string",
+      "enum": [
+        "file",
+        "folder"
+      ],
+      "description": "Domain classification of the resource."
+    },
+    "mimeType": {
+      "type": "string",
+      "description": "Interoperable MIME type of the resource content or container."
+    },
+    "parentId": {
+      "description": "Identifier of the parent resource. Null represents the root of the logical tree.",
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "path": {
+      "type": "string",
+      "pattern": "^/",
+      "description": "Canonical absolute path of the resource in the logical drive tree. Uses '/' as separator and '/' for the root."
+    },
+    "webUrl": {
+      "type": "string",
+      "format": "uri",
+      "description": "Optional web URL that opens the resource in a user-facing client."
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Creation timestamp in ISO-8601 date-time format."
+    },
+    "updatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Last update timestamp in ISO-8601 date-time format."
+    },
+    "trashed": {
+      "type": "boolean",
+      "description": "Whether the resource is currently marked as trashed."
+    },
+    "meta": {
+      "type": "object",
+      "description": "Optional open metadata bag for provider-specific or indexing details.",
+      "additionalProperties": true
+    }
+  },
+  "required": [
+    "id",
+    "name",
+    "kind",
+    "mimeType",
+    "parentId",
+    "path",
+    "createdAt",
+    "updatedAt",
+    "trashed"
+  ],
+  "examples": [
+    {
+      "id": "folder-clients-acme",
+      "name": "acme",
+      "kind": "folder",
+      "mimeType": "application/vnd.jocaagura.folder",
+      "parentId": "folder-clients",
+      "path": "/clients/acme",
+      "webUrl": "https://workspace.jocaagura.dev/drive/folders/folder-clients-acme",
+      "createdAt": "2026-03-14T10:00:00.000Z",
+      "updatedAt": "2026-03-14T10:15:00.000Z",
+      "trashed": false,
+      "meta": {
+        "indexed": true,
+        "source": "workspace-backend"
+      }
+    }
+  ]
+}
