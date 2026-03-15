@@ -42,7 +42,8 @@ class ModelDriveFolder extends ModelDriveItem {
       meta: _nullableMapFromDynamic(json[ModelDriveItemEnum.meta.name]),
       childrenCount: json.containsKey(ModelDriveFolderEnum.childrenCount.name)
           ? Utils.getIntegerFromDynamic(
-              json[ModelDriveFolderEnum.childrenCount.name])
+              json[ModelDriveFolderEnum.childrenCount.name],
+            )
           : null,
     );
   }
