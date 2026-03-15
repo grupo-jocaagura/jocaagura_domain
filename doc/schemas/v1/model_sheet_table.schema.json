@@ -1,0 +1,78 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://jocaagura.dev/schemas/jocaagura_domain/v1/model_sheet_table.schema.json",
+  "title": "ModelSheetTable",
+  "description": "Canonical JSON contract for a normalized sheet table in jocaagura_domain.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique identifier of the table."
+    },
+    "name": {
+      "type": "string",
+      "description": "Visible table name."
+    },
+    "primaryKeyColumn": {
+      "type": "string",
+      "description": "Column name used as the effective primary key for persisted rows."
+    },
+    "columns": {
+      "type": "array",
+      "description": "Normalized structural definition of the table columns.",
+      "items": {
+        "$ref": "./model_sheet_column.schema.json"
+      }
+    },
+    "rowsCount": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Optional known number of rows currently stored for the table."
+    }
+  },
+  "required": [
+    "id",
+    "name",
+    "primaryKeyColumn",
+    "columns"
+  ],
+  "examples": [
+    {
+      "id": "tbl_customers",
+      "name": "customers",
+      "primaryKeyColumn": "customerId",
+      "columns": [
+        {
+          "name": "customerId",
+          "type": "string",
+          "required": true,
+          "defaultValue": null,
+          "isPrimaryKey": true
+        },
+        {
+          "name": "fullName",
+          "type": "string",
+          "required": true,
+          "defaultValue": "",
+          "isPrimaryKey": false
+        },
+        {
+          "name": "isActive",
+          "type": "boolean",
+          "required": true,
+          "defaultValue": true,
+          "isPrimaryKey": false
+        },
+        {
+          "name": "profile",
+          "type": "json",
+          "required": false,
+          "defaultValue": null,
+          "isPrimaryKey": false
+        }
+      ],
+      "rowsCount": 128
+    }
+  ]
+}

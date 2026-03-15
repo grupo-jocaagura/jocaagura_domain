@@ -1,0 +1,7 @@
+{
+  "name": "customerId",
+  "type": "string",
+  "required": true,
+  "defaultValue": null,
+  "isPrimaryKey": true
+}
