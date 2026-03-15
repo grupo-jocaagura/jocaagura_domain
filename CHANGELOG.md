@@ -3,6 +3,45 @@
 This document follows the guidelines of [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.38.7] - 2026-03-15
+
+### Added
+- **Docs domain module**
+  - Nuevo módulo `lib/domain/docs/` con:
+    - `ModelDocDocument`
+    - `ModelDocBlock`
+  - Los modelos materializan un dominio documental mínimo por bloques, agnóstico a renderer.
+  - `ModelDocDocument` organiza el contenido mediante `blocksByIndex`.
+  - `ModelDocBlock` define bloques `heading`, `paragraph` y `markdown`.
+- **Docs unit tests**
+  - Nuevas pruebas unitarias para:
+    - roundtrip `fromJson(toJson(model))`
+    - roundtrip `toJson(fromJson(jsonCanonico))`
+    - `copyWith`
+  - Cobertura inicial para:
+    - `doc_model_document_test.dart`
+    - `doc_model_block_test.dart`
+- **Docs JSON contracts**
+  - Nuevos schemas y examples canónicos en `doc/schemas/v1/` para:
+    - `model_doc_document.schema.json`
+    - `model_doc_block.schema.json`
+  - Se formaliza:
+    - `title` fuera del cuerpo del documento
+    - `blocksByIndex` como mapa indexado para preservar intención y orden
+    - `content` siempre como `string`
+    - `level` opcional solo para bloques `heading`
+
+### Changed
+- **Docs documentation**
+  - Se actualizan `doc/schemas/README.md` y `doc/schemas/v1/README.md` para reflejar:
+    - la semántica de `blocksByIndex`
+    - el alcance reducido de la fase
+    - la separación entre contrato documental y representación visual
+- **Schema validation tooling**
+  - Se reemplaza `ajv-cli` por un script propio basado en `ajv` y `ajv-formats`.
+  - Se elimina la cadena transitiva que incorporaba `fast-json-patch` en `package-lock.json`.
+  - El flujo `npm run validate:schemas` se mantiene operativo con el nuevo validador.
+
 ## [1.38.6] - 2026-03-15
 
 ### Added

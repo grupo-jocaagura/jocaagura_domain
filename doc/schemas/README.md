@@ -92,6 +92,8 @@ npm run validate:schemas
 - El dominio documental tipo Drive usa `ModelDriveItem` como payload base real y consumible.
 - En contratos Drive, `kind` y `mimeType` no son equivalentes: `kind` clasifica la naturaleza del recurso y `mimeType` describe su tipo interoperable de contenido o contenedor.
 - En contratos Drive, `path` representa una ruta canónica absoluta del árbol lógico y siempre usa `/` como separador.
+- El dominio documental tipo Docs usa `blocksByIndex` para preservar orden lógico de bloques sin depender de arrays.
+- En contratos Docs, `title` vive fuera del cuerpo y `content` siempre se serializa como `string`.
 - El dominio tabular tipo Sheets representa filas como `idRow + data`, donde `data` es un objeto JSON gobernado por columnas declaradas en la tabla.
 - En contratos tabulares tipo Sheets, la PK efectiva siempre se serializa como `String`, incluso cuando es autogenerada.
 
