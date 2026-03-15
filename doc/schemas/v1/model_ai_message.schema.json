@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://jocaagura.dev/schemas/jocaagura_domain/v1/model_ai_message.schema.json",
+  "title": "ModelAiMessage",
+  "description": "Canonical JSON contract for a conversational AI message in jocaagura_domain.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "role": {
+      "type": "string",
+      "description": "Conversational role of the message.",
+      "enum": [
+        "user",
+        "assistant"
+      ]
+    },
+    "content": {
+      "type": "string",
+      "description": "Text content of the message."
+    }
+  },
+  "required": [
+    "role",
+    "content"
+  ],
+  "examples": [
+    {
+      "role": "user",
+      "content": "Resume la arquitectura en tres puntos."
+    }
+  ]
+}
