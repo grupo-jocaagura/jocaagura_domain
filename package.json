@@ -7,7 +7,7 @@
     "validate:schemas": "powershell -ExecutionPolicy Bypass -File tools/validate-schemas.ps1"
   },
   "devDependencies": {
-    "ajv-cli": "^5.0.0",
+    "ajv": "^8.18.0",
     "ajv-formats": "^3.0.1"
   }
 }

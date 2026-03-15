@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://jocaagura.dev/schemas/jocaagura_domain/v1/model_doc_document.schema.json",
+  "title": "ModelDocDocument",
+  "description": "Canonical JSON contract for a block-based document in jocaagura_domain.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique identifier of the document."
+    },
+    "title": {
+      "type": "string",
+      "description": "Document title outside the content blocks."
+    },
+    "blocksByIndex": {
+      "type": "object",
+      "description": "Dictionary of blocks keyed by logical index serialized as JSON string keys.",
+      "propertyNames": {
+        "pattern": "^[0-9]+$"
+      },
+      "additionalProperties": {
+        "$ref": "./model_doc_block.schema.json"
+      }
+    }
+  },
+  "required": [
+    "id",
+    "title",
+    "blocksByIndex"
+  ],
+  "examples": [
+    {
+      "id": "doc_welcome",
+      "title": "Bienvenido",
+      "blocksByIndex": {
+        "0": {
+          "kind": "heading",
+          "content": "Bienvenido",
+          "level": 1
+        },
+        "1": {
+          "kind": "paragraph",
+          "content": "Este documento introduce la plataforma."
+        },
+        "2": {
+          "kind": "markdown",
+          "content": "- item 1\n- item 2"
+        }
+      }
+    }
+  ]
+}
