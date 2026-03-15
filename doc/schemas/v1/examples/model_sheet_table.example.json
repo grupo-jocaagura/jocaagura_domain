@@ -1,0 +1,36 @@
+{
+  "id": "tbl_customers",
+  "name": "customers",
+  "primaryKeyColumn": "customerId",
+  "columns": [
+    {
+      "name": "customerId",
+      "type": "string",
+      "required": true,
+      "defaultValue": null,
+      "isPrimaryKey": true
+    },
+    {
+      "name": "fullName",
+      "type": "string",
+      "required": true,
+      "defaultValue": "",
+      "isPrimaryKey": false
+    },
+    {
+      "name": "isActive",
+      "type": "boolean",
+      "required": true,
+      "defaultValue": true,
+      "isPrimaryKey": false
+    },
+    {
+      "name": "profile",
+      "type": "json",
+      "required": false,
+      "defaultValue": null,
+      "isPrimaryKey": false
+    }
+  ],
+  "rowsCount": 128
+}

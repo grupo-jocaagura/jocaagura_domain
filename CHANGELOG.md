@@ -3,6 +3,52 @@
 This document follows the guidelines of [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.38.6] - 2026-03-15
+
+### Added
+- **Sheets domain module**
+  - Nuevo módulo `lib/domain/sheets/` con:
+    - `ModelSheetBook`
+    - `ModelSheetTable`
+    - `ModelSheetColumn`
+    - `ModelSheetRow`
+  - Los modelos materializan un dominio tabular agnóstico para persistencia flexible tipo Sheets.
+  - `ModelSheetRow` se define como `idRow + data`, donde `data` es un `Map<String, dynamic>` gobernado por columnas.
+  - `idRow` se trata como PK efectiva del registro y se serializa siempre como `String`.
+- **Sheets unit tests**
+  - Nuevas pruebas unitarias para:
+    - roundtrip `fromJson(toJson(model))`
+    - roundtrip `toJson(fromJson(jsonCanonico))`
+    - `copyWith`
+  - Cobertura inicial para:
+    - `sheet_model_book_test.dart`
+    - `sheet_model_table_test.dart`
+    - `sheet_model_column_test.dart`
+    - `sheet_model_row_test.dart`
+- **Sheets JSON contracts**
+  - Nuevos schemas y examples canónicos en `doc/schemas/v1/` para:
+    - `model_sheet_book.schema.json`
+    - `model_sheet_table.schema.json`
+    - `model_sheet_column.schema.json`
+    - `model_sheet_row.schema.json`
+  - Se formaliza:
+    - `Book` como contenedor lógico de tablas
+    - `Table` como definición estructural normalizada
+    - `Column` como definición mínima de encabezado persistible
+    - `Row` como payload persistible gobernado por columnas
+    - tipos de columna canónicos: `string`, `integer`, `number`, `boolean`, `dateTime`, `json`
+
+### Changed
+- **Sheets documentation**
+  - Se actualizan `doc/schemas/README.md` y `doc/schemas/v1/README.md` para reflejar:
+    - la semántica de `idRow` como PK efectiva
+    - la relación entre `ModelSheetTable.columns` y `ModelSheetRow.data`
+    - el alcance deliberadamente reducido de la fase:
+      - sin fórmulas
+      - sin foreign keys
+      - sin labels visibles
+      - sin versionado estructural
+
 ## [1.38.5] - 2026-03-14
 
 

@@ -1,0 +1,61 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://jocaagura.dev/schemas/jocaagura_domain/v1/model_sheet_column.schema.json",
+  "title": "ModelSheetColumn",
+  "description": "Canonical JSON contract for a normalized sheet column in jocaagura_domain.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Unique column name that also acts as the key used inside row data objects."
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "string",
+        "integer",
+        "number",
+        "boolean",
+        "dateTime",
+        "json"
+      ],
+      "description": "Canonical data type expected for values stored in this column."
+    },
+    "required": {
+      "type": "boolean",
+      "description": "Whether the column must be present in a valid row payload."
+    },
+    "defaultValue": {
+      "description": "Optional default value applied when the implementer decides to materialize missing data.",
+      "anyOf": [
+        { "type": "string" },
+        { "type": "integer" },
+        { "type": "number" },
+        { "type": "boolean" },
+        { "type": "object", "additionalProperties": true },
+        { "type": "array" },
+        { "type": "null" }
+      ]
+    },
+    "isPrimaryKey": {
+      "type": "boolean",
+      "description": "Whether this column is the declared primary key of the table."
+    }
+  },
+  "required": [
+    "name",
+    "type",
+    "required",
+    "isPrimaryKey"
+  ],
+  "examples": [
+    {
+      "name": "customerId",
+      "type": "string",
+      "required": true,
+      "defaultValue": null,
+      "isPrimaryKey": true
+    }
+  ]
+}

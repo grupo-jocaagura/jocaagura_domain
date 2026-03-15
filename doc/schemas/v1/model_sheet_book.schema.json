@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://jocaagura.dev/schemas/jocaagura_domain/v1/model_sheet_book.schema.json",
+  "title": "ModelSheetBook",
+  "description": "Canonical JSON contract for a logical book that contains normalized tables in jocaagura_domain.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique identifier of the logical book."
+    },
+    "name": {
+      "type": "string",
+      "description": "Visible book name."
+    },
+    "tables": {
+      "type": "array",
+      "description": "Tables structurally contained in the book.",
+      "items": {
+        "$ref": "./model_sheet_table.schema.json"
+      }
+    }
+  },
+  "required": [
+    "id",
+    "name",
+    "tables"
+  ],
+  "examples": [
+    {
+      "id": "book_customers",
+      "name": "Customer Master Data",
+      "tables": [
+        {
+          "id": "tbl_customers",
+          "name": "customers",
+          "primaryKeyColumn": "customerId",
+          "columns": [
+            {
+              "name": "customerId",
+              "type": "string",
+              "required": true,
+              "defaultValue": null,
+              "isPrimaryKey": true
+            },
+            {
+              "name": "fullName",
+              "type": "string",
+              "required": true,
+              "defaultValue": "",
+              "isPrimaryKey": false
+            },
+            {
+              "name": "isActive",
+              "type": "boolean",
+              "required": true,
+              "defaultValue": true,
+              "isPrimaryKey": false
+            }
+          ],
+          "rowsCount": 128
+        }
+      ]
+    }
+  ]
+}
