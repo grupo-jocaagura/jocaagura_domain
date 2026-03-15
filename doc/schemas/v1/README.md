@@ -24,6 +24,8 @@ Esta carpeta contiene la primera version de contratos JSON canonicos para `jocaa
 - `model_drive_file.schema.json`
 - `model_drive_folder.schema.json`
 - `model_drive_item.schema.json`
+- `model_doc_block.schema.json`
+- `model_doc_document.schema.json`
 - `model_config_http_request.schema.json`
 - `model_assessment.schema.json`
 - `model_json_schema_document.schema.json`
@@ -70,6 +72,7 @@ Esta carpeta contiene la primera version de contratos JSON canonicos para `jocaa
 ## Dependencias entre schemas
 
 - `model_drive_file.schema.json`, `model_drive_folder.schema.json` y `model_drive_item.schema.json` forman una familia contractual alineada, pero en `v1` se mantienen como contratos completos independientes para preservar validación simple con `additionalProperties: false`
+- `model_doc_document.schema.json` referencia `model_doc_block.schema.json`
 - `model_sheet_book.schema.json` referencia `model_sheet_table.schema.json`
 - `model_sheet_table.schema.json` referencia `model_sheet_column.schema.json`
 - `store_model.schema.json` referencia `address_model.schema.json`
@@ -132,6 +135,9 @@ Resultado esperado:
 - En contratos Drive, `kind` y `mimeType` son complementarios y no equivalentes
 - En contratos Drive, `path` debe ser absoluto, iniciar con `/` y representar una ruta lógica, no una ruta física del sistema operativo
 - En contratos Drive, la raíz documental se representa con `parentId: null`
+- En contratos Docs, `ModelDocDocument` organiza el contenido mediante `blocksByIndex`
+- En contratos Docs, `ModelDocBlock.kind` se limita a `heading`, `paragraph` y `markdown`
+- En contratos Docs, `ModelDocBlock.level` solo aplica a encabezados
 - En contratos Sheets, `ModelSheetRow` representa un registro persistible mediante `idRow` y `data`
 - En contratos Sheets, `idRow` es la PK efectiva y siempre se serializa como `string`
 - En contratos Sheets, `data` es un objeto JSON gobernado por los nombres únicos declarados en `ModelSheetColumn`
@@ -148,6 +154,7 @@ Resultado esperado:
 - Cuando un modelo reutiliza otro contrato ya definido, debe hacerlo mediante `$ref` y no duplicando shape.
 - Los examples deben ser internamente consistentes con el resto de contratos reutilizados.
 - En la familia Drive, `mimeType` canónico de carpeta es `application/vnd.jocaagura.folder`.
+- En la familia Docs, el markdown libre se limita a bloques `markdown` y no se modela rich text inline.
 - En la familia Sheets no se modelan labels visibles, fórmulas, orden visual, foreign keys ni versionado estructural.
 
 ## Brechas conocidas entre contrato y Dart actual
@@ -174,6 +181,9 @@ Resultado esperado:
 - `model_sheet_book.schema.json`, `model_sheet_table.schema.json`, `model_sheet_column.schema.json` y `model_sheet_row.schema.json`
   - formalizan el dominio tabular mínimo para persistencia tipo Sheets.
   - la validación fuerte de qué claves entran en `data` se gobierna por las columnas de la tabla, no por un schema dinámico generado en esta fase.
+- `model_doc_document.schema.json` y `model_doc_block.schema.json`
+  - formalizan el dominio mínimo de documentos por bloques.
+  - la representación visual final queda deliberadamente fuera del contrato y se delega al implementador.
 
 ## Compatibilidad esperada
 

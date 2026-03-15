@@ -1,0 +1,19 @@
+{
+  "id": "doc_welcome",
+  "title": "Bienvenido",
+  "blocksByIndex": {
+    "0": {
+      "kind": "heading",
+      "content": "Bienvenido",
+      "level": 1
+    },
+    "1": {
+      "kind": "paragraph",
+      "content": "Este documento introduce la plataforma."
+    },
+    "2": {
+      "kind": "markdown",
+      "content": "- item 1\n- item 2"
+    }
+  }
+}

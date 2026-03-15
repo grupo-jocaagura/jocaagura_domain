@@ -72,6 +72,8 @@ part 'domain/dentist_app/diagnosis_model.dart';
 part 'domain/dentist_app/medical_record_model.dart';
 part 'domain/dentist_app/medical_treatment_model.dart';
 part 'domain/dentist_app/treatment_plan_model.dart';
+part 'domain/docs/model_doc_block.dart';
+part 'domain/docs/model_doc_document.dart';
 part 'domain/drive/model_drive_file.dart';
 part 'domain/drive/model_drive_folder.dart';
 part 'domain/drive/model_drive_item.dart';
