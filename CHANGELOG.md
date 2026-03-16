@@ -3,6 +3,51 @@
 This document follows the guidelines of [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.38.9] - 2026-03-15
+
+### Added
+- **Flow certification domain module**
+  - Nuevo wrapper de certificación lineal sobre `either_flow` con:
+    - `ModelFlowStepCompletion`
+    - `ModelFlowCertificate`
+  - Los modelos convierten un `ModelCompleteFlow` embebido en evidencia auditable de cumplimiento secuencial.
+  - `ModelFlowCertificate` conserva el flujo completo desde el inicio, junto con:
+    - `candidate`
+    - `certificateKey`
+    - `stepCompletionsByIndex`
+    - `state`
+    - datos opcionales de certificación final
+  - `ModelFlowStepCompletion` registra trazabilidad mínima por paso mediante:
+    - `completedAt`
+    - `evidenceUrl`
+    - `notes`
+- **Flow certification unit tests**
+  - Nuevas pruebas unitarias para:
+    - roundtrip `fromJson(toJson(model))`
+    - roundtrip `toJson(fromJson(jsonCanonico))`
+    - `copyWith`
+  - Cobertura inicial para:
+    - `model_flow_step_completion_test.dart`
+    - `model_flow_certificate_test.dart`
+- **Flow certification JSON contracts**
+  - Nuevos schemas y examples canónicos en `doc/schemas/v1/` para:
+    - `model_flow_step_completion.schema.json`
+    - `model_flow_certificate.schema.json`
+  - Se formaliza:
+    - certificación lineal secuencial
+    - flujo embebido completo e inmutable como snapshot auditable
+    - estados `draft`, `inProgress`, `readyForCertification` y `certified`
+    - cierre explícito de certificación, no automático
+
+### Changed
+- **Flow certification documentation**
+  - Se actualizan `doc/schemas/README.md` y `doc/schemas/v1/README.md` para reflejar:
+    - la diferencia entre completar pasos y certificar
+    - el carácter lineal y obligatorio del proceso
+    - el cierre lógico de un certificado en estado `certified`
+- **Value equality inside flow certificates**
+  - `ModelFlowCertificate` compara `candidate` y `certifiedBy` por valor serializado para evitar falsos negativos de igualdad causados por la comparación superficial de `jwt` en `UserModel`.
+
 ## [1.38.8] - 2026-03-15
 
 ### Added
