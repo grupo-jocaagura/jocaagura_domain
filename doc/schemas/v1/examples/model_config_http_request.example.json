@@ -1,0 +1,17 @@
+{
+  "method": "post",
+  "uri": "https://api.example.com/users",
+  "headers": {
+    "Authorization": "Bearer token",
+    "Content-Type": "application/json"
+  },
+  "body": {
+    "name": "John",
+    "active": true
+  },
+  "timeout": 5000,
+  "metadata": {
+    "feature": "createUser",
+    "retryPolicy": "default"
+  }
+}

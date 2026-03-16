@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://jocaagura.dev/schemas/jocaagura_domain/v1/treatment_plan_model.schema.json",
+  "title": "TreatmentPlanModel",
+  "description": "Canonical JSON contract for TreatmentPlanModel in jocaagura_domain.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique identifier of the treatment plan."
+    },
+    "medicalTreatments": {
+      "type": "object",
+      "description": "Named dictionary of medical treatments included in the plan.",
+      "additionalProperties": {
+        "$ref": "./medical_treatment_model.schema.json"
+      }
+    }
+  },
+  "required": [
+    "id",
+    "medicalTreatments"
+  ],
+  "examples": [
+    {
+      "id": "dtpm",
+      "medicalTreatments": {
+        "oxo": {
+          "id": "default_id",
+          "concept": "Tratamiento de ejemplo",
+          "dateTimeOfRecord": "2024-07-28T00:00:00.000Z",
+          "quantity": 1
+        }
+      }
+    }
+  ]
+}

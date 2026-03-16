@@ -1,0 +1,10 @@
+{
+  "latencyMs": 5,
+  "throwOnSave": false,
+  "throwOnDelete": false,
+  "emitInitial": true,
+  "deepCopies": true,
+  "dedupeByContent": true,
+  "orderCollectionsByKey": true,
+  "idKey": "id"
+}

@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://jocaagura.dev/schemas/jocaagura_domain/v1/onboarding_state.schema.json",
+  "title": "OnboardingState",
+  "description": "Canonical JSON contract for OnboardingState in jocaagura_domain.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "status": {
+      "type": "string",
+      "description": "Current onboarding status serialized by enum name.",
+      "enum": [
+        "idle",
+        "running",
+        "completed",
+        "skipped"
+      ]
+    },
+    "stepIndex": {
+      "type": "integer",
+      "description": "Zero-based current step index."
+    },
+    "totalSteps": {
+      "type": "integer",
+      "description": "Configured total number of steps."
+    },
+    "error": {
+      "description": "Optional domain error surfaced by the onboarding orchestration.",
+      "oneOf": [
+        {
+          "$ref": "./error_item_model.schema.json"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "required": [
+    "status",
+    "stepIndex",
+    "totalSteps",
+    "error"
+  ],
+  "examples": [
+    {
+      "status": "running",
+      "stepIndex": 1,
+      "totalSteps": 3,
+      "error": null
+    }
+  ]
+}

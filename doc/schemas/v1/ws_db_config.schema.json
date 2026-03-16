@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://jocaagura.dev/schemas/jocaagura_domain/v1/ws_db_config.schema.json",
+  "title": "WsDbConfig",
+  "description": "Canonical JSON contract for WsDbConfig in jocaagura_domain.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "latencyMs": {
+      "type": "integer",
+      "description": "Simulated latency in milliseconds.",
+      "minimum": 0
+    },
+    "throwOnSave": {
+      "type": "boolean",
+      "description": "Whether save operations simulate an error."
+    },
+    "throwOnDelete": {
+      "type": "boolean",
+      "description": "Whether delete operations simulate an error."
+    },
+    "emitInitial": {
+      "type": "boolean",
+      "description": "Whether streams emit an initial snapshot."
+    },
+    "deepCopies": {
+      "type": "boolean",
+      "description": "Whether deep copies are performed on write and emit."
+    },
+    "dedupeByContent": {
+      "type": "boolean",
+      "description": "Whether repeated equal content emissions are skipped."
+    },
+    "orderCollectionsByKey": {
+      "type": "boolean",
+      "description": "Whether collection snapshots are emitted sorted by key."
+    },
+    "idKey": {
+      "type": "string",
+      "description": "JSON key used for the document identifier."
+    }
+  },
+  "required": [
+    "latencyMs",
+    "throwOnSave",
+    "throwOnDelete",
+    "emitInitial",
+    "deepCopies",
+    "dedupeByContent",
+    "orderCollectionsByKey",
+    "idKey"
+  ],
+  "examples": [
+    {
+      "latencyMs": 5,
+      "throwOnSave": false,
+      "throwOnDelete": false,
+      "emitInitial": true,
+      "deepCopies": true,
+      "dedupeByContent": true,
+      "orderCollectionsByKey": true,
+      "idKey": "id"
+    }
+  ]
+}

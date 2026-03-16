@@ -1,0 +1,98 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://jocaagura.dev/schemas/jocaagura_domain/v1/store_model.schema.json",
+  "title": "StoreModel",
+  "description": "Canonical JSON contract for StoreModel in jocaagura_domain.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique identifier of the store."
+    },
+    "nit": {
+      "type": "integer",
+      "description": "Tax identification number represented as a JSON integer.",
+      "minimum": 0
+    },
+    "photoUrl": {
+      "type": "string",
+      "format": "uri",
+      "description": "Primary photo URL of the store."
+    },
+    "coverPhotoUrl": {
+      "type": "string",
+      "format": "uri",
+      "description": "Cover photo URL of the store."
+    },
+    "email": {
+      "type": "string",
+      "format": "email",
+      "description": "Primary contact email of the store."
+    },
+    "ownerEmail": {
+      "type": "string",
+      "format": "email",
+      "description": "Owner email of the store."
+    },
+    "name": {
+      "type": "string",
+      "description": "Display name of the store."
+    },
+    "alias": {
+      "type": "string",
+      "description": "Alternative short name or alias of the store."
+    },
+    "address": {
+      "$ref": "./address_model.schema.json",
+      "description": "Structured postal address of the store."
+    },
+    "phoneNumber1": {
+      "type": "integer",
+      "description": "Primary phone number represented as a JSON integer.",
+      "minimum": 0
+    },
+    "phoneNumber2": {
+      "type": "integer",
+      "description": "Secondary phone number represented as a JSON integer.",
+      "minimum": 0
+    }
+  },
+  "required": [
+    "id",
+    "nit",
+    "photoUrl",
+    "coverPhotoUrl",
+    "email",
+    "ownerEmail",
+    "name",
+    "alias",
+    "address",
+    "phoneNumber1",
+    "phoneNumber2"
+  ],
+  "examples": [
+    {
+      "id": "store_001",
+      "nit": 98765,
+      "photoUrl": "https://example.com/photo.jpg",
+      "coverPhotoUrl": "https://example.com/cover.jpg",
+      "email": "store@example.com",
+      "ownerEmail": "owner@example.com",
+      "name": "Super Store",
+      "alias": "SS",
+      "address": {
+        "id": "1",
+        "postalCode": 12345,
+        "country": "USA",
+        "administrativeArea": "CA",
+        "city": "San Francisco",
+        "locality": "SOMA",
+        "address": "123 Main St",
+        "notes": "Near the corner"
+      },
+      "phoneNumber1": 123456789,
+      "phoneNumber2": 987654321
+    }
+  ]
+}

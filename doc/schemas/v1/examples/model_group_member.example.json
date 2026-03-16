@@ -1,0 +1,21 @@
+{
+  "id": "member-1",
+  "groupId": "group-001",
+  "email": "user@domain.com",
+  "userId": "user-001",
+  "role": "member",
+  "entityType": "user",
+  "membershipId": "m-001",
+  "source": "manual",
+  "subscription": "allMail",
+  "includeDerived": false,
+  "active": true,
+  "crud": {
+    "recordId": "member-1",
+    "createdBy": "system@domain.com",
+    "createdAt": "2025-01-01T10:00:00.000Z",
+    "updatedBy": "system@domain.com",
+    "updatedAt": "2025-01-01T10:00:00.000Z",
+    "version": 1
+  }
+}

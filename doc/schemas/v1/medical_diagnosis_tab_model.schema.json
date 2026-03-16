@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://jocaagura.dev/schemas/jocaagura_domain/v1/medical_diagnosis_tab_model.schema.json",
+  "title": "MedicalDiagnosisTabModel",
+  "description": "Canonical JSON contract for MedicalDiagnosisTabModel in jocaagura_domain.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique identifier of the diagnosis entry."
+    },
+    "condition": {
+      "type": "string",
+      "description": "Condition or diagnosis label."
+    },
+    "quantity": {
+      "type": "number",
+      "description": "Quantitative measure associated with the diagnosis."
+    },
+    "observation": {
+      "type": "string",
+      "description": "Additional observation for the diagnosis."
+    },
+    "dateTimeOfRecord": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Diagnosis timestamp as ISO-8601 string."
+    }
+  },
+  "required": [
+    "id",
+    "condition",
+    "quantity",
+    "observation",
+    "dateTimeOfRecord"
+  ],
+  "examples": [
+    {
+      "id": "oxo",
+      "condition": "sane",
+      "quantity": 0,
+      "observation": "No observation",
+      "dateTimeOfRecord": "2024-07-21T00:00:00.000Z"
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "id": "schema-ref-001",
+  "sourceSchemaId": "https://jocaagura.dev/schemas/jocaagura_domain/v1/medical_record_model.schema.json",
+  "targetSchemaId": "https://jocaagura.dev/schemas/jocaagura_domain/v1/person_model.schema.json",
+  "referenceType": "ref",
+  "path": "/properties/patient",
+  "referenceDescription": "Medical record references the person contract for patient."
+}

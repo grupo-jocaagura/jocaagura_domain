@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://jocaagura.dev/schemas/jocaagura_domain/v1/model_group_sync_job.schema.json",
+  "title": "ModelGroupSyncJob",
+  "description": "Canonical JSON contract for ModelGroupSyncJob in jocaagura_domain.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "id": { "type": "string" },
+    "groupId": { "type": "string" },
+    "source": { "type": "string", "enum": ["course", "sheet", "manual", "bulkImport"] },
+    "type": { "type": "string", "enum": ["full", "incremental"] },
+    "status": { "type": "string", "enum": ["running", "ok", "error"] },
+    "startedAt": { "type": "string", "format": "date-time" },
+    "finishedAt": { "type": "string", "format": "date-time" },
+    "addedCount": { "type": "integer", "minimum": 0 },
+    "removedCount": { "type": "integer", "minimum": 0 },
+    "updatedCount": { "type": "integer", "minimum": 0 },
+    "directoryApiCalls": { "type": "integer", "minimum": 0 },
+    "groupSettingsApiCalls": { "type": "integer", "minimum": 0 },
+    "errorItemId": { "type": "string" },
+    "createdBy": { "type": "string" }
+  },
+  "required": ["id", "groupId", "source", "type", "status", "startedAt", "addedCount", "removedCount", "updatedCount", "directoryApiCalls", "groupSettingsApiCalls", "errorItemId", "createdBy"],
+  "examples": [
+    {
+      "id": "job-1",
+      "groupId": "group-001",
+      "source": "sheet",
+      "type": "full",
+      "status": "ok",
+      "startedAt": "2025-01-01T10:00:00.000Z",
+      "finishedAt": "2025-01-01T10:05:00.000Z",
+      "addedCount": 10,
+      "removedCount": 2,
+      "updatedCount": 3,
+      "directoryApiCalls": 5,
+      "groupSettingsApiCalls": 1,
+      "errorItemId": "",
+      "createdBy": "system@domain.com"
+    }
+  ]
+}

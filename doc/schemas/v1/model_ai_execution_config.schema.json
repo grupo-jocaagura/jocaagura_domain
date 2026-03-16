@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://jocaagura.dev/schemas/jocaagura_domain/v1/model_ai_execution_config.schema.json",
+  "title": "ModelAiExecutionConfig",
+  "description": "Canonical JSON contract for agnostic AI execution intent in jocaagura_domain.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "temperature": {
+      "type": "number",
+      "description": "Sampling temperature requested for the provider."
+    },
+    "topP": {
+      "type": "number",
+      "description": "Top-p nucleus sampling value requested for the provider."
+    },
+    "topK": {
+      "type": "integer",
+      "description": "Top-k sampling value requested for the provider."
+    },
+    "maxOutputTokens": {
+      "type": "integer",
+      "description": "Maximum output tokens requested for the response.",
+      "minimum": 1
+    },
+    "seed": {
+      "type": "integer",
+      "description": "Preferred deterministic seed when the provider supports it."
+    },
+    "stopSequences": {
+      "type": "array",
+      "description": "Optional list of stop sequences requested for generation.",
+      "items": {
+        "type": "string"
+      }
+    },
+    "deterministicPreferred": {
+      "type": "boolean",
+      "description": "Agnostic intent that the request should favor reproducible outputs when possible."
+    }
+  },
+  "required": [],
+  "examples": [
+    {
+      "temperature": 0,
+      "topP": 0.95,
+      "topK": 40,
+      "maxOutputTokens": 512,
+      "seed": 7,
+      "stopSequences": [
+        "</json>"
+      ],
+      "deterministicPreferred": true
+    }
+  ]
+}

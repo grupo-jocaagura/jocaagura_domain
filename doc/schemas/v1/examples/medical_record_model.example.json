@@ -1,0 +1,121 @@
+{
+  "id": "default",
+  "patient": {
+    "id": "person_001",
+    "names": "John",
+    "photoUrl": "https://example.com/photo.jpg",
+    "lastNames": "Doe",
+    "attributes": {
+      "age": {
+        "name": "age",
+        "value": 30
+      }
+    }
+  },
+  "diagnoses": [
+    {
+      "id": "xox",
+      "title": "Diagnostico periodontal",
+      "description": "Descripcion detallada del diagnostico."
+    }
+  ],
+  "dentalConditions": [
+    {
+      "id": "xxiv",
+      "dentalId": 11,
+      "dentalRegion": "gingival",
+      "condition": "healthy",
+      "dateTimeOfRecord": "2024-07-24T00:00:00.000Z"
+    }
+  ],
+  "treatmentPlan": {
+    "id": "dtpm",
+    "medicalTreatments": {
+      "oxo": {
+        "id": "default_id",
+        "concept": "Tratamiento de ejemplo",
+        "dateTimeOfRecord": "2024-07-28T00:00:00.000Z",
+        "quantity": 1
+      }
+    }
+  },
+  "acceptanceClause": {
+    "id": "acm789",
+    "odontologistSignature": {
+      "id": "sig123",
+      "created": "2024-07-28T00:00:00.000Z",
+      "appId": "appOdonto123",
+      "png64Image": "iVBORw0KGgoAAAANSUhEUgAAAAEAAAAB"
+    },
+    "patientPrint": "Juan Perez",
+    "patientSignature": {
+      "id": "sig456",
+      "created": "2024-07-28T00:00:00.000Z",
+      "appId": "appPatient456",
+      "png64Image": "iVBORw0KGgoAAAANSUhEUgAAAAEAAAAB"
+    },
+    "stringAcceptanceLeyend": "Acepto los terminos y condiciones del tratamiento odontologico."
+  },
+  "address": {
+    "id": "addr_001",
+    "country": "Colombia",
+    "administrativeArea": "Atlantico",
+    "city": "Barranquilla",
+    "locality": "Norte Centro Historico",
+    "address": "Calle 84 # 54-21",
+    "postalCode": 80020,
+    "notes": "Apartamento 4B"
+  },
+  "legalId": {
+    "id": "vHi05635G",
+    "idType": "Cédula de Ciudadanía",
+    "names": "pedro luis",
+    "lastNames": "manjarrez paez",
+    "legalIdNumber": "123456",
+    "attributes": {
+      "rh": {
+        "name": "rh",
+        "value": "O+"
+      }
+    }
+  },
+  "user": {
+    "id": "user_001",
+    "displayName": "John Doe",
+    "photoUrl": "https://example.com/profile.jpg",
+    "email": "john.doe@example.com",
+    "jwt": {
+      "sub": "user_001",
+      "role": "patient"
+    }
+  },
+  "appointments": [
+    {
+      "id": "appt001",
+      "date": "2024-07-24T00:00:00.000Z",
+      "odontologist": "Dr. Juan Perez",
+      "purpose": "Consulta General",
+      "status": "Pendiente",
+      "notes": "Revisar dolor en la muela"
+    }
+  ],
+  "medications": [
+    {
+      "id": "med001",
+      "name": "Ibuprofeno",
+      "dosage": "200mg",
+      "frequency": "Cada 8 horas",
+      "startDate": "2024-07-20T00:00:00.000Z",
+      "endDate": "2024-07-25T00:00:00.000Z"
+    }
+  ],
+  "contacts": [
+    {
+      "id": "contact001",
+      "name": "Jane Doe",
+      "relationship": "Hermana",
+      "phoneNumber": "3001234567",
+      "email": "jane.doe@example.com"
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "id": "alias-1",
+  "groupId": "group-001",
+  "aliasEmail": "soporte@domain.com",
+  "status": "active",
+  "errorItemId": "",
+  "crud": {
+    "recordId": "alias-1",
+    "createdBy": "system@domain.com",
+    "createdAt": "2025-01-01T10:00:00.000Z",
+    "updatedBy": "system@domain.com",
+    "updatedAt": "2025-01-01T10:00:00.000Z",
+    "version": 1
+  }
+}

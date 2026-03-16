@@ -1,0 +1,76 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://jocaagura.dev/schemas/jocaagura_domain/v1/model_crud_log_entry.schema.json",
+  "title": "ModelCrudLogEntry",
+  "description": "Canonical JSON contract for ModelCrudLogEntry in jocaagura_domain.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique identifier of the log entry."
+    },
+    "entityType": {
+      "type": "string",
+      "description": "Type of entity affected by the operation."
+    },
+    "entityId": {
+      "type": "string",
+      "description": "Identifier of the affected entity."
+    },
+    "operation": {
+      "type": "string",
+      "description": "CRUD operation kind.",
+      "enum": [
+        "create",
+        "update",
+        "delete"
+      ]
+    },
+    "performedBy": {
+      "type": "string",
+      "description": "Actor that performed the operation."
+    },
+    "performedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Operation timestamp as ISO-8601 string."
+    },
+    "diff": {
+      "type": "object",
+      "description": "Optional structured change payload.",
+      "additionalProperties": true
+    },
+    "env": {
+      "type": "string",
+      "description": "Execution environment name."
+    },
+    "errorItemId": {
+      "type": "string",
+      "description": "Associated error item identifier when applicable."
+    }
+  },
+  "required": [
+    "id",
+    "entityType",
+    "entityId",
+    "operation",
+    "performedBy",
+    "performedAt"
+  ],
+  "examples": [
+    {
+      "id": "log-1",
+      "entityType": "Group",
+      "entityId": "group-001",
+      "operation": "create",
+      "performedBy": "admin@domain.com",
+      "performedAt": "2025-01-01T10:00:00.000Z",
+      "diff": {
+        "field": "value"
+      },
+      "env": "dev",
+      "errorItemId": "ERR-123"
+    }
+  ]
+}

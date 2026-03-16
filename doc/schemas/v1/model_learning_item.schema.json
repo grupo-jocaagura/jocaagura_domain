@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://jocaagura.dev/schemas/jocaagura_domain/v1/model_learning_item.schema.json",
+  "title": "ModelLearningItem",
+  "description": "Canonical JSON contract for ModelLearningItem in jocaagura_domain.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "id": { "type": "string" },
+    "label": { "type": "string" },
+    "correctAnswer": { "type": "string" },
+    "wrongAnswerOne": { "type": "string" },
+    "wrongAnswerTwo": { "type": "string" },
+    "wrongAnswerThree": { "type": "string" },
+    "explanation": { "type": "string" },
+    "attributes": {
+      "type": "array",
+      "items": { "$ref": "./attribute_model.schema.json" }
+    },
+    "achievementOne": { "$ref": "./model_performance_indicator.schema.json" },
+    "achievementTwo": { "$ref": "./model_performance_indicator.schema.json" },
+    "achievementThree": { "$ref": "./model_performance_indicator.schema.json" },
+    "cineLevel": { "type": "integer", "minimum": 0, "maximum": 11 },
+    "estimatedTimeMs": { "type": "integer", "minimum": 0 },
+    "category": { "$ref": "./model_category.schema.json" }
+  },
+  "required": [
+    "id",
+    "label",
+    "correctAnswer",
+    "wrongAnswerOne",
+    "wrongAnswerTwo",
+    "wrongAnswerThree",
+    "explanation",
+    "attributes",
+    "achievementOne",
+    "cineLevel",
+    "estimatedTimeMs",
+    "category"
+  ]
+}

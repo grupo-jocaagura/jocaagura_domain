@@ -1,0 +1,16 @@
+{
+  "indexNumber": 10,
+  "title": "Authenticate",
+  "description": "Runs auth use case and returns Either result",
+  "failureCode": "AUTH_FAILED",
+  "nextOnSuccessIndex": 11,
+  "nextOnFailureIndex": -1,
+  "constraints": [
+    "requiresInternet"
+  ],
+  "cost": {
+    "latencyMs": 250,
+    "networkKb": 12.5,
+    "dbReadsCount": 2
+  }
+}

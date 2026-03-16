@@ -1,0 +1,101 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://jocaagura.dev/schemas/jocaagura_domain/v1/model_app_version.schema.json",
+  "title": "ModelAppVersion",
+  "description": "Canonical JSON contract for ModelAppVersion in jocaagura_domain.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique identifier of the app version record."
+    },
+    "appName": {
+      "type": "string",
+      "description": "Application name."
+    },
+    "version": {
+      "type": "string",
+      "description": "Semantic version string."
+    },
+    "buildNumber": {
+      "type": "integer",
+      "description": "Monotonic build number.",
+      "minimum": 0
+    },
+    "platform": {
+      "type": "string",
+      "description": "Target platform identifier."
+    },
+    "channel": {
+      "type": "string",
+      "description": "Release channel identifier."
+    },
+    "minSupportedVersion": {
+      "type": "string",
+      "description": "Minimum compatible semantic version."
+    },
+    "forceUpdate": {
+      "type": "boolean",
+      "description": "Whether the update is mandatory."
+    },
+    "artifactUrl": {
+      "type": "string",
+      "format": "uri",
+      "description": "Download URL for the artifact."
+    },
+    "changelogUrl": {
+      "type": "string",
+      "format": "uri",
+      "description": "URL of the changelog."
+    },
+    "commitSha": {
+      "type": "string",
+      "description": "Source control commit SHA associated with the build."
+    },
+    "buildAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Build timestamp as ISO-8601 UTC string."
+    },
+    "meta": {
+      "type": "object",
+      "description": "Additional build metadata.",
+      "additionalProperties": true
+    }
+  },
+  "required": [
+    "id",
+    "appName",
+    "version",
+    "buildNumber",
+    "platform",
+    "channel",
+    "minSupportedVersion",
+    "forceUpdate",
+    "artifactUrl",
+    "changelogUrl",
+    "commitSha",
+    "buildAt",
+    "meta"
+  ],
+  "examples": [
+    {
+      "id": "42",
+      "appName": "Pixel",
+      "version": "1.2.3",
+      "buildNumber": 1203,
+      "platform": "android",
+      "channel": "prod",
+      "minSupportedVersion": "1.0.0",
+      "forceUpdate": false,
+      "artifactUrl": "https://example.com/app.apk",
+      "changelogUrl": "https://example.com/changelog",
+      "commitSha": "abc123",
+      "buildAt": "2025-12-07T00:00:00.000Z",
+      "meta": {
+        "size": 4200
+      }
+    }
+  ]
+}

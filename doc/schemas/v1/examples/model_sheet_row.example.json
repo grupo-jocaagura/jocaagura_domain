@@ -1,0 +1,11 @@
+{
+  "idRow": "CUST-001",
+  "data": {
+    "customerId": "CUST-001",
+    "fullName": "Acme SAS",
+    "isActive": true,
+    "profile": {
+      "tier": "gold"
+    }
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "id": "GOAL-1",
+  "standard": {
+    "id": "STD-MATH-ALG-001",
+    "label": "Understands linear functions",
+    "area": {
+      "category": "math",
+      "description": "Mathematics"
+    },
+    "cineLevel": 2,
+    "code": "MATH.ALG.001"
+  },
+  "label": "Classify matter by composition",
+  "code": "SCI.MAT.G1"
+}

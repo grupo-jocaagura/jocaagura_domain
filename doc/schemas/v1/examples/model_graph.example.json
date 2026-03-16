@@ -1,0 +1,38 @@
+{
+  "xAxis": {
+    "title": "Mes (índice)",
+    "min": 1.0,
+    "max": 3.0
+  },
+  "yAxis": {
+    "title": "Valor",
+    "min": 55000.0,
+    "max": 65000.0
+  },
+  "points": [
+    {
+      "label": "Enero",
+      "vector": {
+        "dx": 1.0,
+        "dy": 60000.0
+      }
+    },
+    {
+      "label": "Febrero",
+      "vector": {
+        "dx": 2.0,
+        "dy": 55000.0
+      }
+    },
+    {
+      "label": "Marzo",
+      "vector": {
+        "dx": 3.0,
+        "dy": 65000.0
+      }
+    }
+  ],
+  "title": "Precio Pizza",
+  "subtitle": "Serie mensual",
+  "description": "Valores de ejemplo"
+}

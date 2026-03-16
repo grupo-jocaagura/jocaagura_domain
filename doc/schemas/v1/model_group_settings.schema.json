@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://jocaagura.dev/schemas/jocaagura_domain/v1/model_group_settings.schema.json",
+  "title": "ModelGroupSettings",
+  "description": "Canonical JSON contract for ModelGroupSettings in jocaagura_domain.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "id": { "type": "string" },
+    "groupId": { "type": "string" },
+    "googleGroupId": { "type": "string" },
+    "whoCanViewGroup": { "type": "string" },
+    "whoCanViewMembership": { "type": "string" },
+    "whoCanJoin": { "type": "string" },
+    "whoCanPostMessage": { "type": "string" },
+    "messageModerationLevel": { "type": "string" },
+    "spamModerationLevel": { "type": "string" },
+    "includeInGlobalAddressList": { "type": "boolean" },
+    "membersCanPostAsTheGroup": { "type": "boolean" },
+    "isArchived": { "type": "boolean" },
+    "isCollaborativeInbox": { "type": "boolean" },
+    "rawSettings": { "type": "object", "additionalProperties": true },
+    "fetchedAt": { "type": "string", "format": "date-time" }
+  },
+  "required": ["id", "groupId", "googleGroupId", "whoCanViewGroup", "whoCanViewMembership", "whoCanJoin", "whoCanPostMessage", "messageModerationLevel", "spamModerationLevel", "includeInGlobalAddressList", "membersCanPostAsTheGroup", "isArchived", "isCollaborativeInbox", "rawSettings", "fetchedAt"],
+  "examples": [
+    {
+      "id": "settings-1",
+      "groupId": "group-001",
+      "googleGroupId": "AAA-BBB-CCC",
+      "whoCanViewGroup": "ALL_MEMBERS_CAN_VIEW",
+      "whoCanViewMembership": "ALL_MEMBERS_CAN_VIEW",
+      "whoCanJoin": "INVITED_CAN_JOIN",
+      "whoCanPostMessage": "ALL_MEMBERS_CAN_POST",
+      "messageModerationLevel": "MODERATE_NONE",
+      "spamModerationLevel": "MODERATE",
+      "includeInGlobalAddressList": true,
+      "membersCanPostAsTheGroup": false,
+      "isArchived": false,
+      "isCollaborativeInbox": true,
+      "rawSettings": {
+        "whoCanAssist": "OWNERS_ONLY"
+      },
+      "fetchedAt": "2025-01-01T12:00:00.000Z"
+    }
+  ]
+}

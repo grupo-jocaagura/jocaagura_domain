@@ -1,0 +1,85 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://jocaagura.dev/schemas/jocaagura_domain/v1/model_acl.schema.json",
+  "title": "ModelAcl",
+  "description": "Canonical JSON contract for ModelAcl in jocaagura_domain.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique ACL grant identifier."
+    },
+    "roleType": {
+      "type": "string",
+      "description": "Role granted to the user.",
+      "enum": [
+        "admin",
+        "editor",
+        "viewer"
+      ]
+    },
+    "appName": {
+      "type": "string",
+      "description": "Application name."
+    },
+    "feature": {
+      "type": "string",
+      "description": "Feature identifier."
+    },
+    "email": {
+      "type": "string",
+      "format": "email",
+      "description": "Email address receiving the grant."
+    },
+    "isActive": {
+      "type": "boolean",
+      "description": "Whether the ACL grant is currently active."
+    },
+    "emailAutorizedBy": {
+      "type": "string",
+      "format": "email",
+      "description": "Email address of the actor that granted the ACL."
+    },
+    "autorizedAtIsoDate": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Authorization timestamp as ISO-8601 string."
+    },
+    "revokedAtIsoDate": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Revocation timestamp as ISO-8601 string."
+    },
+    "note": {
+      "type": "string",
+      "description": "Human-readable note about the grant."
+    }
+  },
+  "required": [
+    "id",
+    "roleType",
+    "appName",
+    "feature",
+    "email",
+    "isActive",
+    "emailAutorizedBy",
+    "autorizedAtIsoDate",
+    "revokedAtIsoDate",
+    "note"
+  ],
+  "examples": [
+    {
+      "id": "acl-1",
+      "roleType": "admin",
+      "appName": "sat-p",
+      "feature": "router",
+      "email": "user@pragma.com.co",
+      "isActive": true,
+      "emailAutorizedBy": "admin@pragma.com.co",
+      "autorizedAtIsoDate": "2026-01-03T00:00:00.000Z",
+      "revokedAtIsoDate": "2026-02-01T00:00:00.000Z",
+      "note": "Seed permission"
+    }
+  ]
+}

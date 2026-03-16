@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://jocaagura.dev/schemas/jocaagura_domain/v1/model_group_labels.schema.json",
+  "title": "ModelGroupLabels",
+  "description": "Canonical JSON contract for ModelGroupLabels in jocaagura_domain.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "pillar": {
+      "type": "string",
+      "enum": ["education", "logistics", "commerce", "shared"]
+    },
+    "kind": {
+      "type": "string",
+      "enum": ["course", "family", "cohort", "project", "team", "warehouse", "deliveryRoute", "store", "service", "other"]
+    },
+    "tags": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "attributes": {
+      "type": "object",
+      "additionalProperties": true
+    }
+  },
+  "required": ["pillar", "kind", "tags"],
+  "examples": [
+    {
+      "pillar": "education",
+      "kind": "course",
+      "tags": ["primary", "virtual"],
+      "attributes": { "campus": "north" }
+    }
+  ]
+}

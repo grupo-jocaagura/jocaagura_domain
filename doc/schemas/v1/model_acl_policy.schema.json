@@ -1,0 +1,70 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://jocaagura.dev/schemas/jocaagura_domain/v1/model_acl_policy.schema.json",
+  "title": "ModelAclPolicy",
+  "description": "Canonical JSON contract for ModelAclPolicy in jocaagura_domain.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Canonical policy identifier, typically appName.feature."
+    },
+    "minRoleType": {
+      "type": "string",
+      "description": "Minimum role required to access the feature.",
+      "enum": [
+        "viewer",
+        "editor",
+        "admin"
+      ]
+    },
+    "appName": {
+      "type": "string",
+      "description": "Application name that owns the feature."
+    },
+    "feature": {
+      "type": "string",
+      "description": "Feature key or path under access control."
+    },
+    "isActive": {
+      "type": "boolean",
+      "description": "Whether the policy is currently active."
+    },
+    "note": {
+      "type": "string",
+      "description": "Human-readable note about the policy."
+    },
+    "upsertAtIsoDate": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Last upsert timestamp as ISO-8601 string."
+    },
+    "upsertBy": {
+      "type": "string",
+      "description": "Actor that created or updated the policy."
+    }
+  },
+  "required": [
+    "id",
+    "minRoleType",
+    "appName",
+    "feature",
+    "isActive",
+    "note",
+    "upsertAtIsoDate",
+    "upsertBy"
+  ],
+  "examples": [
+    {
+      "id": "bienvenido.user.creation",
+      "minRoleType": "editor",
+      "appName": "bienvenido",
+      "feature": "user.creation",
+      "isActive": true,
+      "note": "Controls user creation flow",
+      "upsertAtIsoDate": "2026-01-18T00:00:00.000Z",
+      "upsertBy": "admin@corp.com"
+    }
+  ]
+}

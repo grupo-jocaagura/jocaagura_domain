@@ -3,7 +3,303 @@
 This document follows the guidelines of [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.39.0] - 2026-03-15
+
+### Added
+- **Portable contract platform for `jocaagura_domain`**
+  - Se consolida la primera base estable de contratos JSON Schema versionados en `doc/schemas/v1/`.
+  - La librería ahora incluye examples canónicos y validación reproducible para contratos agnósticos del dominio.
+- **Self-documented contract infrastructure**
+  - Nuevo módulo `lib/domain/json_schema/` para tratar JSON Schema como dato dentro del dominio.
+  - Base preparada para contratos vivos, composición entre schemas y futura evolución hacia registry o tooling contractual.
+- **Agnostic operational domain modules**
+  - Nuevo módulo `lib/domain/drive/` para recursos documentales tipo Drive.
+  - Nuevo módulo `lib/domain/sheets/` para persistencia tabular normalizada tipo Sheets.
+  - Nuevo módulo `lib/domain/docs/` para documentos por bloques.
+  - Nuevo módulo `lib/domain/ai/` para interacción agnóstica con modelos de IA.
+  - Nuevo wrapper de certificación lineal sobre `either_flow` mediante `ModelFlowStepCompletion` y `ModelFlowCertificate`.
+
+### Changed
+- **Contract-first interoperability**
+  - Se formaliza una estrategia consistente donde el contrato JSON canónico prioriza interoperabilidad sobre tolerancias históricas de parseo Dart.
+  - Quedan documentadas brechas conocidas entre schemas y ciertos `toJson()` / `fromJson()` legacy para preparar normalización futura sin contaminar el contrato portable.
+- **Documentation and validation tooling**
+  - Se endurece la documentación en `doc/schemas/README.md` y `doc/schemas/v1/README.md`.
+  - Se reemplaza `ajv-cli` por un validador propio basado en `ajv` y `ajv-formats`, eliminando la cadena vulnerable que arrastraba `fast-json-patch`.
+
+### Notes
+- Esta versión agrupa y consolida las entregas realizadas entre `1.38.1` y `1.38.9` para publicación estable en `pub.dev`.
+- El detalle histórico completo de cada versión menor se mantiene más abajo en este changelog.
+
+## [1.38.9] - 2026-03-15
+
+### Added
+- **Flow certification domain module**
+  - Nuevo wrapper de certificación lineal sobre `either_flow` con:
+    - `ModelFlowStepCompletion`
+    - `ModelFlowCertificate`
+  - Los modelos convierten un `ModelCompleteFlow` embebido en evidencia auditable de cumplimiento secuencial.
+  - `ModelFlowCertificate` conserva el flujo completo desde el inicio, junto con:
+    - `candidate`
+    - `certificateKey`
+    - `stepCompletionsByIndex`
+    - `state`
+    - datos opcionales de certificación final
+  - `ModelFlowStepCompletion` registra trazabilidad mínima por paso mediante:
+    - `completedAt`
+    - `evidenceUrl`
+    - `notes`
+- **Flow certification unit tests**
+  - Nuevas pruebas unitarias para:
+    - roundtrip `fromJson(toJson(model))`
+    - roundtrip `toJson(fromJson(jsonCanonico))`
+    - `copyWith`
+  - Cobertura inicial para:
+    - `model_flow_step_completion_test.dart`
+    - `model_flow_certificate_test.dart`
+- **Flow certification JSON contracts**
+  - Nuevos schemas y examples canónicos en `doc/schemas/v1/` para:
+    - `model_flow_step_completion.schema.json`
+    - `model_flow_certificate.schema.json`
+  - Se formaliza:
+    - certificación lineal secuencial
+    - flujo embebido completo e inmutable como snapshot auditable
+    - estados `draft`, `inProgress`, `readyForCertification` y `certified`
+    - cierre explícito de certificación, no automático
+
+### Changed
+- **Flow certification documentation**
+  - Se actualizan `doc/schemas/README.md` y `doc/schemas/v1/README.md` para reflejar:
+    - la diferencia entre completar pasos y certificar
+    - el carácter lineal y obligatorio del proceso
+    - el cierre lógico de un certificado en estado `certified`
+- **Value equality inside flow certificates**
+  - `ModelFlowCertificate` compara `candidate` y `certifiedBy` por valor serializado para evitar falsos negativos de igualdad causados por la comparación superficial de `jwt` en `UserModel`.
+
+## [1.38.8] - 2026-03-15
+
+### Added
+- **AI domain module**
+  - Nuevo módulo `lib/domain/ai/` con:
+    - `ModelAiMessage`
+    - `ModelAiExecutionConfig`
+    - `ModelAiRequest`
+    - `ModelAiResponse`
+  - Los modelos materializan un dominio mínimo y agnóstico para interacción con modelos de IA.
+  - `ModelAiRequest` separa `systemInstruction`, `messages`, `executionConfig`, `references` y `expectedResponseSchema`.
+  - `ModelAiResponse` define una respuesta final canónica única, con soporte opcional para `parsedJson`, `finishReason` y `usage`.
+- **AI unit tests**
+  - Nuevas pruebas unitarias para:
+    - roundtrip `fromJson(toJson(model))`
+    - roundtrip `toJson(fromJson(jsonCanonico))`
+    - `copyWith`
+  - Cobertura inicial para:
+    - `ai_model_message_test.dart`
+    - `ai_model_execution_config_test.dart`
+    - `ai_model_request_test.dart`
+    - `ai_model_response_test.dart`
+- **AI JSON contracts**
+  - Nuevos schemas y examples canónicos en `doc/schemas/v1/` para:
+    - `model_ai_message.schema.json`
+    - `model_ai_execution_config.schema.json`
+    - `model_ai_request.schema.json`
+    - `model_ai_response.schema.json`
+  - Se formaliza:
+    - `taskType` explícito para `textGeneration`, `groundedTextGeneration` e `imageGeneration`
+    - `references` como lista de URLs canónicas
+    - `expectedResponseSchema` reutilizando `ModelJsonSchemaDocument`
+    - `provider` y `modelId` como strings libres para no acoplar el contrato a un proveedor concreto
+
+### Changed
+- **AI documentation**
+  - Se actualizan `doc/schemas/README.md` y `doc/schemas/v1/README.md` para reflejar:
+    - la separación entre intención agnóstica e implementación del proveedor
+    - la semántica de `taskType`, `systemInstruction` y `references`
+    - el alcance reducido de la fase:
+      - sin tool calling
+      - sin múltiples candidates
+      - sin attachments binarios
+      - sin multimodalidad avanzada más allá de la intención contractual
+
+## [1.38.7] - 2026-03-15
+
+### Added
+- **Docs domain module**
+  - Nuevo módulo `lib/domain/docs/` con:
+    - `ModelDocDocument`
+    - `ModelDocBlock`
+  - Los modelos materializan un dominio documental mínimo por bloques, agnóstico a renderer.
+  - `ModelDocDocument` organiza el contenido mediante `blocksByIndex`.
+  - `ModelDocBlock` define bloques `heading`, `paragraph` y `markdown`.
+- **Docs unit tests**
+  - Nuevas pruebas unitarias para:
+    - roundtrip `fromJson(toJson(model))`
+    - roundtrip `toJson(fromJson(jsonCanonico))`
+    - `copyWith`
+  - Cobertura inicial para:
+    - `doc_model_document_test.dart`
+    - `doc_model_block_test.dart`
+- **Docs JSON contracts**
+  - Nuevos schemas y examples canónicos en `doc/schemas/v1/` para:
+    - `model_doc_document.schema.json`
+    - `model_doc_block.schema.json`
+  - Se formaliza:
+    - `title` fuera del cuerpo del documento
+    - `blocksByIndex` como mapa indexado para preservar intención y orden
+    - `content` siempre como `string`
+    - `level` opcional solo para bloques `heading`
+
+### Changed
+- **Docs documentation**
+  - Se actualizan `doc/schemas/README.md` y `doc/schemas/v1/README.md` para reflejar:
+    - la semántica de `blocksByIndex`
+    - el alcance reducido de la fase
+    - la separación entre contrato documental y representación visual
+- **Schema validation tooling**
+  - Se reemplaza `ajv-cli` por un script propio basado en `ajv` y `ajv-formats`.
+  - Se elimina la cadena transitiva que incorporaba `fast-json-patch` en `package-lock.json`.
+  - El flujo `npm run validate:schemas` se mantiene operativo con el nuevo validador.
+
+## [1.38.6] - 2026-03-15
+
+### Added
+- **Sheets domain module**
+  - Nuevo módulo `lib/domain/sheets/` con:
+    - `ModelSheetBook`
+    - `ModelSheetTable`
+    - `ModelSheetColumn`
+    - `ModelSheetRow`
+  - Los modelos materializan un dominio tabular agnóstico para persistencia flexible tipo Sheets.
+  - `ModelSheetRow` se define como `idRow + data`, donde `data` es un `Map<String, dynamic>` gobernado por columnas.
+  - `idRow` se trata como PK efectiva del registro y se serializa siempre como `String`.
+- **Sheets unit tests**
+  - Nuevas pruebas unitarias para:
+    - roundtrip `fromJson(toJson(model))`
+    - roundtrip `toJson(fromJson(jsonCanonico))`
+    - `copyWith`
+  - Cobertura inicial para:
+    - `sheet_model_book_test.dart`
+    - `sheet_model_table_test.dart`
+    - `sheet_model_column_test.dart`
+    - `sheet_model_row_test.dart`
+- **Sheets JSON contracts**
+  - Nuevos schemas y examples canónicos en `doc/schemas/v1/` para:
+    - `model_sheet_book.schema.json`
+    - `model_sheet_table.schema.json`
+    - `model_sheet_column.schema.json`
+    - `model_sheet_row.schema.json`
+  - Se formaliza:
+    - `Book` como contenedor lógico de tablas
+    - `Table` como definición estructural normalizada
+    - `Column` como definición mínima de encabezado persistible
+    - `Row` como payload persistible gobernado por columnas
+    - tipos de columna canónicos: `string`, `integer`, `number`, `boolean`, `dateTime`, `json`
+
+### Changed
+- **Sheets documentation**
+  - Se actualizan `doc/schemas/README.md` y `doc/schemas/v1/README.md` para reflejar:
+    - la semántica de `idRow` como PK efectiva
+    - la relación entre `ModelSheetTable.columns` y `ModelSheetRow.data`
+    - el alcance deliberadamente reducido de la fase:
+      - sin fórmulas
+      - sin foreign keys
+      - sin labels visibles
+      - sin versionado estructural
+
+## [1.38.5] - 2026-03-14
+
+
+### Added
+- **Drive domain module**
+  - Nuevo módulo `lib/domain/drive/` con:
+    - `ModelDriveItem`
+    - `ModelDriveFile`
+    - `ModelDriveFolder`
+  - Los modelos siguen el contrato canónico de exploración/indexación documental tipo Drive ya definido en `doc/schemas/v1/`.
+  - `ModelDriveItem` se implementa como payload base real y consumible.
+  - `ModelDriveFile` y `ModelDriveFolder` materializan especializaciones contractuales del recurso documental base.
+- **Drive unit tests**
+  - Nuevas pruebas unitarias para:
+    - roundtrip `fromJson(toJson(model))`
+    - roundtrip `toJson(fromJson(jsonCanonico))`
+    - `copyWith`
+  - Cobertura inicial para:
+    - `drive_model_item_test.dart`
+    - `drive_model_file_test.dart`
+    - `drive_model_folder_test.dart`
+- **Drive JSON contracts**
+  - Nuevos schemas y examples canónicos en `doc/schemas/v1/` para:
+    - `model_drive_item.schema.json`
+    - `model_drive_file.schema.json`
+    - `model_drive_folder.schema.json`
+  - Se formaliza:
+    - `kind` como clasificación de dominio
+    - `mimeType` como tipo interoperable del recurso
+    - `path` como ruta lógica absoluta
+    - `application/vnd.jocaagura.folder` como mime canónico de carpeta
+
+### Changed
+- **Drive documentation**
+  - Se actualizan `doc/schemas/README.md` y `doc/schemas/v1/README.md` para reflejar:
+    - la distinción entre `kind` y `mimeType`
+    - la semántica mínima de `path`
+    - la disponibilidad del nuevo módulo `lib/domain/drive/`
+
+## [1.38.2] - 2026-03-14
+
+### Added
+- **JSON Schema domain module**
+  - Nuevo módulo `lib/domain/json_schema/` para tratar contratos JSON Schema como dato dentro del dominio.
+  - Nuevo `ModelJsonSchemaDocument` como entidad principal para almacenar:
+    - identificador del documento
+    - identificador canónico del schema
+    - metadata funcional
+    - schema JSON completo como `Map<String, dynamic>`
+    - example canónico
+    - tags, timestamps y estado activo
+  - Nuevo `ModelJsonSchemaReference` para modelar relaciones explícitas entre contratos, pensado para composición, anidamiento y futuros grafos de dependencias.
+- **Contratos del propio módulo**
+  - Nuevos schemas y examples en `doc/schemas/v1/` para:
+    - `model_json_schema_document.schema.json`
+    - `model_json_schema_reference.schema.json`
+  - Los examples asociados validan correctamente dentro del flujo local de `npm run validate:schemas`.
+
+### Tests
+- Nuevas pruebas unitarias para el módulo `json_schema` cubriendo:
+  - roundtrip `fromJson(toJson(model))`
+  - roundtrip `toJson(fromJson(jsonCanonico))`
+  - `copyWith`
+  - igualdad por valor
+
+### Changed
+- **Ajuste semántico de nombres en el contenedor de schemas**
+  - Se renombran campos del modelo y del contrato para evitar colisión conceptual con keywords nativas de JSON Schema:
+    - `title` -> `schemaTitle`
+    - `description` -> `schemaDescription`
+    - `ModelJsonSchemaReference.description` -> `referenceDescription`
+  - Esto aclara la diferencia entre:
+    - metadata del documento contenedor
+    - y contenido del schema almacenado dentro del campo `schema`
+
+### Docs
+- Se actualiza la documentación de schemas para dejar explícito que:
+  - el módulo `json_schema` almacena contratos completos como `Map<String, dynamic>`
+  - en esta fase no se modelan keyword por keyword las estructuras internas de JSON Schema
+  - `ModelJsonSchemaReference` existe para representar composición y anidamiento entre contratos
+
 ## [1.38.1] - 2026-01-19
+
+### Added
+- **JSON Schema contracts for `jocaagura_domain`**
+  - Se crea la carpeta versionada `doc/schemas/v1/` como fuente formal del contrato JSON interoperable.
+  - Se agregan contratos JSON Schema canonicos y examples validados para los modelos agnosticos principales del dominio:
+    - base y transversales: `AddressModel`, `AttributeModel`, `UserModel`, `PersonModel`, `StoreModel`, `ConnectivityModel`, `ErrorItem`, `LegalIdModel`, `SignatureModel`
+    - store: `ModelCategory`, `ModelPrice`, `ModelItem`
+    - apps / auditoria / flows: `ModelAppVersion`, `ModelAcl`, `ModelAclPolicy`, `ModelCrudMetadata`, `ModelCrudLogEntry`, `ModelFlowStep`, `ModelCompleteFlow`
+    - financial / graphics / groups / education
+    - dentist / medical: `AcceptanceClauseModel`, `DentalConditionModel`, `DiagnosisModel`, `MedicalTreatmentModel`, `TreatmentPlanModel`, `MedicalRecordModel`, `MedicalDiagnosisTabModel`
+    - configs / estados serializables: `WsDbConfig`, `ModelConfigHttpRequest`, `OnboardingState`
+  - Se agrega `doc/schemas/v1/examples/` con un example canonico por schema.
 
 ### Fixed
 - **DateUtils.normalizeIsoOrEmpty**
@@ -30,12 +326,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Docs
 
+- **JSON Schema**
+  - Se documenta la estrategia de contratos canonicos en `doc/schemas/README.md`.
+  - Se documenta `v1` en `doc/schemas/v1/README.md`, incluyendo:
+    - reglas contractuales
+    - setup local de validacion
+    - dependencias entre schemas
+    - criterio de exclusión
+    - brechas conocidas entre contrato canónico y la implementación Dart actual
+  - Se referencia la capa JSON Schema desde `README.md`.
+
 * Actualización de DartDoc en `DateUtils.normalizeIsoOrEmpty` detallando:
 
     * Tipos admitidos.
     * Normalización a UTC.
     * Política de *fallback* a cadena vacía en entradas inválidas.
 * Nota de uso recomendando **`JocaDateUtils`** en proyectos Flutter.
+
+### Dev tooling
+
+- Se agrega tooling local reproducible para validar schemas:
+  - `package.json`
+  - `package-lock.json`
+  - `tools/validate-schemas.ps1`
+  - `tools/jq/jq.exe`
+- Se agrega exclusión de `node_modules/` en `.gitignore`.
 
 ### Tests
 

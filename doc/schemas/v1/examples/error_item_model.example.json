@@ -1,0 +1,9 @@
+{
+  "title": "Network timeout",
+  "code": "NET_TIMEOUT",
+  "description": "The request took too long to complete.",
+  "meta": {
+    "retryAfterMs": 1500
+  },
+  "errorLevel": "severe"
+}

@@ -1,0 +1,10 @@
+{
+  "id": "1",
+  "postalCode": 12345,
+  "country": "USA",
+  "administrativeArea": "CA",
+  "city": "San Francisco",
+  "locality": "SOMA",
+  "address": "123 Main St",
+  "notes": "Near the corner"
+}

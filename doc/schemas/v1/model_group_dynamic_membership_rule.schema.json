@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://jocaagura.dev/schemas/jocaagura_domain/v1/model_group_dynamic_membership_rule.schema.json",
+  "title": "ModelGroupDynamicMembershipRule",
+  "description": "Canonical JSON contract for ModelGroupDynamicMembershipRule in jocaagura_domain.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "id": { "type": "string" },
+    "groupId": { "type": "string" },
+    "expression": { "type": "string" },
+    "status": { "type": "string", "enum": ["active", "draft", "disabled"] },
+    "lastEvaluatedAt": { "type": "string", "format": "date-time" },
+    "estimatedMembers": { "type": "integer", "minimum": 0 }
+  },
+  "required": ["id", "groupId", "expression", "status", "estimatedMembers"],
+  "examples": [
+    {
+      "id": "rule-1",
+      "groupId": "group-001",
+      "expression": "user.department == \"Engineering\"",
+      "status": "active",
+      "lastEvaluatedAt": "2025-01-02T10:00:00.000Z",
+      "estimatedMembers": 42
+    }
+  ]
+}

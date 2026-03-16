@@ -119,6 +119,8 @@ unlinked_spec.ds
 
 # Coverage
 coverage/
+node_modules/
+npm-debug.log*
 
 # Symbols
 app.*.symbols
@@ -130,3 +132,4 @@ app.*.symbols
 !**/ios/**/default.perspectivev3
 !/packages/flutter_tools/test/data/dart_dependencies_test/**/.packages
 !/dev/ci/**/Gemfile.lock
+plan-de-trabajo.md
