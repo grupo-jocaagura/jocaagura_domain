@@ -99,6 +99,8 @@ npm run validate:schemas
 - El dominio de IA separa `systemInstruction`, `messages`, `executionConfig` y `expectedResponseSchema` para mantener una intencion portable entre proveedores.
 - En contratos de IA, `taskType` hace explicita la intencion de texto, grounded text o generacion de imagen sin depender solo del prompt.
 - En contratos de IA, `expectedResponseSchema` reutiliza `ModelJsonSchemaDocument` para exigir salidas JSON estructuradas sin acoplarse a un proveedor concreto.
+- El dominio de certificación de flujos envuelve `ModelCompleteFlow` dentro de `ModelFlowCertificate` para convertir una plantilla lineal en evidencia auditable de cumplimiento.
+- En contratos de certificación de flujo, la certificación final es explícita, no automática, y un estado `certified` implica cierre lógico del proceso.
 
 ## Brechas conocidas con la implementación Dart
 
@@ -114,5 +116,9 @@ npm run validate:schemas
   - `fromJson()` acepta `dentalId` a partir de string y lo normaliza a entero.
   - `toJson()` emite `dentalId` como entero.
   - El contrato canónico `v1` fija `dentalId` como `integer`.
+- `ModelFlowCertificate`
+  - embebe `candidate` y `certifiedBy` como `UserModel`.
+  - el schema canónico hereda la forma contractual de `user_model.schema.json`, donde `jwt` es `object`.
+  - el `toJson()` actual de `UserModel` sigue serializando `jwt` como string JSON embebido, por lo que esta brecha también afecta los payloads Dart del certificado.
 
 Estas brechas no se resuelven en esta carpeta. Se documentan aqui para preparar la posterior normalización de mappers Dart sin contaminar el contrato portable.
