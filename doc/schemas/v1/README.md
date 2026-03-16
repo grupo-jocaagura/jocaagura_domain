@@ -8,6 +8,10 @@ Esta carpeta contiene la primera version de contratos JSON canonicos para `jocaa
 - `attribute_model.schema.json`
 - `appointment_model.schema.json`
 - `acceptance_clause_model.schema.json`
+- `model_ai_execution_config.schema.json`
+- `model_ai_message.schema.json`
+- `model_ai_request.schema.json`
+- `model_ai_response.schema.json`
 - `connectivity_model.schema.json`
 - `contact_model.schema.json`
 - `dental_condition_model.schema.json`
@@ -73,6 +77,7 @@ Esta carpeta contiene la primera version de contratos JSON canonicos para `jocaa
 
 - `model_drive_file.schema.json`, `model_drive_folder.schema.json` y `model_drive_item.schema.json` forman una familia contractual alineada, pero en `v1` se mantienen como contratos completos independientes para preservar validación simple con `additionalProperties: false`
 - `model_doc_document.schema.json` referencia `model_doc_block.schema.json`
+- `model_ai_request.schema.json` referencia `model_ai_message.schema.json`, `model_ai_execution_config.schema.json` y `model_json_schema_document.schema.json`
 - `model_sheet_book.schema.json` referencia `model_sheet_table.schema.json`
 - `model_sheet_table.schema.json` referencia `model_sheet_column.schema.json`
 - `store_model.schema.json` referencia `address_model.schema.json`
@@ -138,6 +143,9 @@ Resultado esperado:
 - En contratos Docs, `ModelDocDocument` organiza el contenido mediante `blocksByIndex`
 - En contratos Docs, `ModelDocBlock.kind` se limita a `heading`, `paragraph` y `markdown`
 - En contratos Docs, `ModelDocBlock.level` solo aplica a encabezados
+- En contratos IA, `ModelAiRequest.taskType` se limita a `textGeneration`, `groundedTextGeneration` e `imageGeneration`
+- En contratos IA, `systemInstruction` se separa de `messages` para estabilizar la intención del prompt
+- En contratos IA, `references` contiene URLs canónicas y `expectedResponseSchema` reutiliza `ModelJsonSchemaDocument`
 - En contratos Sheets, `ModelSheetRow` representa un registro persistible mediante `idRow` y `data`
 - En contratos Sheets, `idRow` es la PK efectiva y siempre se serializa como `string`
 - En contratos Sheets, `data` es un objeto JSON gobernado por los nombres únicos declarados en `ModelSheetColumn`
@@ -155,6 +163,7 @@ Resultado esperado:
 - Los examples deben ser internamente consistentes con el resto de contratos reutilizados.
 - En la familia Drive, `mimeType` canónico de carpeta es `application/vnd.jocaagura.folder`.
 - En la familia Docs, el markdown libre se limita a bloques `markdown` y no se modela rich text inline.
+- En la familia IA, la respuesta canónica es única y no se modelan múltiples candidates ni tool calling en `v1`.
 - En la familia Sheets no se modelan labels visibles, fórmulas, orden visual, foreign keys ni versionado estructural.
 
 ## Brechas conocidas entre contrato y Dart actual
@@ -184,6 +193,10 @@ Resultado esperado:
 - `model_doc_document.schema.json` y `model_doc_block.schema.json`
   - formalizan el dominio mínimo de documentos por bloques.
   - la representación visual final queda deliberadamente fuera del contrato y se delega al implementador.
+- `model_ai_message.schema.json`, `model_ai_execution_config.schema.json`, `model_ai_request.schema.json` y `model_ai_response.schema.json`
+  - formalizan el dominio mínimo para interacción agnóstica con modelos de IA.
+  - el proveedor y el `modelId` quedan abiertos como strings para no acoplar el contrato a Gemini, GPT u otra API puntual.
+  - la interpretación final de `executionConfig` y de `references` sigue siendo responsabilidad del implementador.
 
 ## Compatibilidad esperada
 

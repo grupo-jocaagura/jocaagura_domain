@@ -3,6 +3,51 @@
 This document follows the guidelines of [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.38.8] - 2026-03-15
+
+### Added
+- **AI domain module**
+  - Nuevo módulo `lib/domain/ai/` con:
+    - `ModelAiMessage`
+    - `ModelAiExecutionConfig`
+    - `ModelAiRequest`
+    - `ModelAiResponse`
+  - Los modelos materializan un dominio mínimo y agnóstico para interacción con modelos de IA.
+  - `ModelAiRequest` separa `systemInstruction`, `messages`, `executionConfig`, `references` y `expectedResponseSchema`.
+  - `ModelAiResponse` define una respuesta final canónica única, con soporte opcional para `parsedJson`, `finishReason` y `usage`.
+- **AI unit tests**
+  - Nuevas pruebas unitarias para:
+    - roundtrip `fromJson(toJson(model))`
+    - roundtrip `toJson(fromJson(jsonCanonico))`
+    - `copyWith`
+  - Cobertura inicial para:
+    - `ai_model_message_test.dart`
+    - `ai_model_execution_config_test.dart`
+    - `ai_model_request_test.dart`
+    - `ai_model_response_test.dart`
+- **AI JSON contracts**
+  - Nuevos schemas y examples canónicos en `doc/schemas/v1/` para:
+    - `model_ai_message.schema.json`
+    - `model_ai_execution_config.schema.json`
+    - `model_ai_request.schema.json`
+    - `model_ai_response.schema.json`
+  - Se formaliza:
+    - `taskType` explícito para `textGeneration`, `groundedTextGeneration` e `imageGeneration`
+    - `references` como lista de URLs canónicas
+    - `expectedResponseSchema` reutilizando `ModelJsonSchemaDocument`
+    - `provider` y `modelId` como strings libres para no acoplar el contrato a un proveedor concreto
+
+### Changed
+- **AI documentation**
+  - Se actualizan `doc/schemas/README.md` y `doc/schemas/v1/README.md` para reflejar:
+    - la separación entre intención agnóstica e implementación del proveedor
+    - la semántica de `taskType`, `systemInstruction` y `references`
+    - el alcance reducido de la fase:
+      - sin tool calling
+      - sin múltiples candidates
+      - sin attachments binarios
+      - sin multimodalidad avanzada más allá de la intención contractual
+
 ## [1.38.7] - 2026-03-15
 
 ### Added

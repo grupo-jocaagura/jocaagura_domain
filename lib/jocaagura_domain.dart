@@ -34,6 +34,10 @@ export 'src/repositories/repository_ws_database_impl.dart';
 
 part 'date_utils.dart';
 part 'domain/address_model.dart';
+part 'domain/ai/model_ai_execution_config.dart';
+part 'domain/ai/model_ai_message.dart';
+part 'domain/ai/model_ai_request.dart';
+part 'domain/ai/model_ai_response.dart';
 part 'domain/apps/model_acl.dart';
 part 'domain/apps/model_acl_policy.dart';
 part 'domain/apps/model_app_version.dart';

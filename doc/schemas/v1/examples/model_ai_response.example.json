@@ -1,0 +1,19 @@
+{
+  "requestId": "ai_req_customer_summary_001",
+  "provider": "gemini",
+  "modelId": "gemini-2.5-pro",
+  "content": "{\"summary\":\"El dominio prioriza interoperabilidad y contratos JSON canonicos.\",\"highlights\":[\"Schemas versionados en v1\",\"Roundtrip JSON en modelos Dart\",\"Base agnostica para backend y Apps Script\"]}",
+  "parsedJson": {
+    "summary": "El dominio prioriza interoperabilidad y contratos JSON canonicos.",
+    "highlights": [
+      "Schemas versionados en v1",
+      "Roundtrip JSON en modelos Dart",
+      "Base agnostica para backend y Apps Script"
+    ]
+  },
+  "finishReason": "stop",
+  "usage": {
+    "inputTokens": 312,
+    "outputTokens": 97
+  }
+}

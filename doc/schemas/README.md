@@ -54,7 +54,7 @@ Notas:
 
 - `package.json` y `package-lock.json` forman parte del tooling reproducible del repo
 - `node_modules/` es solo instalación local y no debe versionarse
-- el validador usa `ajv-cli` desde `node_modules/.bin` y `jq` vendorizado en `tools/jq/jq.exe`
+- el validador usa `ajv` mediante `tools/validate-schemas.mjs` y `jq` vendorizado en `tools/jq/jq.exe`
 
 - Comando principal:
 
@@ -96,6 +96,9 @@ npm run validate:schemas
 - En contratos Docs, `title` vive fuera del cuerpo y `content` siempre se serializa como `string`.
 - El dominio tabular tipo Sheets representa filas como `idRow + data`, donde `data` es un objeto JSON gobernado por columnas declaradas en la tabla.
 - En contratos tabulares tipo Sheets, la PK efectiva siempre se serializa como `String`, incluso cuando es autogenerada.
+- El dominio de IA separa `systemInstruction`, `messages`, `executionConfig` y `expectedResponseSchema` para mantener una intencion portable entre proveedores.
+- En contratos de IA, `taskType` hace explicita la intencion de texto, grounded text o generacion de imagen sin depender solo del prompt.
+- En contratos de IA, `expectedResponseSchema` reutiliza `ModelJsonSchemaDocument` para exigir salidas JSON estructuradas sin acoplarse a un proveedor concreto.
 
 ## Brechas conocidas con la implementación Dart
 
