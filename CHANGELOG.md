@@ -3,6 +3,34 @@
 This document follows the guidelines of [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.39.0] - 2026-03-15
+
+### Added
+- **Portable contract platform for `jocaagura_domain`**
+  - Se consolida la primera base estable de contratos JSON Schema versionados en `doc/schemas/v1/`.
+  - La librería ahora incluye examples canónicos y validación reproducible para contratos agnósticos del dominio.
+- **Self-documented contract infrastructure**
+  - Nuevo módulo `lib/domain/json_schema/` para tratar JSON Schema como dato dentro del dominio.
+  - Base preparada para contratos vivos, composición entre schemas y futura evolución hacia registry o tooling contractual.
+- **Agnostic operational domain modules**
+  - Nuevo módulo `lib/domain/drive/` para recursos documentales tipo Drive.
+  - Nuevo módulo `lib/domain/sheets/` para persistencia tabular normalizada tipo Sheets.
+  - Nuevo módulo `lib/domain/docs/` para documentos por bloques.
+  - Nuevo módulo `lib/domain/ai/` para interacción agnóstica con modelos de IA.
+  - Nuevo wrapper de certificación lineal sobre `either_flow` mediante `ModelFlowStepCompletion` y `ModelFlowCertificate`.
+
+### Changed
+- **Contract-first interoperability**
+  - Se formaliza una estrategia consistente donde el contrato JSON canónico prioriza interoperabilidad sobre tolerancias históricas de parseo Dart.
+  - Quedan documentadas brechas conocidas entre schemas y ciertos `toJson()` / `fromJson()` legacy para preparar normalización futura sin contaminar el contrato portable.
+- **Documentation and validation tooling**
+  - Se endurece la documentación en `doc/schemas/README.md` y `doc/schemas/v1/README.md`.
+  - Se reemplaza `ajv-cli` por un validador propio basado en `ajv` y `ajv-formats`, eliminando la cadena vulnerable que arrastraba `fast-json-patch`.
+
+### Notes
+- Esta versión agrupa y consolida las entregas realizadas entre `1.38.1` y `1.38.9` para publicación estable en `pub.dev`.
+- El detalle histórico completo de cada versión menor se mantiene más abajo en este changelog.
+
 ## [1.38.9] - 2026-03-15
 
 ### Added
