@@ -1,0 +1,167 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://jocaagura.dev/schemas/jocaagura_domain/v1/model_flow_certificate.schema.json",
+  "title": "ModelFlowCertificate",
+  "description": "Canonical JSON contract for a certified linear flow execution in jocaagura_domain.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique identifier of the flow certificate."
+    },
+    "certificateKey": {
+      "type": "string",
+      "description": "Validation key of the certificate against a certifying store or service."
+    },
+    "flow": {
+      "$ref": "./model_complete_flow.schema.json"
+    },
+    "candidate": {
+      "$ref": "./user_model.schema.json"
+    },
+    "candidateDisplayName": {
+      "type": "string",
+      "description": "Optional display name snapshot of the certification candidate."
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Timestamp when the certification process record was created."
+    },
+    "stepCompletionsByIndex": {
+      "type": "object",
+      "description": "Dictionary of step completion evidences keyed by logical step index serialized as JSON string keys.",
+      "propertyNames": {
+        "pattern": "^[0-9]+$"
+      },
+      "additionalProperties": {
+        "$ref": "./model_flow_step_completion.schema.json"
+      }
+    },
+    "state": {
+      "type": "string",
+      "description": "Lifecycle state of the linear certification process.",
+      "enum": [
+        "draft",
+        "inProgress",
+        "readyForCertification",
+        "certified"
+      ]
+    },
+    "certifiedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Timestamp when the certificate was formally signed and closed."
+    },
+    "certifiedBy": {
+      "$ref": "./user_model.schema.json"
+    },
+    "certifierNotes": {
+      "type": "string",
+      "description": "Optional notes recorded by the certifier at the time of closure."
+    }
+  },
+  "required": [
+    "id",
+    "certificateKey",
+    "flow",
+    "candidate",
+    "createdAt",
+    "stepCompletionsByIndex",
+    "state"
+  ],
+  "examples": [
+    {
+      "id": "flow_cert_onboarding_001",
+      "certificateKey": "CERT-ONBOARDING-001",
+      "flow": {
+        "name": "TechnicalOnboarding",
+        "description": "Linear onboarding checklist for new technical operators.",
+        "stepsByIndex": {
+          "10": {
+            "indexNumber": 10,
+            "title": "CloneRepository",
+            "description": "Clone the main repository and verify local access.",
+            "failureCode": "REPO_SETUP_FAILED",
+            "nextOnSuccessIndex": 20,
+            "nextOnFailureIndex": -1,
+            "constraints": [
+              "gitAccess"
+            ],
+            "cost": {
+              "latencyMs": 300
+            }
+          },
+          "20": {
+            "indexNumber": 20,
+            "title": "InstallDependencies",
+            "description": "Install project dependencies successfully.",
+            "failureCode": "DEPENDENCY_SETUP_FAILED",
+            "nextOnSuccessIndex": 30,
+            "nextOnFailureIndex": -1,
+            "constraints": [
+              "flutterSdk"
+            ],
+            "cost": {
+              "latencyMs": 1200
+            }
+          },
+          "30": {
+            "indexNumber": 30,
+            "title": "RunValidation",
+            "description": "Execute mandatory validation commands of the flow.",
+            "failureCode": "VALIDATION_FAILED",
+            "nextOnSuccessIndex": -1,
+            "nextOnFailureIndex": -1,
+            "constraints": [],
+            "cost": {
+              "latencyMs": 500
+            }
+          }
+        }
+      },
+      "candidate": {
+        "id": "user_001",
+        "displayName": "John Doe",
+        "photoUrl": "https://example.com/profile.jpg",
+        "email": "john.doe@example.com",
+        "jwt": {
+          "token": "abc123",
+          "exp": 1735689600
+        }
+      },
+      "candidateDisplayName": "John Doe",
+      "createdAt": "2026-03-15T13:30:00.000Z",
+      "stepCompletionsByIndex": {
+        "10": {
+          "stepIndex": 10,
+          "completedAt": "2026-03-15T14:00:00.000Z",
+          "evidenceUrl": "https://workspace.jocaagura.dev/evidence/onboarding/step-10",
+          "notes": "Repositorio clonado y dependencias instaladas."
+        },
+        "20": {
+          "stepIndex": 20,
+          "completedAt": "2026-03-15T14:20:00.000Z"
+        },
+        "30": {
+          "stepIndex": 30,
+          "completedAt": "2026-03-15T14:40:00.000Z"
+        }
+      },
+      "state": "certified",
+      "certifiedAt": "2026-03-15T15:00:00.000Z",
+      "certifiedBy": {
+        "id": "user_100",
+        "displayName": "Jane Certifier",
+        "photoUrl": "https://example.com/certifier.jpg",
+        "email": "jane.certifier@example.com",
+        "jwt": {
+          "token": "cert789",
+          "exp": 1735689600
+        }
+      },
+      "certifierNotes": "Checklist validada secuencialmente y aprobada para cierre."
+    }
+  ]
+}

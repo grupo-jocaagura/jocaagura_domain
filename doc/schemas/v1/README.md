@@ -68,6 +68,8 @@ Esta carpeta contiene la primera version de contratos JSON canonicos para `jocaa
 - `model_crud_metadata.schema.json`
 - `model_crud_log_entry.schema.json`
 - `model_flow_step.schema.json`
+- `model_flow_step_completion.schema.json`
+- `model_flow_certificate.schema.json`
 - `model_point.schema.json`
 - `model_complete_flow.schema.json`
 - `model_performance_indicator.schema.json`
@@ -98,6 +100,7 @@ Esta carpeta contiene la primera version de contratos JSON canonicos para `jocaa
 - `person_model.schema.json` referencia `attribute_model.schema.json`
 - `model_item.schema.json` referencia `model_category.schema.json`, `model_price.schema.json` y `attribute_model.schema.json`
 - `model_complete_flow.schema.json` referencia `model_flow_step.schema.json`
+- `model_flow_certificate.schema.json` referencia `model_complete_flow.schema.json`, `model_flow_step_completion.schema.json` y `user_model.schema.json`
 - `model_point.schema.json` referencia `model_vector.schema.json`
 - `model_graph.schema.json` referencia `model_graph_axis_spec.schema.json` y `model_point.schema.json`
 - `model_group.schema.json` referencia `model_group_labels.schema.json` y `model_crud_metadata.schema.json`
@@ -146,6 +149,9 @@ Resultado esperado:
 - En contratos IA, `ModelAiRequest.taskType` se limita a `textGeneration`, `groundedTextGeneration` e `imageGeneration`
 - En contratos IA, `systemInstruction` se separa de `messages` para estabilizar la intención del prompt
 - En contratos IA, `references` contiene URLs canónicas y `expectedResponseSchema` reutiliza `ModelJsonSchemaDocument`
+- En contratos de certificación de flujo, `ModelFlowCertificate` embebe el `ModelCompleteFlow` desde el inicio del proceso
+- En contratos de certificación de flujo, `stepCompletionsByIndex` registra trazabilidad mínima secuencial por paso
+- En contratos de certificación de flujo, `state` distingue `draft`, `inProgress`, `readyForCertification` y `certified`
 - En contratos Sheets, `ModelSheetRow` representa un registro persistible mediante `idRow` y `data`
 - En contratos Sheets, `idRow` es la PK efectiva y siempre se serializa como `string`
 - En contratos Sheets, `data` es un objeto JSON gobernado por los nombres únicos declarados en `ModelSheetColumn`
@@ -164,6 +170,7 @@ Resultado esperado:
 - En la familia Drive, `mimeType` canónico de carpeta es `application/vnd.jocaagura.folder`.
 - En la familia Docs, el markdown libre se limita a bloques `markdown` y no se modela rich text inline.
 - En la familia IA, la respuesta canónica es única y no se modelan múltiples candidates ni tool calling en `v1`.
+- En la familia Flow Certificate, la certificación es explícita y un estado `certified` implica cierre lógico e inmutabilidad documental del certificado.
 - En la familia Sheets no se modelan labels visibles, fórmulas, orden visual, foreign keys ni versionado estructural.
 
 ## Brechas conocidas entre contrato y Dart actual
@@ -197,6 +204,10 @@ Resultado esperado:
   - formalizan el dominio mínimo para interacción agnóstica con modelos de IA.
   - el proveedor y el `modelId` quedan abiertos como strings para no acoplar el contrato a Gemini, GPT u otra API puntual.
   - la interpretación final de `executionConfig` y de `references` sigue siendo responsabilidad del implementador.
+- `model_flow_step_completion.schema.json` y `model_flow_certificate.schema.json`
+  - formalizan el dominio mínimo para certificación lineal auditable de flujos.
+  - el flujo vive embebido dentro del certificado y no depende de que siga existiendo una plantilla externa.
+  - la certificación final es una acción explícita y no se deduce automáticamente solo por completar pasos.
 
 ## Compatibilidad esperada
 

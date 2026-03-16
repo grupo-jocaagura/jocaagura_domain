@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://jocaagura.dev/schemas/jocaagura_domain/v1/model_flow_step_completion.schema.json",
+  "title": "ModelFlowStepCompletion",
+  "description": "Canonical JSON contract for auditable completion evidence of a linear flow step in jocaagura_domain.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "stepIndex": {
+      "type": "integer",
+      "description": "Index of the completed step inside the embedded flow."
+    },
+    "completedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Timestamp when the operator confirms the completion of the step."
+    },
+    "evidenceUrl": {
+      "type": "string",
+      "format": "uri",
+      "description": "Optional URL that points to supporting evidence of the completed step."
+    },
+    "notes": {
+      "type": "string",
+      "description": "Optional observation captured for auditability of the completed step."
+    }
+  },
+  "required": [
+    "stepIndex",
+    "completedAt"
+  ],
+  "examples": [
+    {
+      "stepIndex": 10,
+      "completedAt": "2026-03-15T14:00:00.000Z",
+      "evidenceUrl": "https://workspace.jocaagura.dev/evidence/onboarding/step-10",
+      "notes": "Repositorio clonado y dependencias instaladas."
+    }
+  ]
+}
