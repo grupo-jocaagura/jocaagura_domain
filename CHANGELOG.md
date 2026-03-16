@@ -348,8 +348,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Se agrega tooling local reproducible para validar schemas:
   - `package.json`
   - `package-lock.json`
-  - `tools/validate-schemas.ps1`
-  - `tools/jq/jq.exe`
+  - `tool/validate-schemas.ps1`
+  - `tool/jq/jq.exe`
 - Se agrega exclusión de `node_modules/` en `.gitignore`.
 
 ### Tests

@@ -3,8 +3,8 @@ $ErrorActionPreference = 'Stop'
 $repoRoot = Split-Path -Parent $PSScriptRoot
 $schemaDir = Join-Path $repoRoot 'doc\schemas\v1'
 $examplesDir = Join-Path $schemaDir 'examples'
-$jqPath = Join-Path $repoRoot 'tools\jq\jq.exe'
-$ajvScriptPath = Join-Path $repoRoot 'tools\validate-schemas.mjs'
+$jqPath = Join-Path $repoRoot 'tool\jq\jq.exe'
+$ajvScriptPath = Join-Path $repoRoot 'tool\validate-schemas.mjs'
 if (-not (Test-Path $schemaDir)) {
   throw "Schema directory not found: $schemaDir"
 }

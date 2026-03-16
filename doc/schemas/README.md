@@ -40,7 +40,7 @@ Cada modelo se normaliza asi:
 
 - `Node.js` y `npm` instalados localmente
 - PowerShell disponible en el sistema
-- `tools/jq/jq.exe` disponible en el repo
+- `tool/jq/jq.exe` disponible en el repo
 
 ### Preparacion inicial
 
@@ -54,7 +54,7 @@ Notas:
 
 - `package.json` y `package-lock.json` forman parte del tooling reproducible del repo
 - `node_modules/` es solo instalación local y no debe versionarse
-- el validador usa `ajv` mediante `tools/validate-schemas.mjs` y `jq` vendorizado en `tools/jq/jq.exe`
+- el validador usa `ajv` mediante `tool/validate-schemas.mjs` y `jq` vendorizado en `tool/jq/jq.exe`
 
 - Comando principal:
 
