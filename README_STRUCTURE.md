@@ -2,7 +2,7 @@
 
 [Ir a la versión en español](#guía-de-estructura-del-proyecto-para-jocaagura_domain)
 
-This guide describes the recommended base folder and architecture setup when initializing a Flutter project using the [`jocaagura_domain`](https://pub.dev/packages/jocaagura_domain) package. It is aligned with Clean Architecture principles, and is intended to enforce scalability, testability, and clarity from the start.
+This guide describes a recommended application folder and architecture setup when initializing a Flutter project that uses the [`jocaagura_domain`](https://pub.dev/packages/jocaagura_domain) package. It is aligned with Clean Architecture principles and is intended to enforce scalability, testability, and clarity from the start.
 
 ---
 
@@ -44,7 +44,7 @@ dependencies:
 ```
 
 * No external packages are required for testing or mocking.
-* Fake services like `FakeWsDatabaseServiceImpl` are provided for robust test scenarios.
+* Fake services included in `jocaagura_domain` can be used for robust test scenarios.
 
 ---
 
@@ -116,7 +116,7 @@ You may include GitHub Actions for:
 * Running tests
 * (Optionally) Publishing to pub.dev
 
-Example config: [Workflow example](https://github.com/grupo-jocaagura/jocaagura_domain/blob/develop/.github/workflows/validate_pr.yaml)
+Example config: [`validate_pr.yaml`](.github/workflows/validate_pr.yaml)
 
 ---
 
@@ -186,7 +186,7 @@ Enjoy building with `jocaagura_domain` 🐱‍👤
 # 🇨🇴 🇪🇸
 # Guía de estructura del proyecto para `jocaagura_domain`
 
-Esta guía describe la estructura de carpetas y la arquitectura recomendada al iniciar un proyecto Flutter usando el paquete [`jocaagura_domain`](https://pub.dev/packages/jocaagura_domain). Está alineada con los principios de Clean Architecture y busca garantizar escalabilidad, testabilidad y claridad desde el inicio.
+Esta guía describe una estructura de aplicación y arquitectura recomendada al iniciar un proyecto Flutter que usa el paquete [`jocaagura_domain`](https://pub.dev/packages/jocaagura_domain). Está alineada con los principios de Clean Architecture y busca garantizar escalabilidad, testabilidad y claridad desde el inicio.
 
 ---
 
@@ -228,7 +228,7 @@ dependencies:
 ```
 
 * No se requieren paquetes externos para pruebas o mocks.
-* Se proveen servicios falsos como `FakeWsDatabaseServiceImpl` para escenarios de test robustos.
+* Los servicios fake incluidos en `jocaagura_domain` pueden usarse para escenarios de test robustos.
 
 ---
 
@@ -300,7 +300,7 @@ Puedes incluir GitHub Actions para:
 * Ejecución de tests
 * (Opcional) Publicar en pub.dev
 
-Ejemplo de configuración: [Ejemplo de workflow](https://github.com/grupo-jocaagura/jocaagura_domain/blob/develop/.github/workflows/validate_pr.yaml)
+Ejemplo de configuración: [`validate_pr.yaml`](.github/workflows/validate_pr.yaml)
 
 ---
 
@@ -350,7 +350,7 @@ class CounterView extends StatelessWidget {
     return StreamBuilder<int>(
       stream: bloc.stream,
       initialData: bloc.value,
-      builder: (_, snapshot) => Text('Valor: 	${snapshot.data}'),
+      builder: (_, snapshot) => Text('Valor: ${snapshot.data}'),
     );
   }
 }
