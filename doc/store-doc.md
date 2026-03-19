@@ -6,7 +6,9 @@ siguiendo el **Suggested Flow**:
 > UI → AppManager → Bloc → UseCase → Repository → Gateway → Service
 
 > Consulta la guía de estructura completa:
-> [https://github.com/grupo-jocaagura/jocaagura_domain/raw/refs/heads/develop/README_STRUCTURE.md](https://github.com/grupo-jocaagura/jocaagura_domain/raw/refs/heads/develop/README_STRUCTURE.md)
+> [`README_STRUCTURE.md`](../README_STRUCTURE.md)
+
+El ejemplo relacionado dentro del repo está en [`example/lib/store_model_example.dart`](../example/lib/store_model_example.dart).
 
 ## Objetivo
 

@@ -2,6 +2,12 @@
 
 Esta carpeta contiene la primera version de contratos JSON canonicos para `jocaagura_domain`.
 
+Resumen actual de cobertura:
+
+- `71` schemas versionados
+- `71` examples canónicos
+- convención uno a uno entre `foo.schema.json` y `examples/foo.example.json`
+
 ## Modelos incluidos
 
 - `address_model.schema.json`
@@ -30,6 +36,7 @@ Esta carpeta contiene la primera version de contratos JSON canonicos para `jocaa
 - `model_drive_item.schema.json`
 - `model_doc_block.schema.json`
 - `model_doc_document.schema.json`
+- `obituary_model.schema.json`
 - `model_config_http_request.schema.json`
 - `model_assessment.schema.json`
 - `model_json_schema_document.schema.json`

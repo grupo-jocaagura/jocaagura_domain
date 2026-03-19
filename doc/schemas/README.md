@@ -2,6 +2,8 @@
 
 Este directorio contiene los contratos JSON canonicos de `jocaagura_domain`.
 
+La versión contractual vigente se documenta en [`doc/schemas/v1/README.md`](v1/README.md).
+
 ## Convenciones base
 
 - Los schemas versionados viven en `doc/schemas/vN/`.
@@ -56,7 +58,7 @@ Notas:
 - `node_modules/` es solo instalación local y no debe versionarse
 - el validador usa `ajv` mediante `tool/validate-schemas.mjs` y `jq` vendorizado en `tool/jq/jq.exe`
 
-- Comando principal:
+### Comando principal
 
 ```powershell
 npm run validate:schemas
@@ -74,12 +76,13 @@ npm run validate:schemas
 4. Reutilizar referencias a otros schemas cuando ya exista un contrato estable.
 5. Crear `foo.schema.json` y `examples/foo.example.json`.
 6. Registrar dependencias y decisiones relevantes en `doc/schemas/vN/README.md`.
-7. Actualizar la matriz de cobertura en `plan-de-trabajo.md`.
+7. Actualizar la documentación de cobertura o inventario contractual si aplica.
 8. Ejecutar `npm run validate:schemas`.
 
 ## Version actual
 
 - `v1`: contratos iniciales canonicos para los modelos prioritarios.
+- detalle de alcance y cobertura en [`doc/schemas/v1/README.md`](v1/README.md)
 
 ## Decisiones canonicas actuales
 
@@ -121,4 +124,4 @@ npm run validate:schemas
   - el schema canónico hereda la forma contractual de `user_model.schema.json`, donde `jwt` es `object`.
   - el `toJson()` actual de `UserModel` sigue serializando `jwt` como string JSON embebido, por lo que esta brecha también afecta los payloads Dart del certificado.
 
-Estas brechas no se resuelven en esta carpeta. Se documentan aqui para preparar la posterior normalización de mappers Dart sin contaminar el contrato portable.
+Estas brechas no se resuelven en esta carpeta. Se documentan aqui para preparar una posterior normalización de mappers Dart sin contaminar el contrato portable.
