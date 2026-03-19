@@ -1,7 +1,26 @@
-# CHANGELOG Jocaagura Domain
+# CHANGELOG
 
 This document follows the guidelines of [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+Recent entries aim to follow a normalized structure. Older historical entries may preserve some original headings where reclassification would risk changing the original intent.
+
+## [1.39.1] - 2026-03-19
+
+### Docs
+- **README reduction and documentation split**
+  - El `README.md` pasa a funcionar como puerta de entrada y mapa documental del repositorio.
+  - Se extrae la referencia extensa a nuevos documentos complementarios en `doc/reference/`, `doc/guides/` y `doc/operations/`.
+- **Documentation navigation cleanup**
+  - Se corrigen enlaces internos y referencias locales para reducir dependencias de URLs absolutas del repositorio.
+  - Se alinean `README_STRUCTURE.md`, `example/README.md`, `doc/http-requests-doc.md`, `doc/advanced-http-simulation.md` y `doc/store-doc.md` con el nuevo rol del `README`.
+- **Schema documentation consistency**
+  - Se mejora la navegación entre `doc/schemas/README.md` y `doc/schemas/v1/README.md`.
+  - Se corrige el inventario de `v1` para incluir `obituary_model.schema.json`.
+
+### Changed
+- **Editorial normalization**
+  - Se aplican ajustes de forma en `CHANGELOG.md` sin alterar la intención histórica de las entradas previas.
 
 ## [1.39.0] - 2026-03-15
 
@@ -208,7 +227,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.38.5] - 2026-03-14
 
-
 ### Added
 - **Drive domain module**
   - Nuevo módulo `lib/domain/drive/` con:
@@ -348,8 +366,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Se agrega tooling local reproducible para validar schemas:
   - `package.json`
   - `package-lock.json`
-  - `tools/validate-schemas.ps1`
-  - `tools/jq/jq.exe`
+  - `tool/validate-schemas.ps1`
+  - `tool/jq/jq.exe`
 - Se agrega exclusión de `node_modules/` en `.gitignore`.
 
 ### Tests
@@ -369,14 +387,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.38.0] - 2026-01-18
 
 ### Added
-
 - Modelo ModelAclPolicy: política mínima de acceso por app/feature con serialización robusta y buildId.
 - Pruebas de ModelAclPolicy: buildId, jerarquía de roles, copyWith, fromJson/toJson y round-trip.
 - Suite de pruebas del ciclo de vida de Debouncer (cancelación, idempotencia y llamadas tras dispose()).
 
-### changed
+### Changed
 - Debouncer.dispose(): cancela timers pendientes y evita ejecuciones tras liberar la instancia.
-
 
 ## [1.37.0] - 2026-01-14
 
@@ -595,8 +611,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.33.1] - 2025-12-07
 ### Fixed
 - Hotfix para estabilizar el contrato de `ModelAppVersion` al serializar `buildAt` y permitir `defaultModelAppVersion` totalmente constante.
-
-### Fixed
 - `ModelAppVersion` ahora persiste `buildAt` como cadena ISO-8601 UTC con `kDefaultBuildAtIso` (07 Dic 2025) como valor por defecto, evitando drift entre plataformas y habilitando instancias const en tree-shaking.
 - Se agregó el *getter* `buildAtDateTime` que utiliza `DateUtils` para exponer el valor en `DateTime` sin sacrificar el almacenamiento en texto.
 
@@ -1687,7 +1701,6 @@ simplifica la **integración** en apps nuevas o existentes.
   ```
 
 — Fin de 1.25.1 —
-
 
 ## [1.25.0] - 2025-08-17
 
