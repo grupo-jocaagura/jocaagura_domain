@@ -4,8 +4,8 @@ Esta carpeta contiene la primera version de contratos JSON canonicos para `jocaa
 
 Resumen actual de cobertura:
 
-- `71` schemas versionados
-- `71` examples canónicos
+- `73` schemas versionados
+- `73` examples canónicos
 - convención uno a uno entre `foo.schema.json` y `examples/foo.example.json`
 
 ## Modelos incluidos
@@ -60,6 +60,8 @@ Resumen actual de cobertura:
 - `model_learning_goal.schema.json`
 - `model_learning_item.schema.json`
 - `model_acl.schema.json`
+- `model_acl_plan.schema.json`
+- `model_acl_plan_assignment.schema.json`
 - `user_model.schema.json`
 - `person_model.schema.json`
 - `onboarding_state.schema.json`
@@ -108,6 +110,8 @@ Resumen actual de cobertura:
 - `model_item.schema.json` referencia `model_category.schema.json`, `model_price.schema.json` y `attribute_model.schema.json`
 - `model_complete_flow.schema.json` referencia `model_flow_step.schema.json`
 - `model_flow_certificate.schema.json` referencia `model_complete_flow.schema.json`, `model_flow_step_completion.schema.json` y `user_model.schema.json`
+- `model_acl_plan.schema.json` referencia `model_acl.schema.json`
+- `model_acl_plan_assignment.schema.json` referencia `model_acl_plan.schema.json` y `user_model.schema.json`
 - `model_point.schema.json` referencia `model_vector.schema.json`
 - `model_graph.schema.json` referencia `model_graph_axis_spec.schema.json` y `model_point.schema.json`
 - `model_group.schema.json` referencia `model_group_labels.schema.json` y `model_crud_metadata.schema.json`
@@ -159,6 +163,8 @@ Resultado esperado:
 - En contratos de certificación de flujo, `ModelFlowCertificate` embebe el `ModelCompleteFlow` desde el inicio del proceso
 - En contratos de certificación de flujo, `stepCompletionsByIndex` registra trazabilidad mínima secuencial por paso
 - En contratos de certificación de flujo, `state` distingue `draft`, `inProgress`, `readyForCertification` y `certified`
+- En contratos ACL agrupados, `ModelAclPlan` embebe grants `ModelAcl` completos y no una proyección reducida
+- En contratos ACL agrupados, `ModelAclPlanAssignment` embebe el plan completo como snapshot histórico de la asignación
 - En contratos Sheets, `ModelSheetRow` representa un registro persistible mediante `idRow` y `data`
 - En contratos Sheets, `idRow` es la PK efectiva y siempre se serializa como `string`
 - En contratos Sheets, `data` es un objeto JSON gobernado por los nombres únicos declarados en `ModelSheetColumn`
@@ -178,6 +184,7 @@ Resultado esperado:
 - En la familia Docs, el markdown libre se limita a bloques `markdown` y no se modela rich text inline.
 - En la familia IA, la respuesta canónica es única y no se modelan múltiples candidates ni tool calling en `v1`.
 - En la familia Flow Certificate, la certificación es explícita y un estado `certified` implica cierre lógico e inmutabilidad documental del certificado.
+- En la familia ACL Plan, los grants individuales siguen viviendo en `ModelAcl` y el plan solo agrega semántica reusable de bundle y asignación batch.
 - En la familia Sheets no se modelan labels visibles, fórmulas, orden visual, foreign keys ni versionado estructural.
 
 ## Brechas conocidas entre contrato y Dart actual
@@ -215,6 +222,10 @@ Resultado esperado:
   - formalizan el dominio mínimo para certificación lineal auditable de flujos.
   - el flujo vive embebido dentro del certificado y no depende de que siga existiendo una plantilla externa.
   - la certificación final es una acción explícita y no se deduce automáticamente solo por completar pasos.
+- `model_acl_plan.schema.json` y `model_acl_plan_assignment.schema.json`
+  - formalizan el dominio mínimo para bundles ACL reutilizables y su asignación batch auditable.
+  - `ModelAclPlanAssignment` embebe el plan completo para que la asignación siga siendo auditable aunque cambie o desaparezca la plantilla origen.
+  - los payloads Dart siguen heredando la brecha actual de `UserModel.jwt` cuando serializan `targetUser` o `assignedBy`.
 
 ## Compatibilidad esperada
 

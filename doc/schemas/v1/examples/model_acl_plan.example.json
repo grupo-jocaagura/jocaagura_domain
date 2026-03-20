@@ -1,0 +1,32 @@
+{
+  "id": "acl_plan_bienvenido_operator_v1",
+  "name": "BienvenidoOperatorDefaults",
+  "description": "Default access bundle for regular operators in the Bienvenido app.",
+  "appName": "bienvenido",
+  "acls": [
+    {
+      "id": "acl_bienvenido_dashboard_operator",
+      "roleType": "viewer",
+      "appName": "bienvenido",
+      "feature": "dashboard",
+      "email": "template@jocaagura.dev",
+      "isActive": true,
+      "emailAutorizedBy": "admin@jocaagura.dev",
+      "autorizedAtIsoDate": "2026-03-20T10:00:00.000Z",
+      "revokedAtIsoDate": "2026-12-31T23:59:59.000Z",
+      "note": "Default dashboard access for operator plan."
+    },
+    {
+      "id": "acl_bienvenido_profile_operator",
+      "roleType": "editor",
+      "appName": "bienvenido",
+      "feature": "profile",
+      "email": "template@jocaagura.dev",
+      "isActive": true,
+      "emailAutorizedBy": "admin@jocaagura.dev",
+      "autorizedAtIsoDate": "2026-03-20T10:00:00.000Z",
+      "revokedAtIsoDate": "2026-12-31T23:59:59.000Z",
+      "note": "Default profile update access for operator plan."
+    }
+  ]
+}
