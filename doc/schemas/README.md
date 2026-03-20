@@ -104,6 +104,7 @@ npm run validate:schemas
 - En contratos de IA, `expectedResponseSchema` reutiliza `ModelJsonSchemaDocument` para exigir salidas JSON estructuradas sin acoplarse a un proveedor concreto.
 - El dominio de certificación de flujos envuelve `ModelCompleteFlow` dentro de `ModelFlowCertificate` para convertir una plantilla lineal en evidencia auditable de cumplimiento.
 - En contratos de certificación de flujo, la certificación final es explícita, no automática, y un estado `certified` implica cierre lógico del proceso.
+- El dominio ACL agrupado introduce `ModelAclPlan` como bundle reusable de grants y `ModelAclPlanAssignment` como snapshot auditable de asignación a usuario.
 
 ## Brechas conocidas con la implementación Dart
 
@@ -123,5 +124,9 @@ npm run validate:schemas
   - embebe `candidate` y `certifiedBy` como `UserModel`.
   - el schema canónico hereda la forma contractual de `user_model.schema.json`, donde `jwt` es `object`.
   - el `toJson()` actual de `UserModel` sigue serializando `jwt` como string JSON embebido, por lo que esta brecha también afecta los payloads Dart del certificado.
+- `ModelAclPlanAssignment`
+  - embebe `targetUser` y opcionalmente `assignedBy` como `UserModel`.
+  - el schema canónico hereda la forma contractual de `user_model.schema.json`, donde `jwt` es `object`.
+  - el `toJson()` actual de `UserModel` sigue serializando `jwt` como string JSON embebido, por lo que esta brecha también afecta los payloads Dart de asignación ACL.
 
 Estas brechas no se resuelven en esta carpeta. Se documentan aqui para preparar una posterior normalización de mappers Dart sin contaminar el contrato portable.

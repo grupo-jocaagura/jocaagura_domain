@@ -1,0 +1,73 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://jocaagura.dev/schemas/jocaagura_domain/v1/model_acl_plan.schema.json",
+  "title": "ModelAclPlan",
+  "description": "Canonical JSON contract for a reusable ACL plan in jocaagura_domain.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique identifier of the ACL plan."
+    },
+    "name": {
+      "type": "string",
+      "description": "Functional display name of the reusable ACL bundle."
+    },
+    "description": {
+      "type": "string",
+      "description": "Optional human description of the ACL plan."
+    },
+    "appName": {
+      "type": "string",
+      "description": "App namespace shared by all ACL grants embedded in the plan."
+    },
+    "acls": {
+      "type": "array",
+      "description": "Concrete ACL grants that make up the reusable plan snapshot.",
+      "items": {
+        "$ref": "./model_acl.schema.json"
+      }
+    }
+  },
+  "required": [
+    "id",
+    "name",
+    "appName",
+    "acls"
+  ],
+  "examples": [
+    {
+      "id": "acl_plan_bienvenido_operator_v1",
+      "name": "BienvenidoOperatorDefaults",
+      "description": "Default access bundle for regular operators in the Bienvenido app.",
+      "appName": "bienvenido",
+      "acls": [
+        {
+          "id": "acl_bienvenido_dashboard_operator",
+          "roleType": "viewer",
+          "appName": "bienvenido",
+          "feature": "dashboard",
+          "email": "template@jocaagura.dev",
+          "isActive": true,
+          "emailAutorizedBy": "admin@jocaagura.dev",
+          "autorizedAtIsoDate": "2026-03-20T10:00:00.000Z",
+          "revokedAtIsoDate": "2026-12-31T23:59:59.000Z",
+          "note": "Default dashboard access for operator plan."
+        },
+        {
+          "id": "acl_bienvenido_profile_operator",
+          "roleType": "editor",
+          "appName": "bienvenido",
+          "feature": "profile",
+          "email": "template@jocaagura.dev",
+          "isActive": true,
+          "emailAutorizedBy": "admin@jocaagura.dev",
+          "autorizedAtIsoDate": "2026-03-20T10:00:00.000Z",
+          "revokedAtIsoDate": "2026-12-31T23:59:59.000Z",
+          "note": "Default profile update access for operator plan."
+        }
+      ]
+    }
+  ]
+}

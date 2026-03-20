@@ -39,6 +39,8 @@ part 'domain/ai/model_ai_message.dart';
 part 'domain/ai/model_ai_request.dart';
 part 'domain/ai/model_ai_response.dart';
 part 'domain/apps/model_acl.dart';
+part 'domain/apps/model_acl_plan.dart';
+part 'domain/apps/model_acl_plan_assignment.dart';
 part 'domain/apps/model_acl_policy.dart';
 part 'domain/apps/model_app_version.dart';
 part 'domain/attribute_model.dart';
