@@ -5,6 +5,41 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 Recent entries aim to follow a normalized structure. Older historical entries may preserve some original headings where reclassification would risk changing the original intent.
 
+## [1.39.2] - 2026-03-20
+
+### Added
+- **ACL plan domain module**
+  - Nuevos modelos reutilizables para agrupación funcional de ACLs:
+    - `ModelAclPlan`
+    - `ModelAclPlanAssignment`
+  - `ModelAclPlan` define bundles de grants concretos reutilizando `ModelAcl` completo.
+  - `ModelAclPlanAssignment` conserva el plan completo embebido como snapshot histórico de asignación a usuario.
+- **ACL plan unit tests**
+  - Nuevas pruebas unitarias para:
+    - roundtrip `fromJson(toJson(model))`
+    - roundtrip `toJson(fromJson(jsonCanonico))`
+    - `copyWith`
+  - Cobertura inicial para:
+    - `acl_model_plan_test.dart`
+    - `acl_model_plan_assignment_test.dart`
+- **ACL plan JSON contracts**
+  - Nuevos schemas y examples canónicos en `doc/schemas/v1/` para:
+    - `model_acl_plan.schema.json`
+    - `model_acl_plan_assignment.schema.json`
+  - Se formaliza:
+    - agrupación ACL reusable como plan funcional
+    - asignación batch auditable mediante snapshot embebido
+    - reutilización explícita de `ModelAcl` y `UserModel`
+
+### Changed
+- **ACL schema documentation**
+  - Se actualizan `doc/schemas/README.md` y `doc/schemas/v1/README.md` para reflejar:
+    - la diferencia entre grant individual, política, plan y asignación
+    - el uso de snapshots embebidos en `ModelAclPlanAssignment`
+    - la brecha heredada de `UserModel.jwt` cuando una asignación serializa `targetUser` o `assignedBy`
+- **Branch work plan**
+  - Se reemplaza `plan-de-trabajo.md` con el plan de ejecución cerrado para la fase ACL Plan.
+
 ## [1.39.1] - 2026-03-19
 
 ### Docs
