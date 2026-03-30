@@ -4,8 +4,8 @@ Esta carpeta contiene la primera version de contratos JSON canonicos para `jocaa
 
 Resumen actual de cobertura:
 
-- `73` schemas versionados
-- `73` examples canónicos
+- `79` schemas versionados
+- `79` examples canónicos
 - convención uno a uno entre `foo.schema.json` y `examples/foo.example.json`
 
 ## Modelos incluidos
@@ -36,6 +36,12 @@ Resumen actual de cobertura:
 - `model_drive_item.schema.json`
 - `model_doc_block.schema.json`
 - `model_doc_document.schema.json`
+- `model_ds_component_anatomy.schema.json`
+- `model_ds_data_viz_palette.schema.json`
+- `model_ds_extended_tokens.schema.json`
+- `model_ds_semantic_colors.schema.json`
+- `model_ds_system.schema.json`
+- `model_ds_theme.schema.json`
 - `obituary_model.schema.json`
 - `model_config_http_request.schema.json`
 - `model_assessment.schema.json`
@@ -112,6 +118,7 @@ Resumen actual de cobertura:
 - `model_flow_certificate.schema.json` referencia `model_complete_flow.schema.json`, `model_flow_step_completion.schema.json` y `user_model.schema.json`
 - `model_acl_plan.schema.json` referencia `model_acl.schema.json`
 - `model_acl_plan_assignment.schema.json` referencia `model_acl_plan.schema.json` y `user_model.schema.json`
+- `model_ds_system.schema.json` referencia `model_ds_theme.schema.json`, `model_ds_extended_tokens.schema.json`, `model_ds_semantic_colors.schema.json`, `model_ds_data_viz_palette.schema.json` y `model_ds_component_anatomy.schema.json`
 - `model_point.schema.json` referencia `model_vector.schema.json`
 - `model_graph.schema.json` referencia `model_graph_axis_spec.schema.json` y `model_point.schema.json`
 - `model_group.schema.json` referencia `model_group_labels.schema.json` y `model_crud_metadata.schema.json`
@@ -165,6 +172,9 @@ Resultado esperado:
 - En contratos de certificación de flujo, `state` distingue `draft`, `inProgress`, `readyForCertification` y `certified`
 - En contratos ACL agrupados, `ModelAclPlan` embebe grants `ModelAcl` completos y no una proyección reducida
 - En contratos ACL agrupados, `ModelAclPlanAssignment` embebe el plan completo como snapshot histórico de la asignación
+- En contratos de Design System, `model_ds_system.schema.json` define un documento persistible y portable, no una serialización universal de `ThemeData`
+- En contratos de Design System, `model_ds_theme.schema.json` se mantiene pragmáticamente orientado a consumidores Flutter/Material sin introducir dependencias a Flutter en este repo
+- En contratos de Design System, `componentCatalog` es opcional y el sistema de emociones queda fuera de `v1`
 - En contratos Sheets, `ModelSheetRow` representa un registro persistible mediante `idRow` y `data`
 - En contratos Sheets, `idRow` es la PK efectiva y siempre se serializa como `string`
 - En contratos Sheets, `data` es un objeto JSON gobernado por los nombres únicos declarados en `ModelSheetColumn`
@@ -185,6 +195,7 @@ Resultado esperado:
 - En la familia IA, la respuesta canónica es única y no se modelan múltiples candidates ni tool calling en `v1`.
 - En la familia Flow Certificate, la certificación es explícita y un estado `certified` implica cierre lógico e inmutabilidad documental del certificado.
 - En la familia ACL Plan, los grants individuales siguen viviendo en `ModelAcl` y el plan solo agrega semántica reusable de bundle y asignación batch.
+- En la familia DS Contract, `theme`, `tokens`, `semantic`, `dataViz` y `componentCatalog` forman un agregado persistible consumible por backend y adaptadores Flutter.
 - En la familia Sheets no se modelan labels visibles, fórmulas, orden visual, foreign keys ni versionado estructural.
 
 ## Brechas conocidas entre contrato y Dart actual
@@ -226,6 +237,10 @@ Resultado esperado:
   - formalizan el dominio mínimo para bundles ACL reutilizables y su asignación batch auditable.
   - `ModelAclPlanAssignment` embebe el plan completo para que la asignación siga siendo auditable aunque cambie o desaparezca la plantilla origen.
   - los payloads Dart siguen heredando la brecha actual de `UserModel.jwt` cuando serializan `targetUser` o `assignedBy`.
+- `model_ds_system.schema.json`, `model_ds_theme.schema.json`, `model_ds_extended_tokens.schema.json`, `model_ds_semantic_colors.schema.json`, `model_ds_data_viz_palette.schema.json` y `model_ds_component_anatomy.schema.json`
+  - formalizan el dominio contractual mínimo del Design System persistible.
+  - en esta fase solo se agregan contracts y examples; no se mueven modelos Dart desde `jocaaguraarchetype`.
+  - la abstracción multiplataforma completa y el sistema de emociones quedan para fases posteriores.
 
 ## Compatibilidad esperada
 

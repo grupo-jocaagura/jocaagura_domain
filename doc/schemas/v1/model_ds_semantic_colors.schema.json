@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://jocaagura.dev/schemas/jocaagura_domain/v1/model_ds_semantic_colors.schema.json",
+  "title": "ModelDsSemanticColors",
+  "description": "Canonical JSON contract for semantic functional colors in jocaagura_domain.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "success": { "type": "integer", "minimum": 0, "maximum": 4294967295 },
+    "onSuccess": { "type": "integer", "minimum": 0, "maximum": 4294967295 },
+    "successContainer": { "type": "integer", "minimum": 0, "maximum": 4294967295 },
+    "onSuccessContainer": { "type": "integer", "minimum": 0, "maximum": 4294967295 },
+    "warning": { "type": "integer", "minimum": 0, "maximum": 4294967295 },
+    "onWarning": { "type": "integer", "minimum": 0, "maximum": 4294967295 },
+    "warningContainer": { "type": "integer", "minimum": 0, "maximum": 4294967295 },
+    "onWarningContainer": { "type": "integer", "minimum": 0, "maximum": 4294967295 },
+    "info": { "type": "integer", "minimum": 0, "maximum": 4294967295 },
+    "onInfo": { "type": "integer", "minimum": 0, "maximum": 4294967295 },
+    "infoContainer": { "type": "integer", "minimum": 0, "maximum": 4294967295 },
+    "onInfoContainer": { "type": "integer", "minimum": 0, "maximum": 4294967295 }
+  },
+  "required": ["success", "onSuccess", "successContainer", "onSuccessContainer", "warning", "onWarning", "warningContainer", "onWarningContainer", "info", "onInfo", "infoContainer", "onInfoContainer"],
+  "examples": [
+    {
+      "success": 4282049099,
+      "onSuccess": 4294967295,
+      "successContainer": 4290162688,
+      "onSuccessContainer": 4278196992,
+      "warning": 4292620288,
+      "onWarning": 4278190080,
+      "warningContainer": 4294958694,
+      "onWarningContainer": 4281273600,
+      "info": 4283215696,
+      "onInfo": 4294967295,
+      "infoContainer": 4290824191,
+      "onInfoContainer": 4278196864
+    }
+  ]
+}

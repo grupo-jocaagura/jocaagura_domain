@@ -1,0 +1,107 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://jocaagura.dev/schemas/jocaagura_domain/v1/model_ds_system.schema.json",
+  "title": "ModelDsSystem",
+  "description": "Canonical JSON contract for a portable design system document in jocaagura_domain.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": { "type": "string", "description": "Version of the persisted design system contract document." },
+    "id": { "type": "string", "description": "Unique identifier of the design system document." },
+    "name": { "type": "string", "description": "Human-readable name of the design system." },
+    "description": { "type": "string", "description": "Optional description of the design system and its intended usage." },
+    "branding": {
+      "type": "object",
+      "description": "Brand metadata associated with the design system.",
+      "additionalProperties": false,
+      "properties": {
+        "owner": { "type": "string" },
+        "product": { "type": "string" }
+      },
+      "required": ["owner", "product"]
+    },
+    "theme": { "$ref": "./model_ds_theme.schema.json" },
+    "tokens": { "$ref": "./model_ds_extended_tokens.schema.json" },
+    "semantic": {
+      "type": "object",
+      "description": "Semantic functional colors organized by light and dark modes.",
+      "additionalProperties": false,
+      "properties": {
+        "light": { "$ref": "./model_ds_semantic_colors.schema.json" },
+        "dark": { "$ref": "./model_ds_semantic_colors.schema.json" }
+      },
+      "required": ["light", "dark"]
+    },
+    "dataViz": { "$ref": "./model_ds_data_viz_palette.schema.json" },
+    "componentCatalog": {
+      "type": "array",
+      "description": "Optional documentary catalog of design system components.",
+      "items": { "$ref": "./model_ds_component_anatomy.schema.json" }
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Administrative metadata of the persisted design system document.",
+      "additionalProperties": false,
+      "properties": {
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" },
+        "status": { "type": "string", "enum": ["draft", "active", "deprecated"] }
+      },
+      "required": ["createdAt", "updatedAt", "status"]
+    }
+  },
+  "required": ["schemaVersion", "id", "name", "theme", "tokens"],
+  "examples": [
+    {
+      "schemaVersion": "1.0.0",
+      "id": "bienvenido-emotions-ds",
+      "name": "Bienvenido Emotions DS",
+      "description": "Portable design system contract for Bienvenido managed by JA-10-DS-SYSTEM.",
+      "branding": { "owner": "Jocaagura", "product": "Bienvenido" },
+      "theme": {
+        "useMaterial3": true,
+        "lightScheme": {
+          "brightness": "light",
+          "primary": 4283215696,
+          "onPrimary": 4294967295,
+          "secondary": 4287379350,
+          "onSecondary": 4294967295,
+          "error": 4290386458,
+          "onError": 4294967295,
+          "surface": 4294966271,
+          "onSurface": 4279966491
+        },
+        "darkScheme": {
+          "brightness": "dark",
+          "primary": 4290824191,
+          "onPrimary": 4278196864,
+          "secondary": 4293517311,
+          "onSecondary": 4278196992,
+          "error": 4294948011,
+          "onError": 4281794561,
+          "surface": 4279374354,
+          "onSurface": 4293717228
+        },
+        "lightTextTheme": {
+          "headlineSmall": { "fontFamily": "Lora", "fontSize": 24, "fontWeight": 700, "letterSpacing": 0, "height": 1.2, "color": 4279966491 },
+          "titleMedium": { "fontFamily": "Lora", "fontSize": 18, "fontWeight": 600, "letterSpacing": 0, "height": 1.3, "color": 4279966491 },
+          "bodyMedium": { "fontFamily": "SourceSans3", "fontSize": 16, "fontWeight": 400, "letterSpacing": 0.15, "height": 1.45, "color": 4279966491 },
+          "labelLarge": { "fontFamily": "SourceSans3", "fontSize": 14, "fontWeight": 600, "letterSpacing": 0.1, "height": 1.2, "color": 4294967295 }
+        },
+        "darkTextTheme": {
+          "headlineSmall": { "fontFamily": "Lora", "fontSize": 24, "fontWeight": 700, "letterSpacing": 0, "height": 1.2, "color": 4293717228 },
+          "titleMedium": { "fontFamily": "Lora", "fontSize": 18, "fontWeight": 600, "letterSpacing": 0, "height": 1.3, "color": 4293717228 },
+          "bodyMedium": { "fontFamily": "SourceSans3", "fontSize": 16, "fontWeight": 400, "letterSpacing": 0.15, "height": 1.45, "color": 4293717228 },
+          "labelLarge": { "fontFamily": "SourceSans3", "fontSize": 14, "fontWeight": 600, "letterSpacing": 0.1, "height": 1.2, "color": 4278196864 }
+        }
+      },
+      "tokens": {
+        "spacing": { "xxs": 2, "xs": 4, "sm": 8, "md": 12, "lg": 16, "xl": 24, "xxl": 32 },
+        "radius": { "sm": 4, "md": 8, "lg": 12, "xl": 16, "full": 999 },
+        "elevation": { "level0": 0, "level1": 1, "level2": 3, "level3": 6, "level4": 12 },
+        "alpha": { "disabled": 0.38, "muted": 0.72, "scrim": 0.32 },
+        "durationMs": { "fast": 120, "normal": 240, "slow": 360 }
+      }
+    }
+  ]
+}
