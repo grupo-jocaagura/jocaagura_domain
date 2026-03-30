@@ -1,0 +1,41 @@
+{
+  "id": "button-filled",
+  "name": "FilledButton",
+  "description": "Primary call-to-action button with a high-emphasis filled surface.",
+  "tags": [
+    "action",
+    "button",
+    "cta"
+  ],
+  "status": "active",
+  "platforms": [
+    "mobile",
+    "web"
+  ],
+  "previews": [
+    "https://design.jocaagura.dev/components/button-filled/preview.png"
+  ],
+  "links": [
+    {
+      "label": "Figma specification",
+      "url": "https://design.jocaagura.dev/components/button-filled/spec"
+    }
+  ],
+  "slots": [
+    {
+      "id": "container",
+      "name": "Container",
+      "description": "Clickable filled surface that defines the shape and background."
+    },
+    {
+      "id": "label",
+      "name": "Label",
+      "description": "Primary text content of the button."
+    },
+    {
+      "id": "leadingIcon",
+      "name": "Leading icon",
+      "description": "Optional leading decorative or semantic icon."
+    }
+  ]
+}

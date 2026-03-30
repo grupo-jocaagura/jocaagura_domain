@@ -5,6 +5,41 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 Recent entries aim to follow a normalized structure. Older historical entries may preserve some original headings where reclassification would risk changing the original intent.
 
+## [1.39.3] - 2026-03-30
+
+### Added
+- **Design System contract family**
+  - Nueva expansión retrocompatible de `v1` para el sistema de diseño persistible mediante:
+    - `model_ds_system.schema.json`
+    - `model_ds_theme.schema.json`
+    - `model_ds_extended_tokens.schema.json`
+    - `model_ds_semantic_colors.schema.json`
+    - `model_ds_data_viz_palette.schema.json`
+    - `model_ds_component_anatomy.schema.json`
+  - Se agregan examples canónicos para cada contrato del DS en `doc/schemas/v1/examples/`.
+  - `model_ds_system.schema.json` formaliza un agregado raíz portable con:
+    - `schemaVersion`
+    - identidad y branding
+    - `theme`
+    - `tokens`
+    - `semantic`
+    - `dataViz`
+    - `componentCatalog`
+    - `metadata`
+
+### Changed
+- **Design System documentation**
+  - Se actualizan `doc/schemas/README.md` y `doc/schemas/v1/README.md` para reflejar:
+    - la diferencia entre contrato DS portable y adaptador Flutter
+    - el carácter pragmático de `model_ds_theme.schema.json` como contrato consumible por Flutter/Material
+    - la decisión de dejar el sistema de emociones fuera de esta fase
+- **Branch work plan**
+  - Se reemplaza `plan-de-trabajo.md` con el plan de ejecución cerrado para `DS Contract v1`.
+
+### Notes
+- Esta fase agrega contratos y examples del Design System, pero no mueve modelos Dart desde `jocaaguraarchetype`.
+- La alineación completa del adaptador Flutter queda para una fase posterior separada.
+
 ## [1.39.2] - 2026-03-20
 
 ### Added

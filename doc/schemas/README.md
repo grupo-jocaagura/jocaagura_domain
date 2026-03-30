@@ -105,6 +105,7 @@ npm run validate:schemas
 - El dominio de certificación de flujos envuelve `ModelCompleteFlow` dentro de `ModelFlowCertificate` para convertir una plantilla lineal en evidencia auditable de cumplimiento.
 - En contratos de certificación de flujo, la certificación final es explícita, no automática, y un estado `certified` implica cierre lógico del proceso.
 - El dominio ACL agrupado introduce `ModelAclPlan` como bundle reusable de grants y `ModelAclPlanAssignment` como snapshot auditable de asignación a usuario.
+- El dominio de Design System publica contratos JSON persistibles y portables, mientras `jocaaguraarchetype` permanece como adaptador Flutter/Material de consumo.
 
 ## Brechas conocidas con la implementación Dart
 
@@ -128,5 +129,9 @@ npm run validate:schemas
   - embebe `targetUser` y opcionalmente `assignedBy` como `UserModel`.
   - el schema canónico hereda la forma contractual de `user_model.schema.json`, donde `jwt` es `object`.
   - el `toJson()` actual de `UserModel` sigue serializando `jwt` como string JSON embebido, por lo que esta brecha también afecta los payloads Dart de asignación ACL.
+- `DS Contract v1`
+  - define contratos JSON para `theme`, `tokens`, `semantic`, `dataViz` y `componentCatalog`.
+  - en esta fase no existen modelos Dart equivalentes en `jocaagura_domain`; el consumo Flutter sigue viviendo en `jocaaguraarchetype`.
+  - `model_ds_theme.schema.json` se documenta como contrato portable consumible por Flutter, no como estándar universal de `ThemeData`.
 
 Estas brechas no se resuelven en esta carpeta. Se documentan aqui para preparar una posterior normalización de mappers Dart sin contaminar el contrato portable.

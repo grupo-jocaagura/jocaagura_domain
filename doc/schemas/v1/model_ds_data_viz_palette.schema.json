@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://jocaagura.dev/schemas/jocaagura_domain/v1/model_ds_data_viz_palette.schema.json",
+  "title": "ModelDsDataVizPalette",
+  "description": "Canonical JSON contract for data visualization palettes in jocaagura_domain.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "categorical": {
+      "type": "array",
+      "description": "Ordered categorical palette represented as ARGB 32-bit integers.",
+      "minItems": 1,
+      "items": { "type": "integer", "minimum": 0, "maximum": 4294967295 }
+    },
+    "sequential": {
+      "type": "array",
+      "description": "Ordered sequential palette represented as ARGB 32-bit integers.",
+      "minItems": 2,
+      "items": { "type": "integer", "minimum": 0, "maximum": 4294967295 }
+    }
+  },
+  "required": ["categorical", "sequential"],
+  "examples": [
+    {
+      "categorical": [4283215696, 4287379350, 4292620288, 4282049099, 4286141768],
+      "sequential": [4294638847, 4291933439, 4287379350, 4283215696]
+    }
+  ]
+}
