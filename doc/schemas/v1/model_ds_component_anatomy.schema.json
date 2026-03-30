@@ -1,0 +1,95 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://jocaagura.dev/schemas/jocaagura_domain/v1/model_ds_component_anatomy.schema.json",
+  "title": "ModelDsComponentAnatomy",
+  "description": "Canonical JSON contract for the documentary anatomy of a design system component in jocaagura_domain.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "id": { "type": "string", "description": "Unique identifier of the documented component anatomy." },
+    "name": { "type": "string", "description": "Human-readable component name." },
+    "description": { "type": "string", "description": "Documentary description of the component and its intended use." },
+    "tags": {
+      "type": "array",
+      "description": "Searchable documentary tags of the component.",
+      "items": { "type": "string" }
+    },
+    "status": {
+      "type": "string",
+      "description": "Lifecycle state of the documented component.",
+      "enum": ["draft", "active", "deprecated"]
+    },
+    "platforms": {
+      "type": "array",
+      "description": "Target platforms explicitly documented for the component.",
+      "items": { "type": "string", "enum": ["mobile", "web", "desktop"] }
+    },
+    "previews": {
+      "type": "array",
+      "description": "Preview URLs that visually document the component.",
+      "items": { "type": "string", "format": "uri" }
+    },
+    "links": {
+      "type": "array",
+      "description": "Auxiliary documentary links for specs, design files or implementation notes.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "label": { "type": "string" },
+          "url": { "type": "string", "format": "uri" }
+        },
+        "required": ["label", "url"]
+      }
+    },
+    "slots": {
+      "type": "array",
+      "description": "Named anatomy slots that make up the component.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string" },
+          "name": { "type": "string" },
+          "description": { "type": "string" }
+        },
+        "required": ["id", "name", "description"]
+      }
+    }
+  },
+  "required": ["id", "name", "description", "tags", "status", "platforms", "previews", "links", "slots"],
+  "examples": [
+    {
+      "id": "button-filled",
+      "name": "FilledButton",
+      "description": "Primary call-to-action button with a high-emphasis filled surface.",
+      "tags": ["action", "button", "cta"],
+      "status": "active",
+      "platforms": ["mobile", "web"],
+      "previews": ["https://design.jocaagura.dev/components/button-filled/preview.png"],
+      "links": [
+        {
+          "label": "Figma specification",
+          "url": "https://design.jocaagura.dev/components/button-filled/spec"
+        }
+      ],
+      "slots": [
+        {
+          "id": "container",
+          "name": "Container",
+          "description": "Clickable filled surface that defines the shape and background."
+        },
+        {
+          "id": "label",
+          "name": "Label",
+          "description": "Primary text content of the button."
+        },
+        {
+          "id": "leadingIcon",
+          "name": "Leading icon",
+          "description": "Optional leading decorative or semantic icon."
+        }
+      ]
+    }
+  ]
+}
