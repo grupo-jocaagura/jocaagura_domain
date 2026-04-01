@@ -4,8 +4,8 @@ Esta carpeta contiene la primera version de contratos JSON canonicos para `jocaa
 
 Resumen actual de cobertura:
 
-- `79` schemas versionados
-- `79` examples canónicos
+- `80` schemas versionados
+- `80` examples canónicos
 - convención uno a uno entre `foo.schema.json` y `examples/foo.example.json`
 
 ## Modelos incluidos
@@ -73,6 +73,7 @@ Resumen actual de cobertura:
 - `onboarding_state.schema.json`
 - `signature_model.schema.json`
 - `model_vector.schema.json`
+- `model_vehicle.schema.json`
 - `store_model.schema.json`
 - `treatment_plan_model.schema.json`
 - `model_category.schema.json`
@@ -113,6 +114,7 @@ Resumen actual de cobertura:
 - `model_learning_item.schema.json` referencia `attribute_model.schema.json`, `model_performance_indicator.schema.json` y `model_category.schema.json`
 - `model_assessment.schema.json` referencia `model_learning_item.schema.json`
 - `person_model.schema.json` referencia `attribute_model.schema.json`
+- `model_vehicle.schema.json` referencia `model_category.schema.json` y `attribute_model.schema.json`
 - `model_item.schema.json` referencia `model_category.schema.json`, `model_price.schema.json` y `attribute_model.schema.json`
 - `model_complete_flow.schema.json` referencia `model_flow_step.schema.json`
 - `model_flow_certificate.schema.json` referencia `model_complete_flow.schema.json`, `model_flow_step_completion.schema.json` y `user_model.schema.json`
