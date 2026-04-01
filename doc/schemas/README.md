@@ -106,6 +106,7 @@ npm run validate:schemas
 - En contratos de certificación de flujo, la certificación final es explícita, no automática, y un estado `certified` implica cierre lógico del proceso.
 - El dominio ACL agrupado introduce `ModelAclPlan` como bundle reusable de grants y `ModelAclPlanAssignment` como snapshot auditable de asignación a usuario.
 - El dominio de Design System publica contratos JSON persistibles y portables, mientras `jocaaguraarchetype` permanece como adaptador Flutter/Material de consumo.
+- El dominio vehicular fija `ModelVehicle` como contrato base transversal y reutiliza `ModelCategory` para clasificación y `AttributeModel` para extensibilidad operativa.
 
 ## Brechas conocidas con la implementación Dart
 

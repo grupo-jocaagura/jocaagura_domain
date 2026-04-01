@@ -5,6 +5,48 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 Recent entries aim to follow a normalized structure. Older historical entries may preserve some original headings where reclassification would risk changing the original intent.
 
+## [1.39.4] - 2026-04-01
+
+### Added
+- **Vehicle base domain contract**
+  - Nuevo módulo vehicular base con:
+    - `ModelVehicle`
+    - `ModelVehicleEnum`
+  - `ModelVehicle` define un contrato transversal mínimo y reusable con:
+    - identidad estructural (`id`, `displayName`, `plate`)
+    - datos base (`brand`, `model`, `year`, `description`, `isActive`)
+    - clasificación principal mediante `ModelCategory`
+    - clasificación secundaria mediante `List<ModelCategory>`
+    - extensibilidad operativa mediante `Map<String, AttributeModel<dynamic>>`
+- **Vehicle unit tests**
+  - Nuevas pruebas unitarias para `ModelVehicle` cubriendo:
+    - roundtrip JSON canónico
+    - `copyWith`
+    - igualdad y `hashCode`
+    - defaults
+    - normalización defensiva de `attributes`
+- **Vehicle JSON contracts**
+  - Nuevos contratos y examples canónicos en `doc/schemas/v1/` para:
+    - `model_vehicle.schema.json`
+    - `examples/model_vehicle.example.json`
+
+### Changed
+- **Vehicle serialization semantics**
+  - `ModelVehicle.toJson()` fija el shape canónico portable del vehículo.
+  - `ModelVehicle.fromJson()` acepta variantes razonables para `attributes` y converge al contrato canonizado.
+  - La igualdad y el hash de `attributes` se alinean con el contenido serializado para evitar falsas diferencias por genéricos Dart internos.
+- **Schema documentation**
+  - Se actualizan `doc/schemas/README.md` y `doc/schemas/v1/README.md` para reflejar:
+    - la incorporación del contrato vehicular base
+    - la reutilización de `ModelCategory` para clasificación
+    - la reutilización de `AttributeModel` para extensibilidad controlada
+- **Library exports**
+  - Se registran los nuevos `part` del módulo vehicular en `lib/jocaagura_domain.dart`.
+
+### Notes
+- Esta fase cierra únicamente `ModelVehicle Base Contract v1`.
+- La evolución hacia submodelos específicos de documentos, mantenimiento, energía o capacidad queda deliberadamente fuera de esta versión.
+
 ## [1.39.3] - 2026-03-30
 
 ### Added

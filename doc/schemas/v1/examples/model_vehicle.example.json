@@ -1,0 +1,38 @@
+{
+  "id": "vehicle-001",
+  "displayName": "Van 01",
+  "plate": "ABC123",
+  "brand": "Renault",
+  "model": "Kangoo",
+  "year": 2024,
+  "description": "Urban delivery van",
+  "isActive": true,
+  "vehicleCategory": {
+    "category": "cargo-van",
+    "description": "Light cargo vehicle"
+  },
+  "tags": [
+    {
+      "category": "fleet-a",
+      "description": "Primary fleet"
+    },
+    {
+      "category": "urban-route",
+      "description": "Urban operation"
+    }
+  ],
+  "attributes": {
+    "color": {
+      "name": "color",
+      "value": "white"
+    },
+    "passengerCapacity": {
+      "name": "passengerCapacity",
+      "value": 2
+    },
+    "currentOccupancy": {
+      "name": "currentOccupancy",
+      "value": 1
+    }
+  }
+}
