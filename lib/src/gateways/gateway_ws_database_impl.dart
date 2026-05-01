@@ -136,7 +136,7 @@ class GatewayWsDatabaseImpl implements GatewayWsDatabase {
       }
 
       if (_treatEmptyAsMissing && json.isEmpty) {
-        return Left<ErrorItem, Map<String, dynamic>>(
+        return const Left<ErrorItem, Map<String, dynamic>>(
           DatabaseErrorItems.notFound,
         );
       }
@@ -190,7 +190,7 @@ class GatewayWsDatabaseImpl implements GatewayWsDatabase {
     _assertNotDisposed();
     try {
       await _service.deleteDocument(collection: _collection, docId: docId);
-      return Right<ErrorItem, Unit>(Unit.value);
+      return const Right<ErrorItem, Unit>(Unit.value);
     } catch (e, s) {
       return Left<ErrorItem, Unit>(
         _mapper.fromException(e, s, location: 'GatewayWsDatabase.delete'),
@@ -217,7 +217,7 @@ class GatewayWsDatabaseImpl implements GatewayWsDatabase {
     final _DocChannel channel = _channels.putIfAbsent(docId, () {
       final BlocGeneral<Either<ErrorItem, Map<String, dynamic>>> bloc =
           BlocGeneral<Either<ErrorItem, Map<String, dynamic>>>(
-        Right<ErrorItem, Map<String, dynamic>>(const <String, dynamic>{}),
+        const Right<ErrorItem, Map<String, dynamic>>(<String, dynamic>{}),
       );
 
       return _DocChannel(
@@ -243,7 +243,7 @@ class GatewayWsDatabaseImpl implements GatewayWsDatabase {
           },
           onDone: () {
             const ErrorItem closed = DatabaseErrorItems.streamClosed;
-            bloc.value = Left<ErrorItem, Map<String, dynamic>>(closed);
+            bloc.value = const Left<ErrorItem, Map<String, dynamic>>(closed);
           },
         ),
       );
@@ -312,7 +312,9 @@ class GatewayWsDatabaseImpl implements GatewayWsDatabase {
       return Left<ErrorItem, Map<String, dynamic>>(payloadErr);
     }
     if (_treatEmptyAsMissing && json.isEmpty) {
-      return Left<ErrorItem, Map<String, dynamic>>(DatabaseErrorItems.notFound);
+      return const Left<ErrorItem, Map<String, dynamic>>(
+        DatabaseErrorItems.notFound,
+      );
     }
     return Right<ErrorItem, Map<String, dynamic>>(_withId(docId, json));
   }

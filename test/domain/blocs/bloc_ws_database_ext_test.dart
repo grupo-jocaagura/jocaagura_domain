@@ -17,7 +17,7 @@ class RepoFake implements RepositoryWsDatabase<UserModel> {
   Future<Either<ErrorItem, UserModel>> read(String docId) async {
     final UserModel? u = _store[docId];
     if (u == null) {
-      return Left<ErrorItem, UserModel>(DatabaseErrorItems.notFound);
+      return const Left<ErrorItem, UserModel>(DatabaseErrorItems.notFound);
     }
     return Right<ErrorItem, UserModel>(u);
   }
@@ -36,8 +36,8 @@ class RepoFake implements RepositoryWsDatabase<UserModel> {
   Future<Either<ErrorItem, Unit>> delete(String docId) async {
     _store.remove(docId);
     _streams[docId]
-        ?.add(Left<ErrorItem, UserModel>(DatabaseErrorItems.notFound));
-    return Right<ErrorItem, Unit>(Unit.value);
+        ?.add(const Left<ErrorItem, UserModel>(DatabaseErrorItems.notFound));
+    return const Right<ErrorItem, Unit>(Unit.value);
   }
 
   @override
@@ -52,7 +52,7 @@ class RepoFake implements RepositoryWsDatabase<UserModel> {
       final UserModel? u = _store[docId];
       ctrl.add(
         u == null
-            ? Left<ErrorItem, UserModel>(DatabaseErrorItems.notFound)
+            ? const Left<ErrorItem, UserModel>(DatabaseErrorItems.notFound)
             : Right<ErrorItem, UserModel>(u),
       );
     });

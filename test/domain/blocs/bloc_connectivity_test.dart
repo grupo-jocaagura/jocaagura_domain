@@ -51,9 +51,9 @@ void main() {
 
     test('loadInitial sets Right', () async {
       final _RepoStub repo = _RepoStub(
-        snapshotResult: Right<ErrorItem, ConnectivityModel>(initial),
-        typeResult: Right<ErrorItem, ConnectivityModel>(initial),
-        speedResult: Right<ErrorItem, ConnectivityModel>(initial),
+        snapshotResult: const Right<ErrorItem, ConnectivityModel>(initial),
+        typeResult: const Right<ErrorItem, ConnectivityModel>(initial),
+        speedResult: const Right<ErrorItem, ConnectivityModel>(initial),
       );
       final BlocConnectivity bloc = BlocConnectivity(
         watch: WatchConnectivityUseCase(repo),
@@ -71,9 +71,9 @@ void main() {
 
     test('startWatching propagates Right and Left', () async {
       final _RepoStub repo = _RepoStub(
-        snapshotResult: Right<ErrorItem, ConnectivityModel>(initial),
-        typeResult: Right<ErrorItem, ConnectivityModel>(initial),
-        speedResult: Right<ErrorItem, ConnectivityModel>(initial),
+        snapshotResult: const Right<ErrorItem, ConnectivityModel>(initial),
+        typeResult: const Right<ErrorItem, ConnectivityModel>(initial),
+        speedResult: const Right<ErrorItem, ConnectivityModel>(initial),
       );
       final BlocConnectivity bloc = BlocConnectivity(
         watch: WatchConnectivityUseCase(repo),
@@ -82,11 +82,11 @@ void main() {
         checkSpeed: CheckInternetSpeedUseCase(repo),
       );
       bloc.startWatching();
-      repo.emit(Right<ErrorItem, ConnectivityModel>(other));
+      repo.emit(const Right<ErrorItem, ConnectivityModel>(other));
       await Future<void>.delayed(const Duration(milliseconds: 5));
       expect((bloc.value as Right<ErrorItem, ConnectivityModel>).value, other);
 
-      repo.emit(Left<ErrorItem, ConnectivityModel>(err));
+      repo.emit(const Left<ErrorItem, ConnectivityModel>(err));
       await Future<void>.delayed(const Duration(milliseconds: 5));
       expect(bloc.value.isLeft, isTrue);
 
@@ -95,9 +95,9 @@ void main() {
 
     test('refreshType/refreshSpeed update value', () async {
       final _RepoStub repo = _RepoStub(
-        snapshotResult: Right<ErrorItem, ConnectivityModel>(initial),
-        typeResult: Right<ErrorItem, ConnectivityModel>(other),
-        speedResult: Right<ErrorItem, ConnectivityModel>(other),
+        snapshotResult: const Right<ErrorItem, ConnectivityModel>(initial),
+        typeResult: const Right<ErrorItem, ConnectivityModel>(other),
+        speedResult: const Right<ErrorItem, ConnectivityModel>(other),
       );
       final BlocConnectivity bloc = BlocConnectivity(
         watch: WatchConnectivityUseCase(repo),
@@ -114,9 +114,9 @@ void main() {
 
     test('stopWatching prevents further updates', () async {
       final _RepoStub repo = _RepoStub(
-        snapshotResult: Right<ErrorItem, ConnectivityModel>(initial),
-        typeResult: Right<ErrorItem, ConnectivityModel>(initial),
-        speedResult: Right<ErrorItem, ConnectivityModel>(initial),
+        snapshotResult: const Right<ErrorItem, ConnectivityModel>(initial),
+        typeResult: const Right<ErrorItem, ConnectivityModel>(initial),
+        speedResult: const Right<ErrorItem, ConnectivityModel>(initial),
       );
       final BlocConnectivity bloc = BlocConnectivity(
         watch: WatchConnectivityUseCase(repo),
@@ -127,7 +127,7 @@ void main() {
       bloc.startWatching();
       bloc.stopWatching();
       final Either<ErrorItem, ConnectivityModel> before = bloc.value;
-      repo.emit(Right<ErrorItem, ConnectivityModel>(other));
+      repo.emit(const Right<ErrorItem, ConnectivityModel>(other));
       await Future<void>.delayed(const Duration(milliseconds: 5));
       expect(bloc.value, before);
       bloc.dispose();

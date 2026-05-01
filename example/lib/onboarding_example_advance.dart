@@ -63,7 +63,7 @@ class _RiceOnboardingPageState extends State<RiceOnboardingPage> {
       OnboardingStep(
         title: '¿Para cuántas personas?',
         description: 'Ingresa un número entre 1 y 20 y confirma.',
-        onEnter: () async => Right<ErrorItem, Unit>(Unit.value),
+        onEnter: () async => const Right<ErrorItem, Unit>(Unit.value),
       ),
       OnboardingStep(
         title: 'Validación de porciones',
@@ -71,8 +71,8 @@ class _RiceOnboardingPageState extends State<RiceOnboardingPage> {
         onEnter: () async {
           final int? n = servings;
           if (n == null) {
-            return Left<ErrorItem, Unit>(
-              const ErrorItem(
+            return const Left<ErrorItem, Unit>(
+              ErrorItem(
                 title: 'Dato faltante',
                 code: 'ERR_NO_SERVINGS',
                 description: 'Debes ingresar el número de personas.',
@@ -81,8 +81,8 @@ class _RiceOnboardingPageState extends State<RiceOnboardingPage> {
             );
           }
           if (n < 1 || n > 20) {
-            return Left<ErrorItem, Unit>(
-              const ErrorItem(
+            return const Left<ErrorItem, Unit>(
+              ErrorItem(
                 title: 'Valor inválido',
                 code: 'ERR_RANGE',
                 description: 'El número debe estar entre 1 y 20.',
@@ -90,7 +90,7 @@ class _RiceOnboardingPageState extends State<RiceOnboardingPage> {
               ),
             );
           }
-          return Right<ErrorItem, Unit>(Unit.value);
+          return const Right<ErrorItem, Unit>(Unit.value);
         },
         // si es Right, avanza solo
         autoAdvanceAfter: const Duration(milliseconds: 900),
@@ -98,7 +98,7 @@ class _RiceOnboardingPageState extends State<RiceOnboardingPage> {
       OnboardingStep(
         title: 'Ingredientes',
         description: 'Cantidades ajustadas a tus porciones.',
-        onEnter: () async => Right<ErrorItem, Unit>(Unit.value),
+        onEnter: () async => const Right<ErrorItem, Unit>(Unit.value),
       ),
       const OnboardingStep(
         title: 'Cocción',

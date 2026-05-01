@@ -160,8 +160,8 @@ class _StubGateway implements GatewayAuth {
   @override
   Future<Either<ErrorItem, Map<String, dynamic>>> logInWithGoogle() async {
     return google ??
-        Right<ErrorItem, Map<String, dynamic>>(
-          const <String, dynamic>{'id': 'g', 'email': 'g@x.com'},
+        const Right<ErrorItem, Map<String, dynamic>>(
+          <String, dynamic>{'id': 'g', 'email': 'g@x.com'},
         );
   }
 
@@ -198,16 +198,16 @@ class _StubGateway implements GatewayAuth {
     Map<String, dynamic> sessionJson,
   ) async {
     return logout ??
-        Right<ErrorItem, Map<String, dynamic>>(
-          const <String, dynamic>{'ok': true},
+        const Right<ErrorItem, Map<String, dynamic>>(
+          <String, dynamic>{'ok': true},
         );
   }
 
   @override
   Future<Either<ErrorItem, Map<String, dynamic>>> getCurrentUser() async {
     return current ??
-        Right<ErrorItem, Map<String, dynamic>>(
-          const <String, dynamic>{'id': 'id', 'email': 'a@b.com'},
+        const Right<ErrorItem, Map<String, dynamic>>(
+          <String, dynamic>{'id': 'id', 'email': 'a@b.com'},
         );
     // Para simular "no session" como error, retorna Left
   }
@@ -215,8 +215,8 @@ class _StubGateway implements GatewayAuth {
   @override
   Future<Either<ErrorItem, Map<String, dynamic>>> isSignedIn() async {
     return signedIn ??
-        Right<ErrorItem, Map<String, dynamic>>(
-          const <String, dynamic>{'isSignedIn': true},
+        const Right<ErrorItem, Map<String, dynamic>>(
+          <String, dynamic>{'isSignedIn': true},
         );
   }
 
@@ -253,32 +253,32 @@ void main() {
     test('StubGateway acepta todos los parámetros opcionales (silencia lints)',
         () {
       final _StubGateway g = _StubGateway(
-        signIn: Right<ErrorItem, Map<String, dynamic>>(
-          const <String, dynamic>{'id': 's', 'email': 's@x.com'},
+        signIn: const Right<ErrorItem, Map<String, dynamic>>(
+          <String, dynamic>{'id': 's', 'email': 's@x.com'},
         ),
-        login: Right<ErrorItem, Map<String, dynamic>>(
-          const <String, dynamic>{'id': 'l', 'email': 'l@x.com'},
+        login: const Right<ErrorItem, Map<String, dynamic>>(
+          <String, dynamic>{'id': 'l', 'email': 'l@x.com'},
         ),
-        google: Right<ErrorItem, Map<String, dynamic>>(
-          const <String, dynamic>{'id': 'g', 'email': 'g@x.com'},
+        google: const Right<ErrorItem, Map<String, dynamic>>(
+          <String, dynamic>{'id': 'g', 'email': 'g@x.com'},
         ),
-        silent: Right<ErrorItem, Map<String, dynamic>>(
-          const <String, dynamic>{'id': 'z', 'email': 'z@x.com'},
+        silent: const Right<ErrorItem, Map<String, dynamic>>(
+          <String, dynamic>{'id': 'z', 'email': 'z@x.com'},
         ),
-        refresh: Right<ErrorItem, Map<String, dynamic>>(
-          const <String, dynamic>{'id': 'r', 'email': 'r@x.com'},
+        refresh: const Right<ErrorItem, Map<String, dynamic>>(
+          <String, dynamic>{'id': 'r', 'email': 'r@x.com'},
         ),
-        recover: Right<ErrorItem, Map<String, dynamic>>(
-          const <String, dynamic>{'ok': true},
+        recover: const Right<ErrorItem, Map<String, dynamic>>(
+          <String, dynamic>{'ok': true},
         ),
-        logout: Right<ErrorItem, Map<String, dynamic>>(
-          const <String, dynamic>{'ok': true},
+        logout: const Right<ErrorItem, Map<String, dynamic>>(
+          <String, dynamic>{'ok': true},
         ),
-        current: Right<ErrorItem, Map<String, dynamic>>(
-          const <String, dynamic>{'id': 'c', 'email': 'c@x.com'},
+        current: const Right<ErrorItem, Map<String, dynamic>>(
+          <String, dynamic>{'id': 'c', 'email': 'c@x.com'},
         ),
-        signedIn: Right<ErrorItem, Map<String, dynamic>>(
-          const <String, dynamic>{'isSignedIn': true},
+        signedIn: const Right<ErrorItem, Map<String, dynamic>>(
+          <String, dynamic>{'isSignedIn': true},
         ),
         authStream:
             const Stream<Either<ErrorItem, Map<String, dynamic>?>>.empty(),
@@ -288,7 +288,7 @@ void main() {
 
     test('logInUserAndPassword → Right(UserModel)', () async {
       final GatewayAuth gw = _StubGateway(
-        login: Right<ErrorItem, Map<String, dynamic>>(const <String, dynamic>{
+        login: const Right<ErrorItem, Map<String, dynamic>>(<String, dynamic>{
           'id': 'u1',
           'email': 'a@b.com',
           'jwt': <String, dynamic>{'accessToken': 't'},
@@ -310,8 +310,8 @@ void main() {
     test('logInWithGoogle → Right(UserModel)', () async {
       final RepositoryAuth repo = RepositoryAuthImpl(
         gateway: _StubGateway(
-          google: Right<ErrorItem, Map<String, dynamic>>(
-            const <String, dynamic>{'id': 'g', 'email': 'g@x.com'},
+          google: const Right<ErrorItem, Map<String, dynamic>>(
+            <String, dynamic>{'id': 'g', 'email': 'g@x.com'},
           ),
         ),
         errorMapper: const _FakeErrorMapper(),
@@ -350,8 +350,8 @@ void main() {
     test('getCurrentUser → Right(UserModel)', () async {
       final RepositoryAuth repo = RepositoryAuthImpl(
         gateway: _StubGateway(
-          current: Right<ErrorItem, Map<String, dynamic>>(
-            const <String, dynamic>{'id': 'id', 'email': 'a@b.com'},
+          current: const Right<ErrorItem, Map<String, dynamic>>(
+            <String, dynamic>{'id': 'id', 'email': 'a@b.com'},
           ),
         ),
         errorMapper: const _FakeErrorMapper(),
@@ -366,8 +366,8 @@ void main() {
     test('isSignedIn → Right(bool)', () async {
       final RepositoryAuth repo = RepositoryAuthImpl(
         gateway: _StubGateway(
-          signedIn: Right<ErrorItem, Map<String, dynamic>>(
-            const <String, dynamic>{'isSignedIn': false},
+          signedIn: const Right<ErrorItem, Map<String, dynamic>>(
+            <String, dynamic>{'isSignedIn': false},
           ),
         ),
         errorMapper: const _FakeErrorMapper(),
@@ -384,8 +384,8 @@ void main() {
     test('payload error (ok:false) → Left en signIn', () async {
       final RepositoryAuth repo = RepositoryAuthImpl(
         gateway: _StubGateway(
-          signIn: Right<ErrorItem, Map<String, dynamic>>(
-            const <String, dynamic>{'ok': false, 'message': 'nope'},
+          signIn: const Right<ErrorItem, Map<String, dynamic>>(
+            <String, dynamic>{'ok': false, 'message': 'nope'},
           ),
         ),
         errorMapper: const _FakeErrorMapper(),
@@ -396,8 +396,8 @@ void main() {
     test('payload inválido (ok:false) → Left', () async {
       final RepositoryAuth repo = RepositoryAuthImpl(
         gateway: _StubGateway(
-          login: Right<ErrorItem, Map<String, dynamic>>(
-            const <String, dynamic>{'ok': false, 'message': 'invalid'},
+          login: const Right<ErrorItem, Map<String, dynamic>>(
+            <String, dynamic>{'ok': false, 'message': 'invalid'},
           ),
         ),
         errorMapper: const _FakeErrorMapper(),
@@ -408,8 +408,8 @@ void main() {
     test('isSignedIn payload error → Left', () async {
       final RepositoryAuth repo = RepositoryAuthImpl(
         gateway: _StubGateway(
-          signedIn: Right<ErrorItem, Map<String, dynamic>>(
-            const <String, dynamic>{'ok': false},
+          signedIn: const Right<ErrorItem, Map<String, dynamic>>(
+            <String, dynamic>{'ok': false},
           ),
         ),
         errorMapper: const _FakeErrorMapper(),
@@ -420,8 +420,8 @@ void main() {
     test('malformed json (payload inválido) → Left vía mapper', () async {
       final RepositoryAuth repo = RepositoryAuthImpl(
         gateway: _StubGateway(
-          login: Right<ErrorItem, Map<String, dynamic>>(
-            const <String, dynamic>{'ok': false, 'message': 'invalid'},
+          login: const Right<ErrorItem, Map<String, dynamic>>(
+            <String, dynamic>{'ok': false, 'message': 'invalid'},
           ),
         ),
         errorMapper: const _FakeErrorMapper(),
@@ -444,10 +444,10 @@ void main() {
       final StreamSubscription<Either<ErrorItem, UserModel?>> sub =
           repo.authStateChanges().listen(emissions.add);
 
-      ctrl.add(Right<ErrorItem, Map<String, dynamic>?>(null));
+      ctrl.add(const Right<ErrorItem, Map<String, dynamic>?>(null));
       ctrl.add(
-        Right<ErrorItem, Map<String, dynamic>?>(
-          const <String, dynamic>{'id': 'id', 'email': 'a@b.com'},
+        const Right<ErrorItem, Map<String, dynamic>?>(
+          <String, dynamic>{'id': 'id', 'email': 'a@b.com'},
         ),
       );
       await Future<void>.delayed(const Duration(milliseconds: 1));
@@ -480,8 +480,8 @@ void main() {
       });
 
       ctrl.add(
-        Right<ErrorItem, Map<String, dynamic>?>(
-          const <String, dynamic>{'ok': false},
+        const Right<ErrorItem, Map<String, dynamic>?>(
+          <String, dynamic>{'ok': false},
         ),
       );
       await seenLeft.future;
@@ -493,7 +493,7 @@ void main() {
       final Stream<Either<ErrorItem, Map<String, dynamic>?>> s =
           Stream<Either<ErrorItem, Map<String, dynamic>?>>.fromIterable(
         <Either<ErrorItem, Map<String, dynamic>?>>[
-          Left<ErrorItem, Map<String, dynamic>?>(
+          const Left<ErrorItem, Map<String, dynamic>?>(
             SessionErrorItems.networkUnavailable,
           ),
         ],
@@ -517,7 +517,7 @@ void main() {
         () async {
       // El gateway entrega JSON válido; onOk devuelve el mismo UserModel (identidad).
       final GatewayAuth gw = _StubGateway(
-        signIn: Right<ErrorItem, Map<String, dynamic>>(const <String, dynamic>{
+        signIn: const Right<ErrorItem, Map<String, dynamic>>(<String, dynamic>{
           'id': 'u1',
           'email': 'onok@x.com',
           'jwt': <String, dynamic>{'accessToken': 't'},
@@ -544,8 +544,8 @@ void main() {
         () async {
       final RepositoryAuth repo = RepositoryAuthImpl(
         gateway: _StubGateway(
-          recover: Right<ErrorItem, Map<String, dynamic>>(
-            const <String, dynamic>{'ok': false, 'message': 'invalid'},
+          recover: const Right<ErrorItem, Map<String, dynamic>>(
+            <String, dynamic>{'ok': false, 'message': 'invalid'},
           ),
         ),
         errorMapper: const _FakeErrorMapper(), // detecta ok:false

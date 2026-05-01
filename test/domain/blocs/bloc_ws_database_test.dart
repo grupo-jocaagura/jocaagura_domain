@@ -85,7 +85,7 @@ void main() {
 
       // Ahora simulamos error
       repo.onRead = (String id) async =>
-          Left<ErrorItem, UserModel>(DatabaseErrorItems.notFound);
+          const Left<ErrorItem, UserModel>(DatabaseErrorItems.notFound);
 
       final Either<ErrorItem, UserModel> res = await bloc.readDoc(kDoc);
       expect(res.isLeft, isTrue);
@@ -113,7 +113,7 @@ void main() {
     test('writeDoc error: setea error', () async {
       final UserModel u = makeUser();
       repo.onWrite = (String id, UserModel e) async =>
-          Left<ErrorItem, UserModel>(DatabaseErrorItems.conflict);
+          const Left<ErrorItem, UserModel>(DatabaseErrorItems.conflict);
 
       final Either<ErrorItem, UserModel> res = await bloc.writeDoc(kDoc, u);
       expect(res.isLeft, isTrue);
@@ -127,7 +127,8 @@ void main() {
       await bloc.readDoc(kDoc);
       expect(bloc.value.doc, isNotNull);
 
-      repo.onDelete = (String id) async => Right<ErrorItem, Unit>(Unit.value);
+      repo.onDelete =
+          (String id) async => const Right<ErrorItem, Unit>(Unit.value);
 
       final Either<ErrorItem, Unit> res = await bloc.deleteDoc(kDoc);
       expect(res.isRight, isTrue);
@@ -139,7 +140,7 @@ void main() {
       repo.onRead = (String id) async => Right<ErrorItem, UserModel>(u);
       await bloc.readDoc(kDoc);
 
-      repo.onExists = (String id) async => Right<ErrorItem, bool>(true);
+      repo.onExists = (String id) async => const Right<ErrorItem, bool>(true);
 
       final Either<ErrorItem, bool> res = await bloc.existsDoc(kDoc);
       expect(res.isRight, isTrue);
@@ -154,7 +155,7 @@ void main() {
       final UserModel base = makeUser();
       // read inexistente -> simulate notFound
       repo.onRead = (String _) async =>
-          Left<ErrorItem, UserModel>(DatabaseErrorItems.notFound);
+          const Left<ErrorItem, UserModel>(DatabaseErrorItems.notFound);
       repo.onWrite =
           (String _, UserModel e) async => Right<ErrorItem, UserModel>(e);
 
@@ -205,7 +206,10 @@ void main() {
       expect(bloc.value.doc, equals(u1));
 
       // Emite un Left (error)
-      repo.emit(kDoc, Left<ErrorItem, UserModel>(DatabaseErrorItems.timeout));
+      repo.emit(
+        kDoc,
+        const Left<ErrorItem, UserModel>(DatabaseErrorItems.timeout),
+      );
       await flush();
       expect(bloc.value.error, isNotNull);
       expect(bloc.value.error!.code, DatabaseErrorItems.timeout.code);

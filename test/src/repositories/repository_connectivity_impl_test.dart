@@ -33,24 +33,24 @@ class _StubGatewayPayloadError implements GatewayConnectivity {
   final ConnectivityModel _curr;
   @override
   Future<Either<ErrorItem, Map<String, dynamic>>> snapshot() async =>
-      Right<ErrorItem, Map<String, dynamic>>(const <String, dynamic>{
+      const Right<ErrorItem, Map<String, dynamic>>(<String, dynamic>{
         'error': <String, String>{'code': 'MY_ERR', 'message': 'bad'},
       });
   @override
   Stream<Either<ErrorItem, Map<String, dynamic>>> watch() async* {
-    yield Right<ErrorItem, Map<String, dynamic>>(const <String, dynamic>{
+    yield const Right<ErrorItem, Map<String, dynamic>>(<String, dynamic>{
       'error': <String, String>{'code': 'MY_ERR', 'message': 'bad'},
     });
   }
 
   @override
   Future<Either<ErrorItem, Map<String, dynamic>>> checkType() async =>
-      Right<ErrorItem, Map<String, dynamic>>(const <String, dynamic>{
+      const Right<ErrorItem, Map<String, dynamic>>(<String, dynamic>{
         'error': <String, String>{'code': 'MY_ERR', 'message': 'bad'},
       });
   @override
   Future<Either<ErrorItem, Map<String, dynamic>>> checkSpeed() async =>
-      Right<ErrorItem, Map<String, dynamic>>(const <String, dynamic>{
+      const Right<ErrorItem, Map<String, dynamic>>(<String, dynamic>{
         'error': <String, String>{'code': 'MY_ERR', 'message': 'bad'},
       });
   @override

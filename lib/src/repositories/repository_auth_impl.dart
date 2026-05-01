@@ -89,7 +89,7 @@ class RepositoryAuthImpl implements RepositoryAuth {
     if (pe != null) {
       return Left<ErrorItem, void>(pe);
     }
-    return Right<ErrorItem, void>(null);
+    return const Right<ErrorItem, void>(null);
   }
 
   @override
@@ -244,7 +244,7 @@ class RepositoryAuthImpl implements RepositoryAuth {
         (ErrorItem err) async => Left<ErrorItem, UserModel?>(err),
         (Map<String, dynamic>? json) async {
           if (json == null) {
-            return Right<ErrorItem, UserModel?>(null);
+            return const Right<ErrorItem, UserModel?>(null);
           }
           final ErrorItem? pe = _err.fromPayload(
             json,

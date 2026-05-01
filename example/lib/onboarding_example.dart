@@ -74,7 +74,7 @@ class _OnboardingSquareAreaValidationPageState
         title: 'Ingresa el lado',
         description:
             'Ingresa un número mayor que 0 y como máximo 100, luego confirma.',
-        onEnter: () async => Right<ErrorItem, Unit>(Unit.value),
+        onEnter: () async => const Right<ErrorItem, Unit>(Unit.value),
       ),
       OnboardingStep(
         title: 'Validación',
@@ -85,8 +85,8 @@ class _OnboardingSquareAreaValidationPageState
           final double? s = side;
           // Reglas intencionalmente estrictas para demostrar manejo de errores:
           if (s == null || s <= 0) {
-            return Left<ErrorItem, Unit>(
-              const ErrorItem(
+            return const Left<ErrorItem, Unit>(
+              ErrorItem(
                 title: 'Lado inválido',
                 code: 'ERR_SIDE_NON_POSITIVE',
                 description: 'El lado debe ser mayor que 0.',
@@ -95,8 +95,8 @@ class _OnboardingSquareAreaValidationPageState
             );
           }
           if (s > 100) {
-            return Left<ErrorItem, Unit>(
-              const ErrorItem(
+            return const Left<ErrorItem, Unit>(
+              ErrorItem(
                 title: 'Lado demasiado grande',
                 code: 'ERR_SIDE_TOO_BIG',
                 description: 'El lado no puede ser mayor que 100.',
@@ -105,7 +105,7 @@ class _OnboardingSquareAreaValidationPageState
             );
           }
           // Éxito → Right
-          return Right<ErrorItem, Unit>(Unit.value);
+          return const Right<ErrorItem, Unit>(Unit.value);
         },
         // Si la validación fue exitosa, auto-avanzamos a "Resultado"
         autoAdvanceAfter: const Duration(milliseconds: 800),
@@ -113,7 +113,7 @@ class _OnboardingSquareAreaValidationPageState
       OnboardingStep(
         title: 'Resultado',
         description: 'Mostramos el área calculada y puedes finalizar.',
-        onEnter: () async => Right<ErrorItem, Unit>(Unit.value),
+        onEnter: () async => const Right<ErrorItem, Unit>(Unit.value),
       ),
       const OnboardingStep(
         title: 'Final',

@@ -13,7 +13,7 @@ FutureOr<Either<ErrorItem, Unit>> Function() onEnterSuccess({
     if (delay > Duration.zero) {
       await Future<void>.delayed(delay);
     }
-    return Right<ErrorItem, Unit>(Unit.value);
+    return const Right<ErrorItem, Unit>(Unit.value);
   };
 }
 
@@ -296,7 +296,7 @@ void main() {
         if (mode == 'throw') {
           throw const FormatException('fail first');
         }
-        return Right<ErrorItem, Unit>(Unit.value);
+        return const Right<ErrorItem, Unit>(Unit.value);
       }
 
       bloc.configure(<OnboardingStep>[

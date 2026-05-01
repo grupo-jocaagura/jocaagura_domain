@@ -94,23 +94,23 @@ class _RepoFake implements RepositoryAuth {
 
   @override
   Future<Either<ErrorItem, void>> recoverPassword(String email) async {
-    return recoverResp ?? Right<ErrorItem, void>(null);
+    return recoverResp ?? const Right<ErrorItem, void>(null);
   }
 
   @override
   Future<Either<ErrorItem, void>> logOutUser(UserModel user) async {
-    return logoutResp ?? Right<ErrorItem, void>(null);
+    return logoutResp ?? const Right<ErrorItem, void>(null);
   }
 
   @override
   Future<Either<ErrorItem, UserModel>> getCurrentUser() async {
     return currentResp ??
-        Left<ErrorItem, UserModel>(SessionErrorItems.notSignedIn);
+        const Left<ErrorItem, UserModel>(SessionErrorItems.notSignedIn);
   }
 
   @override
   Future<Either<ErrorItem, bool>> isSignedIn() async {
-    return isSignedInResp ?? Right<ErrorItem, bool>(true);
+    return isSignedInResp ?? const Right<ErrorItem, bool>(true);
   }
 
   @override
@@ -138,7 +138,7 @@ void main() {
       await session.boot();
 
       // 1) signed-out
-      repo.addAuth(Right<ErrorItem, UserModel?>(null));
+      repo.addAuth(const Right<ErrorItem, UserModel?>(null));
       await Future<void>.delayed(const Duration(milliseconds: 1));
 
       // 2) signed-in
@@ -147,7 +147,7 @@ void main() {
 
       // 3) error
       repo.addAuth(
-        Left<ErrorItem, UserModel?>(SessionErrorItems.networkUnavailable),
+        const Left<ErrorItem, UserModel?>(SessionErrorItems.networkUnavailable),
       );
       await Future<void>.delayed(const Duration(milliseconds: 1));
 

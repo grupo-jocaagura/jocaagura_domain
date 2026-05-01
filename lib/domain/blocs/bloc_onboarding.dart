@@ -348,7 +348,7 @@ class BlocOnboarding extends BlocModule {
       Either<ErrorItem, Unit> result;
       try {
         result =
-            await (step.onEnter?.call() ?? Right<ErrorItem, Unit>(Unit.value));
+            await (step.onEnter?.call() ?? const Right<ErrorItem, Unit>(Unit.value));
       } catch (e, s) {
         if (isDisposed ||
             epochAtCall != epoch ||

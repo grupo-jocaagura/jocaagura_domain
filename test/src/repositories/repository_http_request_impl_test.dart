@@ -213,7 +213,7 @@ void main() {
 
         final _FakeGatewayHttpRequest fakeGateway = _FakeGatewayHttpRequest()
           ..forcedGetResult =
-              Left<ErrorItem, Map<String, dynamic>>(gatewayError);
+              const Left<ErrorItem, Map<String, dynamic>>(gatewayError);
 
         final RepositoryHttpRequestImpl repository =
             RepositoryHttpRequestImpl(fakeGateway);
@@ -309,7 +309,7 @@ void main() {
 
         final _FakeGatewayHttpRequest fakeGateway = _FakeGatewayHttpRequest()
           ..forcedPostResult =
-              Left<ErrorItem, Map<String, dynamic>>(gatewayError);
+              const Left<ErrorItem, Map<String, dynamic>>(gatewayError);
 
         final RepositoryHttpRequestImpl repository =
             RepositoryHttpRequestImpl(fakeGateway);
@@ -426,7 +426,7 @@ void main() {
 
         final _FakeGatewayHttpRequest fakeGateway = _FakeGatewayHttpRequest()
           ..forcedPutResult =
-              Left<ErrorItem, Map<String, dynamic>>(gatewayError);
+              const Left<ErrorItem, Map<String, dynamic>>(gatewayError);
 
         final RepositoryHttpRequestImpl repository =
             RepositoryHttpRequestImpl(fakeGateway);
@@ -510,7 +510,7 @@ void main() {
 
         final _FakeGatewayHttpRequest fakeGateway = _FakeGatewayHttpRequest()
           ..forcedDeleteResult =
-              Left<ErrorItem, Map<String, dynamic>>(gatewayError);
+              const Left<ErrorItem, Map<String, dynamic>>(gatewayError);
 
         final RepositoryHttpRequestImpl repository =
             RepositoryHttpRequestImpl(fakeGateway);

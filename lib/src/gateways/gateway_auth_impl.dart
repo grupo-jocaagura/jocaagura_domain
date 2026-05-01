@@ -172,7 +172,7 @@ class GatewayAuthImpl implements GatewayAuth {
     try {
       await for (final Map<String, dynamic>? e in _service.authStateChanges()) {
         if (e == null) {
-          yield Right<ErrorItem, Map<String, dynamic>?>(null);
+          yield const Right<ErrorItem, Map<String, dynamic>?>(null);
           continue;
         }
         final ErrorItem? pe =
