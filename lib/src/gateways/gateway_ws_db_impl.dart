@@ -330,7 +330,9 @@ class GatewayWsDbImpl implements GatewayWsDatabase {
       return Left<ErrorItem, Map<String, dynamic>>(payloadErr);
     }
     if (_treatEmptyAsMissing && json.isEmpty) {
-      return const Left<ErrorItem, Map<String, dynamic>>(DatabaseErrorItems.notFound);
+      return const Left<ErrorItem, Map<String, dynamic>>(
+        DatabaseErrorItems.notFound,
+      );
     }
     return Right<ErrorItem, Map<String, dynamic>>(_withId(docId, json));
   }
