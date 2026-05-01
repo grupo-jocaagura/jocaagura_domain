@@ -12,7 +12,7 @@ Future<Either<ErrorItem, Unit>> activateStep(OnboardingStep step) async {
     if (step.autoAdvanceAfter != null) {
       await Future<void>.delayed(step.autoAdvanceAfter!);
     }
-    return Right<ErrorItem, Unit>(unit);
+    return const Right<ErrorItem, Unit>(unit);
   }
 
   final Either<ErrorItem, Unit> result = await step.onEnter!();
@@ -50,7 +50,7 @@ void main() {
       final OnboardingStep step = OnboardingStep(
         title: 'Permisos',
         autoAdvanceAfter: delay,
-        onEnter: () async => Right<ErrorItem, Unit>(unit),
+        onEnter: () async => const Right<ErrorItem, Unit>(unit),
       );
 
       // Act + Assert (no medimos el tiempo exacto, solo que no falla y es Right)
@@ -68,8 +68,8 @@ void main() {
         autoAdvanceAfter: const Duration(milliseconds: 20),
         onEnter: () {
           tick++; // Se ejecuta una vez
-          return Left<ErrorItem, Unit>(
-            const ErrorItem(
+          return const Left<ErrorItem, Unit>(
+            ErrorItem(
               code: 'VALIDATION_FAIL',
               title: 'Datos inválidos',
               description: 'Datos inválidos',
@@ -127,7 +127,7 @@ void main() {
       final OnboardingStep step = OnboardingStep(
         title: 'Sincronización',
         autoAdvanceAfter: delay,
-        onEnter: () async => Right<ErrorItem, Unit>(unit),
+        onEnter: () async => const Right<ErrorItem, Unit>(unit),
       );
 
       // Act

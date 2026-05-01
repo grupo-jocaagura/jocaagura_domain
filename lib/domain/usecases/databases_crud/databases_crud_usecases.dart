@@ -356,11 +356,11 @@ class ExistsDocUseCase<T extends Model>
     final Either<ErrorItem, T> r = await _repo.read(params.docId);
     return r.fold((ErrorItem err) {
       if (err.code == DatabaseErrorItems.notFound.code) {
-        return Right<ErrorItem, bool>(false);
+        return const Right<ErrorItem, bool>(false);
       }
       return Left<ErrorItem, bool>(err);
     }, (_) {
-      return Right<ErrorItem, bool>(true);
+      return const Right<ErrorItem, bool>(true);
     });
   }
 }
@@ -848,7 +848,7 @@ class DetachWatchUseCase<T extends Model>
   Future<Either<ErrorItem, Unit>> call(DeleteParams params) async {
     try {
       _repo.detachWatch(params.docId);
-      return Right<ErrorItem, Unit>(Unit.value);
+      return const Right<ErrorItem, Unit>(Unit.value);
     } catch (e, s) {
       return Left<ErrorItem, Unit>(
         const DefaultErrorMapper().fromException(
@@ -886,7 +886,7 @@ class ReleaseDocUseCase<T extends Model>
   Future<Either<ErrorItem, Unit>> call(DeleteParams params) async {
     try {
       _repo.releaseDoc(params.docId);
-      return Right<ErrorItem, Unit>(Unit.value);
+      return const Right<ErrorItem, Unit>(Unit.value);
     } catch (e, s) {
       return Left<ErrorItem, Unit>(
         const DefaultErrorMapper().fromException(
@@ -929,7 +929,7 @@ class DisposeWsDatabaseUseCase<T extends Model>
   Future<Either<ErrorItem, Unit>> call(NoParams params) async {
     try {
       _repo.dispose();
-      return Right<ErrorItem, Unit>(Unit.value);
+      return const Right<ErrorItem, Unit>(Unit.value);
     } catch (e, s) {
       return Left<ErrorItem, Unit>(
         const DefaultErrorMapper().fromException(

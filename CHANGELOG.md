@@ -4,6 +4,31 @@ This document follows the guidelines of [Keep a Changelog](https://keepachangelo
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 Recent entries aim to follow a normalized structure. Older historical entries may preserve some original headings where reclassification would risk changing the original intent.
+## [1.40.0] - 2026-05-01
+
+### Changed
+- Added a `const` constructor to the `Either` base class and to its concrete variants:
+  - `Left`
+  - `Right`
+- Enabled compile-time constant creation for `Either` values when the contained value is also constant.
+- Applied the resulting linter-driven `const` updates across the package.
+
+### Quality
+- Completed 189 minor `prefer_const_constructors` updates suggested by the linter.
+- Verified that the package remains stable after the const migration.
+
+### Migration note
+- This change is backward compatible.
+- Consumers using strict lint rules may now receive additional `prefer_const_constructors` suggestions where `Left` or `Right` instances can be declared as `const`.
+- No behavioral changes were introduced for `when`, `fold`, `isLeft`, `isRight`, equality, `hashCode`, or `toString`.
+
+## [1.39.5] - 2026-05-01
+
+### Changed
+- Added a `const` constructor to `Either`, `Left`, and `Right` to support compile-time constant values.
+
+### Migration note
+- This change is backward compatible. However, projects using strict lint rules may now receive `prefer_const_constructors` suggestions where `Left` or `Right` values can be declared as `const`.
 
 ## [1.39.4] - 2026-04-01
 

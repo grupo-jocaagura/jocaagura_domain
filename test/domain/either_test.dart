@@ -5,7 +5,7 @@ void main() {
   group('Either', () {
     // Test for Left
     test('Left should return correct value and type', () {
-      final Left<int, String> left = Left<int, String>(42);
+      const Left<int, String> left = Left<int, String>(42);
 
       expect(left.isLeft, true);
       expect(left.isRight, false);
@@ -21,8 +21,8 @@ void main() {
 
     // Test for Right
     test('Right should return correct value and type', () {
-      final Right<int, String> right = Right<int, String>('hello');
-      final Right<int, String> right2 = Right<int, String>('hello');
+      const Right<int, String> right = Right<int, String>('hello');
+      const Right<int, String> right2 = Right<int, String>('hello');
 
       expect(right.isLeft, false);
       expect(right.isRight, true);
@@ -39,9 +39,9 @@ void main() {
 
     // Test for when method
     test('Either.when should execute correct function', () {
-      final Left<int, String> left = Left<int, String>(42);
-      final Left<int, String> left2 = Left<int, String>(42);
-      final Right<int, String> right = Right<int, String>('hello');
+      const Left<int, String> left = Left<int, String>(42);
+      const Left<int, String> left2 = Left<int, String>(42);
+      const Right<int, String> right = Right<int, String>('hello');
       expect(left2 == left, true);
 
       expect(

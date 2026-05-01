@@ -22,11 +22,11 @@ class _RepoFake implements RepositoryAuth {
 
   @override
   Future<Either<ErrorItem, UserModel>> getCurrentUser() async =>
-      Left<ErrorItem, UserModel>(SessionErrorItems.notSignedIn);
+      const Left<ErrorItem, UserModel>(SessionErrorItems.notSignedIn);
 
   @override
   Future<Either<ErrorItem, bool>> isSignedIn() async =>
-      Right<ErrorItem, bool>(false);
+      const Right<ErrorItem, bool>(false);
 
   @override
   Future<Either<ErrorItem, UserModel>> logInSilently(
@@ -53,11 +53,11 @@ class _RepoFake implements RepositoryAuth {
 
   @override
   Future<Either<ErrorItem, void>> logOutUser(UserModel user) async =>
-      Right<ErrorItem, UserModel>(defaultUserModel);
+      const Right<ErrorItem, UserModel>(defaultUserModel);
 
   @override
   Future<Either<ErrorItem, void>> recoverPassword(String email) async =>
-      Right<ErrorItem, UserModel>(defaultUserModel);
+      const Right<ErrorItem, UserModel>(defaultUserModel);
 
   @override
   Future<Either<ErrorItem, UserModel>> refreshSession(
@@ -119,7 +119,7 @@ void main() {
       await session.boot();
 
       // 1) signed-out
-      repo.addAuth(Right<ErrorItem, UserModel?>(null));
+      repo.addAuth(const Right<ErrorItem, UserModel?>(null));
       await Future<void>.delayed(const Duration(milliseconds: 1));
 
       // 2) signed-in
@@ -128,7 +128,7 @@ void main() {
 
       // 3) error
       repo.addAuth(
-        Left<ErrorItem, UserModel?>(SessionErrorItems.networkUnavailable),
+        const Left<ErrorItem, UserModel?>(SessionErrorItems.networkUnavailable),
       );
       await Future<void>.delayed(const Duration(milliseconds: 1));
 
@@ -157,7 +157,7 @@ void main() {
       await session.boot();
 
       // Primera emisión: debería incrementar
-      repo.addAuth(Right<ErrorItem, UserModel?>(null));
+      repo.addAuth(const Right<ErrorItem, UserModel?>(null));
       await Future<void>.delayed(const Duration(milliseconds: 1));
       expect(calls, greaterThanOrEqualTo(1));
 
@@ -203,7 +203,7 @@ void main() {
       session.addFunctionToProcessTValueOnStream('dup', (_) => a++);
       await session.boot();
 
-      repo.addAuth(Right<ErrorItem, UserModel?>(null));
+      repo.addAuth(const Right<ErrorItem, UserModel?>(null));
       await Future<void>.delayed(const Duration(milliseconds: 1));
       expect(a, greaterThanOrEqualTo(1));
       expect(b, 0);
@@ -218,7 +218,9 @@ void main() {
       final int aAfter = a;
       expect(b, greaterThanOrEqualTo(1));
 
-      repo.addAuth(Left<ErrorItem, UserModel?>(SessionErrorItems.timeout));
+      repo.addAuth(
+        const Left<ErrorItem, UserModel?>(SessionErrorItems.timeout),
+      );
       await Future<void>.delayed(const Duration(milliseconds: 1));
       expect(a, aAfter); // a no cambió
 

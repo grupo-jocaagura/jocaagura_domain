@@ -264,7 +264,7 @@ class _OnboardingSquareAreaValidationPageState
         title: 'Ingresa el lado',
         description:
             'Ingresa un número mayor que 0 y como máximo 100, luego confirma.',
-        onEnter: () async => Right<ErrorItem, Unit>(Unit.value),
+        onEnter: () async => const Right<ErrorItem, Unit>(Unit.value),
       ),
       OnboardingStep(
         title: 'Validación',
@@ -272,8 +272,8 @@ class _OnboardingSquareAreaValidationPageState
         onEnter: () async {
           final double? s = side;
           if (s == null || s <= 0) {
-            return Left<ErrorItem, Unit>(
-              const ErrorItem(
+            return const Left<ErrorItem, Unit>(
+              ErrorItem(
                 title: 'Lado inválido',
                 code: 'ERR_SIDE_NON_POSITIVE',
                 description: 'El lado debe ser mayor que 0.',
@@ -282,8 +282,8 @@ class _OnboardingSquareAreaValidationPageState
             );
           }
           if (s > 100) {
-            return Left<ErrorItem, Unit>(
-              const ErrorItem(
+            return const Left<ErrorItem, Unit>(
+              ErrorItem(
                 title: 'Lado demasiado grande',
                 code: 'ERR_SIDE_TOO_BIG',
                 description: 'El lado no puede ser mayor que 100.',
@@ -291,14 +291,14 @@ class _OnboardingSquareAreaValidationPageState
               ),
             );
           }
-          return Right<ErrorItem, Unit>(Unit.value);
+          return const Right<ErrorItem, Unit>(Unit.value);
         },
         autoAdvanceAfter: const Duration(milliseconds: 800),
       ),
       OnboardingStep(
         title: 'Resultado',
         description: 'Mostramos el área calculada y puedes finalizar.',
-        onEnter: () async => Right<ErrorItem, Unit>(Unit.value),
+        onEnter: () async => const Right<ErrorItem, Unit>(Unit.value),
       ),
       const OnboardingStep(
         title: 'Final',
@@ -680,7 +680,7 @@ class _BlocOnboardingDemoPageState extends State<BlocOnboardingDemoPage> {
         onEnter: () async {
           _logMsg('onEnter: Welcome (step 1)');
           await Future<void>.delayed(const Duration(milliseconds: 120));
-          return Right<ErrorItem, Unit>(Unit.value);
+          return const Right<ErrorItem, Unit>(Unit.value);
         },
         autoAdvanceAfter: const Duration(milliseconds: 900),
       ),
@@ -694,15 +694,15 @@ class _BlocOnboardingDemoPageState extends State<BlocOnboardingDemoPage> {
             throw StateError('Simulated thrown exception in step 2');
           }
           if (_failStep2AsLeft) {
-            return Left<ErrorItem, Unit>(
-              const ErrorItem(
+            return const Left<ErrorItem, Unit>(
+              ErrorItem(
                 title: 'Permissions required',
                 code: 'PERM_DENIED',
                 description: 'User denied permissions (simulated Left)',
               ),
             );
           }
-          return Right<ErrorItem, Unit>(Unit.value);
+          return const Right<ErrorItem, Unit>(Unit.value);
         },
         autoAdvanceAfter: const Duration(milliseconds: 900),
       ),
@@ -712,7 +712,7 @@ class _BlocOnboardingDemoPageState extends State<BlocOnboardingDemoPage> {
         onEnter: () async {
           _logMsg('onEnter: Finish (step 3)');
           await Future<void>.delayed(const Duration(milliseconds: 100));
-          return Right<ErrorItem, Unit>(Unit.value);
+          return const Right<ErrorItem, Unit>(Unit.value);
         },
       ),
     ]);

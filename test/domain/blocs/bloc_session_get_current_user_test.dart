@@ -28,8 +28,8 @@ class FakeRepositoryAuth implements RepositoryAuth {
 
   @override
   Future<Either<ErrorItem, UserModel>> logInSilently(UserModel user) async =>
-      Left<ErrorItem, UserModel>(
-        const ErrorItem(title: 'stub', code: 'STUB', description: ''),
+      const Left<ErrorItem, UserModel>(
+        ErrorItem(title: 'stub', code: 'STUB', description: ''),
       );
 
   @override
@@ -37,34 +37,34 @@ class FakeRepositoryAuth implements RepositoryAuth {
     String email,
     String password,
   ) async =>
-      Left<ErrorItem, UserModel>(
-        const ErrorItem(title: 'stub', code: 'STUB', description: ''),
+      const Left<ErrorItem, UserModel>(
+        ErrorItem(title: 'stub', code: 'STUB', description: ''),
       );
 
   @override
   Future<Either<ErrorItem, UserModel>> logInWithGoogle() async =>
-      Left<ErrorItem, UserModel>(
-        const ErrorItem(title: 'stub', code: 'STUB', description: ''),
+      const Left<ErrorItem, UserModel>(
+        ErrorItem(title: 'stub', code: 'STUB', description: ''),
       );
 
   @override
   Future<Either<ErrorItem, void>> logOutUser(UserModel user) async =>
-      Left<ErrorItem, UserModel>(
-        const ErrorItem(title: 'stub', code: 'STUB', description: ''),
+      const Left<ErrorItem, UserModel>(
+        ErrorItem(title: 'stub', code: 'STUB', description: ''),
       );
 
   @override
   Future<Either<ErrorItem, void>> recoverPassword(String email) async =>
-      Left<ErrorItem, UserModel>(
-        const ErrorItem(title: 'stub', code: 'STUB', description: ''),
+      const Left<ErrorItem, UserModel>(
+        ErrorItem(title: 'stub', code: 'STUB', description: ''),
       );
 
   @override
   Future<Either<ErrorItem, UserModel>> refreshSession(
     UserModel currentUser,
   ) async =>
-      Left<ErrorItem, UserModel>(
-        const ErrorItem(title: 'stub', code: 'STUB', description: ''),
+      const Left<ErrorItem, UserModel>(
+        ErrorItem(title: 'stub', code: 'STUB', description: ''),
       );
 
   void dispose() {
@@ -116,7 +116,7 @@ void main() {
 
       repo = FakeRepositoryAuth(
         getCurrentUserBehavior: () async =>
-            Right<ErrorItem, UserModel>(expected),
+            const Right<ErrorItem, UserModel>(expected),
       );
       bloc = BlocSession.fromRepository(repository: repo);
 
@@ -157,7 +157,7 @@ void main() {
 
       repo = FakeRepositoryAuth(
         getCurrentUserBehavior: () async =>
-            Left<ErrorItem, UserModel>(expectedErr),
+            const Left<ErrorItem, UserModel>(expectedErr),
       );
       bloc = BlocSession.fromRepository(repository: repo);
 
@@ -195,8 +195,8 @@ void main() {
         'Then throws StateError', () async {
       // Arrange
       repo = FakeRepositoryAuth(
-        getCurrentUserBehavior: () async => Right<ErrorItem, UserModel>(
-          const UserModel(
+        getCurrentUserBehavior: () async => const Right<ErrorItem, UserModel>(
+          UserModel(
             id: 'u1',
             email: 'user@mail.com',
             displayName: 'user',
@@ -228,7 +228,7 @@ void main() {
       repo = FakeRepositoryAuth(
         getCurrentUserBehavior: () async {
           await Future<void>.delayed(const Duration(milliseconds: 50));
-          return Right<ErrorItem, UserModel>(expected);
+          return const Right<ErrorItem, UserModel>(expected);
         },
       );
       bloc = BlocSession.fromRepository(repository: repo);
@@ -255,7 +255,7 @@ void main() {
       repo = FakeRepositoryAuth(
         getCurrentUserBehavior: () async {
           await Future<void>.delayed(const Duration(milliseconds: 50));
-          return Right<ErrorItem, UserModel>(expected);
+          return const Right<ErrorItem, UserModel>(expected);
         },
       );
       bloc = BlocSession.fromRepository(repository: repo);

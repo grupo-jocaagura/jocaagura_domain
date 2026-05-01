@@ -1,32 +1,41 @@
 part of '../jocaagura_domain.dart';
 
-/// An abstract class representing an `Either` type, which can hold a value of
-/// one of two types: [L] or [R].
+/// Represents a value that can be either [Left] or [Right].
 ///
-/// This is commonly used to represent operations that can either succeed with
-/// a value of type [R] or fail with a value of type [L].
+/// Use [Left] to represent a failure or alternative value, and [Right] to
+/// represent a successful value.
 ///
-/// Example usage:
-///
+/// Functional example:
 /// ```dart
-/// Either<String, int> divide(int a, int b) {
-///   if (b == 0) {
-///     return Left('Division by zero');
-///   } else {
-///     return Right(a ~/ b);
+/// Either<String, int> divide(int dividend, int divisor) {
+///   if (divisor == 0) {
+///     return const Left<String, int>('Division by zero');
 ///   }
+///
+///   return Right<String, int>(dividend ~/ divisor);
 /// }
 ///
 /// void main() {
-///   final result = divide(10, 0);
-///   result.when(
-///     (error) => print('Error: $error'),
-///     (value) => print('Result: $value'),
+///   final Either<String, int> result = divide(10, 2);
+///
+///   final String message = result.when<String>(
+///     (String error) => 'Error: $error',
+///     (int value) => 'Result: $value',
 ///   );
+///
+///   print(message);
 /// }
 /// ```
+///
+/// Contract:
+/// - [Left] contains a value of type [L].
+/// - [Right] contains a value of type [R].
+/// - [when] and [fold] execute only the callback matching the current variant.
 @immutable
 abstract class Either<L, R> {
+  /// Creates an immutable [Either] value.
+  const Either();
+
   /// Executes one of the provided functions depending on the value type.
   ///
   /// If the value is a [Left], the [left] function is executed with the value
@@ -64,7 +73,7 @@ abstract class Either<L, R> {
 /// Represents a value of type [L] in the [Either] type.
 class Left<L, R> extends Either<L, R> {
   /// Constructs a [Left] object containing a value of type [L].
-  Left(this.value);
+  const Left(this.value);
 
   /// The value of type [L].
   final L value;
@@ -86,7 +95,7 @@ class Left<L, R> extends Either<L, R> {
 /// Represents a value of type [R] in the [Either] type.
 class Right<L, R> extends Either<L, R> {
   /// Constructs a [Right] object containing a value of type [R].
-  Right(this.value);
+  const Right(this.value);
 
   /// The value of type [R].
   final R value;
