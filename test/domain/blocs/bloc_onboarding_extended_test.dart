@@ -66,7 +66,7 @@ void main() {
         onEnter: () async {
           // Simular trabajo asíncrono rápido
           await Future<void>.delayed(const Duration(milliseconds: 5));
-          return Right<ErrorItem, Unit>(Unit.value);
+          return const Right<ErrorItem, Unit>(Unit.value);
         },
       );
       const OnboardingStep step2 = OnboardingStep(title: 'next');
@@ -91,8 +91,8 @@ void main() {
         title: 'fail',
         autoAdvanceAfter: const Duration(milliseconds: 20),
         onEnter: () async {
-          return Left<ErrorItem, Unit>(
-            const ErrorItem(
+          return const Left<ErrorItem, Unit>(
+            ErrorItem(
               title: 'X',
               code: 'ERR',
               description: 'boom',
@@ -158,15 +158,15 @@ void main() {
         onEnter: () async {
           attempts++;
           if (attempts == 1) {
-            return Left<ErrorItem, Unit>(
-              const ErrorItem(
+            return const Left<ErrorItem, Unit>(
+              ErrorItem(
                 title: 'F',
                 code: 'E1',
                 description: 'first',
               ),
             );
           }
-          return Right<ErrorItem, Unit>(Unit.value);
+          return const Right<ErrorItem, Unit>(Unit.value);
         },
         autoAdvanceAfter: const Duration(milliseconds: 20),
       );
@@ -196,8 +196,8 @@ void main() {
       // Arrange
       final OnboardingStep step = OnboardingStep(
         title: 'fail',
-        onEnter: () async => Left<ErrorItem, Unit>(
-          const ErrorItem(
+        onEnter: () async => const Left<ErrorItem, Unit>(
+          ErrorItem(
             title: 'X',
             code: 'ERR',
             description: 'boom',
@@ -293,8 +293,8 @@ void main() {
         title: 'slow-fail',
         onEnter: () async {
           await Future<void>.delayed(const Duration(milliseconds: 60));
-          return Left<ErrorItem, Unit>(
-            const ErrorItem(
+          return const Left<ErrorItem, Unit>(
+            ErrorItem(
               title: 'late',
               code: 'LATE',
               description: 'arrived too late',
@@ -304,7 +304,7 @@ void main() {
       );
       final OnboardingStep ok = OnboardingStep(
         title: 'ok',
-        onEnter: () async => Right<ErrorItem, Unit>(Unit.value),
+        onEnter: () async => const Right<ErrorItem, Unit>(Unit.value),
       );
       bloc.configure(<OnboardingStep>[slowFail, ok]);
 
@@ -335,8 +335,8 @@ void main() {
       // Arrange
       final OnboardingStep fail = OnboardingStep(
         title: 'fail',
-        onEnter: () async => Left<ErrorItem, Unit>(
-          const ErrorItem(
+        onEnter: () async => const Left<ErrorItem, Unit>(
+          ErrorItem(
             title: 'boom',
             code: 'ERR',
             description: 'x',
@@ -364,8 +364,8 @@ void main() {
       // Arrange
       final OnboardingStep fail = OnboardingStep(
         title: 'fail',
-        onEnter: () async => Left<ErrorItem, Unit>(
-          const ErrorItem(
+        onEnter: () async => const Left<ErrorItem, Unit>(
+          ErrorItem(
             title: 'boom',
             code: 'ERR',
             description: 'x',
@@ -397,7 +397,7 @@ void main() {
       final OnboardingStep s0 = OnboardingStep(
         title: 'auto',
         autoAdvanceAfter: const Duration(milliseconds: 60),
-        onEnter: () async => Right<ErrorItem, Unit>(Unit.value),
+        onEnter: () async => const Right<ErrorItem, Unit>(Unit.value),
       );
       const OnboardingStep s1 = OnboardingStep(title: 'next');
       bloc.configure(<OnboardingStep>[s0, s1]);
@@ -482,7 +482,7 @@ void main() {
           title: 'A',
           onEnter: () async {
             await Future<void>.delayed(const Duration(milliseconds: 10));
-            return Right<ErrorItem, Unit>(Unit.value);
+            return const Right<ErrorItem, Unit>(Unit.value);
           },
           autoAdvanceAfter: const Duration(milliseconds: 40),
         );
@@ -521,7 +521,7 @@ void main() {
         // Arrange
         final OnboardingStep a = OnboardingStep(
           title: 'A',
-          onEnter: () async => Right<ErrorItem, Unit>(Unit.value),
+          onEnter: () async => const Right<ErrorItem, Unit>(Unit.value),
           autoAdvanceAfter: const Duration(milliseconds: 40),
         );
         const OnboardingStep b = OnboardingStep(title: 'B');

@@ -1,0 +1,93 @@
+{
+  "useMaterial3": true,
+  "lightScheme": {
+    "brightness": "light",
+    "primary": 4283215696,
+    "onPrimary": 4294967295,
+    "secondary": 4287379350,
+    "onSecondary": 4294967295,
+    "error": 4290386458,
+    "onError": 4294967295,
+    "surface": 4294966271,
+    "onSurface": 4279966491
+  },
+  "darkScheme": {
+    "brightness": "dark",
+    "primary": 4290824191,
+    "onPrimary": 4278196864,
+    "secondary": 4293517311,
+    "onSecondary": 4278196992,
+    "error": 4294948011,
+    "onError": 4281794561,
+    "surface": 4279374354,
+    "onSurface": 4293717228
+  },
+  "lightTextTheme": {
+    "headlineSmall": {
+      "fontFamily": "Lora",
+      "fontSize": 24,
+      "fontWeight": 700,
+      "letterSpacing": 0,
+      "height": 1.2,
+      "color": 4279966491
+    },
+    "titleMedium": {
+      "fontFamily": "Lora",
+      "fontSize": 18,
+      "fontWeight": 600,
+      "letterSpacing": 0,
+      "height": 1.3,
+      "color": 4279966491
+    },
+    "bodyMedium": {
+      "fontFamily": "SourceSans3",
+      "fontSize": 16,
+      "fontWeight": 400,
+      "letterSpacing": 0.15,
+      "height": 1.45,
+      "color": 4279966491
+    },
+    "labelLarge": {
+      "fontFamily": "SourceSans3",
+      "fontSize": 14,
+      "fontWeight": 600,
+      "letterSpacing": 0.1,
+      "height": 1.2,
+      "color": 4294967295
+    }
+  },
+  "darkTextTheme": {
+    "headlineSmall": {
+      "fontFamily": "Lora",
+      "fontSize": 24,
+      "fontWeight": 700,
+      "letterSpacing": 0,
+      "height": 1.2,
+      "color": 4293717228
+    },
+    "titleMedium": {
+      "fontFamily": "Lora",
+      "fontSize": 18,
+      "fontWeight": 600,
+      "letterSpacing": 0,
+      "height": 1.3,
+      "color": 4293717228
+    },
+    "bodyMedium": {
+      "fontFamily": "SourceSans3",
+      "fontSize": 16,
+      "fontWeight": 400,
+      "letterSpacing": 0.15,
+      "height": 1.45,
+      "color": 4293717228
+    },
+    "labelLarge": {
+      "fontFamily": "SourceSans3",
+      "fontSize": 14,
+      "fontWeight": 600,
+      "letterSpacing": 0.1,
+      "height": 1.2,
+      "color": 4278196864
+    }
+  }
+}

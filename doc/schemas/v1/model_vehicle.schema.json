@@ -1,0 +1,109 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://jocaagura.dev/schemas/jocaagura_domain/v1/model_vehicle.schema.json",
+  "title": "ModelVehicle",
+  "description": "Canonical JSON contract for ModelVehicle in jocaagura_domain.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Stable identifier of the vehicle."
+    },
+    "displayName": {
+      "type": "string",
+      "description": "Human-readable vehicle label."
+    },
+    "plate": {
+      "type": "string",
+      "description": "Vehicle plate or registration identifier."
+    },
+    "brand": {
+      "type": "string",
+      "description": "Manufacturer or brand."
+    },
+    "model": {
+      "type": "string",
+      "description": "Vehicle model name."
+    },
+    "year": {
+      "type": "integer",
+      "description": "Vehicle model year."
+    },
+    "description": {
+      "type": "string",
+      "description": "Additional vehicle description."
+    },
+    "isActive": {
+      "type": "boolean",
+      "description": "Whether the vehicle is currently active in the domain."
+    },
+    "vehicleCategory": {
+      "$ref": "./model_category.schema.json",
+      "description": "Primary reusable classification of the vehicle."
+    },
+    "tags": {
+      "type": "array",
+      "description": "Secondary reusable classifications for filtering and grouping.",
+      "items": {
+        "$ref": "./model_category.schema.json"
+      }
+    },
+    "attributes": {
+      "type": "object",
+      "description": "Named dictionary of extensible operational attributes.",
+      "additionalProperties": {
+        "$ref": "./attribute_model.schema.json"
+      }
+    }
+  },
+  "required": [
+    "id",
+    "displayName",
+    "plate",
+    "brand",
+    "model",
+    "year",
+    "description",
+    "isActive",
+    "vehicleCategory",
+    "tags",
+    "attributes"
+  ],
+  "examples": [
+    {
+      "id": "vehicle-001",
+      "displayName": "Van 01",
+      "plate": "ABC123",
+      "brand": "Renault",
+      "model": "Kangoo",
+      "year": 2024,
+      "description": "Urban delivery van",
+      "isActive": true,
+      "vehicleCategory": {
+        "category": "cargo-van",
+        "description": "Light cargo vehicle"
+      },
+      "tags": [
+        {
+          "category": "fleet-a",
+          "description": "Primary fleet"
+        },
+        {
+          "category": "urban-route",
+          "description": "Urban operation"
+        }
+      ],
+      "attributes": {
+        "color": {
+          "name": "color",
+          "value": "white"
+        },
+        "passengerCapacity": {
+          "name": "passengerCapacity",
+          "value": 2
+        }
+      }
+    }
+  ]
+}

@@ -8,6 +8,10 @@
 > - UseCases simples y testeables.
 > - Integración transparente con UIs Flutter (loaders, dashboards de red, etc.).
 
+Esta es la guía general del módulo HTTP. Para simulación avanzada sin red usando `VirtualCrudService`, ver [`doc/advanced-http-simulation.md`](advanced-http-simulation.md).
+
+El ejemplo principal de esta guía se apoya en [`example/lib/bloc_http_request_example.dart`](../example/lib/bloc_http_request_example.dart).
+
 ---
 
 ## 1. Visión general del flujo
@@ -664,7 +668,7 @@ class _HelperNote extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const Text(
-      'Tip: En producción, reemplaza el FakeServiceHttpRequest por tu client real.\n'
+      'Tip: En producción, reemplaza el FakeHttpRequest por tu client real.\n'
       'Este ejemplo solo muestra el flujo transversal y el rol de BlocHttpRequest.',
       textAlign: TextAlign.center,
       style: TextStyle(fontSize: 11),

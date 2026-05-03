@@ -1,0 +1,231 @@
+{
+  "schemaVersion": "1.0.0",
+  "id": "bienvenido-emotions-ds",
+  "name": "Bienvenido Emotions DS",
+  "description": "Portable design system contract for Bienvenido managed by JA-10-DS-SYSTEM.",
+  "branding": {
+    "owner": "Jocaagura",
+    "product": "Bienvenido"
+  },
+  "theme": {
+    "useMaterial3": true,
+    "lightScheme": {
+      "brightness": "light",
+      "primary": 4283215696,
+      "onPrimary": 4294967295,
+      "secondary": 4287379350,
+      "onSecondary": 4294967295,
+      "error": 4290386458,
+      "onError": 4294967295,
+      "surface": 4294966271,
+      "onSurface": 4279966491
+    },
+    "darkScheme": {
+      "brightness": "dark",
+      "primary": 4290824191,
+      "onPrimary": 4278196864,
+      "secondary": 4293517311,
+      "onSecondary": 4278196992,
+      "error": 4294948011,
+      "onError": 4281794561,
+      "surface": 4279374354,
+      "onSurface": 4293717228
+    },
+    "lightTextTheme": {
+      "headlineSmall": {
+        "fontFamily": "Lora",
+        "fontSize": 24,
+        "fontWeight": 700,
+        "letterSpacing": 0,
+        "height": 1.2,
+        "color": 4279966491
+      },
+      "titleMedium": {
+        "fontFamily": "Lora",
+        "fontSize": 18,
+        "fontWeight": 600,
+        "letterSpacing": 0,
+        "height": 1.3,
+        "color": 4279966491
+      },
+      "bodyMedium": {
+        "fontFamily": "SourceSans3",
+        "fontSize": 16,
+        "fontWeight": 400,
+        "letterSpacing": 0.15,
+        "height": 1.45,
+        "color": 4279966491
+      },
+      "labelLarge": {
+        "fontFamily": "SourceSans3",
+        "fontSize": 14,
+        "fontWeight": 600,
+        "letterSpacing": 0.1,
+        "height": 1.2,
+        "color": 4294967295
+      }
+    },
+    "darkTextTheme": {
+      "headlineSmall": {
+        "fontFamily": "Lora",
+        "fontSize": 24,
+        "fontWeight": 700,
+        "letterSpacing": 0,
+        "height": 1.2,
+        "color": 4293717228
+      },
+      "titleMedium": {
+        "fontFamily": "Lora",
+        "fontSize": 18,
+        "fontWeight": 600,
+        "letterSpacing": 0,
+        "height": 1.3,
+        "color": 4293717228
+      },
+      "bodyMedium": {
+        "fontFamily": "SourceSans3",
+        "fontSize": 16,
+        "fontWeight": 400,
+        "letterSpacing": 0.15,
+        "height": 1.45,
+        "color": 4293717228
+      },
+      "labelLarge": {
+        "fontFamily": "SourceSans3",
+        "fontSize": 14,
+        "fontWeight": 600,
+        "letterSpacing": 0.1,
+        "height": 1.2,
+        "color": 4278196864
+      }
+    }
+  },
+  "tokens": {
+    "spacing": {
+      "xxs": 2,
+      "xs": 4,
+      "sm": 8,
+      "md": 12,
+      "lg": 16,
+      "xl": 24,
+      "xxl": 32
+    },
+    "radius": {
+      "sm": 4,
+      "md": 8,
+      "lg": 12,
+      "xl": 16,
+      "full": 999
+    },
+    "elevation": {
+      "level0": 0,
+      "level1": 1,
+      "level2": 3,
+      "level3": 6,
+      "level4": 12
+    },
+    "alpha": {
+      "disabled": 0.38,
+      "muted": 0.72,
+      "scrim": 0.32
+    },
+    "durationMs": {
+      "fast": 120,
+      "normal": 240,
+      "slow": 360
+    }
+  },
+  "semantic": {
+    "light": {
+      "success": 4282049099,
+      "onSuccess": 4294967295,
+      "successContainer": 4290162688,
+      "onSuccessContainer": 4278196992,
+      "warning": 4292620288,
+      "onWarning": 4278190080,
+      "warningContainer": 4294958694,
+      "onWarningContainer": 4281273600,
+      "info": 4283215696,
+      "onInfo": 4294967295,
+      "infoContainer": 4290824191,
+      "onInfoContainer": 4278196864
+    },
+    "dark": {
+      "success": 4288800885,
+      "onSuccess": 4278196992,
+      "successContainer": 4278207680,
+      "onSuccessContainer": 4290162688,
+      "warning": 4294948011,
+      "onWarning": 4281273600,
+      "warningContainer": 4283784192,
+      "onWarningContainer": 4294958694,
+      "info": 4290824191,
+      "onInfo": 4278196864,
+      "infoContainer": 4278205440,
+      "onInfoContainer": 4291871487
+    }
+  },
+  "dataViz": {
+    "categorical": [
+      4283215696,
+      4287379350,
+      4292620288,
+      4282049099,
+      4286141768
+    ],
+    "sequential": [
+      4294638847,
+      4291933439,
+      4287379350,
+      4283215696
+    ]
+  },
+  "componentCatalog": [
+    {
+      "id": "button-filled",
+      "name": "FilledButton",
+      "description": "Primary call-to-action button with a high-emphasis filled surface.",
+      "tags": [
+        "action",
+        "button",
+        "cta"
+      ],
+      "status": "active",
+      "platforms": [
+        "mobile",
+        "web"
+      ],
+      "previews": [
+        "https://design.jocaagura.dev/components/button-filled/preview.png"
+      ],
+      "links": [
+        {
+          "label": "Figma specification",
+          "url": "https://design.jocaagura.dev/components/button-filled/spec"
+        }
+      ],
+      "slots": [
+        {
+          "id": "container",
+          "name": "Container",
+          "description": "Clickable filled surface that defines the shape and background."
+        },
+        {
+          "id": "label",
+          "name": "Label",
+          "description": "Primary text content of the button."
+        },
+        {
+          "id": "leadingIcon",
+          "name": "Leading icon",
+          "description": "Optional leading decorative or semantic icon."
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "createdAt": "2026-03-30T10:00:00.000Z",
+    "updatedAt": "2026-03-30T10:00:00.000Z",
+    "status": "active"
+  }
+}

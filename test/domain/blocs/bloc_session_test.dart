@@ -53,7 +53,7 @@ void main() {
 
       await bloc.boot();
 
-      repo.emitAuth(Right<ErrorItem, UserModel?>(null));
+      repo.emitAuth(const Right<ErrorItem, UserModel?>(null));
       await waitForState(
         bloc.sessionStream,
         (SessionState s) => s is Unauthenticated,
@@ -67,7 +67,7 @@ void main() {
         email: 'u1@x.com',
         jwt: <String, dynamic>{},
       );
-      repo.emitAuth(Right<ErrorItem, UserModel?>(u));
+      repo.emitAuth(const Right<ErrorItem, UserModel?>(u));
       await waitForState(
         bloc.sessionStream,
         (SessionState state) => state is Authenticated,
@@ -81,7 +81,7 @@ void main() {
         code: 'ERR_X',
         description: 'fail',
       );
-      repo.emitAuth(Left<ErrorItem, UserModel?>(err));
+      repo.emitAuth(const Left<ErrorItem, UserModel?>(err));
       await waitForState(
         bloc.sessionStream,
         (SessionState s) => s is SessionError,
@@ -105,8 +105,8 @@ void main() {
     });
 
     test('logIn() error → SessionError', () async {
-      repo.nextLoginResult = Left<ErrorItem, UserModel>(
-        const ErrorItem(title: 'Bad', code: 'ERR_LOGIN', description: 'nope'),
+      repo.nextLoginResult = const Left<ErrorItem, UserModel>(
+        ErrorItem(title: 'Bad', code: 'ERR_LOGIN', description: 'nope'),
       );
       final Either<ErrorItem, UserModel> r =
           await bloc.logIn(email: 'me@mail.com', password: 'secret');
@@ -160,7 +160,7 @@ void main() {
         email: 'a@x.com',
         jwt: <String, dynamic>{'t': 1},
       );
-      repo.emitAuth(Right<ErrorItem, UserModel?>(base));
+      repo.emitAuth(const Right<ErrorItem, UserModel?>(base));
       await waitForState(
         bloc.sessionStream,
         (SessionState s) => s is Authenticated,
@@ -200,12 +200,12 @@ void main() {
         email: 'r@x.com',
         jwt: <String, dynamic>{'t': 1},
       );
-      repo.emitAuth(Right<ErrorItem, UserModel?>(base));
+      repo.emitAuth(const Right<ErrorItem, UserModel?>(base));
       await waitForState(bloc.stream, (SessionState s) => s is Authenticated);
 
       // Forzamos fallo en refresh
-      repo.nextRefreshResult = Left<ErrorItem, UserModel>(
-        const ErrorItem(title: 'x', code: 'ERR_REFRESH', description: 'fail'),
+      repo.nextRefreshResult = const Left<ErrorItem, UserModel>(
+        ErrorItem(title: 'x', code: 'ERR_REFRESH', description: 'fail'),
       );
 
       final Either<ErrorItem, UserModel>? r = await bloc.refreshSession();
@@ -229,7 +229,7 @@ void main() {
         email: 'c@x.com',
         jwt: <String, dynamic>{},
       );
-      repo.emitAuth(Right<ErrorItem, UserModel?>(u));
+      repo.emitAuth(const Right<ErrorItem, UserModel?>(u));
       await waitForState(
         bloc.sessionStream,
         (SessionState s) => s is Authenticated,
@@ -248,8 +248,8 @@ void main() {
     });
 
     test('recoverPassword() error → SessionError', () async {
-      repo.nextRecoverResult = Left<ErrorItem, void>(
-        const ErrorItem(title: 'x', code: 'ERR_REC', description: 'fail'),
+      repo.nextRecoverResult = const Left<ErrorItem, void>(
+        ErrorItem(title: 'x', code: 'ERR_REC', description: 'fail'),
       );
       final Either<ErrorItem, void> r =
           await bloc.recoverPassword(email: 'z@x.com');
@@ -270,7 +270,7 @@ void main() {
         email: 'd@x.com',
         jwt: <String, dynamic>{},
       );
-      repo.emitAuth(Right<ErrorItem, UserModel?>(u));
+      repo.emitAuth(const Right<ErrorItem, UserModel?>(u));
       await waitForState(
         bloc.sessionStream,
         (SessionState s) => s is Authenticated,
@@ -306,8 +306,8 @@ void main() {
       expect(bloc.isAuthenticated, isFalse);
       await bloc.boot();
       repo.emitAuth(
-        Right<ErrorItem, UserModel?>(
-          const UserModel(
+        const Right<ErrorItem, UserModel?>(
+          UserModel(
             id: 'idE',
             displayName: 'e',
             photoUrl: '',
@@ -333,8 +333,8 @@ void main() {
       expect(repo.logInUserAndPasswordCalls, 1);
     });
     test('logInWithGoogle() error → SessionError', () async {
-      repo.nextGoogleResult = Left<ErrorItem, UserModel>(
-        const ErrorItem(
+      repo.nextGoogleResult = const Left<ErrorItem, UserModel>(
+        ErrorItem(
           title: 'google',
           code: 'ERR_GOOGLE',
           description: 'fail',
@@ -363,14 +363,14 @@ void main() {
         email: 's@x.com',
         jwt: <String, dynamic>{},
       );
-      repo.emitAuth(Right<ErrorItem, UserModel?>(base));
+      repo.emitAuth(const Right<ErrorItem, UserModel?>(base));
       await waitForState(
         bloc.sessionStream,
         (SessionState s) => s is Authenticated,
       );
 
-      repo.nextSilentResult = Left<ErrorItem, UserModel>(
-        const ErrorItem(
+      repo.nextSilentResult = const Left<ErrorItem, UserModel>(
+        ErrorItem(
           title: 'silent',
           code: 'ERR_SILENT',
           description: 'boom',
@@ -398,7 +398,7 @@ void main() {
       );
 
       // 1) Autenticamos con el "base"
-      repo.emitAuth(Right<ErrorItem, UserModel?>(base));
+      repo.emitAuth(const Right<ErrorItem, UserModel?>(base));
       await waitForState(
         bloc.sessionStream,
         (SessionState s) => s is Authenticated && s.user.email == base.email,
@@ -488,7 +488,7 @@ void main() {
       await bloc.boot();
 
       // 1) Right(null) -> Unauthenticated (explícito, aunque ya recibimos uno por replay)
-      repo.emitAuth(Right<ErrorItem, UserModel?>(null));
+      repo.emitAuth(const Right<ErrorItem, UserModel?>(null));
       await waitForState(bloc.stream, (SessionState s) => s is Unauthenticated);
 
       // 2) Right(user1) -> Authenticated
@@ -499,11 +499,11 @@ void main() {
         email: 'u1@x.com',
         jwt: <String, dynamic>{'v': 1},
       );
-      repo.emitAuth(Right<ErrorItem, UserModel?>(user1));
+      repo.emitAuth(const Right<ErrorItem, UserModel?>(user1));
       await waitForState(bloc.stream, (SessionState s) => s is Authenticated);
 
       // 3) Right(null) -> Unauthenticated
-      repo.emitAuth(Right<ErrorItem, UserModel?>(null));
+      repo.emitAuth(const Right<ErrorItem, UserModel?>(null));
       await waitForState(bloc.stream, (SessionState s) => s is Unauthenticated);
 
       // 4) Right(user2) -> Authenticated (cambiar el payload para evitar colisiones de igualdad)
@@ -516,7 +516,7 @@ void main() {
           'v': 2,
         }, // <-- cambia algo (ej. jwt) para asegurar nueva emisión
       );
-      repo.emitAuth(Right<ErrorItem, UserModel?>(user2));
+      repo.emitAuth(const Right<ErrorItem, UserModel?>(user2));
       await waitForState(bloc.stream, (SessionState s) => s is Authenticated);
 
       // Dar un tick para drenar microtasks
@@ -556,7 +556,7 @@ void main() {
         jwt: <String, dynamic>{'k': 1},
       );
 
-      repo.emitAuth(Right<ErrorItem, UserModel?>(u));
+      repo.emitAuth(const Right<ErrorItem, UserModel?>(u));
       await waitForState(
         bloc.sessionStream,
         (SessionState s) => s is Authenticated && s.user.email == u.email,
@@ -592,7 +592,7 @@ void main() {
         email: 'z@x.com',
         jwt: <String, dynamic>{},
       );
-      repo.emitAuth(Right<ErrorItem, UserModel?>(u));
+      repo.emitAuth(const Right<ErrorItem, UserModel?>(u));
       await waitForState(
         bloc.sessionStream,
         (SessionState s) => s is Authenticated,
@@ -615,7 +615,7 @@ void main() {
       final StreamSubscription<SessionState> sub = bloc.stream.listen(seen.add);
 
       await bloc.boot();
-      repo.emitAuth(Right<ErrorItem, UserModel?>(null));
+      repo.emitAuth(const Right<ErrorItem, UserModel?>(null));
       await waitForState(bloc.stream, (SessionState s) => s is Unauthenticated);
 
       expect(seen.last, isA<Unauthenticated>());
@@ -631,13 +631,13 @@ void main() {
           bloc.stream.listen((SessionState s) => seen.add(s.runtimeType));
 
       // 1) Unauthenticated
-      repo.emitAuth(Right<ErrorItem, UserModel?>(null));
+      repo.emitAuth(const Right<ErrorItem, UserModel?>(null));
       await waitForState(bloc.stream, (SessionState s) => s is Unauthenticated);
 
       // 2) Authenticated
       repo.emitAuth(
-        Right<ErrorItem, UserModel?>(
-          const UserModel(
+        const Right<ErrorItem, UserModel?>(
+          UserModel(
             id: 'a',
             displayName: 'a',
             photoUrl: '',
@@ -753,13 +753,13 @@ void main() {
           email: 'x@x.com',
           jwt: <String, dynamic>{},
         );
-        repo.emitAuth(Right<ErrorItem, UserModel?>(u));
+        repo.emitAuth(const Right<ErrorItem, UserModel?>(u));
         await waitForState(bloc.stream, (SessionState s) => s is Authenticated);
 
         bloc.dispose();
 
         // Cambios ya no deben reflejarse
-        repo.emitAuth(Right<ErrorItem, UserModel?>(null));
+        repo.emitAuth(const Right<ErrorItem, UserModel?>(null));
         // No podemos leer getters (lanzan). Validamos que el stream tampoco es accesible.
         expect(() => bloc.sessionStream, throwsStateError);
       });
@@ -793,7 +793,7 @@ void main() {
           email: 'l@x.com',
           jwt: <String, dynamic>{'k': 7},
         );
-        repo.emitAuth(Right<ErrorItem, UserModel?>(u));
+        repo.emitAuth(const Right<ErrorItem, UserModel?>(u));
         await waitForState(bloc.stream, (SessionState s) => s is Authenticated);
 
         bloc.dispose();
@@ -816,7 +816,7 @@ void main() {
           email: 'l2@x.com',
           jwt: <String, dynamic>{},
         );
-        repo.emitAuth(Right<ErrorItem, UserModel?>(u));
+        repo.emitAuth(const Right<ErrorItem, UserModel?>(u));
         await waitForState(bloc.stream, (SessionState s) => s is Authenticated);
 
         bloc.dispose();
@@ -853,8 +853,8 @@ void main() {
       test('no refleja nuevos cambios del repo tras dispose()', () async {
         await bloc.boot();
         repo.emitAuth(
-          Right<ErrorItem, UserModel?>(
-            const UserModel(
+          const Right<ErrorItem, UserModel?>(
+            UserModel(
               id: 'idLS',
               displayName: 'LS',
               photoUrl: '',
@@ -868,7 +868,7 @@ void main() {
         bloc.dispose();
 
         // El repo cambia a Unauthenticated, pero el snapshot se mantiene.
-        repo.emitAuth(Right<ErrorItem, UserModel?>(null));
+        repo.emitAuth(const Right<ErrorItem, UserModel?>(null));
         await Future<void>.delayed(const Duration(milliseconds: 20));
 
         expect(bloc.state, isA<Authenticated>());

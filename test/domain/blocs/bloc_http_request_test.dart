@@ -383,7 +383,7 @@ void main() {
 
         final _FakeUsecaseHttpRequestPost fakePost =
             _FakeUsecaseHttpRequestPost()
-              ..result = Left<ErrorItem, ModelConfigHttpRequest>(error);
+              ..result = const Left<ErrorItem, ModelConfigHttpRequest>(error);
 
         final FacadeHttpRequestUsecases facade = FacadeHttpRequestUsecases(
           get: _FakeUsecaseHttpRequestGet(),
@@ -469,7 +469,7 @@ void main() {
         final _FakeUsecaseHttpRequestDelete fakeDelete =
             _FakeUsecaseHttpRequestDelete()
               ..delay = true
-              ..result = Left<ErrorItem, ModelConfigHttpRequest>(error);
+              ..result = const Left<ErrorItem, ModelConfigHttpRequest>(error);
 
         final FacadeHttpRequestUsecases facade = FacadeHttpRequestUsecases(
           get: _FakeUsecaseHttpRequestGet(),

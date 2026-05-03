@@ -91,7 +91,9 @@ class _GatewayFake implements GatewayWsDatabase {
   Future<Either<ErrorItem, Map<String, dynamic>>> read(String docId) async {
     final Map<String, dynamic>? json = _store[docId];
     if (json == null) {
-      return Left<ErrorItem, Map<String, dynamic>>(DatabaseErrorItems.notFound);
+      return const Left<ErrorItem, Map<String, dynamic>>(
+        DatabaseErrorItems.notFound,
+      );
     }
     return Right<ErrorItem, Map<String, dynamic>>(
       Map<String, dynamic>.from(json),
@@ -123,9 +125,9 @@ class _GatewayFake implements GatewayWsDatabase {
     }
     _store.remove(docId);
     _docCtrls[docId]?.add(
-      Left<ErrorItem, Map<String, dynamic>>(DatabaseErrorItems.notFound),
+      const Left<ErrorItem, Map<String, dynamic>>(DatabaseErrorItems.notFound),
     );
-    return Right<ErrorItem, Unit>(Unit.value);
+    return const Right<ErrorItem, Unit>(Unit.value);
   }
 
   @override

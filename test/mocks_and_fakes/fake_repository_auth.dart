@@ -27,7 +27,7 @@ class FakeRepositoryAuth implements RepositoryAuth {
 
   final BlocGeneral<Either<ErrorItem, UserModel?>> _authCtrl =
       BlocGeneral<Either<ErrorItem, UserModel?>>(
-    Right<ErrorItem, UserModel?>(defaultUserModel),
+    const Right<ErrorItem, UserModel?>(defaultUserModel),
   );
 
   void emitAuth(Either<ErrorItem, UserModel?> error) {
@@ -79,8 +79,8 @@ class FakeRepositoryAuth implements RepositoryAuth {
   Future<Either<ErrorItem, UserModel>> logInWithGoogle() async {
     logInWithGoogleCalls++;
     return nextGoogleResult ??
-        Right<ErrorItem, UserModel>(
-          const UserModel(
+        const Right<ErrorItem, UserModel>(
+          UserModel(
             id: 'google_user',
             displayName: 'Fake User',
             photoUrl: 'https://fake.com/photo.png',
@@ -119,21 +119,21 @@ class FakeRepositoryAuth implements RepositoryAuth {
   @override
   Future<Either<ErrorItem, void>> recoverPassword(String email) async {
     recoverPasswordCalls++;
-    return nextRecoverResult ?? Right<ErrorItem, void>(null);
+    return nextRecoverResult ?? const Right<ErrorItem, void>(null);
   }
 
   @override
   Future<Either<ErrorItem, void>> logOutUser(UserModel user) async {
     logOutUserCalls++;
-    return nextLogoutResult ?? Right<ErrorItem, void>(null);
+    return nextLogoutResult ?? const Right<ErrorItem, void>(null);
   }
 
   @override
   Future<Either<ErrorItem, UserModel>> getCurrentUser() async {
     getCurrentUserCalls++;
     return nextGetCurrentUserResult ??
-        Left<ErrorItem, UserModel>(
-          const ErrorItem(
+        const Left<ErrorItem, UserModel>(
+          ErrorItem(
             title: 'No session',
             code: 'ERR_NOT_SIGNED_IN',
             description: 'There is no active session',
@@ -144,6 +144,6 @@ class FakeRepositoryAuth implements RepositoryAuth {
   @override
   Future<Either<ErrorItem, bool>> isSignedIn() async {
     isSignedInCalls++;
-    return nextIsSignedInResult ?? Right<ErrorItem, bool>(false);
+    return nextIsSignedInResult ?? const Right<ErrorItem, bool>(false);
   }
 }

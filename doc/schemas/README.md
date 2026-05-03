@@ -2,6 +2,8 @@
 
 Este directorio contiene los contratos JSON canonicos de `jocaagura_domain`.
 
+La versión contractual vigente se documenta en [`doc/schemas/v1/README.md`](v1/README.md).
+
 ## Convenciones base
 
 - Los schemas versionados viven en `doc/schemas/vN/`.
@@ -40,7 +42,7 @@ Cada modelo se normaliza asi:
 
 - `Node.js` y `npm` instalados localmente
 - PowerShell disponible en el sistema
-- `tools/jq/jq.exe` disponible en el repo
+- `tool/jq/jq.exe` disponible en el repo
 
 ### Preparacion inicial
 
@@ -54,9 +56,9 @@ Notas:
 
 - `package.json` y `package-lock.json` forman parte del tooling reproducible del repo
 - `node_modules/` es solo instalación local y no debe versionarse
-- el validador usa `ajv` mediante `tools/validate-schemas.mjs` y `jq` vendorizado en `tools/jq/jq.exe`
+- el validador usa `ajv` mediante `tool/validate-schemas.mjs` y `jq` vendorizado en `tool/jq/jq.exe`
 
-- Comando principal:
+### Comando principal
 
 ```powershell
 npm run validate:schemas
@@ -74,12 +76,13 @@ npm run validate:schemas
 4. Reutilizar referencias a otros schemas cuando ya exista un contrato estable.
 5. Crear `foo.schema.json` y `examples/foo.example.json`.
 6. Registrar dependencias y decisiones relevantes en `doc/schemas/vN/README.md`.
-7. Actualizar la matriz de cobertura en `plan-de-trabajo.md`.
+7. Actualizar la documentación de cobertura o inventario contractual si aplica.
 8. Ejecutar `npm run validate:schemas`.
 
 ## Version actual
 
 - `v1`: contratos iniciales canonicos para los modelos prioritarios.
+- detalle de alcance y cobertura en [`doc/schemas/v1/README.md`](v1/README.md)
 
 ## Decisiones canonicas actuales
 
@@ -101,6 +104,9 @@ npm run validate:schemas
 - En contratos de IA, `expectedResponseSchema` reutiliza `ModelJsonSchemaDocument` para exigir salidas JSON estructuradas sin acoplarse a un proveedor concreto.
 - El dominio de certificación de flujos envuelve `ModelCompleteFlow` dentro de `ModelFlowCertificate` para convertir una plantilla lineal en evidencia auditable de cumplimiento.
 - En contratos de certificación de flujo, la certificación final es explícita, no automática, y un estado `certified` implica cierre lógico del proceso.
+- El dominio ACL agrupado introduce `ModelAclPlan` como bundle reusable de grants y `ModelAclPlanAssignment` como snapshot auditable de asignación a usuario.
+- El dominio de Design System publica contratos JSON persistibles y portables, mientras `jocaaguraarchetype` permanece como adaptador Flutter/Material de consumo.
+- El dominio vehicular fija `ModelVehicle` como contrato base transversal y reutiliza `ModelCategory` para clasificación y `AttributeModel` para extensibilidad operativa.
 
 ## Brechas conocidas con la implementación Dart
 
@@ -120,5 +126,13 @@ npm run validate:schemas
   - embebe `candidate` y `certifiedBy` como `UserModel`.
   - el schema canónico hereda la forma contractual de `user_model.schema.json`, donde `jwt` es `object`.
   - el `toJson()` actual de `UserModel` sigue serializando `jwt` como string JSON embebido, por lo que esta brecha también afecta los payloads Dart del certificado.
+- `ModelAclPlanAssignment`
+  - embebe `targetUser` y opcionalmente `assignedBy` como `UserModel`.
+  - el schema canónico hereda la forma contractual de `user_model.schema.json`, donde `jwt` es `object`.
+  - el `toJson()` actual de `UserModel` sigue serializando `jwt` como string JSON embebido, por lo que esta brecha también afecta los payloads Dart de asignación ACL.
+- `DS Contract v1`
+  - define contratos JSON para `theme`, `tokens`, `semantic`, `dataViz` y `componentCatalog`.
+  - en esta fase no existen modelos Dart equivalentes en `jocaagura_domain`; el consumo Flutter sigue viviendo en `jocaaguraarchetype`.
+  - `model_ds_theme.schema.json` se documenta como contrato portable consumible por Flutter, no como estándar universal de `ThemeData`.
 
-Estas brechas no se resuelven en esta carpeta. Se documentan aqui para preparar la posterior normalización de mappers Dart sin contaminar el contrato portable.
+Estas brechas no se resuelven en esta carpeta. Se documentan aqui para preparar una posterior normalización de mappers Dart sin contaminar el contrato portable.

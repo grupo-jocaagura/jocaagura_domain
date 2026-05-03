@@ -1,7 +1,163 @@
-# CHANGELOG Jocaagura Domain
+# CHANGELOG
 
 This document follows the guidelines of [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+Recent entries aim to follow a normalized structure. Older historical entries may preserve some original headings where reclassification would risk changing the original intent.
+## [1.40.0] - 2026-05-01
+
+### Changed
+- Added a `const` constructor to the `Either` base class and to its concrete variants:
+  - `Left`
+  - `Right`
+- Enabled compile-time constant creation for `Either` values when the contained value is also constant.
+- Applied the resulting linter-driven `const` updates across the package.
+
+### Quality
+- Completed 189 minor `prefer_const_constructors` updates suggested by the linter.
+- Verified that the package remains stable after the const migration.
+
+### Migration note
+- This change is backward compatible.
+- Consumers using strict lint rules may now receive additional `prefer_const_constructors` suggestions where `Left` or `Right` instances can be declared as `const`.
+- No behavioral changes were introduced for `when`, `fold`, `isLeft`, `isRight`, equality, `hashCode`, or `toString`.
+
+## [1.39.5] - 2026-05-01
+
+### Changed
+- Added a `const` constructor to `Either`, `Left`, and `Right` to support compile-time constant values.
+
+### Migration note
+- This change is backward compatible. However, projects using strict lint rules may now receive `prefer_const_constructors` suggestions where `Left` or `Right` values can be declared as `const`.
+
+## [1.39.4] - 2026-04-01
+
+### Added
+- **Vehicle base domain contract**
+  - Nuevo módulo vehicular base con:
+    - `ModelVehicle`
+    - `ModelVehicleEnum`
+  - `ModelVehicle` define un contrato transversal mínimo y reusable con:
+    - identidad estructural (`id`, `displayName`, `plate`)
+    - datos base (`brand`, `model`, `year`, `description`, `isActive`)
+    - clasificación principal mediante `ModelCategory`
+    - clasificación secundaria mediante `List<ModelCategory>`
+    - extensibilidad operativa mediante `Map<String, AttributeModel<dynamic>>`
+- **Vehicle unit tests**
+  - Nuevas pruebas unitarias para `ModelVehicle` cubriendo:
+    - roundtrip JSON canónico
+    - `copyWith`
+    - igualdad y `hashCode`
+    - defaults
+    - normalización defensiva de `attributes`
+- **Vehicle JSON contracts**
+  - Nuevos contratos y examples canónicos en `doc/schemas/v1/` para:
+    - `model_vehicle.schema.json`
+    - `examples/model_vehicle.example.json`
+
+### Changed
+- **Vehicle serialization semantics**
+  - `ModelVehicle.toJson()` fija el shape canónico portable del vehículo.
+  - `ModelVehicle.fromJson()` acepta variantes razonables para `attributes` y converge al contrato canonizado.
+  - La igualdad y el hash de `attributes` se alinean con el contenido serializado para evitar falsas diferencias por genéricos Dart internos.
+- **Schema documentation**
+  - Se actualizan `doc/schemas/README.md` y `doc/schemas/v1/README.md` para reflejar:
+    - la incorporación del contrato vehicular base
+    - la reutilización de `ModelCategory` para clasificación
+    - la reutilización de `AttributeModel` para extensibilidad controlada
+- **Library exports**
+  - Se registran los nuevos `part` del módulo vehicular en `lib/jocaagura_domain.dart`.
+
+### Notes
+- Esta fase cierra únicamente `ModelVehicle Base Contract v1`.
+- La evolución hacia submodelos específicos de documentos, mantenimiento, energía o capacidad queda deliberadamente fuera de esta versión.
+
+## [1.39.3] - 2026-03-30
+
+### Added
+- **Design System contract family**
+  - Nueva expansión retrocompatible de `v1` para el sistema de diseño persistible mediante:
+    - `model_ds_system.schema.json`
+    - `model_ds_theme.schema.json`
+    - `model_ds_extended_tokens.schema.json`
+    - `model_ds_semantic_colors.schema.json`
+    - `model_ds_data_viz_palette.schema.json`
+    - `model_ds_component_anatomy.schema.json`
+  - Se agregan examples canónicos para cada contrato del DS en `doc/schemas/v1/examples/`.
+  - `model_ds_system.schema.json` formaliza un agregado raíz portable con:
+    - `schemaVersion`
+    - identidad y branding
+    - `theme`
+    - `tokens`
+    - `semantic`
+    - `dataViz`
+    - `componentCatalog`
+    - `metadata`
+
+### Changed
+- **Design System documentation**
+  - Se actualizan `doc/schemas/README.md` y `doc/schemas/v1/README.md` para reflejar:
+    - la diferencia entre contrato DS portable y adaptador Flutter
+    - el carácter pragmático de `model_ds_theme.schema.json` como contrato consumible por Flutter/Material
+    - la decisión de dejar el sistema de emociones fuera de esta fase
+- **Branch work plan**
+  - Se reemplaza `plan-de-trabajo.md` con el plan de ejecución cerrado para `DS Contract v1`.
+
+### Notes
+- Esta fase agrega contratos y examples del Design System, pero no mueve modelos Dart desde `jocaaguraarchetype`.
+- La alineación completa del adaptador Flutter queda para una fase posterior separada.
+
+## [1.39.2] - 2026-03-20
+
+### Added
+- **ACL plan domain module**
+  - Nuevos modelos reutilizables para agrupación funcional de ACLs:
+    - `ModelAclPlan`
+    - `ModelAclPlanAssignment`
+  - `ModelAclPlan` define bundles de grants concretos reutilizando `ModelAcl` completo.
+  - `ModelAclPlanAssignment` conserva el plan completo embebido como snapshot histórico de asignación a usuario.
+- **ACL plan unit tests**
+  - Nuevas pruebas unitarias para:
+    - roundtrip `fromJson(toJson(model))`
+    - roundtrip `toJson(fromJson(jsonCanonico))`
+    - `copyWith`
+  - Cobertura inicial para:
+    - `acl_model_plan_test.dart`
+    - `acl_model_plan_assignment_test.dart`
+- **ACL plan JSON contracts**
+  - Nuevos schemas y examples canónicos en `doc/schemas/v1/` para:
+    - `model_acl_plan.schema.json`
+    - `model_acl_plan_assignment.schema.json`
+  - Se formaliza:
+    - agrupación ACL reusable como plan funcional
+    - asignación batch auditable mediante snapshot embebido
+    - reutilización explícita de `ModelAcl` y `UserModel`
+
+### Changed
+- **ACL schema documentation**
+  - Se actualizan `doc/schemas/README.md` y `doc/schemas/v1/README.md` para reflejar:
+    - la diferencia entre grant individual, política, plan y asignación
+    - el uso de snapshots embebidos en `ModelAclPlanAssignment`
+    - la brecha heredada de `UserModel.jwt` cuando una asignación serializa `targetUser` o `assignedBy`
+- **Branch work plan**
+  - Se reemplaza `plan-de-trabajo.md` con el plan de ejecución cerrado para la fase ACL Plan.
+
+## [1.39.1] - 2026-03-19
+
+### Docs
+- **README reduction and documentation split**
+  - El `README.md` pasa a funcionar como puerta de entrada y mapa documental del repositorio.
+  - Se extrae la referencia extensa a nuevos documentos complementarios en `doc/reference/`, `doc/guides/` y `doc/operations/`.
+- **Documentation navigation cleanup**
+  - Se corrigen enlaces internos y referencias locales para reducir dependencias de URLs absolutas del repositorio.
+  - Se alinean `README_STRUCTURE.md`, `example/README.md`, `doc/http-requests-doc.md`, `doc/advanced-http-simulation.md` y `doc/store-doc.md` con el nuevo rol del `README`.
+- **Schema documentation consistency**
+  - Se mejora la navegación entre `doc/schemas/README.md` y `doc/schemas/v1/README.md`.
+  - Se corrige el inventario de `v1` para incluir `obituary_model.schema.json`.
+
+### Changed
+- **Editorial normalization**
+  - Se aplican ajustes de forma en `CHANGELOG.md` sin alterar la intención histórica de las entradas previas.
 
 ## [1.39.0] - 2026-03-15
 
@@ -208,7 +364,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.38.5] - 2026-03-14
 
-
 ### Added
 - **Drive domain module**
   - Nuevo módulo `lib/domain/drive/` con:
@@ -348,8 +503,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Se agrega tooling local reproducible para validar schemas:
   - `package.json`
   - `package-lock.json`
-  - `tools/validate-schemas.ps1`
-  - `tools/jq/jq.exe`
+  - `tool/validate-schemas.ps1`
+  - `tool/jq/jq.exe`
 - Se agrega exclusión de `node_modules/` en `.gitignore`.
 
 ### Tests
@@ -369,14 +524,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.38.0] - 2026-01-18
 
 ### Added
-
 - Modelo ModelAclPolicy: política mínima de acceso por app/feature con serialización robusta y buildId.
 - Pruebas de ModelAclPolicy: buildId, jerarquía de roles, copyWith, fromJson/toJson y round-trip.
 - Suite de pruebas del ciclo de vida de Debouncer (cancelación, idempotencia y llamadas tras dispose()).
 
-### changed
+### Changed
 - Debouncer.dispose(): cancela timers pendientes y evita ejecuciones tras liberar la instancia.
-
 
 ## [1.37.0] - 2026-01-14
 
@@ -595,8 +748,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.33.1] - 2025-12-07
 ### Fixed
 - Hotfix para estabilizar el contrato de `ModelAppVersion` al serializar `buildAt` y permitir `defaultModelAppVersion` totalmente constante.
-
-### Fixed
 - `ModelAppVersion` ahora persiste `buildAt` como cadena ISO-8601 UTC con `kDefaultBuildAtIso` (07 Dic 2025) como valor por defecto, evitando drift entre plataformas y habilitando instancias const en tree-shaking.
 - Se agregó el *getter* `buildAtDateTime` que utiliza `DateUtils` para exponer el valor en `DateTime` sin sacrificar el almacenamiento en texto.
 
@@ -1687,7 +1838,6 @@ simplifica la **integración** en apps nuevas o existentes.
   ```
 
 — Fin de 1.25.1 —
-
 
 ## [1.25.0] - 2025-08-17
 

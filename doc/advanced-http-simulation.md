@@ -1,8 +1,12 @@
-# VirtualCrudService: simular un API REST (sin red) en Jocaagura
+# VirtualCrudService: simular una API REST (sin red) en Jocaagura
 
 Este documento explica cómo usar `VirtualCrudService` para **simular el comportamiento de un API REST** sin networking real, con rutas, validaciones, estado in-memory y fallos determinísticos, integrado al flujo Jocaagura:
 
 **UI → BlocHttpRequest → Facade (usecases) → Repository → Gateway → ServiceHttpRequest**
+
+Es una guía avanzada y complementa la documentación general de HTTP en [`doc/http-requests-doc.md`](http-requests-doc.md).
+
+El ejemplo base referenciado aquí vive en [`example/lib/jocaagura_fake_http_request.dart`](../example/lib/jocaagura_fake_http_request.dart).
 
 ---
 

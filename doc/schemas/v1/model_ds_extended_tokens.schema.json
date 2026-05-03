@@ -1,0 +1,83 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://jocaagura.dev/schemas/jocaagura_domain/v1/model_ds_extended_tokens.schema.json",
+  "title": "ModelDsExtendedTokens",
+  "description": "Canonical JSON contract for extended design system tokens in jocaagura_domain.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "spacing": {
+      "type": "object",
+      "description": "Ordered spacing scale used by layout primitives and component composition.",
+      "additionalProperties": false,
+      "properties": {
+        "xxs": { "type": "number", "minimum": 0 },
+        "xs": { "type": "number", "minimum": 0 },
+        "sm": { "type": "number", "minimum": 0 },
+        "md": { "type": "number", "minimum": 0 },
+        "lg": { "type": "number", "minimum": 0 },
+        "xl": { "type": "number", "minimum": 0 },
+        "xxl": { "type": "number", "minimum": 0 }
+      },
+      "required": ["xxs", "xs", "sm", "md", "lg", "xl", "xxl"]
+    },
+    "radius": {
+      "type": "object",
+      "description": "Corner radius scale used by surfaces, controls and overlays.",
+      "additionalProperties": false,
+      "properties": {
+        "sm": { "type": "number", "minimum": 0 },
+        "md": { "type": "number", "minimum": 0 },
+        "lg": { "type": "number", "minimum": 0 },
+        "xl": { "type": "number", "minimum": 0 },
+        "full": { "type": "number", "minimum": 0 }
+      },
+      "required": ["sm", "md", "lg", "xl", "full"]
+    },
+    "elevation": {
+      "type": "object",
+      "description": "Elevation scale used by shadows and surface hierarchy.",
+      "additionalProperties": false,
+      "properties": {
+        "level0": { "type": "number", "minimum": 0 },
+        "level1": { "type": "number", "minimum": 0 },
+        "level2": { "type": "number", "minimum": 0 },
+        "level3": { "type": "number", "minimum": 0 },
+        "level4": { "type": "number", "minimum": 0 }
+      },
+      "required": ["level0", "level1", "level2", "level3", "level4"]
+    },
+    "alpha": {
+      "type": "object",
+      "description": "Named alpha constants used by overlays, disabled states and scrims.",
+      "additionalProperties": false,
+      "properties": {
+        "disabled": { "type": "number", "minimum": 0, "maximum": 1 },
+        "muted": { "type": "number", "minimum": 0, "maximum": 1 },
+        "scrim": { "type": "number", "minimum": 0, "maximum": 1 }
+      },
+      "required": ["disabled", "muted", "scrim"]
+    },
+    "durationMs": {
+      "type": "object",
+      "description": "Named motion durations in milliseconds.",
+      "additionalProperties": false,
+      "properties": {
+        "fast": { "type": "integer", "minimum": 0 },
+        "normal": { "type": "integer", "minimum": 0 },
+        "slow": { "type": "integer", "minimum": 0 }
+      },
+      "required": ["fast", "normal", "slow"]
+    }
+  },
+  "required": ["spacing", "radius", "elevation", "alpha", "durationMs"],
+  "examples": [
+    {
+      "spacing": { "xxs": 2, "xs": 4, "sm": 8, "md": 12, "lg": 16, "xl": 24, "xxl": 32 },
+      "radius": { "sm": 4, "md": 8, "lg": 12, "xl": 16, "full": 999 },
+      "elevation": { "level0": 0, "level1": 1, "level2": 3, "level3": 6, "level4": 12 },
+      "alpha": { "disabled": 0.38, "muted": 0.72, "scrim": 0.32 },
+      "durationMs": { "fast": 120, "normal": 240, "slow": 360 }
+    }
+  ]
+}
