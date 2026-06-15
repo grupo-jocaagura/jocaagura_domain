@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 
 import '../../jocaagura_domain.dart';
 
@@ -322,7 +321,7 @@ class FakeHttpRequest implements ServiceHttpRequest {
       throw TimeoutException('Simulated HTTP timeout for $key');
     }
     if (message == 'offline') {
-      throw const SocketException('Simulated offline mode');
+      throw const FakeHttpOfflineException('Simulated offline mode');
     }
 
     throw StateError(message);
@@ -364,4 +363,13 @@ class FakeHttpRequest implements ServiceHttpRequest {
     }
     return v; // primitives
   }
+}
+
+class FakeHttpOfflineException implements Exception {
+  const FakeHttpOfflineException(this.message);
+
+  final String message;
+
+  @override
+  String toString() => 'FakeHttpOfflineException: $message';
 }

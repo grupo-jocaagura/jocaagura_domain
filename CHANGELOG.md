@@ -5,6 +5,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 Recent entries aim to follow a normalized structure. Older historical entries may preserve some original headings where reclassification would risk changing the original intent.
 
+## [1.42.0] - 2026-06-15
+
+### Fixed
+- Removed the `dart:io` dependency from `FakeHttpRequest` by replacing `SocketException` with the platform-agnostic `FakeHttpOfflineException`.
+- Restored Web compatibility for packages importing `jocaagura_domain` through the public library graph.
+
+### Added
+- Added `FakeHttpOfflineException` to preserve offline simulation behavior without depending on platform-specific APIs.
+- Added behavioral tests for `FacadeCrudDatabaseUsecases`, covering factory wiring and convenience CRUD methods.
+
+### Tested
+- Covered `readDoc`, `writeDoc`, `deleteDoc`, `existsDoc`, `mutateDoc`, `patchDoc`, `ensureDoc`, `readDocs`, `writeDocs`, and `deleteDocs`.
+- Verified key branches for not-found handling, propagated repository errors, patch merging, ensure create/update paths, and deterministic sequential many operations.
+
+### Removed
+- Removed legacy local schema validation helper scripts and bundled `jq` binary from `tools`.
+
 ## [1.41.0] - 2026-06-15
 
 ### Added

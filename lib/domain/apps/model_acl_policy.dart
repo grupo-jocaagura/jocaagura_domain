@@ -113,7 +113,7 @@ class ModelAclPolicy extends Model {
   static const ModelAclPolicy defaultModelAclPolicy =
       ModelAclPolicy._defaults();
 
-  /// Canonical id: "<appName>.<feature>" (dot notation).
+  /// Canonical id: "appName.feature" (dot notation).
   ///
   /// Note: we **do not** enforce lowercase to keep implementers free to decide.
   static String buildId({
