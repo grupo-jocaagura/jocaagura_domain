@@ -4,6 +4,32 @@ This document follows the guidelines of [Keep a Changelog](https://keepachangelo
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 Recent entries aim to follow a normalized structure. Older historical entries may preserve some original headings where reclassification would risk changing the original intent.
+
+## [1.41.0] - 2026-06-15
+
+### Added
+- Added explicit branch-resolution and transformation helpers to `Either`:
+  - `match`
+  - `map`
+  - `mapLeft`
+  - `flatMap`
+  - `onLeft`
+  - `onRight`
+
+### Changed
+- Kept `when` and `fold` as compatibility-friendly APIs while documenting `match` as the preferred option when both branches must be resolved explicitly.
+- Clarified that the generic type used by `when`, `fold`, and `match` represents the common return type produced by both branches.
+
+### Quality
+- Expanded test coverage for `Either` branch behavior, transformations, chaining, side-effect callbacks, equality, `hashCode`, and string representation.
+- Added branch-specific tests for both `Left` and `Right` paths across the new helper methods.
+
+### Migration note
+- This change is backward compatible.
+- Existing usages of `when`, `fold`, `isLeft`, `isRight`, `Left`, and `Right` continue to work without changes.
+- Consumers may progressively adopt `match`, `map`, `mapLeft`, or `flatMap` to express intent more clearly in new code.
+
+
 ## [1.40.0] - 2026-05-01
 
 ### Changed
