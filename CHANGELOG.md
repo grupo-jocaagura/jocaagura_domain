@@ -5,7 +5,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 Recent entries aim to follow a normalized structure. Older historical entries may preserve some original headings where reclassification would risk changing the original intent.
 
-## 1.42.0
+## [1.42.0] - 2026-06-15
 
 ### Fixed
 - Removed the `dart:io` dependency from `FakeHttpRequest` by replacing `SocketException` with the platform-agnostic `FakeHttpOfflineException`.
