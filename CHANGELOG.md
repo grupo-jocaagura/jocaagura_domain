@@ -29,6 +29,7 @@ Recent entries aim to follow a normalized structure. Older historical entries ma
 - Existing usages of `when`, `fold`, `isLeft`, `isRight`, `Left`, and `Right` continue to work without changes.
 - Consumers may progressively adopt `match`, `map`, `mapLeft`, or `flatMap` to express intent more clearly in new code.
 
+
 ## [1.40.0] - 2026-05-01
 
 ### Changed
