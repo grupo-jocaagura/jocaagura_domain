@@ -175,6 +175,8 @@ part 'domain/usecases/session/session_usecases.dart';
 part 'domain/usecases/session/sign_in_user_and_password_usecase.dart';
 part 'domain/usecases/session/watch_auth_state_changes_usecases.dart';
 part 'domain/usecases/usecase.dart';
+part 'domain/internationalization/model_language.dart';
+part 'domain/internationalization/model_localized_text.dart';
 part 'domain/user_model.dart';
 part 'domain/utils/money_utils.dart';
 part 'domain/vehicles/model_vehicle.dart';
