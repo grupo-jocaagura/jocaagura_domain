@@ -171,7 +171,7 @@ class GatewayWsDatabaseImpl implements GatewayWsDatabase {
         document: json,
       );
       if (_readAfterWrite) {
-        return read(docId); // authoritative
+        return await read(docId); // authoritative
       }
       return Right<ErrorItem, Map<String, dynamic>>(_withId(docId, json));
     } catch (e, s) {

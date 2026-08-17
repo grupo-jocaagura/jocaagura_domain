@@ -5,6 +5,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 Recent entries aim to follow a normalized structure. Older historical entries may preserve some original headings where reclassification would risk changing the original intent.
 
+## [1.43.0] - 2026-08-17
+
+### Added
+
+* Internationalization domain primitives:
+
+  * Added `ModelLanguage` with deterministic language, script and region representation, canonical language tags, structural equality and stable `hashCode`.
+  * Added normalized JSON round-trip support for `ModelLanguage`, including safe fallback to `und` for missing or empty language codes.
+  * Added ready-to-use language presets for common regional configurations.
+  * Added `ModelLocalizedText` with immutable localized translations through defensive copying and unmodifiable maps.
+  * Added explicit fallback-language support using `ModelLanguage.undetermined` when no fallback is declared.
+  * Added deterministic JSON round-trip support for localized text using stable public JSON keys and nested `ModelLanguage` serialization.
+  * Exported the new internationalization models through the main `jocaagura_domain` library.
+
+### Changed
+
+* Updated analyzer exclusions for generated Flutter build and platform directories in the package and example project.
+* Updated `GatewayWsDatabaseImpl` read-after-write flow to await the authoritative read inside the existing error-handling boundary.
+
+### Tests
+
+* Added comprehensive unit tests for language normalization, canonical tags, presets, equality, hashing, JSON serialization/deserialization and round-trip behavior.
+* Added tests for localized-text defensive copying, unmodifiable translations, fallback behavior, structural equality and deterministic JSON handling.
+* Achieved 100% line coverage for `ModelLanguage`.
+* Achieved 100% line coverage for `ModelLocalizedText`.
+
 ## [1.42.0] - 2026-06-15
 
 ### Fixed
