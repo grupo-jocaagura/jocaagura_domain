@@ -5,7 +5,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 Recent entries aim to follow a normalized structure. Older historical entries may preserve some original headings where reclassification would risk changing the original intent.
 
-## [1.44.0] - 2026-08-17
+## [1.43.0] - 2026-08-17
 
 ### Added
 
@@ -30,11 +30,6 @@ Recent entries aim to follow a normalized structure. Older historical entries ma
 * Added tests for localized-text defensive copying, unmodifiable translations, fallback behavior, structural equality and deterministic JSON handling.
 * Achieved 100% line coverage for `ModelLanguage`.
 * Achieved 100% line coverage for `ModelLocalizedText`.
-
-## [1.43.0] - 2026-08-17
-
-### Fixed
-- Updated flutter version compatiblity
 
 ## [1.42.0] - 2026-06-15
 
