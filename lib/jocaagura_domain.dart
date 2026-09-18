@@ -9,6 +9,8 @@ import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
+export 'package:jocaagura_domain_core/jocaagura_domain_core.dart';
+
 export 'src/fake_services/fake_http_request_config.dart';
 export 'src/fake_services/fake_service_connectivity.dart';
 export 'src/fake_services/fake_service_geolocation.dart';
@@ -121,6 +123,8 @@ part 'domain/http/http_request_errors.dart';
 part 'domain/http/model_config_http_request.dart';
 part 'domain/http/request_context.dart';
 part 'domain/http/virtual_crud_service.dart';
+part 'domain/internationalization/model_language.dart';
+part 'domain/internationalization/model_localized_text.dart';
 part 'domain/json_schema/model_json_schema_document.dart';
 part 'domain/json_schema/model_json_schema_reference.dart';
 part 'domain/legal_id_model.dart';
@@ -175,8 +179,6 @@ part 'domain/usecases/session/session_usecases.dart';
 part 'domain/usecases/session/sign_in_user_and_password_usecase.dart';
 part 'domain/usecases/session/watch_auth_state_changes_usecases.dart';
 part 'domain/usecases/usecase.dart';
-part 'domain/internationalization/model_language.dart';
-part 'domain/internationalization/model_localized_text.dart';
 part 'domain/user_model.dart';
 part 'domain/utils/money_utils.dart';
 part 'domain/vehicles/model_vehicle.dart';

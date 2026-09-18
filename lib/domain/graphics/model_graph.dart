@@ -60,9 +60,7 @@ ModelGraph defaultModelGraph({
 ///   print(g.points.first.label); // "Enero"
 /// }
 /// ```
-ModelGraph demoPizzaPrices2024Graph({
-  String region = 'LATAM — Región Andina',
-}) {
+ModelGraph demoPizzaPrices2024Graph({String region = 'LATAM — Región Andina'}) {
   final List<Map<String, Object?>> rows = <Map<String, Object?>>[
     <String, Object?>{'label': 'Enero', 'value': 60000},
     <String, Object?>{'label': 'Febrero', 'value': 59000},
@@ -126,21 +124,21 @@ class ModelGraph extends Model {
   /// Notes:
   /// - Non-string values for titles are stringified; empty string becomes `null`.
   factory ModelGraph.fromJson(Map<String, dynamic> json) => ModelGraph(
-        xAxis: ModelGraphAxisSpec.fromJson(
-          Utils.mapFromDynamic(json[ModelGraphEnum.xAxis.name]),
-        ),
-        yAxis: ModelGraphAxisSpec.fromJson(
-          Utils.mapFromDynamic(json[ModelGraphEnum.yAxis.name]),
-        ),
-        points: Utils.listFromDynamic(json[ModelGraphEnum.points.name])
-            .map(ModelPoint.fromJson)
-            .toList(),
-        title: Utils.getStringFromDynamic(json[ModelGraphEnum.title.name]),
-        subtitle:
-            Utils.getStringFromDynamic(json[ModelGraphEnum.subtitle.name]),
-        description:
-            Utils.getStringFromDynamic(json[ModelGraphEnum.description.name]),
-      );
+    xAxis: ModelGraphAxisSpec.fromJson(
+      Utils.mapFromDynamic(json[ModelGraphEnum.xAxis.name]),
+    ),
+    yAxis: ModelGraphAxisSpec.fromJson(
+      Utils.mapFromDynamic(json[ModelGraphEnum.yAxis.name]),
+    ),
+    points: Utils.listFromDynamic(json[ModelGraphEnum.points.name])
+        .map(ModelPoint.fromJson)
+        .toList(),
+    title: Utils.getStringFromDynamic(json[ModelGraphEnum.title.name]),
+    subtitle: Utils.getStringFromDynamic(json[ModelGraphEnum.subtitle.name]),
+    description: Utils.getStringFromDynamic(
+      json[ModelGraphEnum.description.name],
+    ),
+  );
 
   /// Human-readable metadata for the X axis.
   final ModelGraphAxisSpec xAxis;
@@ -191,14 +189,18 @@ class ModelGraph extends Model {
       pts.add(ModelPoint(label: label, vector: ModelVector(x, y)));
     }
 
-    final double minX =
-        pts.isEmpty ? 0 : pts.map((ModelPoint p) => p.vector.dx).reduce(min);
-    final double maxX =
-        pts.isEmpty ? 0 : pts.map((ModelPoint p) => p.vector.dx).reduce(max);
-    final double minY =
-        pts.isEmpty ? 0 : pts.map((ModelPoint p) => p.vector.dy).reduce(min);
-    final double maxY =
-        pts.isEmpty ? 0 : pts.map((ModelPoint p) => p.vector.dy).reduce(max);
+    final double minX = pts.isEmpty
+        ? 0
+        : pts.map((ModelPoint p) => p.vector.dx).reduce(min);
+    final double maxX = pts.isEmpty
+        ? 0
+        : pts.map((ModelPoint p) => p.vector.dx).reduce(max);
+    final double minY = pts.isEmpty
+        ? 0
+        : pts.map((ModelPoint p) => p.vector.dy).reduce(min);
+    final double maxY = pts.isEmpty
+        ? 0
+        : pts.map((ModelPoint p) => p.vector.dy).reduce(max);
 
     return ModelGraph(
       xAxis: ModelGraphAxisSpec(
@@ -242,24 +244,25 @@ class ModelGraph extends Model {
   /// Serializes this model to JSON.
   @override
   Map<String, dynamic> toJson() => <String, dynamic>{
-        ModelGraphEnum.xAxis.name: xAxis.toJson(),
-        ModelGraphEnum.yAxis.name: yAxis.toJson(),
-        ModelGraphEnum.points.name:
-            points.map((ModelPoint point) => point.toJson()).toList(),
-        ModelGraphEnum.title.name: title,
-        ModelGraphEnum.subtitle.name: subtitle,
-        ModelGraphEnum.description.name: description,
-      };
+    ModelGraphEnum.xAxis.name: xAxis.toJson(),
+    ModelGraphEnum.yAxis.name: yAxis.toJson(),
+    ModelGraphEnum.points.name: points
+        .map((ModelPoint point) => point.toJson())
+        .toList(),
+    ModelGraphEnum.title.name: title,
+    ModelGraphEnum.subtitle.name: subtitle,
+    ModelGraphEnum.description.name: description,
+  };
 
   @override
   int get hashCode => Object.hash(
-        xAxis,
-        yAxis,
-        Utils.listHash(points),
-        title,
-        subtitle,
-        description,
-      );
+    xAxis,
+    yAxis,
+    Utils.listHash(points),
+    title,
+    subtitle,
+    description,
+  );
 
   /// Value-based equality including ordered [points].
   @override

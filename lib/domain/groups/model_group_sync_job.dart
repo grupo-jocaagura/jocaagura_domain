@@ -216,8 +216,9 @@ class ModelGroupSyncJob extends Model {
       type: type ?? this.type,
       status: status ?? this.status,
       startedAt: startedAt ?? this.startedAt,
-      finishedAt:
-          finishedAtOverrideNull != null ? null : finishedAt ?? this.finishedAt,
+      finishedAt: finishedAtOverrideNull != null
+          ? null
+          : finishedAt ?? this.finishedAt,
       addedCount: addedCount ?? this.addedCount,
       removedCount: removedCount ?? this.removedCount,
       updatedCount: updatedCount ?? this.updatedCount,
@@ -237,8 +238,9 @@ class ModelGroupSyncJob extends Model {
       ModelGroupSyncJobEnum.source.name: source.name,
       ModelGroupSyncJobEnum.type.name: type.name,
       ModelGroupSyncJobEnum.status.name: status.name,
-      ModelGroupSyncJobEnum.startedAt.name:
-          DateUtils.dateTimeToString(startedAt),
+      ModelGroupSyncJobEnum.startedAt.name: DateUtils.dateTimeToString(
+        startedAt,
+      ),
       ModelGroupSyncJobEnum.addedCount.name: addedCount,
       ModelGroupSyncJobEnum.removedCount.name: removedCount,
       ModelGroupSyncJobEnum.updatedCount.name: updatedCount,
@@ -246,8 +248,9 @@ class ModelGroupSyncJob extends Model {
       ModelGroupSyncJobEnum.groupSettingsApiCalls.name: groupSettingsApiCalls,
     };
     if (finishedAt != null) {
-      json[ModelGroupSyncJobEnum.finishedAt.name] =
-          DateUtils.dateTimeToString(finishedAt!);
+      json[ModelGroupSyncJobEnum.finishedAt.name] = DateUtils.dateTimeToString(
+        finishedAt!,
+      );
     }
     json[ModelGroupSyncJobEnum.errorItemId.name] = errorItemId;
     json[ModelGroupSyncJobEnum.createdBy.name] = createdBy;
@@ -276,21 +279,21 @@ class ModelGroupSyncJob extends Model {
 
   @override
   int get hashCode => Object.hash(
-        id,
-        groupId,
-        source,
-        type,
-        status,
-        startedAt,
-        finishedAt,
-        addedCount,
-        removedCount,
-        updatedCount,
-        directoryApiCalls,
-        groupSettingsApiCalls,
-        errorItemId,
-        createdBy,
-      );
+    id,
+    groupId,
+    source,
+    type,
+    status,
+    startedAt,
+    finishedAt,
+    addedCount,
+    removedCount,
+    updatedCount,
+    directoryApiCalls,
+    groupSettingsApiCalls,
+    errorItemId,
+    createdBy,
+  );
 
   @override
   String toString() => 'ModelGroupSyncJob(${toJson()})';

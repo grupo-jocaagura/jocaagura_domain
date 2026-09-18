@@ -60,42 +60,35 @@ void main() {
       notes: 'Default operator ACL plan seeded during onboarding.',
     );
 
-    test(
-      'Given a canonical ACL plan assignment When toJson and fromJson Then preserves the contract',
-      () {
-        final Map<String, dynamic> json = assignment.toJson();
-        final ModelAclPlanAssignment roundtrip =
-            ModelAclPlanAssignment.fromJson(json);
+    test('Given a canonical ACL plan assignment When toJson and fromJson Then preserves the contract', () {
+      final Map<String, dynamic> json = assignment.toJson();
+      final ModelAclPlanAssignment roundtrip = ModelAclPlanAssignment.fromJson(
+        json,
+      );
 
-        expect(roundtrip, assignment);
-        expect(roundtrip.toJson(), assignment.toJson());
-      },
-    );
+      expect(roundtrip, assignment);
+      expect(roundtrip.toJson(), assignment.toJson());
+    });
 
-    test(
-      'Given current Dart JSON When fromJson and toJson Then preserves JSON roundtrip',
-      () {
-        final Map<String, dynamic> json = assignment.toJson();
+    test('Given current Dart JSON When fromJson and toJson Then preserves JSON roundtrip', () {
+      final Map<String, dynamic> json = assignment.toJson();
 
-        final ModelAclPlanAssignment parsed =
-            ModelAclPlanAssignment.fromJson(json);
+      final ModelAclPlanAssignment parsed = ModelAclPlanAssignment.fromJson(
+        json,
+      );
 
-        expect(parsed.toJson(), json);
-      },
-    );
+      expect(parsed.toJson(), json);
+    });
 
-    test(
-      'Given an ACL plan assignment When copyWith overrides fields Then returns updated copy',
-      () {
-        final ModelAclPlanAssignment copy = assignment.copyWith(
-          notes: null,
-          assignedBy: null,
-        );
+    test('Given an ACL plan assignment When copyWith overrides fields Then returns updated copy', () {
+      final ModelAclPlanAssignment copy = assignment.copyWith(
+        notes: null,
+        assignedBy: null,
+      );
 
-        expect(copy.notes, isNull);
-        expect(copy.assignedBy, isNull);
-        expect(copy, isNot(assignment));
-      },
-    );
+      expect(copy.notes, isNull);
+      expect(copy.assignedBy, isNull);
+      expect(copy, isNot(assignment));
+    });
   });
 }

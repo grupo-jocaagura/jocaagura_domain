@@ -3,9 +3,7 @@ import 'package:jocaagura_domain/jocaagura_domain.dart';
 
 void main() {
   group('ModelGraph.fromJson (lenient strings)', () {
-    test(
-        'Given non-string titles When fromJson Then stringifies and maps empty to null',
-        () {
+    test('Given non-string titles When fromJson Then stringifies and maps empty to null', () {
       // Arrange
       final Map<String, dynamic> json = <String, dynamic>{
         ModelGraphEnum.xAxis.name: <String, dynamic>{
@@ -22,7 +20,7 @@ void main() {
           <String, dynamic>{
             'label': 'A',
             'vector': <String, dynamic>{'dx': 1, 'dy': 10},
-          }
+          },
         ],
         ModelGraphEnum.title.name: 123, // -> '123'
         ModelGraphEnum.subtitle.name: '', // -> null
@@ -41,9 +39,7 @@ void main() {
       expect(g.points.single.vector.dy, 10.0);
     });
 
-    test(
-        'Given noisy points list When fromJson Then ignores non-map entries upstream',
-        () {
+    test('Given noisy points list When fromJson Then ignores non-map entries upstream', () {
       // Arrange: Utils.listFromDynamic ignora elementos no-mapa
       final List<dynamic> noisy = <dynamic>[
         <String, dynamic>{
@@ -79,56 +75,61 @@ void main() {
   });
 
   group('ModelGraph immutability & equality', () {
-    test('Given constructed graph When mutating points Then it is unmodifiable',
-        () {
-      // Arrange
-      final ModelGraph g = ModelGraph(
-        xAxis: const ModelGraphAxisSpec(title: 'X', min: 0, max: 2),
-        yAxis: const ModelGraphAxisSpec(title: 'Y', min: 0, max: 2),
-        points: const <ModelPoint>[
-          ModelPoint(label: 'p1', vector: ModelVector(1, 1)),
-        ],
-      );
+    test(
+      'Given constructed graph When mutating points Then it is unmodifiable',
+      () {
+        // Arrange
+        final ModelGraph g = ModelGraph(
+          xAxis: const ModelGraphAxisSpec(title: 'X', min: 0, max: 2),
+          yAxis: const ModelGraphAxisSpec(title: 'Y', min: 0, max: 2),
+          points: const <ModelPoint>[
+            ModelPoint(label: 'p1', vector: ModelVector(1, 1)),
+          ],
+        );
 
-      // Act & Assert
-      expect(
-        () => g.points
-            .add(const ModelPoint(label: 'p2', vector: ModelVector(2, 2))),
-        throwsUnsupportedError,
-      );
-    });
+        // Act & Assert
+        expect(
+          () => g.points.add(
+            const ModelPoint(label: 'p2', vector: ModelVector(2, 2)),
+          ),
+          throwsUnsupportedError,
+        );
+      },
+    );
 
-    test('Given two identical graphs When comparing Then == and hashCode match',
-        () {
-      // Arrange
-      final ModelGraph a = ModelGraph(
-        xAxis: const ModelGraphAxisSpec(title: 'X', min: 0, max: 2),
-        yAxis: const ModelGraphAxisSpec(title: 'Y', min: 0, max: 2),
-        points: const <ModelPoint>[
-          ModelPoint(label: 'p1', vector: ModelVector(1, 1)),
-          ModelPoint(label: 'p2', vector: ModelVector(2, 2)),
-        ],
-        title: 'T',
-        subtitle: 'S',
-        description: 'D',
-      );
+    test(
+      'Given two identical graphs When comparing Then == and hashCode match',
+      () {
+        // Arrange
+        final ModelGraph a = ModelGraph(
+          xAxis: const ModelGraphAxisSpec(title: 'X', min: 0, max: 2),
+          yAxis: const ModelGraphAxisSpec(title: 'Y', min: 0, max: 2),
+          points: const <ModelPoint>[
+            ModelPoint(label: 'p1', vector: ModelVector(1, 1)),
+            ModelPoint(label: 'p2', vector: ModelVector(2, 2)),
+          ],
+          title: 'T',
+          subtitle: 'S',
+          description: 'D',
+        );
 
-      final ModelGraph b = ModelGraph(
-        xAxis: const ModelGraphAxisSpec(title: 'X', min: 0, max: 2),
-        yAxis: const ModelGraphAxisSpec(title: 'Y', min: 0, max: 2),
-        points: const <ModelPoint>[
-          ModelPoint(label: 'p1', vector: ModelVector(1, 1)),
-          ModelPoint(label: 'p2', vector: ModelVector(2, 2)),
-        ],
-        title: 'T',
-        subtitle: 'S',
-        description: 'D',
-      );
+        final ModelGraph b = ModelGraph(
+          xAxis: const ModelGraphAxisSpec(title: 'X', min: 0, max: 2),
+          yAxis: const ModelGraphAxisSpec(title: 'Y', min: 0, max: 2),
+          points: const <ModelPoint>[
+            ModelPoint(label: 'p1', vector: ModelVector(1, 1)),
+            ModelPoint(label: 'p2', vector: ModelVector(2, 2)),
+          ],
+          title: 'T',
+          subtitle: 'S',
+          description: 'D',
+        );
 
-      // Assert
-      expect(a == b, isTrue);
-      expect(a.hashCode, b.hashCode);
-    });
+        // Assert
+        expect(a == b, isTrue);
+        expect(a.hashCode, b.hashCode);
+      },
+    );
 
     test('Given copyWith When overriding Then points remain unmodifiable', () {
       // Arrange
@@ -149,8 +150,9 @@ void main() {
 
       // Assert
       expect(
-        () => g2.points
-            .add(const ModelPoint(label: 'x', vector: ModelVector.zero)),
+        () => g2.points.add(
+          const ModelPoint(label: 'x', vector: ModelVector.zero),
+        ),
         throwsUnsupportedError,
       );
       expect(g2.points.length, 1);
@@ -179,18 +181,21 @@ void main() {
       // Assert
       expect(g.xAxis.title, 'Idx');
       expect(g.yAxis.title, 'Val');
-      expect(
-        g.points.map((ModelPoint p) => p.label).toList(),
-        <String>['A', 'B', 'C'],
-      );
-      expect(
-        g.points.map((ModelPoint p) => p.vector.dx).toList(),
-        <double>[1, 2, 3],
-      );
-      expect(
-        g.points.map((ModelPoint p) => p.vector.dy).toList(),
-        <double>[10, 5, 20],
-      );
+      expect(g.points.map((ModelPoint p) => p.label).toList(), <String>[
+        'A',
+        'B',
+        'C',
+      ]);
+      expect(g.points.map((ModelPoint p) => p.vector.dx).toList(), <double>[
+        1,
+        2,
+        3,
+      ]);
+      expect(g.points.map((ModelPoint p) => p.vector.dy).toList(), <double>[
+        10,
+        5,
+        20,
+      ]);
       expect(g.xAxis.min, 1);
       expect(g.xAxis.max, 3);
       expect(g.yAxis.min, 5);
@@ -219,9 +224,7 @@ void main() {
       expect(g.xAxis.max, 10);
     });
 
-    test(
-        'Given empty rows When fromTable Then axis ranges are 0..0 and points empty',
-        () {
+    test('Given empty rows When fromTable Then axis ranges are 0..0 and points empty', () {
       // Arrange
       final List<Map<String, Object?>> rows = <Map<String, Object?>>[];
 
@@ -241,9 +244,7 @@ void main() {
     });
   });
   group('ModelGraph JSON round-trip', () {
-    test(
-        'Given a complete graph When toJson→fromJson Then preserves value equality',
-        () {
+    test('Given a complete graph When toJson→fromJson Then preserves value equality', () {
       // Arrange
       final ModelGraph original = ModelGraph(
         xAxis: const ModelGraphAxisSpec(title: 'X', min: 1.0, max: 12.0),
@@ -265,42 +266,49 @@ void main() {
       expect(round, original);
       expect(round.points, isA<List<ModelPoint>>());
       expect(
-        () => round.points
-            .add(const ModelPoint(label: 'X', vector: ModelVector.zero)),
+        () => round.points.add(
+          const ModelPoint(label: 'X', vector: ModelVector.zero),
+        ),
         throwsUnsupportedError,
       ); // sigue siendo unmodifiable tras el round-trip
     });
 
-    test('Given optional titles as null When toJson→fromJson Then remain null',
-        () {
-      // Arrange
-      final ModelGraph original = ModelGraph(
-        xAxis: const ModelGraphAxisSpec(title: 'X', min: 0.0, max: 2.0),
-        yAxis: const ModelGraphAxisSpec(title: 'Y', min: 0.0, max: 2.0),
-        points: const <ModelPoint>[
-          ModelPoint(label: 'p1', vector: ModelVector(1.0, 1.0)),
-        ],
-      );
-
-      // Act
-      final ModelGraph round = ModelGraph.fromJson(original.toJson());
-
-      // Assert
-      expect(round.title, isEmpty);
-      expect(round.subtitle, isEmpty);
-      expect(round.description, isEmpty);
-      expect(round, original);
-    });
-
     test(
-        'Given empty-string titles in JSON When fromJson Then map to null and round-trip stable',
-        () {
+      'Given optional titles as null When toJson→fromJson Then remain null',
+      () {
+        // Arrange
+        final ModelGraph original = ModelGraph(
+          xAxis: const ModelGraphAxisSpec(title: 'X', min: 0.0, max: 2.0),
+          yAxis: const ModelGraphAxisSpec(title: 'Y', min: 0.0, max: 2.0),
+          points: const <ModelPoint>[
+            ModelPoint(label: 'p1', vector: ModelVector(1.0, 1.0)),
+          ],
+        );
+
+        // Act
+        final ModelGraph round = ModelGraph.fromJson(original.toJson());
+
+        // Assert
+        expect(round.title, isEmpty);
+        expect(round.subtitle, isEmpty);
+        expect(round.description, isEmpty);
+        expect(round, original);
+      },
+    );
+
+    test('Given empty-string titles in JSON When fromJson Then map to null and round-trip stable', () {
       // Arrange: simulamos un JSON externo con strings vacíos
       final Map<String, dynamic> json = <String, dynamic>{
-        ModelGraphEnum.xAxis.name:
-            const ModelGraphAxisSpec(title: 'X', min: 0, max: 1).toJson(),
-        ModelGraphEnum.yAxis.name:
-            const ModelGraphAxisSpec(title: 'Y', min: 0, max: 1).toJson(),
+        ModelGraphEnum.xAxis.name: const ModelGraphAxisSpec(
+          title: 'X',
+          min: 0,
+          max: 1,
+        ).toJson(),
+        ModelGraphEnum.yAxis.name: const ModelGraphAxisSpec(
+          title: 'Y',
+          min: 0,
+          max: 1,
+        ).toJson(),
         ModelGraphEnum.points.name: <Map<String, dynamic>>[
           const ModelPoint(label: 'p', vector: ModelVector(1.0, 1.0)).toJson(),
         ],

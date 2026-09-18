@@ -39,11 +39,11 @@ final SignatureModel defaultPatientSignature = SignatureModel(
 /// Provides predefined values for all fields, including signatures and the acceptance leyend.
 final AcceptanceClauseModel defaultAcceptanceClauseModel =
     AcceptanceClauseModel(
-  id: 'acm789',
-  odontologistSignature: defaultOdontologistSignature,
-  patientPrint: 'patientPrintData',
-  patientSignature: defaultPatientSignature,
-  stringAcceptanceLeyend: '''
+      id: 'acm789',
+      odontologistSignature: defaultOdontologistSignature,
+      patientPrint: 'patientPrintData',
+      patientSignature: defaultPatientSignature,
+      stringAcceptanceLeyend: '''
 # Términos de Aceptación
 Por la presente, yo, el paciente, acepto los términos y condiciones del tratamiento odontológico proporcionado por [Nombre del odontólogo] y confirmo que he sido informado adecuadamente sobre los procedimientos y riesgos involucrados.
 
@@ -52,7 +52,7 @@ Firma del Paciente: ![Firma del Paciente](data:image/png;base64,base64EncodedIma
 
 ID: xmio
     ''',
-);
+    );
 
 /// Represents an acceptance clause within a healthcare management application.
 ///
@@ -123,9 +123,7 @@ class AcceptanceClauseModel extends Model {
         json[AcceptanceClauseEnum.patientPrint.name],
       ),
       patientSignature: SignatureModel.fromJson(
-        Utils.mapFromDynamic(
-          json[AcceptanceClauseEnum.patientSignature.name],
-        ),
+        Utils.mapFromDynamic(json[AcceptanceClauseEnum.patientSignature.name]),
       ),
       stringAcceptanceLeyend: Utils.getStringFromDynamic(
         json[AcceptanceClauseEnum.stringAcceptanceLeyend.name],
@@ -173,8 +171,8 @@ class AcceptanceClauseModel extends Model {
   Map<String, dynamic> toJson() {
     return <String, dynamic>{
       AcceptanceClauseEnum.id.name: id,
-      AcceptanceClauseEnum.odontologistSignature.name:
-          odontologistSignature.toJson(),
+      AcceptanceClauseEnum.odontologistSignature.name: odontologistSignature
+          .toJson(),
       AcceptanceClauseEnum.patientPrint.name: patientPrint,
       AcceptanceClauseEnum.patientSignature.name: patientSignature.toJson(),
       AcceptanceClauseEnum.stringAcceptanceLeyend.name: stringAcceptanceLeyend,
@@ -193,10 +191,10 @@ class AcceptanceClauseModel extends Model {
   /// Returns the hash code for this [AcceptanceClauseModel].
   @override
   int get hashCode => Object.hash(
-        id,
-        odontologistSignature,
-        patientPrint,
-        patientSignature,
-        stringAcceptanceLeyend,
-      );
+    id,
+    odontologistSignature,
+    patientPrint,
+    patientSignature,
+    stringAcceptanceLeyend,
+  );
 }

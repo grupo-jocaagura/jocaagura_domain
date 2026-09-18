@@ -16,14 +16,7 @@ part of 'package:jocaagura_domain/jocaagura_domain.dart';
 ///   print(json.keys); // (id, name)
 /// }
 /// ```
-enum ModelItemEnum {
-  id,
-  name,
-  description,
-  type,
-  price,
-  attributes,
-}
+enum ModelItemEnum { id, name, description, type, price, attributes }
 
 /// Represents an immutable item (product/service) with metadata, price and attributes.
 ///
@@ -77,8 +70,9 @@ class ModelItem extends Model {
     return ModelItem(
       id: Utils.getStringFromDynamic(json[ModelItemEnum.id.name]),
       name: Utils.getStringFromDynamic(json[ModelItemEnum.name.name]),
-      description:
-          Utils.getStringFromDynamic(json[ModelItemEnum.description.name]),
+      description: Utils.getStringFromDynamic(
+        json[ModelItemEnum.description.name],
+      ),
       type: ModelCategory.fromJson(
         Utils.mapFromDynamic(json[ModelItemEnum.type.name]),
       ),
@@ -116,14 +110,16 @@ class ModelItem extends Model {
   @override
   Map<String, dynamic> toJson() {
     return <String, dynamic>{
-      ModelItemEnum.id.name:
-          id.isEmpty ? ModelCategory.normalizeCategory(type.category) : id,
+      ModelItemEnum.id.name: id.isEmpty
+          ? ModelCategory.normalizeCategory(type.category)
+          : id,
       ModelItemEnum.name.name: name.trim(),
       ModelItemEnum.description.name: description.trim(),
       ModelItemEnum.type.name: type.toJson(),
       ModelItemEnum.price.name: price.toJson(),
-      ModelItemEnum.attributes.name:
-          attributes.map((ModelAttribute<dynamic> e) => e.toJson()).toList(),
+      ModelItemEnum.attributes.name: attributes
+          .map((ModelAttribute<dynamic> e) => e.toJson())
+          .toList(),
     };
   }
 
@@ -165,13 +161,13 @@ class ModelItem extends Model {
   /// Hash code consistent with equality.
   @override
   int get hashCode => Object.hash(
-        id,
-        name,
-        description,
-        type,
-        price,
-        Utils.listHash(attributes),
-      );
+    id,
+    name,
+    description,
+    type,
+    price,
+    Utils.listHash(attributes),
+  );
 
   /// Human-readable summary.
   @override

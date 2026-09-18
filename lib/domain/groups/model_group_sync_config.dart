@@ -265,20 +265,20 @@ class ModelGroupSyncConfig extends Model {
 
   @override
   int get hashCode => Object.hash(
-        id,
-        groupId,
-        mode,
-        courseId,
-        sourceSheetId,
-        sourceRange,
-        schedule,
-        strategy,
-        lastResult,
-        lastRunAt,
-        lastJobId,
-        lastErrorItemId,
-        crud,
-      );
+    id,
+    groupId,
+    mode,
+    courseId,
+    sourceSheetId,
+    sourceRange,
+    schedule,
+    strategy,
+    lastResult,
+    lastRunAt,
+    lastJobId,
+    lastErrorItemId,
+    crud,
+  );
 
   @override
   String toString() => 'ModelGroupSyncConfig(${toJson()})';

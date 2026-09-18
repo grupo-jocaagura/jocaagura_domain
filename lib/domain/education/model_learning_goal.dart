@@ -2,12 +2,7 @@ part of 'package:jocaagura_domain/jocaagura_domain.dart';
 
 /// JSON keys for [ModelLearningGoal]. Kept as enum to guarantee roundtrip
 /// stability (avoid string typos and allow `.name` usage).
-enum LearningGoalEnum {
-  id,
-  standard,
-  label,
-  code,
-}
+enum LearningGoalEnum { id, standard, label, code }
 
 /// A default instance for tests or placeholders.
 ///
@@ -96,19 +91,14 @@ class ModelLearningGoal extends Model {
   /// Serializes to JSON using [LearningGoalEnum] keys.
   @override
   Map<String, dynamic> toJson() => <String, dynamic>{
-        LearningGoalEnum.id.name: id,
-        LearningGoalEnum.standard.name: standard.toJson(),
-        LearningGoalEnum.label.name: label,
-        LearningGoalEnum.code.name: code,
-      };
+    LearningGoalEnum.id.name: id,
+    LearningGoalEnum.standard.name: standard.toJson(),
+    LearningGoalEnum.label.name: label,
+    LearningGoalEnum.code.name: code,
+  };
 
   @override
-  int get hashCode => Object.hash(
-        id,
-        standard,
-        label,
-        code,
-      );
+  int get hashCode => Object.hash(id, standard, label, code);
 
   @override
   bool operator ==(Object other) =>

@@ -80,10 +80,12 @@ class ContactModel extends Model {
     return ContactModel(
       id: Utils.getStringFromDynamic(json[ContactEnum.id.name]),
       name: Utils.getStringFromDynamic(json[ContactEnum.name.name]),
-      relationship:
-          Utils.getStringFromDynamic(json[ContactEnum.relationship.name]),
-      phoneNumber:
-          Utils.getStringFromDynamic(json[ContactEnum.phoneNumber.name]),
+      relationship: Utils.getStringFromDynamic(
+        json[ContactEnum.relationship.name],
+      ),
+      phoneNumber: Utils.getStringFromDynamic(
+        json[ContactEnum.phoneNumber.name],
+      ),
       email: Utils.getEmailFromDynamic(json[ContactEnum.email.name]),
     );
   }

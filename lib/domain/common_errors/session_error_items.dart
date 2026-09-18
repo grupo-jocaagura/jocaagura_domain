@@ -240,8 +240,7 @@ abstract class SessionErrorItems {
   static const ErrorItem accountExistsWithDifferentCredential = ErrorItem(
     title: 'Account exists with different credential',
     code: 'AUTH_ACCOUNT_EXISTS_WITH_DIFFERENT_CREDENTIAL',
-    description:
-        'An account already exists with the same email but different sign-in credentials.',
+    description: 'An account already exists with the same email but different sign-in credentials.',
     errorLevel: ErrorLevelEnum.severe,
     meta: <String, dynamic>{
       reasonKey: 'account_exists_with_different_credential',

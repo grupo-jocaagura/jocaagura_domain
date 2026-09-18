@@ -354,14 +354,17 @@ class ExistsDocUseCase<T extends Model>
   @override
   Future<Either<ErrorItem, bool>> call(ReadParams params) async {
     final Either<ErrorItem, T> r = await _repo.read(params.docId);
-    return r.fold((ErrorItem err) {
-      if (err.code == DatabaseErrorItems.notFound.code) {
-        return const Right<ErrorItem, bool>(false);
-      }
-      return Left<ErrorItem, bool>(err);
-    }, (_) {
-      return const Right<ErrorItem, bool>(true);
-    });
+    return r.fold(
+      (ErrorItem err) {
+        if (err.code == DatabaseErrorItems.notFound.code) {
+          return const Right<ErrorItem, bool>(false);
+        }
+        return Left<ErrorItem, bool>(err);
+      },
+      (_) {
+        return const Right<ErrorItem, bool>(true);
+      },
+    );
   }
 }
 
@@ -391,8 +394,7 @@ class ExistsDocUseCase<T extends Model>
 /// ```
 class ReadOrDefaultUseCase<T extends Model>
     implements UseCase<Either<ErrorItem, T>, ReadParams> {
-  ReadOrDefaultUseCase(this._repo, {required T Function() orElse})
-      : _orElse = orElse;
+  ReadOrDefaultUseCase(this._repo, {required this._orElse});
 
   final RepositoryWsDatabase<T> _repo;
   final T Function() _orElse;
@@ -400,14 +402,17 @@ class ReadOrDefaultUseCase<T extends Model>
   @override
   Future<Either<ErrorItem, T>> call(ReadParams params) async {
     final Either<ErrorItem, T> r = await _repo.read(params.docId);
-    return r.fold((ErrorItem err) {
-      if (err.code == DatabaseErrorItems.notFound.code) {
-        return Right<ErrorItem, T>(_orElse());
-      }
-      return Left<ErrorItem, T>(err);
-    }, (T entity) {
-      return Right<ErrorItem, T>(entity);
-    });
+    return r.fold(
+      (ErrorItem err) {
+        if (err.code == DatabaseErrorItems.notFound.code) {
+          return Right<ErrorItem, T>(_orElse());
+        }
+        return Left<ErrorItem, T>(err);
+      },
+      (T entity) {
+        return Right<ErrorItem, T>(entity);
+      },
+    );
   }
 }
 
@@ -478,8 +483,7 @@ class WatchDocUseCase<T extends Model>
 /// ```
 class WatchDocUntilUseCase<T extends Model>
     implements UseCase<Either<ErrorItem, T>, WatchParams> {
-  WatchDocUntilUseCase(this._repo, {required bool Function(T) predicate})
-      : _predicate = predicate;
+  WatchDocUntilUseCase(this._repo, {required this._predicate});
 
   final RepositoryWsDatabase<T> _repo;
   final bool Function(T) _predicate;
@@ -490,30 +494,35 @@ class WatchDocUntilUseCase<T extends Model>
     final Completer<Either<ErrorItem, T>> done =
         Completer<Either<ErrorItem, T>>();
 
-    sub = _repo.watch(params.docId).listen(
-      (Either<ErrorItem, T> e) {
-        e.fold((ErrorItem err) {
-          // surface stream errors immediately
-          if (!done.isCompleted) {
-            done.complete(Left<ErrorItem, T>(err));
-          }
-        }, (T entity) {
-          if (_predicate(entity) && !done.isCompleted) {
-            done.complete(Right<ErrorItem, T>(entity));
-          }
-        });
-      },
-      onError: (Object error, StackTrace st) {
-        if (!done.isCompleted) {
-          final ErrorItem mapped = const DefaultErrorMapper().fromException(
-            error,
-            st,
-            location: 'WatchDocUntilUseCase.onError',
-          );
-          done.complete(Left<ErrorItem, T>(mapped));
-        }
-      },
-    );
+    sub = _repo
+        .watch(params.docId)
+        .listen(
+          (Either<ErrorItem, T> e) {
+            e.fold(
+              (ErrorItem err) {
+                // surface stream errors immediately
+                if (!done.isCompleted) {
+                  done.complete(Left<ErrorItem, T>(err));
+                }
+              },
+              (T entity) {
+                if (_predicate(entity) && !done.isCompleted) {
+                  done.complete(Right<ErrorItem, T>(entity));
+                }
+              },
+            );
+          },
+          onError: (Object error, StackTrace st) {
+            if (!done.isCompleted) {
+              final ErrorItem mapped = const DefaultErrorMapper().fromException(
+                error,
+                st,
+                location: 'WatchDocUntilUseCase.onError',
+              );
+              done.complete(Left<ErrorItem, T>(mapped));
+            }
+          },
+        );
 
     final Either<ErrorItem, T> result = await done.future;
     await sub.cancel();
@@ -591,10 +600,7 @@ class MutateDocUseCase<T extends Model>
 /// ```
 class PatchDocFieldsUseCase<T extends Model>
     implements UseCase<Either<ErrorItem, T>, PatchParams> {
-  PatchDocFieldsUseCase(
-    this._repo, {
-    required T Function(Map<String, dynamic>) fromJson,
-  }) : _fromJson = fromJson;
+  PatchDocFieldsUseCase(this._repo, {required this._fromJson});
 
   final RepositoryWsDatabase<T> _repo;
   final T Function(Map<String, dynamic>) _fromJson;
@@ -602,17 +608,16 @@ class PatchDocFieldsUseCase<T extends Model>
   @override
   Future<Either<ErrorItem, T>> call(PatchParams params) async {
     final Either<ErrorItem, T> r = await _repo.read(params.docId);
-    return r.fold(
-      (ErrorItem err) => Left<ErrorItem, T>(err),
-      (T current) async {
-        final Map<String, dynamic> merged = <String, dynamic>{
-          ...current.toJson(),
-          ...params.patch,
-        };
-        final T updated = _fromJson(merged);
-        return _repo.write(params.docId, updated);
-      },
-    );
+    return r.fold((ErrorItem err) => Left<ErrorItem, T>(err), (
+      T current,
+    ) async {
+      final Map<String, dynamic> merged = <String, dynamic>{
+        ...current.toJson(),
+        ...params.patch,
+      };
+      final T updated = _fromJson(merged);
+      return _repo.write(params.docId, updated);
+    });
   }
 }
 
@@ -650,17 +655,20 @@ class EnsureDocUseCase<T extends Model>
   @override
   Future<Either<ErrorItem, T>> call(EnsureParams<T> params) async {
     final Either<ErrorItem, T> r = await _repo.read(params.docId);
-    return r.fold((ErrorItem err) async {
-      if (err.code == DatabaseErrorItems.notFound.code) {
-        return _repo.write(params.docId, params.create());
-      }
-      return Left<ErrorItem, T>(err);
-    }, (T current) async {
-      if (params.updateIfExists != null) {
-        return _repo.write(params.docId, params.updateIfExists!(current));
-      }
-      return Right<ErrorItem, T>(current);
-    });
+    return r.fold(
+      (ErrorItem err) async {
+        if (err.code == DatabaseErrorItems.notFound.code) {
+          return _repo.write(params.docId, params.create());
+        }
+        return Left<ErrorItem, T>(err);
+      },
+      (T current) async {
+        if (params.updateIfExists != null) {
+          return _repo.write(params.docId, params.updateIfExists!(current));
+        }
+        return Right<ErrorItem, T>(current);
+      },
+    );
   }
 }
 
@@ -689,10 +697,12 @@ class EnsureDocUseCase<T extends Model>
 /// ```
 class ReadManyDocsUseCase<T extends Model>
     implements
-        UseCase<Either<ErrorItem, Map<String, Either<ErrorItem, T>>>,
-            ReadManyParams> {
+        UseCase<
+          Either<ErrorItem, Map<String, Either<ErrorItem, T>>>,
+          ReadManyParams
+        > {
   ReadManyDocsUseCase(this._repo, {ErrorMapper? mapper})
-      : _mapper = mapper ?? const DefaultErrorMapper();
+    : _mapper = mapper ?? const DefaultErrorMapper();
 
   final RepositoryWsDatabase<T> _repo;
   final ErrorMapper _mapper;
@@ -743,10 +753,12 @@ class ReadManyDocsUseCase<T extends Model>
 /// ```
 class WriteManyDocsUseCase<T extends Model>
     implements
-        UseCase<Either<ErrorItem, Map<String, Either<ErrorItem, T>>>,
-            WriteManyParams<T>> {
+        UseCase<
+          Either<ErrorItem, Map<String, Either<ErrorItem, T>>>,
+          WriteManyParams<T>
+        > {
   WriteManyDocsUseCase(this._repo, {ErrorMapper? mapper})
-      : _mapper = mapper ?? const DefaultErrorMapper();
+    : _mapper = mapper ?? const DefaultErrorMapper();
 
   final RepositoryWsDatabase<T> _repo;
   final ErrorMapper _mapper;
@@ -791,10 +803,12 @@ class WriteManyDocsUseCase<T extends Model>
 /// ```
 class DeleteManyDocsUseCase<T extends Model>
     implements
-        UseCase<Either<ErrorItem, Map<String, Either<ErrorItem, Unit>>>,
-            DeleteManyParams> {
+        UseCase<
+          Either<ErrorItem, Map<String, Either<ErrorItem, Unit>>>,
+          DeleteManyParams
+        > {
   DeleteManyDocsUseCase(this._repo, {ErrorMapper? mapper})
-      : _mapper = mapper ?? const DefaultErrorMapper();
+    : _mapper = mapper ?? const DefaultErrorMapper();
 
   final RepositoryWsDatabase<T> _repo;
   final ErrorMapper _mapper;

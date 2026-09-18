@@ -3,18 +3,13 @@ import 'package:jocaagura_domain/jocaagura_domain.dart';
 
 void main() {
   group('ModelLanguage constructor', () {
-    test(
-      'Given only languageCode When constructed Then optional codes default to empty strings',
-      () {
-        const ModelLanguage language = ModelLanguage(
-          languageCode: 'es',
-        );
+    test('Given only languageCode When constructed Then optional codes default to empty strings', () {
+      const ModelLanguage language = ModelLanguage(languageCode: 'es');
 
-        expect(language.languageCode, 'es');
-        expect(language.scriptCode, '');
-        expect(language.regionCode, '');
-      },
-    );
+      expect(language.languageCode, 'es');
+      expect(language.scriptCode, '');
+      expect(language.regionCode, '');
+    });
 
     test(
       'Given all canonical codes When constructed Then values are preserved',
@@ -39,105 +34,77 @@ void main() {
   });
 
   group('ModelLanguage serialization contract', () {
-    test(
-      'Given serialization constants When inspected Then JSON keys remain stable',
-      () {
-        expect(ModelLanguage.languageCodeKey, 'languageCode');
-        expect(ModelLanguage.scriptCodeKey, 'scriptCode');
-        expect(ModelLanguage.regionCodeKey, 'regionCode');
-      },
-    );
+    test('Given serialization constants When inspected Then JSON keys remain stable', () {
+      expect(ModelLanguage.languageCodeKey, 'languageCode');
+      expect(ModelLanguage.scriptCodeKey, 'scriptCode');
+      expect(ModelLanguage.regionCodeKey, 'regionCode');
+    });
 
-    test(
-      'Given undeterminedCode When inspected Then it remains und',
-      () {
-        expect(ModelLanguage.undeterminedCode, 'und');
-      },
-    );
+    test('Given undeterminedCode When inspected Then it remains und', () {
+      expect(ModelLanguage.undeterminedCode, 'und');
+    });
 
-    test(
-      'Given a language with all fields When toJson is called Then all fields are serialized',
-      () {
-        const ModelLanguage language = ModelLanguage.chineseTaiwan;
+    test('Given a language with all fields When toJson is called Then all fields are serialized', () {
+      const ModelLanguage language = ModelLanguage.chineseTaiwan;
 
-        final Map<String, dynamic> json = language.toJson();
+      final Map<String, dynamic> json = language.toJson();
 
-        expect(
-          json,
-          <String, dynamic>{
-            'languageCode': 'zh',
-            'scriptCode': 'Hant',
-            'regionCode': 'TW',
-          },
-        );
-      },
-    );
+      expect(json, <String, dynamic>{
+        'languageCode': 'zh',
+        'scriptCode': 'Hant',
+        'regionCode': 'TW',
+      });
+    });
 
-    test(
-      'Given empty optional fields When toJson is called Then all keys are still included',
-      () {
-        const ModelLanguage language = ModelLanguage(
-          languageCode: 'es',
-        );
+    test('Given empty optional fields When toJson is called Then all keys are still included', () {
+      const ModelLanguage language = ModelLanguage(languageCode: 'es');
 
-        final Map<String, dynamic> json = language.toJson();
+      final Map<String, dynamic> json = language.toJson();
 
-        expect(
-          json,
-          <String, dynamic>{
-            'languageCode': 'es',
-            'scriptCode': '',
-            'regionCode': '',
-          },
-        );
-      },
-    );
+      expect(json, <String, dynamic>{
+        'languageCode': 'es',
+        'scriptCode': '',
+        'regionCode': '',
+      });
+    });
 
-    test(
-      'Given a serialized map When it is modified Then the language remains unchanged',
-      () {
-        const ModelLanguage language = ModelLanguage.spanishColombia;
+    test('Given a serialized map When it is modified Then the language remains unchanged', () {
+      const ModelLanguage language = ModelLanguage.spanishColombia;
 
-        final Map<String, dynamic> json = language.toJson();
+      final Map<String, dynamic> json = language.toJson();
 
-        json['languageCode'] = 'en';
-        json['regionCode'] = 'US';
+      json['languageCode'] = 'en';
+      json['regionCode'] = 'US';
 
-        expect(language, ModelLanguage.spanishColombia);
+      expect(language, ModelLanguage.spanishColombia);
 
-        final Map<String, dynamic> secondJson = language.toJson();
+      final Map<String, dynamic> secondJson = language.toJson();
 
-        expect(secondJson['languageCode'], 'es');
-        expect(secondJson['regionCode'], 'CO');
-      },
-    );
+      expect(secondJson['languageCode'], 'es');
+      expect(secondJson['regionCode'], 'CO');
+    });
   });
 
   group('ModelLanguage fromJson normalization', () {
-    test(
-      'Given mixed-case and padded codes When parsed Then values are canonicalized',
-      () {
-        final ModelLanguage language = ModelLanguage.fromJson(
-          const <String, dynamic>{
-            'languageCode': ' ES ',
-            'scriptCode': ' hAnT ',
-            'regionCode': ' co ',
-          },
-        );
+    test('Given mixed-case and padded codes When parsed Then values are canonicalized', () {
+      final ModelLanguage language = ModelLanguage.fromJson(
+        const <String, dynamic>{
+          'languageCode': ' ES ',
+          'scriptCode': ' hAnT ',
+          'regionCode': ' co ',
+        },
+      );
 
-        expect(language.languageCode, 'es');
-        expect(language.scriptCode, 'Hant');
-        expect(language.regionCode, 'CO');
-      },
-    );
+      expect(language.languageCode, 'es');
+      expect(language.scriptCode, 'Hant');
+      expect(language.regionCode, 'CO');
+    });
 
     test(
       'Given an empty languageCode When parsed Then undetermined is used',
       () {
         final ModelLanguage language = ModelLanguage.fromJson(
-          const <String, dynamic>{
-            'languageCode': '',
-          },
+          const <String, dynamic>{'languageCode': ''},
         );
 
         expect(language, ModelLanguage.undetermined);
@@ -185,125 +152,89 @@ void main() {
       },
     );
 
-    test(
-      'Given missing optional codes When parsed Then they remain empty',
-      () {
-        final ModelLanguage language = ModelLanguage.fromJson(
-          const <String, dynamic>{
-            'languageCode': 'EN',
-          },
-        );
+    test('Given missing optional codes When parsed Then they remain empty', () {
+      final ModelLanguage language = ModelLanguage.fromJson(
+        const <String, dynamic>{'languageCode': 'EN'},
+      );
 
-        expect(language.languageCode, 'en');
-        expect(language.scriptCode, '');
-        expect(language.regionCode, '');
-      },
-    );
+      expect(language.languageCode, 'en');
+      expect(language.scriptCode, '');
+      expect(language.regionCode, '');
+    });
 
-    test(
-      'Given a mixed-case script When parsed Then it is normalized to title case',
-      () {
-        final ModelLanguage language = ModelLanguage.fromJson(
-          const <String, dynamic>{
-            'languageCode': 'zh',
-            'scriptCode': 'hAnT',
-          },
-        );
+    test('Given a mixed-case script When parsed Then it is normalized to title case', () {
+      final ModelLanguage language = ModelLanguage.fromJson(
+        const <String, dynamic>{'languageCode': 'zh', 'scriptCode': 'hAnT'},
+      );
 
-        expect(language.scriptCode, 'Hant');
-      },
-    );
+      expect(language.scriptCode, 'Hant');
+    });
 
-    test(
-      'Given a one-character script When parsed Then normalization remains safe',
-      () {
-        final ModelLanguage language = ModelLanguage.fromJson(
-          const <String, dynamic>{
-            'languageCode': 'x',
-            'scriptCode': 'h',
-          },
-        );
+    test('Given a one-character script When parsed Then normalization remains safe', () {
+      final ModelLanguage language = ModelLanguage.fromJson(
+        const <String, dynamic>{'languageCode': 'x', 'scriptCode': 'h'},
+      );
 
-        expect(language.scriptCode, 'H');
-      },
-    );
+      expect(language.scriptCode, 'H');
+    });
 
-    test(
-      'Given an input JSON map When parsed Then the original map is not mutated',
-      () {
-        final Map<String, dynamic> json = <String, dynamic>{
-          'languageCode': ' ES ',
-          'scriptCode': ' hAnT ',
-          'regionCode': ' co ',
-        };
+    test('Given an input JSON map When parsed Then the original map is not mutated', () {
+      final Map<String, dynamic> json = <String, dynamic>{
+        'languageCode': ' ES ',
+        'scriptCode': ' hAnT ',
+        'regionCode': ' co ',
+      };
 
-        final Map<String, dynamic> original = Map<String, dynamic>.from(json);
+      final Map<String, dynamic> original = Map<String, dynamic>.from(json);
 
-        ModelLanguage.fromJson(json);
+      ModelLanguage.fromJson(json);
 
-        expect(json, original);
-      },
-    );
+      expect(json, original);
+    });
   });
 
   group('ModelLanguage JSON round trip', () {
-    test(
-      'Given a canonical language When serialized and parsed Then equality is preserved',
-      () {
-        const ModelLanguage original = ModelLanguage.chineseTaiwan;
+    test('Given a canonical language When serialized and parsed Then equality is preserved', () {
+      const ModelLanguage original = ModelLanguage.chineseTaiwan;
 
-        final Map<String, dynamic> json = original.toJson();
-        final ModelLanguage restored = ModelLanguage.fromJson(json);
+      final Map<String, dynamic> json = original.toJson();
+      final ModelLanguage restored = ModelLanguage.fromJson(json);
 
-        expect(restored, original);
-      },
-    );
+      expect(restored, original);
+    });
 
-    test(
-      'Given a predefined language When serialized and parsed Then its contract is preserved',
-      () {
-        const ModelLanguage original = ModelLanguage.spanishColombia;
+    test('Given a predefined language When serialized and parsed Then its contract is preserved', () {
+      const ModelLanguage original = ModelLanguage.spanishColombia;
 
-        final ModelLanguage restored = ModelLanguage.fromJson(
-          original.toJson(),
-        );
+      final ModelLanguage restored = ModelLanguage.fromJson(original.toJson());
 
-        expect(restored, original);
-      },
-    );
+      expect(restored, original);
+    });
   });
 
   group('ModelLanguage equality', () {
-    test(
-      'Given the same reference When compared Then equality uses the identity path',
-      () {
-        const ModelLanguage language = ModelLanguage.spanishColombia;
+    test('Given the same reference When compared Then equality uses the identity path', () {
+      const ModelLanguage language = ModelLanguage.spanishColombia;
 
-        const ModelLanguage sameReference = language;
+      const ModelLanguage sameReference = language;
 
-        expect(identical(language, sameReference), isTrue);
-        expect(language == sameReference, isTrue);
-      },
-    );
+      expect(identical(language, sameReference), isTrue);
+      expect(language == sameReference, isTrue);
+    });
 
-    test(
-      'Given separate instances with equal fields When compared Then they are equal',
-      () {
-        const ModelLanguage first = ModelLanguage.spanishColombia;
+    test('Given separate instances with equal fields When compared Then they are equal', () {
+      const ModelLanguage first = ModelLanguage.spanishColombia;
 
-        const ModelLanguage second = ModelLanguage.spanishColombia;
+      const ModelLanguage second = ModelLanguage.spanishColombia;
 
-        expect(identical(first, second), isTrue);
-        expect(first, second);
-      },
-    );
+      expect(identical(first, second), isTrue);
+      expect(first, second);
+    });
 
     test(
       'Given an object of another type When compared Then equality is false',
       () {
-        const ModelLanguage language = ModelLanguage(
-          languageCode: 'es',
-        );
+        const ModelLanguage language = ModelLanguage(languageCode: 'es');
 
         // ignore: unrelated_type_equality_checks
         expect(language == 'es', isFalse);
@@ -535,155 +466,94 @@ void main() {
       test(
         'Given ${testCase.name} When inspected Then its canonical configuration is preserved',
         () {
-          expect(
-            testCase.language.languageCode,
-            testCase.languageCode,
-          );
-          expect(
-            testCase.language.scriptCode,
-            testCase.scriptCode,
-          );
-          expect(
-            testCase.language.regionCode,
-            testCase.regionCode,
-          );
+          expect(testCase.language.languageCode, testCase.languageCode);
+          expect(testCase.language.scriptCode, testCase.scriptCode);
+          expect(testCase.language.regionCode, testCase.regionCode);
         },
       );
     }
   });
   group('ModelLanguage canonicalTag', () {
-    test(
-      'Given only a languageCode When canonicalTag is read Then it returns the language code',
-      () {
-        const ModelLanguage language = ModelLanguage(
-          languageCode: 'es',
-        );
+    test('Given only a languageCode When canonicalTag is read Then it returns the language code', () {
+      const ModelLanguage language = ModelLanguage(languageCode: 'es');
 
-        expect(language.canonicalTag, 'es');
-      },
-    );
+      expect(language.canonicalTag, 'es');
+    });
 
-    test(
-      'Given languageCode and regionCode When canonicalTag is read Then it returns language-region',
-      () {
-        const ModelLanguage language = ModelLanguage.spanishColombia;
+    test('Given languageCode and regionCode When canonicalTag is read Then it returns language-region', () {
+      const ModelLanguage language = ModelLanguage.spanishColombia;
 
-        expect(language.canonicalTag, 'es-CO');
-      },
-    );
+      expect(language.canonicalTag, 'es-CO');
+    });
 
-    test(
-      'Given languageCode and scriptCode When canonicalTag is read Then it returns language-script',
-      () {
-        const ModelLanguage language = ModelLanguage(
-          languageCode: 'zh',
-          scriptCode: 'Hant',
-        );
+    test('Given languageCode and scriptCode When canonicalTag is read Then it returns language-script', () {
+      const ModelLanguage language = ModelLanguage(
+        languageCode: 'zh',
+        scriptCode: 'Hant',
+      );
 
-        expect(language.canonicalTag, 'zh-Hant');
-      },
-    );
+      expect(language.canonicalTag, 'zh-Hant');
+    });
 
-    test(
-      'Given languageCode scriptCode and regionCode When canonicalTag is read Then it returns the complete canonical tag',
-      () {
-        const ModelLanguage language = ModelLanguage.chineseTaiwan;
+    test('Given languageCode scriptCode and regionCode When canonicalTag is read Then it returns the complete canonical tag', () {
+      const ModelLanguage language = ModelLanguage.chineseTaiwan;
 
-        expect(language.canonicalTag, 'zh-Hant-TW');
-      },
-    );
+      expect(language.canonicalTag, 'zh-Hant-TW');
+    });
 
-    test(
-      'Given the undetermined language When canonicalTag is read Then it returns und',
-      () {
-        expect(
-          ModelLanguage.undetermined.canonicalTag,
-          ModelLanguage.undeterminedCode,
-        );
-      },
-    );
+    test('Given the undetermined language When canonicalTag is read Then it returns und', () {
+      expect(
+        ModelLanguage.undetermined.canonicalTag,
+        ModelLanguage.undeterminedCode,
+      );
+    });
 
-    test(
-      'Given a predefined language When canonicalTag is read Then it matches its canonical representation',
-      () {
-        expect(
-          ModelLanguage.spanishColombia.canonicalTag,
-          'es-CO',
-        );
+    test('Given a predefined language When canonicalTag is read Then it matches its canonical representation', () {
+      expect(ModelLanguage.spanishColombia.canonicalTag, 'es-CO');
 
-        expect(
-          ModelLanguage.chineseChina.canonicalTag,
-          'zh-Hans-CN',
-        );
-      },
-    );
+      expect(ModelLanguage.chineseChina.canonicalTag, 'zh-Hans-CN');
+    });
   });
   group('ModelLanguage canonicalTag', () {
-    test(
-      'Given only a languageCode When canonicalTag is read Then it returns the language code',
-      () {
-        const ModelLanguage language = ModelLanguage(
-          languageCode: 'es',
-        );
+    test('Given only a languageCode When canonicalTag is read Then it returns the language code', () {
+      const ModelLanguage language = ModelLanguage(languageCode: 'es');
 
-        expect(language.canonicalTag, 'es');
-      },
-    );
+      expect(language.canonicalTag, 'es');
+    });
 
-    test(
-      'Given languageCode and regionCode When canonicalTag is read Then it returns language-region',
-      () {
-        const ModelLanguage language = ModelLanguage.spanishColombia;
+    test('Given languageCode and regionCode When canonicalTag is read Then it returns language-region', () {
+      const ModelLanguage language = ModelLanguage.spanishColombia;
 
-        expect(language.canonicalTag, 'es-CO');
-      },
-    );
+      expect(language.canonicalTag, 'es-CO');
+    });
 
-    test(
-      'Given languageCode and scriptCode When canonicalTag is read Then it returns language-script',
-      () {
-        const ModelLanguage language = ModelLanguage(
-          languageCode: 'zh',
-          scriptCode: 'Hant',
-        );
+    test('Given languageCode and scriptCode When canonicalTag is read Then it returns language-script', () {
+      const ModelLanguage language = ModelLanguage(
+        languageCode: 'zh',
+        scriptCode: 'Hant',
+      );
 
-        expect(language.canonicalTag, 'zh-Hant');
-      },
-    );
+      expect(language.canonicalTag, 'zh-Hant');
+    });
 
-    test(
-      'Given languageCode scriptCode and regionCode When canonicalTag is read Then it returns the complete canonical tag',
-      () {
-        const ModelLanguage language = ModelLanguage.chineseTaiwan;
+    test('Given languageCode scriptCode and regionCode When canonicalTag is read Then it returns the complete canonical tag', () {
+      const ModelLanguage language = ModelLanguage.chineseTaiwan;
 
-        expect(language.canonicalTag, 'zh-Hant-TW');
-      },
-    );
+      expect(language.canonicalTag, 'zh-Hant-TW');
+    });
 
-    test(
-      'Given the undetermined language When canonicalTag is read Then it returns und',
-      () {
-        expect(
-          ModelLanguage.undetermined.canonicalTag,
-          ModelLanguage.undeterminedCode,
-        );
-      },
-    );
+    test('Given the undetermined language When canonicalTag is read Then it returns und', () {
+      expect(
+        ModelLanguage.undetermined.canonicalTag,
+        ModelLanguage.undeterminedCode,
+      );
+    });
 
-    test(
-      'Given a predefined language When canonicalTag is read Then it matches its canonical representation',
-      () {
-        expect(
-          ModelLanguage.spanishColombia.canonicalTag,
-          'es-CO',
-        );
+    test('Given a predefined language When canonicalTag is read Then it matches its canonical representation', () {
+      expect(ModelLanguage.spanishColombia.canonicalTag, 'es-CO');
 
-        expect(
-          ModelLanguage.chineseChina.canonicalTag,
-          'zh-Hans-CN',
-        );
-      },
-    );
+      expect(ModelLanguage.chineseChina.canonicalTag, 'zh-Hans-CN');
+    });
   });
 }
 

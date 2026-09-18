@@ -123,9 +123,7 @@ class ModelConfigHttpRequest extends Model {
     Map<String, dynamic>? body;
     if (json.containsKey(ModelConfigHttpRequestEnum.body.name) &&
         json[ModelConfigHttpRequestEnum.body.name] != null) {
-      body = Utils.mapFromDynamic(
-        json[ModelConfigHttpRequestEnum.body.name],
-      );
+      body = Utils.mapFromDynamic(json[ModelConfigHttpRequestEnum.body.name]);
     }
 
     // metadata (always normalized, never null)
@@ -207,14 +205,15 @@ class ModelConfigHttpRequest extends Model {
   /// ```
   @override
   Map<String, dynamic> toJson() => <String, dynamic>{
-        ModelConfigHttpRequestEnum.method.name: method.name,
-        ModelConfigHttpRequestEnum.uri.name: uri.toString(),
-        ModelConfigHttpRequestEnum.headers.name: headers,
-        ModelConfigHttpRequestEnum.body.name: body,
-        ModelConfigHttpRequestEnum.timeout.name:
-            timeout != null ? Utils.durationToJson(timeout!) : null,
-        ModelConfigHttpRequestEnum.metadata.name: metadata,
-      };
+    ModelConfigHttpRequestEnum.method.name: method.name,
+    ModelConfigHttpRequestEnum.uri.name: uri.toString(),
+    ModelConfigHttpRequestEnum.headers.name: headers,
+    ModelConfigHttpRequestEnum.body.name: body,
+    ModelConfigHttpRequestEnum.timeout.name: timeout != null
+        ? Utils.durationToJson(timeout!)
+        : null,
+    ModelConfigHttpRequestEnum.metadata.name: metadata,
+  };
 
   /// Returns a copy with selected fields replaced.
   ///
@@ -268,13 +267,13 @@ class ModelConfigHttpRequest extends Model {
 
   @override
   int get hashCode => Object.hash(
-        method,
-        uri,
-        Utils.deepHash(headers),
-        Utils.deepHash(body),
-        timeout,
-        Utils.deepHash(metadata),
-      );
+    method,
+    uri,
+    Utils.deepHash(headers),
+    Utils.deepHash(body),
+    timeout,
+    Utils.deepHash(metadata),
+  );
 
   /// Parses [HttpMethodEnum] from its string `name`.
   ///

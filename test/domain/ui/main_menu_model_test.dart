@@ -35,15 +35,12 @@ void main() {
       expect(copiedModelMainMenu.onPressed, equals(newOnPressed));
       expect(copiedModelMainMenu.label, equals(newLabel));
       expect(copiedModelMainMenu.description, equals(newDescription));
-      final ModelMainMenuModel copied2ModelMainMenu =
-          copiedModelMainMenu.copyWith();
+      final ModelMainMenuModel copied2ModelMainMenu = copiedModelMainMenu
+          .copyWith();
       expect(copied2ModelMainMenu, equals(copiedModelMainMenu));
 
       final ModelMainMenuModel identicalMainMenu = modelMainMenu.copyWith();
-      expect(
-        identicalMainMenu,
-        equals(modelMainMenu),
-      );
+      expect(identicalMainMenu, equals(modelMainMenu));
     });
 
     test('equality comparison returns true for equal instances', () {

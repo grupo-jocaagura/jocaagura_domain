@@ -64,16 +64,15 @@ class AddressModel extends Model {
   /// This factory constructor is used for deserializing a JSON structure into
   /// an instance of [AddressModel].
   factory AddressModel.fromJson(Map<String, dynamic> json) => AddressModel(
-        id: Utils.getStringFromDynamic(json['id']),
-        postalCode: Utils.getIntegerFromDynamic(json['postalCode']),
-        country: Utils.getStringFromDynamic(json['country']),
-        administrativeArea:
-            Utils.getStringFromDynamic(json['administrativeArea']),
-        city: Utils.getStringFromDynamic(json['city']),
-        locality: Utils.getStringFromDynamic(json['locality']),
-        address: Utils.getStringFromDynamic(json['address']),
-        notes: Utils.getStringFromDynamic(json['notes']),
-      );
+    id: Utils.getStringFromDynamic(json['id']),
+    postalCode: Utils.getIntegerFromDynamic(json['postalCode']),
+    country: Utils.getStringFromDynamic(json['country']),
+    administrativeArea: Utils.getStringFromDynamic(json['administrativeArea']),
+    city: Utils.getStringFromDynamic(json['city']),
+    locality: Utils.getStringFromDynamic(json['locality']),
+    address: Utils.getStringFromDynamic(json['address']),
+    notes: Utils.getStringFromDynamic(json['notes']),
+  );
 
   /// A unique identifier for the address.
   final String id;
@@ -112,30 +111,29 @@ class AddressModel extends Model {
     String? locality,
     String? address,
     String? notes,
-  }) =>
-      AddressModel(
-        id: id ?? this.id,
-        postalCode: postalCode ?? this.postalCode,
-        country: country ?? this.country,
-        administrativeArea: administrativeArea ?? this.administrativeArea,
-        city: city ?? this.city,
-        locality: locality ?? this.locality,
-        address: address ?? this.address,
-        notes: notes ?? this.notes,
-      );
+  }) => AddressModel(
+    id: id ?? this.id,
+    postalCode: postalCode ?? this.postalCode,
+    country: country ?? this.country,
+    administrativeArea: administrativeArea ?? this.administrativeArea,
+    city: city ?? this.city,
+    locality: locality ?? this.locality,
+    address: address ?? this.address,
+    notes: notes ?? this.notes,
+  );
 
   /// Converts this [AddressModel] into a JSON map.
   @override
   Map<String, dynamic> toJson() => <String, dynamic>{
-        'id': id,
-        'postalCode': postalCode,
-        'country': country,
-        'administrativeArea': administrativeArea,
-        'city': city,
-        'locality': locality,
-        'address': address,
-        'notes': notes,
-      };
+    'id': id,
+    'postalCode': postalCode,
+    'country': country,
+    'administrativeArea': administrativeArea,
+    'city': city,
+    'locality': locality,
+    'address': address,
+    'notes': notes,
+  };
 
   /// Returns the hash code for this [AddressModel].
   ///

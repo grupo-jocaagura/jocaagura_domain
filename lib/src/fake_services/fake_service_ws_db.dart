@@ -72,20 +72,19 @@ import '../../jocaagura_domain.dart';
 /// db.dispose();
 /// ```
 class FakeServiceWsDb implements ServiceWsDb {
-  /// Creates a fake database with the provided [config].
-  FakeServiceWsDb({WsDbConfig config = defaultWsDbConfig})
-      : _config = config,
-        _collections =
-            BlocGeneral<Map<String, BlocGeneral<Map<String, dynamic>>>>(
-          <String, BlocGeneral<Map<String, dynamic>>>{},
-        );
+  /// Creates a fake database with the provided [_config].
+  FakeServiceWsDb({this._config = defaultWsDbConfig})
+    : _collections =
+          BlocGeneral<Map<String, BlocGeneral<Map<String, dynamic>>>>(
+            <String, BlocGeneral<Map<String, dynamic>>>{},
+          );
 
   /// Runtime configuration toggles.
   final WsDbConfig _config;
 
   /// Root controller: collection name → inner document controller (docId → JSON).
   final BlocGeneral<Map<String, BlocGeneral<Map<String, dynamic>>>>
-      _collections;
+  _collections;
 
   bool _disposed = false;
 
@@ -115,12 +114,14 @@ class FakeServiceWsDb implements ServiceWsDb {
       await Future<void>.delayed(_config.latency);
     }
 
-    final BlocGeneral<Map<String, dynamic>> inner =
-        _ensureCollection(collection);
+    final BlocGeneral<Map<String, dynamic>> inner = _ensureCollection(
+      collection,
+    );
     final Map<String, dynamic> current = inner.value;
 
-    final Map<String, dynamic> safeDoc =
-        _config.deepCopies ? _deepCopyMap(document) : document;
+    final Map<String, dynamic> safeDoc = _config.deepCopies
+        ? _deepCopyMap(document)
+        : document;
 
     inner.value = <String, dynamic>{...current, docId: safeDoc};
 
@@ -140,8 +141,9 @@ class FakeServiceWsDb implements ServiceWsDb {
       await Future<void>.delayed(_config.latency);
     }
 
-    final BlocGeneral<Map<String, dynamic>> inner =
-        _ensureCollection(collection);
+    final BlocGeneral<Map<String, dynamic>> inner = _ensureCollection(
+      collection,
+    );
 
     if (!inner.value.containsKey(docId)) {
       throw StateError('Document not found');
@@ -158,16 +160,19 @@ class FakeServiceWsDb implements ServiceWsDb {
   }) {
     _ensureNotDisposed();
     _validate(collection: collection, docId: docId);
-    final BlocGeneral<Map<String, dynamic>> inner =
-        _ensureCollection(collection);
+    final BlocGeneral<Map<String, dynamic>> inner = _ensureCollection(
+      collection,
+    );
 
-    return Stream<Map<String, dynamic>>.multi(
-        (StreamController<Map<String, dynamic>> ctrl) {
+    return Stream<Map<String, dynamic>>.multi((
+      StreamController<Map<String, dynamic>> ctrl,
+    ) {
       Map<String, dynamic>? last;
 
       void emit(Map<String, dynamic> value) {
-        final Map<String, dynamic> out =
-            _config.deepCopies ? _deepCopyMap(value) : value;
+        final Map<String, dynamic> out = _config.deepCopies
+            ? _deepCopyMap(value)
+            : value;
 
         if (_config.dedupeByContent) {
           if (last != null && _deepEqualsMap(last!, out)) {
@@ -182,13 +187,15 @@ class FakeServiceWsDb implements ServiceWsDb {
 
       // Seed (puede ser {} si aún no existe).
       if (_config.emitInitial) {
-        final Map<String, dynamic> first =
-            Utils.mapFromDynamic(inner.value[docId]);
+        final Map<String, dynamic> first = Utils.mapFromDynamic(
+          inner.value[docId],
+        );
         emit(first);
       }
 
-      final StreamSubscription<Map<String, dynamic>> sub =
-          inner.stream.listen((Map<String, dynamic> docs) {
+      final StreamSubscription<Map<String, dynamic>> sub = inner.stream.listen((
+        Map<String, dynamic> docs,
+      ) {
         final Map<String, dynamic> v = Utils.mapFromDynamic(docs[docId]);
         emit(v);
       });
@@ -204,11 +211,13 @@ class FakeServiceWsDb implements ServiceWsDb {
   }) {
     _ensureNotDisposed();
     _validate(collection: collection);
-    final BlocGeneral<Map<String, dynamic>> inner =
-        _ensureCollection(collection);
+    final BlocGeneral<Map<String, dynamic>> inner = _ensureCollection(
+      collection,
+    );
 
-    return Stream<List<Map<String, dynamic>>>.multi(
-        (StreamController<List<Map<String, dynamic>>> ctrl) {
+    return Stream<List<Map<String, dynamic>>>.multi((
+      StreamController<List<Map<String, dynamic>>> ctrl,
+    ) {
       List<Map<String, dynamic>>? last;
 
       List<Map<String, dynamic>> buildSnapshot(Map<String, dynamic> raw) {
@@ -238,8 +247,9 @@ class FakeServiceWsDb implements ServiceWsDb {
         emit(buildSnapshot(inner.value));
       }
 
-      final StreamSubscription<Map<String, dynamic>> sub =
-          inner.stream.listen((Map<String, dynamic> docs) {
+      final StreamSubscription<Map<String, dynamic>> sub = inner.stream.listen((
+        Map<String, dynamic> docs,
+      ) {
         emit(buildSnapshot(docs));
       });
 
@@ -262,8 +272,9 @@ class FakeServiceWsDb implements ServiceWsDb {
       await Future<void>.delayed(_config.latency);
     }
 
-    final BlocGeneral<Map<String, dynamic>> inner =
-        _ensureCollection(collection);
+    final BlocGeneral<Map<String, dynamic>> inner = _ensureCollection(
+      collection,
+    );
     final Map<String, dynamic> current = inner.value;
 
     if (current.containsKey(docId)) {
@@ -299,8 +310,8 @@ class FakeServiceWsDb implements ServiceWsDb {
       final BlocGeneral<Map<String, dynamic>> inner =
           BlocGeneral<Map<String, dynamic>>(<String, dynamic>{});
       final Map<String, BlocGeneral<Map<String, dynamic>>> updated =
-          <String, BlocGeneral<Map<String, dynamic>>>{...root}..[collection] =
-              inner;
+          <String, BlocGeneral<Map<String, dynamic>>>{...root}
+            ..[collection] = inner;
       _collections.value = updated;
       return inner;
     }

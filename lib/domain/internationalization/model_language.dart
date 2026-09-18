@@ -92,14 +92,15 @@ class ModelLanguage {
   /// }
   /// ```
   factory ModelLanguage.fromJson(Map<String, dynamic> json) {
-    final String rawLanguageCode =
-        Utils.getStringFromDynamic(json[languageCodeKey]).trim();
+    final String rawLanguageCode = Utils.getStringFromDynamic(
+      json[languageCodeKey],
+    ).trim();
 
-    final String rawScriptCode =
-        Utils.getStringFromDynamic(json[scriptCodeKey]).trim();
+    final String rawScriptCode = Utils.getStringFromDynamic(json[scriptCodeKey])
+        .trim();
 
-    final String rawRegionCode =
-        Utils.getStringFromDynamic(json[regionCodeKey]).trim();
+    final String rawRegionCode = Utils.getStringFromDynamic(json[regionCodeKey])
+        .trim();
 
     return ModelLanguage(
       languageCode: rawLanguageCode.isEmpty
@@ -304,11 +305,7 @@ class ModelLanguage {
   }
 
   @override
-  int get hashCode => Object.hash(
-        languageCode,
-        scriptCode,
-        regionCode,
-      );
+  int get hashCode => Object.hash(languageCode, scriptCode, regionCode);
 
   /// Converts this language configuration into a JSON map.
   ///

@@ -62,20 +62,22 @@ class ModelAclPolicy extends Model {
   /// - `minRoleType` is decoded via `Utils.enumFromJson` using enum `name`.
   /// - `upsertAtIsoDate` accepts strings/DateTime/int; when parseable it is normalized to UTC.
   factory ModelAclPolicy.fromJson(Map<String, dynamic> json) {
-    final String appName =
-        Utils.getStringFromDynamic(json[ModelAclPolicyEnum.appName.name])
-            .trim();
-    final String feature =
-        Utils.getStringFromDynamic(json[ModelAclPolicyEnum.feature.name])
-            .trim();
+    final String appName = Utils.getStringFromDynamic(
+      json[ModelAclPolicyEnum.appName.name],
+    ).trim();
+    final String feature = Utils.getStringFromDynamic(
+      json[ModelAclPolicyEnum.feature.name],
+    ).trim();
 
-    final String rawId =
-        Utils.getStringFromDynamic(json[ModelAclPolicyEnum.id.name]).trim();
+    final String rawId = Utils.getStringFromDynamic(
+      json[ModelAclPolicyEnum.id.name],
+    ).trim();
     final String computedId = buildId(appName: appName, feature: feature);
     final String id = rawId.isEmpty ? computedId : rawId;
 
-    final String rawMinRole =
-        Utils.getStringFromDynamic(json[ModelAclPolicyEnum.minRoleType.name]);
+    final String rawMinRole = Utils.getStringFromDynamic(
+      json[ModelAclPolicyEnum.minRoleType.name],
+    );
 
     return ModelAclPolicy(
       id: id,
@@ -94,20 +96,21 @@ class ModelAclPolicy extends Model {
       upsertAtIsoDate: DateUtils.normalizeIsoOrEmpty(
         json[ModelAclPolicyEnum.upsertAtIsoDate.name],
       ),
-      upsertBy:
-          Utils.getStringFromDynamic(json[ModelAclPolicyEnum.upsertBy.name]),
+      upsertBy: Utils.getStringFromDynamic(
+        json[ModelAclPolicyEnum.upsertBy.name],
+      ),
     );
   }
 
   const ModelAclPolicy._defaults()
-      : id = '',
-        minRoleType = RoleType.viewer,
-        appName = '',
-        feature = '',
-        isActive = false,
-        note = '',
-        upsertAtIsoDate = '',
-        upsertBy = '';
+    : id = '',
+      minRoleType = RoleType.viewer,
+      appName = '',
+      feature = '',
+      isActive = false,
+      note = '',
+      upsertAtIsoDate = '',
+      upsertBy = '';
 
   /// Default instance for fallback/testing.
   static const ModelAclPolicy defaultModelAclPolicy =
@@ -116,10 +119,7 @@ class ModelAclPolicy extends Model {
   /// Canonical id: "appName.feature" (dot notation).
   ///
   /// Note: we **do not** enforce lowercase to keep implementers free to decide.
-  static String buildId({
-    required String appName,
-    required String feature,
-  }) {
+  static String buildId({required String appName, required String feature}) {
     final String a = appName.trim();
     final String f = feature.trim();
     if (a.isEmpty || f.isEmpty) {
@@ -167,7 +167,8 @@ class ModelAclPolicy extends Model {
     String? upsertAtIsoDate,
     String? upsertBy,
   }) {
-    final bool noChanges = id == null &&
+    final bool noChanges =
+        id == null &&
         minRoleType == null &&
         appName == null &&
         feature == null &&
@@ -194,16 +195,17 @@ class ModelAclPolicy extends Model {
 
   @override
   Map<String, dynamic> toJson() => <String, dynamic>{
-        ModelAclPolicyEnum.id.name: id,
-        ModelAclPolicyEnum.minRoleType.name: minRoleType.name,
-        ModelAclPolicyEnum.appName.name: appName,
-        ModelAclPolicyEnum.feature.name: feature,
-        ModelAclPolicyEnum.isActive.name: isActive,
-        ModelAclPolicyEnum.note.name: note,
-        ModelAclPolicyEnum.upsertAtIsoDate.name:
-            DateUtils.normalizeIsoOrEmpty(upsertAtIsoDate),
-        ModelAclPolicyEnum.upsertBy.name: upsertBy,
-      };
+    ModelAclPolicyEnum.id.name: id,
+    ModelAclPolicyEnum.minRoleType.name: minRoleType.name,
+    ModelAclPolicyEnum.appName.name: appName,
+    ModelAclPolicyEnum.feature.name: feature,
+    ModelAclPolicyEnum.isActive.name: isActive,
+    ModelAclPolicyEnum.note.name: note,
+    ModelAclPolicyEnum.upsertAtIsoDate.name: DateUtils.normalizeIsoOrEmpty(
+      upsertAtIsoDate,
+    ),
+    ModelAclPolicyEnum.upsertBy.name: upsertBy,
+  };
 
   @override
   bool operator ==(Object other) {
@@ -223,13 +225,13 @@ class ModelAclPolicy extends Model {
 
   @override
   int get hashCode => Object.hash(
-        id,
-        minRoleType,
-        appName,
-        feature,
-        isActive,
-        note,
-        upsertAtIsoDate,
-        upsertBy,
-      );
+    id,
+    minRoleType,
+    appName,
+    feature,
+    isActive,
+    note,
+    upsertAtIsoDate,
+    upsertBy,
+  );
 }

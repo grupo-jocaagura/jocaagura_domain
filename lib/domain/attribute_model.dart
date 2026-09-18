@@ -3,10 +3,7 @@ part of '../jocaagura_domain.dart';
 /// Alias for backwards compatibility.
 typedef ModelAttribute<T> = AttributeModel<T>;
 
-enum AttributeEnum {
-  name,
-  value,
-}
+enum AttributeEnum { name, value }
 
 /// Represents an immutable name–value attribute where [value] is of type [T].
 ///
@@ -43,10 +40,7 @@ enum AttributeEnum {
 ///   via [AttributeModel.isDomainCompatible].
 class AttributeModel<T> extends Model {
   /// Creates an [AttributeModel] with a [name] and a [value] of type [T].
-  const AttributeModel({
-    required this.value,
-    required this.name,
-  });
+  const AttributeModel({required this.value, required this.name});
 
   /// The attribute value.
   final T value;
@@ -56,14 +50,8 @@ class AttributeModel<T> extends Model {
 
   /// Returns a new [AttributeModel] replacing the provided fields.
   @override
-  AttributeModel<T> copyWith({
-    String? name,
-    T? value,
-  }) =>
-      AttributeModel<T>(
-        value: value ?? this.value,
-        name: name ?? this.name,
-      );
+  AttributeModel<T> copyWith({String? name, T? value}) =>
+      AttributeModel<T>(value: value ?? this.value, name: name ?? this.name);
 
   /// Serializes this attribute to a JSON map:
   /// `{ "value": <T>, "name": <String> }`.
@@ -335,8 +323,7 @@ class AttributeModel<T> extends Model {
 AttributeModel<T> attributeModelfromJson<T>(
   Map<String, dynamic> json,
   T Function(dynamic) fromJsonT,
-) =>
-    attributeModelFromJson<T>(json, fromJsonT);
+) => attributeModelFromJson<T>(json, fromJsonT);
 
 // New idiomatic name
 AttributeModel<T> attributeModelFromJson<T>(

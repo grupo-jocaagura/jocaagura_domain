@@ -11,18 +11,9 @@ part of 'package:jocaagura_domain/jocaagura_domain.dart';
 ///   `"deleted"`.
 /// - Parsed via [Utils.enumFromJson], falling back to [ModelGroupState.active]
 ///   when the value is missing or unknown.
-enum ModelGroupState {
-  active,
-  archived,
-  deleted,
-}
+enum ModelGroupState { active, archived, deleted }
 
-enum ModelGroupPillar {
-  education,
-  logistics,
-  commerce,
-  shared,
-}
+enum ModelGroupPillar { education, logistics, commerce, shared }
 
 enum ModelGroupKind {
   course,
@@ -37,102 +28,35 @@ enum ModelGroupKind {
   other,
 }
 
-enum ModelGroupAliasStatus {
-  active,
-  pending,
-  error,
-}
+enum ModelGroupAliasStatus { active, pending, error }
 
-enum ModelGroupConfigApiSource {
-  directory,
-  cloudIdentity,
-  mixed,
-}
+enum ModelGroupConfigApiSource { directory, cloudIdentity, mixed }
 
-enum ModelGroupConfigLastSyncStatus {
-  never,
-  ok,
-  error,
-}
+enum ModelGroupConfigLastSyncStatus { never, ok, error }
 
-enum ModelGroupDynamicMembershipRuleStatus {
-  active,
-  draft,
-  disabled,
-}
+enum ModelGroupDynamicMembershipRuleStatus { active, draft, disabled }
 
-enum ModelGroupMemberRole {
-  owner,
-  moderator,
-  member,
-  readOnly,
-}
+enum ModelGroupMemberRole { owner, moderator, member, readOnly }
 
-enum ModelGroupMemberEntityType {
-  user,
-  group,
-  serviceAccount,
-}
+enum ModelGroupMemberEntityType { user, group, serviceAccount }
 
-enum ModelGroupMemberSource {
-  manual,
-  fromCourse,
-  fromSheet,
-  syncJob,
-}
+enum ModelGroupMemberSource { manual, fromCourse, fromSheet, syncJob }
 
-enum ModelGroupMemberSubscription {
-  allMail,
-  digest,
-  abridged,
-  noEmail,
-}
+enum ModelGroupMemberSubscription { allMail, digest, abridged, noEmail }
 
-enum ModelGroupSyncMode {
-  manual,
-  fromCourse,
-  fromSheet,
-  mixed,
-}
+enum ModelGroupSyncMode { manual, fromCourse, fromSheet, mixed }
 
-enum ModelGroupSyncSchedule {
-  onDemand,
-  hourly,
-  daily,
-  weekly,
-}
+enum ModelGroupSyncSchedule { onDemand, hourly, daily, weekly }
 
-enum ModelGroupSyncStrategy {
-  fullReplace,
-  merge,
-  onlyAdd,
-  onlyRemove,
-}
+enum ModelGroupSyncStrategy { fullReplace, merge, onlyAdd, onlyRemove }
 
-enum ModelGroupSyncLastResult {
-  never,
-  ok,
-  partialError,
-  error,
-}
+enum ModelGroupSyncLastResult { never, ok, partialError, error }
 
-enum ModelGroupSyncJobSource {
-  course,
-  sheet,
-  manual,
-  bulkImport,
-}
+enum ModelGroupSyncJobSource { course, sheet, manual, bulkImport }
 
-enum ModelGroupSyncJobType {
-  full,
-  incremental,
-}
+enum ModelGroupSyncJobType { full, incremental }
 
-enum ModelGroupSyncJobStatus {
-  running,
-  ok,
-  error,
-}
+enum ModelGroupSyncJobStatus { running, ok, error }
 
 /// ===========================================================================
 /// GROUP
@@ -248,15 +172,14 @@ class ModelGroup extends Model {
     return ModelGroup(
       id: json[ModelGroupEnum.id.name]?.toString() ?? '',
       name: json[ModelGroupEnum.name.name]?.toString() ?? '',
-      description:
-          Utils.getStringFromDynamic(json[ModelGroupEnum.description.name]),
+      description: Utils.getStringFromDynamic(
+        json[ModelGroupEnum.description.name],
+      ),
       email: Utils.getStringFromDynamic(json[ModelGroupEnum.email.name]),
       labels: json[ModelGroupEnum.labels.name] == null
           ? null
           : ModelGroupLabels.fromJson(
-              Utils.mapFromDynamic(
-                json[ModelGroupEnum.labels.name],
-              ),
+              Utils.mapFromDynamic(json[ModelGroupEnum.labels.name]),
             ),
       state: Utils.enumFromJson<ModelGroupState>(
         ModelGroupState.values,
@@ -264,10 +187,12 @@ class ModelGroup extends Model {
         ModelGroupState.active,
       ),
       courseId: Utils.getStringFromDynamic(json[ModelGroupEnum.courseId.name]),
-      projectId:
-          Utils.getStringFromDynamic(json[ModelGroupEnum.projectId.name]),
-      driveFolderId:
-          Utils.getStringFromDynamic(json[ModelGroupEnum.driveFolderId.name]),
+      projectId: Utils.getStringFromDynamic(
+        json[ModelGroupEnum.projectId.name],
+      ),
+      driveFolderId: Utils.getStringFromDynamic(
+        json[ModelGroupEnum.driveFolderId.name],
+      ),
       crud: ModelCrudMetadata.fromJson(
         Utils.mapFromDynamic(json[ModelGroupEnum.crud.name]),
       ),
@@ -349,17 +274,17 @@ class ModelGroup extends Model {
 
   @override
   int get hashCode => Object.hash(
-        id,
-        name,
-        description,
-        email,
-        labels,
-        state,
-        courseId,
-        projectId,
-        driveFolderId,
-        crud,
-      );
+    id,
+    name,
+    description,
+    email,
+    labels,
+    state,
+    courseId,
+    projectId,
+    driveFolderId,
+    crud,
+  );
 
   @override
   String toString() => 'ModelGroup(${toJson()})';

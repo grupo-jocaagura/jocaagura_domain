@@ -71,8 +71,8 @@ class ModelAppVersion extends Model {
     this.changelogUrl = '',
     this.commitSha = '',
     Map<String, dynamic> meta = const <String, dynamic>{},
-  })  : buildAt = _normalizeBuildAt(buildAt),
-        meta = Map<String, dynamic>.unmodifiable(meta);
+  }) : buildAt = _normalizeBuildAt(buildAt),
+       meta = Map<String, dynamic>.unmodifiable(meta);
 
   /// Creates an instance from a JSON-like map.
   ///
@@ -123,19 +123,19 @@ class ModelAppVersion extends Model {
   }
 
   const ModelAppVersion._defaults()
-      : id = 'default',
-        appName = 'app',
-        version = '0.0.0',
-        buildNumber = 0,
-        platform = 'shared',
-        channel = 'dev',
-        buildAt = kDefaultBuildAtIso,
-        minSupportedVersion = '',
-        forceUpdate = false,
-        artifactUrl = '',
-        changelogUrl = '',
-        commitSha = '',
-        meta = const <String, dynamic>{};
+    : id = 'default',
+      appName = 'app',
+      version = '0.0.0',
+      buildNumber = 0,
+      platform = 'shared',
+      channel = 'dev',
+      buildAt = kDefaultBuildAtIso,
+      minSupportedVersion = '',
+      forceUpdate = false,
+      artifactUrl = '',
+      changelogUrl = '',
+      commitSha = '',
+      meta = const <String, dynamic>{};
 
   static const String kDefaultBuildAtIso = '2025-12-07T00:00:00.000Z';
   static const ModelAppVersion defaultModelAppVersion =
@@ -175,22 +175,21 @@ class ModelAppVersion extends Model {
     String? commitSha,
     Object? buildAt,
     Map<String, dynamic>? meta,
-  }) =>
-      ModelAppVersion(
-        id: id ?? this.id,
-        appName: appName ?? this.appName,
-        version: version ?? this.version,
-        buildNumber: buildNumber ?? this.buildNumber,
-        platform: platform ?? this.platform,
-        channel: channel ?? this.channel,
-        minSupportedVersion: minSupportedVersion ?? this.minSupportedVersion,
-        forceUpdate: forceUpdate ?? this.forceUpdate,
-        artifactUrl: artifactUrl ?? this.artifactUrl,
-        changelogUrl: changelogUrl ?? this.changelogUrl,
-        commitSha: commitSha ?? this.commitSha,
-        buildAt: buildAt ?? this.buildAt,
-        meta: Map<String, dynamic>.unmodifiable(meta ?? this.meta),
-      );
+  }) => ModelAppVersion(
+    id: id ?? this.id,
+    appName: appName ?? this.appName,
+    version: version ?? this.version,
+    buildNumber: buildNumber ?? this.buildNumber,
+    platform: platform ?? this.platform,
+    channel: channel ?? this.channel,
+    minSupportedVersion: minSupportedVersion ?? this.minSupportedVersion,
+    forceUpdate: forceUpdate ?? this.forceUpdate,
+    artifactUrl: artifactUrl ?? this.artifactUrl,
+    changelogUrl: changelogUrl ?? this.changelogUrl,
+    commitSha: commitSha ?? this.commitSha,
+    buildAt: buildAt ?? this.buildAt,
+    meta: Map<String, dynamic>.unmodifiable(meta ?? this.meta),
+  );
 
   /// Serializes the model into a JSON map.
   ///
@@ -202,20 +201,20 @@ class ModelAppVersion extends Model {
   /// If mutation is needed, clone it first.
   @override
   Map<String, dynamic> toJson() => <String, dynamic>{
-        ModelAppVersionEnum.id.name: id,
-        ModelAppVersionEnum.appName.name: appName,
-        ModelAppVersionEnum.version.name: version,
-        ModelAppVersionEnum.buildNumber.name: buildNumber,
-        ModelAppVersionEnum.platform.name: platform,
-        ModelAppVersionEnum.channel.name: channel,
-        ModelAppVersionEnum.minSupportedVersion.name: minSupportedVersion,
-        ModelAppVersionEnum.forceUpdate.name: forceUpdate,
-        ModelAppVersionEnum.artifactUrl.name: artifactUrl,
-        ModelAppVersionEnum.changelogUrl.name: changelogUrl,
-        ModelAppVersionEnum.commitSha.name: commitSha,
-        ModelAppVersionEnum.buildAt.name: buildAt,
-        ModelAppVersionEnum.meta.name: meta,
-      };
+    ModelAppVersionEnum.id.name: id,
+    ModelAppVersionEnum.appName.name: appName,
+    ModelAppVersionEnum.version.name: version,
+    ModelAppVersionEnum.buildNumber.name: buildNumber,
+    ModelAppVersionEnum.platform.name: platform,
+    ModelAppVersionEnum.channel.name: channel,
+    ModelAppVersionEnum.minSupportedVersion.name: minSupportedVersion,
+    ModelAppVersionEnum.forceUpdate.name: forceUpdate,
+    ModelAppVersionEnum.artifactUrl.name: artifactUrl,
+    ModelAppVersionEnum.changelogUrl.name: changelogUrl,
+    ModelAppVersionEnum.commitSha.name: commitSha,
+    ModelAppVersionEnum.buildAt.name: buildAt,
+    ModelAppVersionEnum.meta.name: meta,
+  };
 
   /// Two instances are equal when all scalar fields match, `buildAt` encodes
   /// the same normalized instant, and `meta` is deep-equal via
@@ -246,20 +245,20 @@ class ModelAppVersion extends Model {
   /// Guarantee: if `a == b`, then `a.hashCode == b.hashCode`.
   @override
   int get hashCode => Object.hash(
-        id,
-        appName,
-        version,
-        buildNumber,
-        platform,
-        channel,
-        minSupportedVersion,
-        forceUpdate,
-        artifactUrl,
-        changelogUrl,
-        commitSha,
-        buildAt,
-        Utils.deepHash(meta),
-      );
+    id,
+    appName,
+    version,
+    buildNumber,
+    platform,
+    channel,
+    minSupportedVersion,
+    forceUpdate,
+    artifactUrl,
+    changelogUrl,
+    commitSha,
+    buildAt,
+    Utils.deepHash(meta),
+  );
 
   /// Parsed `buildAt` as a UTC `DateTime`.
   ///

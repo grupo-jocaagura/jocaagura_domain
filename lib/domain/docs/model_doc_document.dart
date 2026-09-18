@@ -1,11 +1,7 @@
 part of 'package:jocaagura_domain/jocaagura_domain.dart';
 
 /// Stable JSON keys used by [ModelDocDocument].
-enum ModelDocDocumentEnum {
-  id,
-  title,
-  blocksByIndex,
-}
+enum ModelDocDocumentEnum { id, title, blocksByIndex }
 
 /// Portable document composed of indexed blocks.
 class ModelDocDocument extends Model {
@@ -25,8 +21,9 @@ class ModelDocDocument extends Model {
         if (indexKey < 0) {
           continue;
         }
-        final Map<String, dynamic> blockJson =
-            Utils.mapFromDynamic(entry.value);
+        final Map<String, dynamic> blockJson = Utils.mapFromDynamic(
+          entry.value,
+        );
         tmp[indexKey] = ModelDocBlock.fromJson(blockJson);
       }
     }

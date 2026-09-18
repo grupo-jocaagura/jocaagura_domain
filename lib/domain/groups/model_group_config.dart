@@ -193,8 +193,9 @@ class ModelGroupConfig extends Model {
     json[ModelGroupConfigEnum.resourceName.name] = resourceName;
     json[ModelGroupConfigEnum.etagSettings.name] = etagSettings;
     if (lastSyncAt != null) {
-      json[ModelGroupConfigEnum.lastSyncAt.name] =
-          DateUtils.dateTimeToString(lastSyncAt!);
+      json[ModelGroupConfigEnum.lastSyncAt.name] = DateUtils.dateTimeToString(
+        lastSyncAt!,
+      );
     }
     return json;
   }
@@ -217,17 +218,17 @@ class ModelGroupConfig extends Model {
 
   @override
   int get hashCode => Object.hash(
-        id,
-        groupId,
-        googleGroupId,
-        email,
-        resourceName,
-        apiSource,
-        etagSettings,
-        lastSyncStatus,
-        lastSyncAt,
-        crud,
-      );
+    id,
+    groupId,
+    googleGroupId,
+    email,
+    resourceName,
+    apiSource,
+    etagSettings,
+    lastSyncStatus,
+    lastSyncAt,
+    crud,
+  );
 
   @override
   String toString() => 'ModelGroupConfig(${toJson()})';

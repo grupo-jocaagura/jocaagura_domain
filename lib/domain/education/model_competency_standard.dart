@@ -2,13 +2,7 @@ part of 'package:jocaagura_domain/jocaagura_domain.dart';
 
 /// JSON keys for [ModelCompetencyStandard]. Kept as enum to guarantee roundtrip
 /// stability (avoid string typos and allow `.name` usage).
-enum CompetencyStandardEnum {
-  id,
-  label,
-  area,
-  cineLevel,
-  code,
-}
+enum CompetencyStandardEnum { id, label, area, cineLevel, code }
 
 /// A default instance for tests or placeholders.
 ///
@@ -16,12 +10,12 @@ enum CompetencyStandardEnum {
 /// Not intended for production data.
 const ModelCompetencyStandard defaultCompetencyStandard =
     ModelCompetencyStandard(
-  id: 'STD-DEFAULT',
-  label: 'Undefined competency standard',
-  area: ModelCategory(category: 'general', description: 'General'),
-  cineLevel: 0,
-  code: 'GEN.DEFAULT',
-);
+      id: 'STD-DEFAULT',
+      label: 'Undefined competency standard',
+      area: ModelCategory(category: 'general', description: 'General'),
+      cineLevel: 0,
+      code: 'GEN.DEFAULT',
+    );
 
 /// Represents a top-level competency standard (MEN reference).
 ///
@@ -75,8 +69,9 @@ class ModelCompetencyStandard extends Model {
   factory ModelCompetencyStandard.fromJson(Map<String, dynamic> json) {
     return ModelCompetencyStandard(
       id: Utils.getStringFromDynamic(json[CompetencyStandardEnum.id.name]),
-      label:
-          Utils.getStringFromDynamic(json[CompetencyStandardEnum.label.name]),
+      label: Utils.getStringFromDynamic(
+        json[CompetencyStandardEnum.label.name],
+      ),
       area: json[CompetencyStandardEnum.area.name] == null
           ? defaultCompetencyStandard.area
           : ModelCategory.fromJson(
@@ -116,21 +111,15 @@ class ModelCompetencyStandard extends Model {
   /// Serializes to JSON using [CompetencyStandardEnum] keys.
   @override
   Map<String, dynamic> toJson() => <String, dynamic>{
-        CompetencyStandardEnum.id.name: id,
-        CompetencyStandardEnum.label.name: label,
-        CompetencyStandardEnum.area.name: area.toJson(),
-        CompetencyStandardEnum.cineLevel.name: cineLevel,
-        CompetencyStandardEnum.code.name: code,
-      };
+    CompetencyStandardEnum.id.name: id,
+    CompetencyStandardEnum.label.name: label,
+    CompetencyStandardEnum.area.name: area.toJson(),
+    CompetencyStandardEnum.cineLevel.name: cineLevel,
+    CompetencyStandardEnum.code.name: code,
+  };
 
   @override
-  int get hashCode => Object.hash(
-        id,
-        label,
-        area,
-        cineLevel,
-        code,
-      );
+  int get hashCode => Object.hash(id, label, area, cineLevel, code);
 
   @override
   bool operator ==(Object other) =>

@@ -73,8 +73,9 @@ class ModelGraphAxisSpec extends Model {
   /// Never throws; invalid numeric shapes can yield non-finite values.
   factory ModelGraphAxisSpec.fromJson(Map<String, dynamic> json) =>
       ModelGraphAxisSpec(
-        title:
-            Utils.getStringFromDynamic(json[ModelGraphAxisSpecEnum.title.name]),
+        title: Utils.getStringFromDynamic(
+          json[ModelGraphAxisSpecEnum.title.name],
+        ),
         min: Utils.getDouble(json[ModelGraphAxisSpecEnum.min.name]),
         max: Utils.getDouble(json[ModelGraphAxisSpecEnum.max.name]),
       );
@@ -100,10 +101,10 @@ class ModelGraphAxisSpec extends Model {
   /// Serializes this model to JSON
   @override
   Map<String, dynamic> toJson() => <String, dynamic>{
-        ModelGraphAxisSpecEnum.title.name: title,
-        ModelGraphAxisSpecEnum.min.name: min,
-        ModelGraphAxisSpecEnum.max.name: max,
-      };
+    ModelGraphAxisSpecEnum.title.name: title,
+    ModelGraphAxisSpecEnum.min.name: min,
+    ModelGraphAxisSpecEnum.max.name: max,
+  };
 
   @override
   int get hashCode => Object.hash(title, min, max);

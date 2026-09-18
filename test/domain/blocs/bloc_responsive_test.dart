@@ -46,10 +46,7 @@ void main() {
       expect(responsiveBloc.workAreaSize, workAreaSize);
       expect(responsiveBloc.columnsNumber, 12);
       expect(responsiveBloc.columnWidth, greaterThanOrEqualTo(71.0));
-      expect(
-        responsiveBloc.secondaryDrawerWidth,
-        greaterThanOrEqualTo(71.0),
-      );
+      expect(responsiveBloc.secondaryDrawerWidth, greaterThanOrEqualTo(71.0));
       expect(responsiveBloc.appBarHeight, screenSizeConfig.appBarHeight);
       expect(responsiveBloc.gutterWidth, 10.0);
       expect(responsiveBloc.marginWidth, 64);
@@ -102,8 +99,9 @@ void main() {
       expect(blocResponsive.appScreenSizeStreamIsClosed, true);
     });
 
-    testWidgets('setSizeFromContext updates size correctly',
-        (WidgetTester tester) async {
+    testWidgets('setSizeFromContext updates size correctly', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Builder(
@@ -128,12 +126,7 @@ void main() {
       await tester.tap(find.byType(ElevatedButton));
       await tester.pump();
       expect(responsiveBloc.isTv, true);
-      expect(
-        responsiveBloc.workAreaSize,
-        equals(
-          const Size(1536.0, 1080.0),
-        ),
-      );
+      expect(responsiveBloc.workAreaSize, equals(const Size(1536.0, 1080.0)));
       tester.view.resetPhysicalSize();
       tester.view.resetDevicePixelRatio();
     });

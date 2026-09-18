@@ -75,32 +75,33 @@ void main() {
 
     // Test copyWith
     test('copyWith updates values', () {
-      final MedicalRecordModel updatedMedicalRecord =
-          defaultMedicalRecordModel.copyWith(
-        id: 'new_id',
-        patient: patient.copyWith(id: 'new_patient'),
-        diagnoses: <DiagnosisModel>[
-          defaultDiagnosisModel.copyWith(id: 'new_diagnosis'),
-        ],
-        dentalConditions: <DentalConditionModel>[
-          dentalConditionModelDefault.copyWith(id: 'new_dental_condition'),
-        ],
-        treatmentPlan: treatmentPlan.copyWith(id: 'new_treatment_plan'),
-        acceptanceClause:
-            acceptanceClause.copyWith(id: 'new_acceptance_clause'),
-        address: address.copyWith(id: 'new_address'),
-        legalId: legalId.copyWith(id: 'new_legal_id'),
-        user: user.copyWith(id: 'new_user'),
-        appointments: <AppointmentModel>[
-          defaultAppointmentModel.copyWith(id: 'new_appointment'),
-        ],
-        medications: <MedicationModel>[
-          defaultMedicationModel.copyWith(id: 'new_medication'),
-        ],
-        contacts: <ContactModel>[
-          defaultContactModel.copyWith(id: 'new_contact'),
-        ],
-      );
+      final MedicalRecordModel updatedMedicalRecord = defaultMedicalRecordModel
+          .copyWith(
+            id: 'new_id',
+            patient: patient.copyWith(id: 'new_patient'),
+            diagnoses: <DiagnosisModel>[
+              defaultDiagnosisModel.copyWith(id: 'new_diagnosis'),
+            ],
+            dentalConditions: <DentalConditionModel>[
+              dentalConditionModelDefault.copyWith(id: 'new_dental_condition'),
+            ],
+            treatmentPlan: treatmentPlan.copyWith(id: 'new_treatment_plan'),
+            acceptanceClause: acceptanceClause.copyWith(
+              id: 'new_acceptance_clause',
+            ),
+            address: address.copyWith(id: 'new_address'),
+            legalId: legalId.copyWith(id: 'new_legal_id'),
+            user: user.copyWith(id: 'new_user'),
+            appointments: <AppointmentModel>[
+              defaultAppointmentModel.copyWith(id: 'new_appointment'),
+            ],
+            medications: <MedicationModel>[
+              defaultMedicationModel.copyWith(id: 'new_medication'),
+            ],
+            contacts: <ContactModel>[
+              defaultContactModel.copyWith(id: 'new_contact'),
+            ],
+          );
 
       expect(updatedMedicalRecord.id, 'new_id');
       expect(updatedMedicalRecord.patient.id, 'new_patient');
@@ -120,8 +121,8 @@ void main() {
     });
 
     test('copyWith without arguments returns the same object', () {
-      final MedicalRecordModel copiedMedicalRecord =
-          defaultMedicalRecordModel.copyWith();
+      final MedicalRecordModel copiedMedicalRecord = defaultMedicalRecordModel
+          .copyWith();
       expect(copiedMedicalRecord, equals(defaultMedicalRecordModel));
       expect(
         copiedMedicalRecord.hashCode,
@@ -245,8 +246,9 @@ void main() {
     // Additional test: inequality operator
     test('inequality operator works correctly', () {
       final MedicalRecordModel record1 = defaultMedicalRecordModel;
-      final MedicalRecordModel record2 =
-          defaultMedicalRecordModel.copyWith(id: 'new_id');
+      final MedicalRecordModel record2 = defaultMedicalRecordModel.copyWith(
+        id: 'new_id',
+      );
 
       expect(record1, isNot(equals(record2)));
     });

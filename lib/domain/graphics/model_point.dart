@@ -67,11 +67,11 @@ class ModelPoint extends Model {
   /// It never throws; invalid shapes produce empty label `''` and/or a vector
   /// that may contain non-finite values (see [ModelVector.isValidVector]).
   factory ModelPoint.fromJson(Map<String, dynamic> json) => ModelPoint(
-        label: Utils.getStringFromDynamic(json[ModelPointEnum.label.name]),
-        vector: ModelVector.fromJson(
-          Utils.mapFromDynamic(json[ModelPointEnum.vector.name]),
-        ),
-      );
+    label: Utils.getStringFromDynamic(json[ModelPointEnum.label.name]),
+    vector: ModelVector.fromJson(
+      Utils.mapFromDynamic(json[ModelPointEnum.vector.name]),
+    ),
+  );
 
   /// Human-readable point label (e.g., "January").
   final String label;
@@ -87,9 +87,9 @@ class ModelPoint extends Model {
   /// Serializes this model to a JSON map.
   @override
   Map<String, dynamic> toJson() => <String, dynamic>{
-        ModelPointEnum.label.name: label,
-        ModelPointEnum.vector.name: vector.toJson(),
-      };
+    ModelPointEnum.label.name: label,
+    ModelPointEnum.vector.name: vector.toJson(),
+  };
 
   /// Value-based equality: both [label] and [vector] must match.
   @override

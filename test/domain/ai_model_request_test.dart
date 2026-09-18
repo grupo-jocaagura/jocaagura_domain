@@ -5,16 +5,14 @@ void main() {
   group('ModelAiRequest', () {
     final ModelJsonSchemaDocument expectedSchema = ModelJsonSchemaDocument(
       id: 'schema_ai_domain_summary_v1',
-      schemaId:
-          'https://jocaagura.dev/schemas/jocaagura_domain/v1/domain_summary_response.schema.json',
+      schemaId: 'https://jocaagura.dev/schemas/jocaagura_domain/v1/domain_summary_response.schema.json',
       schemaTitle: 'DomainSummaryResponse',
       domainModel: 'DomainSummaryResponse',
       version: 'v1',
       schemaDescription: 'Structured summary response expected from the model.',
       schema: const <String, dynamic>{
         r'$schema': 'https://json-schema.org/draft/2020-12/schema',
-        r'$id':
-            'https://jocaagura.dev/schemas/jocaagura_domain/v1/domain_summary_response.schema.json',
+        r'$id': 'https://jocaagura.dev/schemas/jocaagura_domain/v1/domain_summary_response.schema.json',
         'title': 'DomainSummaryResponse',
         'description': 'Structured summary response expected from the model.',
         'type': 'object',
@@ -66,44 +64,35 @@ void main() {
       expectedResponseSchema: expectedSchema,
     );
 
-    test(
-      'Given a canonical request When toJson and fromJson Then preserves the contract',
-      () {
-        final Map<String, dynamic> json = request.toJson();
-        final ModelAiRequest roundtrip = ModelAiRequest.fromJson(json);
+    test('Given a canonical request When toJson and fromJson Then preserves the contract', () {
+      final Map<String, dynamic> json = request.toJson();
+      final ModelAiRequest roundtrip = ModelAiRequest.fromJson(json);
 
-        expect(roundtrip, request);
-        expect(roundtrip.toJson(), request.toJson());
-      },
-    );
+      expect(roundtrip, request);
+      expect(roundtrip.toJson(), request.toJson());
+    });
 
-    test(
-      'Given canonical JSON When fromJson and toJson Then preserves JSON roundtrip',
-      () {
-        final Map<String, dynamic> json = request.toJson();
+    test('Given canonical JSON When fromJson and toJson Then preserves JSON roundtrip', () {
+      final Map<String, dynamic> json = request.toJson();
 
-        final ModelAiRequest parsed = ModelAiRequest.fromJson(json);
+      final ModelAiRequest parsed = ModelAiRequest.fromJson(json);
 
-        expect(parsed.toJson(), json);
-      },
-    );
+      expect(parsed.toJson(), json);
+    });
 
-    test(
-      'Given a request When copyWith overrides fields Then returns updated copy',
-      () {
-        final ModelAiRequest copy = request.copyWith(
-          provider: 'openai',
-          modelId: 'gpt-5.4',
-          taskType: ModelAiTaskTypeEnum.textGeneration,
-          references: <String>['https://example.com/brief'],
-        );
+    test('Given a request When copyWith overrides fields Then returns updated copy', () {
+      final ModelAiRequest copy = request.copyWith(
+        provider: 'openai',
+        modelId: 'gpt-5.4',
+        taskType: ModelAiTaskTypeEnum.textGeneration,
+        references: <String>['https://example.com/brief'],
+      );
 
-        expect(copy.provider, 'openai');
-        expect(copy.modelId, 'gpt-5.4');
-        expect(copy.taskType, ModelAiTaskTypeEnum.textGeneration);
-        expect(copy.references, <String>['https://example.com/brief']);
-        expect(copy, isNot(request));
-      },
-    );
+      expect(copy.provider, 'openai');
+      expect(copy.modelId, 'gpt-5.4');
+      expect(copy.taskType, ModelAiTaskTypeEnum.textGeneration);
+      expect(copy.references, <String>['https://example.com/brief']);
+      expect(copy, isNot(request));
+    });
   });
 }

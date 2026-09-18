@@ -83,8 +83,8 @@ class ModelLearningItem extends Model {
     int cineLevel = 0,
     this.achievementTwo,
     this.achievementThree,
-  })  : attributes = List<ModelAttribute<dynamic>>.unmodifiable(attributes),
-        _cineLevel = cineLevel.clamp(0, 11);
+  }) : attributes = List<ModelAttribute<dynamic>>.unmodifiable(attributes),
+       _cineLevel = cineLevel.clamp(0, 11);
 
   /// Builds a [ModelLearningItem] from JSON-like input (no legacy keys).
   ///
@@ -103,8 +103,9 @@ class ModelLearningItem extends Model {
       return ModelPerformanceIndicator.fromJson(m);
     }
 
-    final ModelPerformanceIndicator? a1 =
-        parsePI(LearningItemEnum.achievementOne.name);
+    final ModelPerformanceIndicator? a1 = parsePI(
+      LearningItemEnum.achievementOne.name,
+    );
     if (a1 == null) {
       throw const FormatException('achievementOne is required');
     }
@@ -112,8 +113,9 @@ class ModelLearningItem extends Model {
     return ModelLearningItem(
       id: Utils.getStringFromDynamic(json[LearningItemEnum.id.name]),
       label: Utils.getStringFromDynamic(json[LearningItemEnum.label.name]),
-      correctAnswer:
-          Utils.getStringFromDynamic(json[LearningItemEnum.correctAnswer.name]),
+      correctAnswer: Utils.getStringFromDynamic(
+        json[LearningItemEnum.correctAnswer.name],
+      ),
       wrongAnswerOne: Utils.getStringFromDynamic(
         json[LearningItemEnum.wrongAnswerOne.name],
       ),
@@ -123,16 +125,18 @@ class ModelLearningItem extends Model {
       wrongAnswerThree: Utils.getStringFromDynamic(
         json[LearningItemEnum.wrongAnswerThree.name],
       ),
-      explanation:
-          Utils.getStringFromDynamic(json[LearningItemEnum.explanation.name]),
+      explanation: Utils.getStringFromDynamic(
+        json[LearningItemEnum.explanation.name],
+      ),
       attributes: AttributeModel.listFromDynamicShallow(
         json[LearningItemEnum.attributes.name],
       ),
       achievementOne: a1,
       achievementTwo: parsePI(LearningItemEnum.achievementTwo.name),
       achievementThree: parsePI(LearningItemEnum.achievementThree.name),
-      cineLevel:
-          Utils.getIntegerFromDynamic(json[LearningItemEnum.cineLevel.name]),
+      cineLevel: Utils.getIntegerFromDynamic(
+        json[LearningItemEnum.cineLevel.name],
+      ),
       estimatedTimeForAnswer: Utils.durationFromJson(
         json[LearningItemEnum.estimatedTimeMs.name],
         defaultDuration: defaultETA,
@@ -226,43 +230,45 @@ class ModelLearningItem extends Model {
   /// Serializes to JSON using [LearningItemEnum] keys.
   @override
   Map<String, dynamic> toJson() => <String, dynamic>{
-        LearningItemEnum.id.name: id,
-        LearningItemEnum.label.name: label,
-        LearningItemEnum.correctAnswer.name: correctAnswer,
-        LearningItemEnum.wrongAnswerOne.name: wrongAnswerOne,
-        LearningItemEnum.wrongAnswerTwo.name: wrongAnswerTwo,
-        LearningItemEnum.wrongAnswerThree.name: wrongAnswerThree,
-        LearningItemEnum.explanation.name: explanation,
-        LearningItemEnum.attributes.name:
-            attributes.map((ModelAttribute<dynamic> e) => e.toJson()).toList(),
-        LearningItemEnum.achievementOne.name: achievementOne.toJson(),
-        if (achievementTwo != null)
-          LearningItemEnum.achievementTwo.name: achievementTwo!.toJson(),
-        if (achievementThree != null)
-          LearningItemEnum.achievementThree.name: achievementThree!.toJson(),
-        LearningItemEnum.cineLevel.name: cineLevel,
-        LearningItemEnum.estimatedTimeMs.name:
-            Utils.durationToJson(estimatedTimeForAnswer),
-        LearningItemEnum.category.name: category.toJson(),
-      };
+    LearningItemEnum.id.name: id,
+    LearningItemEnum.label.name: label,
+    LearningItemEnum.correctAnswer.name: correctAnswer,
+    LearningItemEnum.wrongAnswerOne.name: wrongAnswerOne,
+    LearningItemEnum.wrongAnswerTwo.name: wrongAnswerTwo,
+    LearningItemEnum.wrongAnswerThree.name: wrongAnswerThree,
+    LearningItemEnum.explanation.name: explanation,
+    LearningItemEnum.attributes.name: attributes
+        .map((ModelAttribute<dynamic> e) => e.toJson())
+        .toList(),
+    LearningItemEnum.achievementOne.name: achievementOne.toJson(),
+    if (achievementTwo != null)
+      LearningItemEnum.achievementTwo.name: achievementTwo!.toJson(),
+    if (achievementThree != null)
+      LearningItemEnum.achievementThree.name: achievementThree!.toJson(),
+    LearningItemEnum.cineLevel.name: cineLevel,
+    LearningItemEnum.estimatedTimeMs.name: Utils.durationToJson(
+      estimatedTimeForAnswer,
+    ),
+    LearningItemEnum.category.name: category.toJson(),
+  };
 
   @override
   int get hashCode => Object.hashAll(<Object?>[
-        id,
-        label,
-        correctAnswer,
-        wrongAnswerOne,
-        wrongAnswerTwo,
-        wrongAnswerThree,
-        explanation,
-        cineLevel,
-        estimatedTimeForAnswer,
-        category,
-        Utils.listHash(attributes),
-        achievementOne,
-        achievementTwo,
-        achievementThree,
-      ]);
+    id,
+    label,
+    correctAnswer,
+    wrongAnswerOne,
+    wrongAnswerTwo,
+    wrongAnswerThree,
+    explanation,
+    cineLevel,
+    estimatedTimeForAnswer,
+    category,
+    Utils.listHash(attributes),
+    achievementOne,
+    achievementTwo,
+    achievementThree,
+  ]);
 
   @override
   bool operator ==(Object other) =>

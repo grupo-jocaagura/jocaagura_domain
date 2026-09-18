@@ -54,10 +54,7 @@ class FakeServiceGeolocation implements ServiceGeolocation {
   }
 
   /// Simulates a new location update.
-  void simulateLocation({
-    required double latitude,
-    required double longitude,
-  }) {
+  void simulateLocation({required double latitude, required double longitude}) {
     _checkDisposed();
     _blocGeolocation.value = <String, double>{
       'latitude': latitude,

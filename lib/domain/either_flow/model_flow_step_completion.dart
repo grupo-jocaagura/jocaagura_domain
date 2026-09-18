@@ -1,12 +1,7 @@
 part of 'package:jocaagura_domain/jocaagura_domain.dart';
 
 /// Stable JSON keys used by [ModelFlowStepCompletion].
-enum ModelFlowStepCompletionEnum {
-  stepIndex,
-  completedAt,
-  evidenceUrl,
-  notes,
-}
+enum ModelFlowStepCompletionEnum { stepIndex, completedAt, evidenceUrl, notes }
 
 /// Minimal auditable evidence that a linear flow step was completed.
 class ModelFlowStepCompletion extends Model {
@@ -27,10 +22,10 @@ class ModelFlowStepCompletion extends Model {
       ),
       evidenceUrl:
           json.containsKey(ModelFlowStepCompletionEnum.evidenceUrl.name)
-              ? _flowCertificateNullableUrlFromDynamic(
-                  json[ModelFlowStepCompletionEnum.evidenceUrl.name],
-                )
-              : null,
+          ? _flowCertificateNullableUrlFromDynamic(
+              json[ModelFlowStepCompletionEnum.evidenceUrl.name],
+            )
+          : null,
       notes: json.containsKey(ModelFlowStepCompletionEnum.notes.name)
           ? _flowCertificateNullableStringFromDynamic(
               json[ModelFlowStepCompletionEnum.notes.name],
@@ -67,8 +62,9 @@ class ModelFlowStepCompletion extends Model {
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> json = <String, dynamic>{
       ModelFlowStepCompletionEnum.stepIndex.name: stepIndex,
-      ModelFlowStepCompletionEnum.completedAt.name:
-          DateUtils.dateTimeToString(completedAt),
+      ModelFlowStepCompletionEnum.completedAt.name: DateUtils.dateTimeToString(
+        completedAt,
+      ),
     };
     if (evidenceUrl != null) {
       json[ModelFlowStepCompletionEnum.evidenceUrl.name] = evidenceUrl;

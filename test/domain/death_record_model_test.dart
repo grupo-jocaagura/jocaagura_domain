@@ -4,8 +4,7 @@ import 'package:jocaagura_domain/jocaagura_domain.dart';
 void main() {
   group('DeathRecordModel Tests', () {
     // Initial test data
-    const StoreModel testNotaria =
-        defaultStoreModel; // Assuming defaultStoreModel is defined as per your provided classes
+    const StoreModel testNotaria = defaultStoreModel; // Assuming defaultStoreModel is defined as per your provided classes
     const PersonModel testPerson =
         defaultPersonModel; // Assuming defaultPersonModel is defined
     const AddressModel testAddress =
@@ -36,11 +35,13 @@ void main() {
     });
 
     // Test copyWith
-    test('copyWith preserves object identity when no new values are passed',
-        () {
-      final DeathRecordModel record = defaultDeathRecord.copyWith();
-      expect(record, equals(defaultDeathRecord));
-    });
+    test(
+      'copyWith preserves object identity when no new values are passed',
+      () {
+        final DeathRecordModel record = defaultDeathRecord.copyWith();
+        expect(record, equals(defaultDeathRecord));
+      },
+    );
 
     test('copyWith updates values', () {
       final DeathRecordModel updatedRecord = defaultDeathRecord.copyWith(

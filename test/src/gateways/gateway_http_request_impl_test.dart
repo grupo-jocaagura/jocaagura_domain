@@ -145,9 +145,7 @@ class _FakeErrorMapper implements ErrorMapper {
         code: 'BUSINESS_ERROR',
         description: 'Detected by payload',
         errorLevel: ErrorLevelEnum.warning,
-        meta: <String, dynamic>{
-          'location': location,
-        },
+        meta: <String, dynamic>{'location': location},
       );
       lastFromPayload = item;
       return item;
@@ -185,13 +183,13 @@ void main() {
         };
 
         // Act
-        final Either<ErrorItem, Map<String, dynamic>> result =
-            await gateway.get(
-          uri,
-          // headers por defecto => {}
-          timeout: timeout,
-          metadata: metadata,
-        );
+        final Either<ErrorItem, Map<String, dynamic>> result = await gateway
+            .get(
+              uri,
+              // headers por defecto => {}
+              timeout: timeout,
+              metadata: metadata,
+            );
 
         // Assert gateway result
         expect(result, isA<Right<ErrorItem, Map<String, dynamic>>>());
@@ -216,46 +214,41 @@ void main() {
       },
     );
 
-    test(
-      'Given headers no vacíos '
-      'When get es invocado '
-      'Then headers son propagados tal cual al servicio',
-      () async {
-        // Arrange
-        final _RecordingServiceHttpRequest service =
-            _RecordingServiceHttpRequest();
-        final GatewayHttpRequestImpl gateway = GatewayHttpRequestImpl(
-          service: service,
-          errorMapper: _FakeErrorMapper(),
-          location: 'MyGateway',
-        );
+    test('Given headers no vacíos '
+        'When get es invocado '
+        'Then headers son propagados tal cual al servicio', () async {
+      // Arrange
+      final _RecordingServiceHttpRequest service =
+          _RecordingServiceHttpRequest();
+      final GatewayHttpRequestImpl gateway = GatewayHttpRequestImpl(
+        service: service,
+        errorMapper: _FakeErrorMapper(),
+        location: 'MyGateway',
+      );
 
-        final Uri uri = Uri.parse('https://api.example.com/users');
-        final Map<String, String> headers = <String, String>{
-          'Authorization': 'Bearer token',
-        };
+      final Uri uri = Uri.parse('https://api.example.com/users');
+      final Map<String, String> headers = <String, String>{
+        'Authorization': 'Bearer token',
+      };
 
-        // Act
-        final Either<ErrorItem, Map<String, dynamic>> result =
-            await gateway.get(
-          uri,
-          headers: headers,
-        );
+      // Act
+      final Either<ErrorItem, Map<String, dynamic>> result = await gateway.get(
+        uri,
+        headers: headers,
+      );
 
-        // Assert
-        expect(result, isA<Right<ErrorItem, Map<String, dynamic>>>());
-        expect(service.lastHeadersGet, equals(headers));
-      },
-    );
+      // Assert
+      expect(result, isA<Right<ErrorItem, Map<String, dynamic>>>());
+      expect(service.lastHeadersGet, equals(headers));
+    });
   });
 
-  group('GatewayHttpRequestImpl - POST/PUT/DELETE body & metadata adapters',
-      () {
-    test(
-      'Given body con valores dinámicos y metadata '
-      'When post es invocado '
-      'Then body se transforma a Map<String, String> y metadata a {tags: {...}}',
-      () async {
+  group(
+    'GatewayHttpRequestImpl - POST/PUT/DELETE body & metadata adapters',
+    () {
+      test('Given body con valores dinámicos y metadata '
+          'When post es invocado '
+          'Then body se transforma a Map<String, String> y metadata a {tags: {...}}', () async {
         // Arrange
         final _RecordingServiceHttpRequest service =
             _RecordingServiceHttpRequest();
@@ -278,13 +271,13 @@ void main() {
         };
 
         // Act
-        final Either<ErrorItem, Map<String, dynamic>> result =
-            await gateway.post(
-          uri,
-          headers: <String, String>{'X-Test': 'yes'},
-          body: body,
-          metadata: metadata,
-        );
+        final Either<ErrorItem, Map<String, dynamic>> result = await gateway
+            .post(
+              uri,
+              headers: <String, String>{'X-Test': 'yes'},
+              body: body,
+              metadata: metadata,
+            );
 
         // Assert resultado
         expect(result, isA<Right<ErrorItem, Map<String, dynamic>>>());
@@ -306,14 +299,11 @@ void main() {
         expect(tags, isNotNull);
         expect(tags!['feature'], equals('createUser'));
         expect(tags['attempt'], equals('1'));
-      },
-    );
+      });
 
-    test(
-      'Given body vacío '
-      'When post es invocado '
-      'Then body se pasa como null al ServiceHttpRequest',
-      () async {
+      test('Given body vacío '
+          'When post es invocado '
+          'Then body se pasa como null al ServiceHttpRequest', () async {
         // Arrange
         final _RecordingServiceHttpRequest service =
             _RecordingServiceHttpRequest();
@@ -325,22 +315,17 @@ void main() {
         final Uri uri = Uri.parse('https://api.example.com/empty-body');
 
         // Act
-        final Either<ErrorItem, Map<String, dynamic>> result =
-            await gateway.post(
-          uri,
-        );
+        final Either<ErrorItem, Map<String, dynamic>> result = await gateway
+            .post(uri);
 
         // Assert
         expect(result, isA<Right<ErrorItem, Map<String, dynamic>>>());
         expect(service.lastBodyPost, isNull);
-      },
-    );
+      });
 
-    test(
-      'Given metadata de dominio '
-      'When put es invocado '
-      'Then metadata se transforma a {tags: flatMap} y body a Map<String, String> si no está vacío',
-      () async {
+      test('Given metadata de dominio '
+          'When put es invocado '
+          'Then metadata se transforma a {tags: flatMap} y body a Map<String, String> si no está vacío', () async {
         // Arrange
         final _RecordingServiceHttpRequest service =
             _RecordingServiceHttpRequest();
@@ -360,12 +345,8 @@ void main() {
         };
 
         // Act
-        final Either<ErrorItem, Map<String, dynamic>> result =
-            await gateway.put(
-          uri,
-          body: body,
-          metadata: metadata,
-        );
+        final Either<ErrorItem, Map<String, dynamic>> result = await gateway
+            .put(uri, body: body, metadata: metadata);
 
         // Assert
         expect(result, isA<Right<ErrorItem, Map<String, dynamic>>>());
@@ -382,14 +363,11 @@ void main() {
         expect(tags, isNotNull);
         expect(tags!['feature'], equals('updateUser'));
         expect(tags['attempt'], equals('2'));
-      },
-    );
+      });
 
-    test(
-      'Given metadata de dominio '
-      'When delete es invocado '
-      'Then metadata se transforma a {tags: flatMap}',
-      () async {
+      test('Given metadata de dominio '
+          'When delete es invocado '
+          'Then metadata se transforma a {tags: flatMap}', () async {
         // Arrange
         final _RecordingServiceHttpRequest service =
             _RecordingServiceHttpRequest();
@@ -405,11 +383,8 @@ void main() {
         };
 
         // Act
-        final Either<ErrorItem, Map<String, dynamic>> result =
-            await gateway.delete(
-          uri,
-          metadata: metadata,
-        );
+        final Either<ErrorItem, Map<String, dynamic>> result = await gateway
+            .delete(uri, metadata: metadata);
 
         // Assert
         expect(result, isA<Right<ErrorItem, Map<String, dynamic>>>());
@@ -421,56 +396,54 @@ void main() {
         expect(tags, isNotNull);
         expect(tags!['feature'], equals('deleteUser'));
         expect(tags['hardDelete'], equals('false'));
-      },
-    );
-  });
+      });
+    },
+  );
 
   group('GatewayHttpRequestImpl - business errors via fromPayload', () {
-    test(
-      'Given ErrorMapper devuelve ErrorItem en fromPayload '
-      'When el payload contiene businessError=true '
-      'Then el gateway devuelve Left con ese ErrorItem',
-      () async {
-        // Arrange
-        final _RecordingServiceHttpRequest service =
-            _RecordingServiceHttpRequest()
-              ..response = <String, dynamic>{
-                'businessError': true,
-                'message': 'Invalid data',
-              };
+    test('Given ErrorMapper devuelve ErrorItem en fromPayload '
+        'When el payload contiene businessError=true '
+        'Then el gateway devuelve Left con ese ErrorItem', () async {
+      // Arrange
+      final _RecordingServiceHttpRequest service =
+          _RecordingServiceHttpRequest()
+            ..response = <String, dynamic>{
+              'businessError': true,
+              'message': 'Invalid data',
+            };
 
-        final _FakeErrorMapper mapper = _FakeErrorMapper()
-          ..returnBusinessError = true;
+      final _FakeErrorMapper mapper = _FakeErrorMapper()
+        ..returnBusinessError = true;
 
-        final GatewayHttpRequestImpl gateway = GatewayHttpRequestImpl(
-          service: service,
-          errorMapper: mapper,
-          location: 'BizGateway',
-        );
+      final GatewayHttpRequestImpl gateway = GatewayHttpRequestImpl(
+        service: service,
+        errorMapper: mapper,
+        location: 'BizGateway',
+      );
 
-        final Uri uri = Uri.parse('https://api.example.com/biz');
+      final Uri uri = Uri.parse('https://api.example.com/biz');
 
-        // Act
-        final Either<ErrorItem, Map<String, dynamic>> result =
-            await gateway.post(uri);
+      // Act
+      final Either<ErrorItem, Map<String, dynamic>> result = await gateway.post(
+        uri,
+      );
 
-        // Assert
-        expect(result, isA<Left<ErrorItem, Map<String, dynamic>>>());
-        final Left<ErrorItem, Map<String, dynamic>> left =
-            result as Left<ErrorItem, Map<String, dynamic>>;
+      // Assert
+      expect(result, isA<Left<ErrorItem, Map<String, dynamic>>>());
+      final Left<ErrorItem, Map<String, dynamic>> left =
+          result as Left<ErrorItem, Map<String, dynamic>>;
 
-        final ErrorItem error = left.value;
-        expect(error.code, equals('BUSINESS_ERROR'));
-        expect(error.title, equals('Business error'));
-        expect(
-          error.meta['location'],
-          equals('BizGateway.POST($uri)'),
-        ); // usa _buildLocation
+      final ErrorItem error = left.value;
+      expect(error.code, equals('BUSINESS_ERROR'));
+      expect(error.title, equals('Business error'));
+      expect(
+        error.meta['location'],
+        equals('BizGateway.POST($uri)'),
+      ); // usa _buildLocation
 
-        // Confirmamos que fromException NO se llamó
-        expect(mapper.lastFromException, isNull);
-      },
-    );
+      // Confirmamos que fromException NO se llamó
+      expect(mapper.lastFromException, isNull);
+    });
   });
 
   group('GatewayHttpRequestImpl - exception mapping via fromException', () {
@@ -494,8 +467,8 @@ void main() {
         final Uri uri = Uri.parse('https://api.example.com/fail');
 
         // Act
-        final Either<ErrorItem, Map<String, dynamic>> result =
-            await gateway.post(uri);
+        final Either<ErrorItem, Map<String, dynamic>> result = await gateway
+            .post(uri);
 
         // Assert
         expect(result, isA<Left<ErrorItem, Map<String, dynamic>>>());
@@ -520,45 +493,42 @@ void main() {
   });
 
   group('GatewayHttpRequestImpl - helpers internos', () {
-    test(
-      'Given metadata vacío '
-      'When se usa en POST/PUT/DELETE '
-      'Then se mapea a {tags: {}} y no es null',
-      () async {
-        // Arrange
-        final _RecordingServiceHttpRequest service =
-            _RecordingServiceHttpRequest();
-        final GatewayHttpRequestImpl gateway = GatewayHttpRequestImpl(
-          service: service,
-          errorMapper: _FakeErrorMapper(),
-        );
+    test('Given metadata vacío '
+        'When se usa en POST/PUT/DELETE '
+        'Then se mapea a {tags: {}} y no es null', () async {
+      // Arrange
+      final _RecordingServiceHttpRequest service =
+          _RecordingServiceHttpRequest();
+      final GatewayHttpRequestImpl gateway = GatewayHttpRequestImpl(
+        service: service,
+        errorMapper: _FakeErrorMapper(),
+      );
 
-        final Uri uri = Uri.parse('https://api.example.com/empty-meta');
+      final Uri uri = Uri.parse('https://api.example.com/empty-meta');
 
-        // Act
-        await gateway.post(uri);
+      // Act
+      await gateway.post(uri);
 
-        // Assert
-        final Map<String, dynamic>? metaPost =
-            service.lastMetadataPost as Map<String, dynamic>?;
-        expect(metaPost, isNotNull);
-        expect(metaPost!.containsKey('tags'), isTrue);
-        expect(metaPost['tags'], equals(<String, String>{}));
+      // Assert
+      final Map<String, dynamic>? metaPost =
+          service.lastMetadataPost as Map<String, dynamic>?;
+      expect(metaPost, isNotNull);
+      expect(metaPost!.containsKey('tags'), isTrue);
+      expect(metaPost['tags'], equals(<String, String>{}));
 
-        // PUT
-        await gateway.put(uri);
-        final Map<String, dynamic>? metaPut =
-            service.lastMetadataPut as Map<String, dynamic>?;
-        expect(metaPut, isNotNull);
-        expect(metaPut!['tags'], equals(<String, String>{}));
+      // PUT
+      await gateway.put(uri);
+      final Map<String, dynamic>? metaPut =
+          service.lastMetadataPut as Map<String, dynamic>?;
+      expect(metaPut, isNotNull);
+      expect(metaPut!['tags'], equals(<String, String>{}));
 
-        // DELETE
-        await gateway.delete(uri);
-        final Map<String, dynamic>? metaDelete =
-            service.lastMetadataDelete as Map<String, dynamic>?;
-        expect(metaDelete, isNotNull);
-        expect(metaDelete!['tags'], equals(<String, String>{}));
-      },
-    );
+      // DELETE
+      await gateway.delete(uri);
+      final Map<String, dynamic>? metaDelete =
+          service.lastMetadataDelete as Map<String, dynamic>?;
+      expect(metaDelete, isNotNull);
+      expect(metaDelete!['tags'], equals(<String, String>{}));
+    });
   });
 }

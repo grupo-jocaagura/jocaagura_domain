@@ -8,9 +8,8 @@ import 'package:jocaagura_domain/jocaagura_domain.dart';
 /// -------------------------
 
 class _RepoFake implements RepositoryAuth {
-  _RepoFake({
-    Stream<Either<ErrorItem, UserModel?>>? authStream,
-  }) : _authCtrl = StreamController<Either<ErrorItem, UserModel?>>.broadcast() {
+  _RepoFake({Stream<Either<ErrorItem, UserModel?>>? authStream})
+    : _authCtrl = StreamController<Either<ErrorItem, UserModel?>>.broadcast() {
     if (authStream != null) {
       _authSub = authStream.listen(
         _authCtrl.add,
@@ -68,9 +67,10 @@ class _RepoFake implements RepositoryAuth {
   Future<Either<ErrorItem, UserModel>> logInWithGoogle() async {
     return googleResp ??
         Right<ErrorItem, UserModel>(
-          UserModel.fromJson(
-            const <String, dynamic>{'id': 'g', 'email': 'g@x.com'},
-          ),
+          UserModel.fromJson(const <String, dynamic>{
+            'id': 'g',
+            'email': 'g@x.com',
+          }),
         );
   }
 
@@ -87,8 +87,9 @@ class _RepoFake implements RepositoryAuth {
   ) async {
     return refreshResp ??
         Right<ErrorItem, UserModel>(
-          currentUser
-              .copyWith(jwt: <String, dynamic>{'accessToken': 'refreshed'}),
+          currentUser.copyWith(
+            jwt: <String, dynamic>{'accessToken': 'refreshed'},
+          ),
         );
   }
 
@@ -123,17 +124,16 @@ UserModel _u(String email) =>
 
 void main() {
   group('BlocSession.fromRepository | boot & stream mapping', () {
-    test(
-        'Given repo stream Right(null) -> Right(user) -> Left(err) '
-        'When boot Then states: Unauthenticated -> Authenticated -> SessionError',
-        () async {
+    test('Given repo stream Right(null) -> Right(user) -> Left(err) '
+        'When boot Then states: Unauthenticated -> Authenticated -> SessionError', () async {
       final _RepoFake repo = _RepoFake();
       final BlocSession session = BlocSession.fromRepository(repository: repo);
 
       // Observa el stream del bloc
       final List<SessionState> seen = <SessionState>[];
-      final StreamSubscription<SessionState> sub =
-          session.stream.listen(seen.add);
+      final StreamSubscription<SessionState> sub = session.stream.listen(
+        seen.add,
+      );
 
       await session.boot();
 
@@ -172,11 +172,14 @@ void main() {
 
       // Captura dos estados: Authenticating -> Authenticated
       final List<SessionState> seen = <SessionState>[];
-      final StreamSubscription<SessionState> sub =
-          session.stream.listen(seen.add);
+      final StreamSubscription<SessionState> sub = session.stream.listen(
+        seen.add,
+      );
 
-      final Either<ErrorItem, UserModel> r =
-          await session.logIn(email: 'me@mail.com', password: 'secret');
+      final Either<ErrorItem, UserModel> r = await session.logIn(
+        email: 'me@mail.com',
+        password: 'secret',
+      );
 
       r.fold(
         (_) => fail('Expected Right'),
@@ -189,38 +192,42 @@ void main() {
       await sub.cancel();
 
       // Debe contener Authenticating seguido de Authenticated
-      final int idxAuthing =
-          seen.indexWhere((SessionState s) => s is Authenticating);
-      final int idxAuthed =
-          seen.lastIndexWhere((SessionState s) => s is Authenticated);
+      final int idxAuthing = seen.indexWhere(
+        (SessionState s) => s is Authenticating,
+      );
+      final int idxAuthed = seen.lastIndexWhere(
+        (SessionState s) => s is Authenticated,
+      );
       expect(idxAuthing, isNonNegative);
       expect(idxAuthed, greaterThan(idxAuthing));
     });
 
-    test('logOut success from Authenticated leads to Unauthenticated',
-        () async {
-      final _RepoFake repo = _RepoFake();
-      final BlocSession session = BlocSession.fromRepository(repository: repo);
-
-      await session.boot();
-
-      // Emite signed-in primero
-      repo.addAuth(Right<ErrorItem, UserModel?>(_u('user@mail.com')));
-      await Future<void>.delayed(const Duration(milliseconds: 1));
-      expect(session.state, isA<Authenticated>());
-
-      final Either<ErrorItem, void>? r = await session.logOut();
-      expect(r, isNotNull);
-      r!.fold((_) => fail('Expected Right for logout'), (_) {});
-
-      // Un tick para propagación
-      await Future<void>.delayed(const Duration(milliseconds: 1));
-      expect(session.stateOrDefault, isA<Unauthenticated>());
-    });
-
     test(
-        'refreshSession when not authenticated returns null and leaves Unauthenticated',
-        () async {
+      'logOut success from Authenticated leads to Unauthenticated',
+      () async {
+        final _RepoFake repo = _RepoFake();
+        final BlocSession session = BlocSession.fromRepository(
+          repository: repo,
+        );
+
+        await session.boot();
+
+        // Emite signed-in primero
+        repo.addAuth(Right<ErrorItem, UserModel?>(_u('user@mail.com')));
+        await Future<void>.delayed(const Duration(milliseconds: 1));
+        expect(session.state, isA<Authenticated>());
+
+        final Either<ErrorItem, void>? r = await session.logOut();
+        expect(r, isNotNull);
+        r!.fold((_) => fail('Expected Right for logout'), (_) {});
+
+        // Un tick para propagación
+        await Future<void>.delayed(const Duration(milliseconds: 1));
+        expect(session.stateOrDefault, isA<Unauthenticated>());
+      },
+    );
+
+    test('refreshSession when not authenticated returns null and leaves Unauthenticated', () async {
       final _RepoFake repo = _RepoFake();
       final BlocSession session = BlocSession.fromRepository(repository: repo);
 
@@ -232,35 +239,35 @@ void main() {
   });
 
   group('BlocSession.fromRepository | post-dispose policies', () {
-    test('returnLastSnapshot returns last Authenticated snapshot after dispose',
-        () async {
-      final _RepoFake repo = _RepoFake();
-      final BlocSession session = BlocSession.fromRepository(
-        repository: repo,
-        postDisposePolicy: PostDisposePolicy.returnLastSnapshot,
-      );
-
-      await session.boot();
-      // Haz signed-in
-      final UserModel user = _u('snap@mail.com');
-      repo.addAuth(Right<ErrorItem, UserModel?>(user));
-      await Future<void>.delayed(const Duration(milliseconds: 1));
-      expect(session.state, isA<Authenticated>());
-
-      session.dispose();
-
-      // Con política "returnLastSnapshot" los getters no lanzan y devuelven el último snapshot
-      expect(session.state, isA<Authenticated>());
-      expect(session.stateOrDefault, isA<Authenticated>());
-      expect(session.currentUser.email, 'snap@mail.com');
-      expect(session.isAuthenticated, isTrue);
-
-      // El stream getter devuelve el mismo stream (ya cerrado); no lo probamos con emisiones.
-    });
-
     test(
-        'returnSessionError returns SessionError/Unauthenticated/defaultUser after dispose',
-        () async {
+      'returnLastSnapshot returns last Authenticated snapshot after dispose',
+      () async {
+        final _RepoFake repo = _RepoFake();
+        final BlocSession session = BlocSession.fromRepository(
+          repository: repo,
+          postDisposePolicy: PostDisposePolicy.returnLastSnapshot,
+        );
+
+        await session.boot();
+        // Haz signed-in
+        final UserModel user = _u('snap@mail.com');
+        repo.addAuth(Right<ErrorItem, UserModel?>(user));
+        await Future<void>.delayed(const Duration(milliseconds: 1));
+        expect(session.state, isA<Authenticated>());
+
+        session.dispose();
+
+        // Con política "returnLastSnapshot" los getters no lanzan y devuelven el último snapshot
+        expect(session.state, isA<Authenticated>());
+        expect(session.stateOrDefault, isA<Authenticated>());
+        expect(session.currentUser.email, 'snap@mail.com');
+        expect(session.isAuthenticated, isTrue);
+
+        // El stream getter devuelve el mismo stream (ya cerrado); no lo probamos con emisiones.
+      },
+    );
+
+    test('returnSessionError returns SessionError/Unauthenticated/defaultUser after dispose', () async {
       final _RepoFake repo = _RepoFake();
       final BlocSession session = BlocSession.fromRepository(
         repository: repo,

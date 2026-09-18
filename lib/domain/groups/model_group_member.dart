@@ -120,9 +120,7 @@ class ModelGroupMember extends Model {
     return ModelGroupMember(
       id: json[ModelGroupMemberEnum.id.name]?.toString() ?? '',
       groupId: json[ModelGroupMemberEnum.groupId.name]?.toString() ?? '',
-      email: Utils.getEmailFromDynamic(
-        json[ModelGroupMemberEnum.email.name],
-      ),
+      email: Utils.getEmailFromDynamic(json[ModelGroupMemberEnum.email.name]),
       userId: json[ModelGroupMemberEnum.userId.name]?.toString() ?? '',
       role: Utils.enumFromJson<ModelGroupMemberRole>(
         ModelGroupMemberRole.values,
@@ -242,19 +240,19 @@ class ModelGroupMember extends Model {
 
   @override
   int get hashCode => Object.hash(
-        id,
-        groupId,
-        email,
-        userId,
-        role,
-        entityType,
-        membershipId,
-        source,
-        subscription,
-        includeDerived,
-        active,
-        crud,
-      );
+    id,
+    groupId,
+    email,
+    userId,
+    role,
+    entityType,
+    membershipId,
+    source,
+    subscription,
+    includeDerived,
+    active,
+    crud,
+  );
 
   @override
   String toString() => 'ModelGroupMember(${toJson()})';

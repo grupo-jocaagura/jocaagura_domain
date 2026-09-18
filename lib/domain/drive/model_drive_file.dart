@@ -1,10 +1,7 @@
 part of 'package:jocaagura_domain/jocaagura_domain.dart';
 
 /// Stable JSON keys used by [ModelDriveFile].
-enum ModelDriveFileEnum {
-  sizeBytes,
-  extension,
-}
+enum ModelDriveFileEnum { sizeBytes, extension }
 
 /// Concrete file payload for the logical drive domain.
 class ModelDriveFile extends ModelDriveItem {
@@ -31,8 +28,9 @@ class ModelDriveFile extends ModelDriveItem {
       mimeType: Utils.getStringFromDynamic(
         json[ModelDriveItemEnum.mimeType.name],
       ),
-      parentId:
-          _nullableStringFromDynamic(json[ModelDriveItemEnum.parentId.name]),
+      parentId: _nullableStringFromDynamic(
+        json[ModelDriveItemEnum.parentId.name],
+      ),
       path: Utils.getStringFromDynamic(json[ModelDriveItemEnum.path.name]),
       webUrl: _nullableUrlFromDynamic(json[ModelDriveItemEnum.webUrl.name]),
       createdAt: DateUtils.dateTimeFromDynamic(
@@ -43,10 +41,12 @@ class ModelDriveFile extends ModelDriveItem {
       ),
       trashed: Utils.getBoolFromDynamic(json[ModelDriveItemEnum.trashed.name]),
       meta: _nullableMapFromDynamic(json[ModelDriveItemEnum.meta.name]),
-      sizeBytes:
-          Utils.getIntegerFromDynamic(json[ModelDriveFileEnum.sizeBytes.name]),
-      extension:
-          _nullableStringFromDynamic(json[ModelDriveFileEnum.extension.name]),
+      sizeBytes: Utils.getIntegerFromDynamic(
+        json[ModelDriveFileEnum.sizeBytes.name],
+      ),
+      extension: _nullableStringFromDynamic(
+        json[ModelDriveFileEnum.extension.name],
+      ),
     );
   }
 

@@ -54,44 +54,56 @@ void main() {
       expect(out[ModelGraphAxisSpecEnum.max.name], 100.0);
     });
 
-    test('Given copyWith When overriding Then returns new spec with overrides',
-        () {
-      // Arrange
-      const ModelGraphAxisSpec a =
-          ModelGraphAxisSpec(title: 'A', min: 1.0, max: 10.0);
+    test(
+      'Given copyWith When overriding Then returns new spec with overrides',
+      () {
+        // Arrange
+        const ModelGraphAxisSpec a = ModelGraphAxisSpec(
+          title: 'A',
+          min: 1.0,
+          max: 10.0,
+        );
 
-      // Act
-      final ModelGraphAxisSpec b = a.copyWith(min: -5.0);
-      final ModelGraphAxisSpec c = a.copyWith(title: 'B', max: 20.0);
+        // Act
+        final ModelGraphAxisSpec b = a.copyWith(min: -5.0);
+        final ModelGraphAxisSpec c = a.copyWith(title: 'B', max: 20.0);
 
-      // Assert
-      expect(b.title, 'A');
-      expect(b.min, -5.0);
-      expect(b.max, 10.0);
+        // Assert
+        expect(b.title, 'A');
+        expect(b.min, -5.0);
+        expect(b.max, 10.0);
 
-      expect(c.title, 'B');
-      expect(c.min, 1.0);
-      expect(c.max, 20.0);
-    });
+        expect(c.title, 'B');
+        expect(c.min, 1.0);
+        expect(c.max, 20.0);
+      },
+    );
 
     test('Given two equal specs When comparing Then == and hashCode match', () {
       // Arrange
-      const ModelGraphAxisSpec a =
-          ModelGraphAxisSpec(title: 'T', min: 0.0, max: 1.0);
-      const ModelGraphAxisSpec b =
-          ModelGraphAxisSpec(title: 'T', min: 0.0, max: 1.0);
+      const ModelGraphAxisSpec a = ModelGraphAxisSpec(
+        title: 'T',
+        min: 0.0,
+        max: 1.0,
+      );
+      const ModelGraphAxisSpec b = ModelGraphAxisSpec(
+        title: 'T',
+        min: 0.0,
+        max: 1.0,
+      );
 
       // Assert
       expect(a == b, isTrue);
       expect(a.hashCode, b.hashCode);
     });
 
-    test(
-        'Given inverted range When constructing Then model allows it (no validation)',
-        () {
+    test('Given inverted range When constructing Then model allows it (no validation)', () {
       // Arrange
-      const ModelGraphAxisSpec spec =
-          ModelGraphAxisSpec(title: 'NoCheck', min: 10.0, max: -10.0);
+      const ModelGraphAxisSpec spec = ModelGraphAxisSpec(
+        title: 'NoCheck',
+        min: 10.0,
+        max: -10.0,
+      );
 
       // Assert (documented: no invariant enforced here)
       expect(spec.min > spec.max, isTrue);

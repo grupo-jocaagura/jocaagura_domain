@@ -1,13 +1,7 @@
 part of 'package:jocaagura_domain/jocaagura_domain.dart';
 
 /// Stable JSON keys used by [ModelSheetColumn].
-enum ModelSheetColumnEnum {
-  name,
-  type,
-  required,
-  defaultValue,
-  isPrimaryKey,
-}
+enum ModelSheetColumnEnum { name, type, required, defaultValue, isPrimaryKey }
 
 /// Canonical column types supported by normalized sheet tables.
 enum ModelSheetColumnTypeEnum {
@@ -101,12 +95,12 @@ class ModelSheetColumn extends Model {
 
   @override
   int get hashCode => Object.hash(
-        name,
-        type,
-        required,
-        Utils.deepHash(defaultValue),
-        isPrimaryKey,
-      );
+    name,
+    type,
+    required,
+    Utils.deepHash(defaultValue),
+    isPrimaryKey,
+  );
 
   @override
   String toString() => 'ModelSheetColumn(${toJson()})';

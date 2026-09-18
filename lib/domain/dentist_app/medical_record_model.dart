@@ -124,11 +124,10 @@ class MedicalRecordModel extends Model {
       diagnoses: Utils.listFromDynamic(json[MedicalRecordEnum.diagnoses.name])
           .map((Map<String, dynamic> e) => DiagnosisModel.fromJson(e))
           .toList(),
-      dentalConditions: Utils.listFromDynamic(
-        json[MedicalRecordEnum.dentalConditions.name],
-      )
-          .map((Map<String, dynamic> e) => DentalConditionModel.fromJson(e))
-          .toList(),
+      dentalConditions:
+          Utils.listFromDynamic(json[MedicalRecordEnum.dentalConditions.name])
+              .map((Map<String, dynamic> e) => DentalConditionModel.fromJson(e))
+              .toList(),
       treatmentPlan: TreatmentPlanModel.fromJson(
         Utils.mapFromDynamic(json[MedicalRecordEnum.treatmentPlan.name]),
       ),
@@ -144,14 +143,12 @@ class MedicalRecordModel extends Model {
       user: UserModel.fromJson(
         Utils.mapFromDynamic(json[MedicalRecordEnum.user.name]),
       ),
-      appointments:
-          Utils.listFromDynamic(json[MedicalRecordEnum.appointments.name])
-              .map((Map<String, dynamic> e) => AppointmentModel.fromJson(e))
-              .toList(),
-      medications:
-          Utils.listFromDynamic(json[MedicalRecordEnum.medications.name])
-              .map((Map<String, dynamic> e) => MedicationModel.fromJson(e))
-              .toList(),
+      appointments: Utils.listFromDynamic(
+        json[MedicalRecordEnum.appointments.name],
+      ).map((Map<String, dynamic> e) => AppointmentModel.fromJson(e)).toList(),
+      medications: Utils.listFromDynamic(
+        json[MedicalRecordEnum.medications.name],
+      ).map((Map<String, dynamic> e) => MedicationModel.fromJson(e)).toList(),
       contacts: Utils.listFromDynamic(json[MedicalRecordEnum.contacts.name])
           .map((Map<String, dynamic> e) => ContactModel.fromJson(e))
           .toList(),
@@ -237,16 +234,21 @@ class MedicalRecordModel extends Model {
       MedicalRecordEnum.address.name: address.toJson(),
       MedicalRecordEnum.legalId.name: legalId.toJson(),
       MedicalRecordEnum.user.name: user.toJson(),
-      MedicalRecordEnum.diagnoses.name:
-          diagnoses.map((DiagnosisModel e) => e.toJson()).toList(),
-      MedicalRecordEnum.dentalConditions.name:
-          dentalConditions.map((DentalConditionModel e) => e.toJson()).toList(),
-      MedicalRecordEnum.appointments.name:
-          appointments.map((AppointmentModel e) => e.toJson()).toList(),
-      MedicalRecordEnum.medications.name:
-          medications.map((MedicationModel e) => e.toJson()).toList(),
-      MedicalRecordEnum.contacts.name:
-          contacts.map((ContactModel e) => e.toJson()).toList(),
+      MedicalRecordEnum.diagnoses.name: diagnoses
+          .map((DiagnosisModel e) => e.toJson())
+          .toList(),
+      MedicalRecordEnum.dentalConditions.name: dentalConditions
+          .map((DentalConditionModel e) => e.toJson())
+          .toList(),
+      MedicalRecordEnum.appointments.name: appointments
+          .map((AppointmentModel e) => e.toJson())
+          .toList(),
+      MedicalRecordEnum.medications.name: medications
+          .map((MedicationModel e) => e.toJson())
+          .toList(),
+      MedicalRecordEnum.contacts.name: contacts
+          .map((ContactModel e) => e.toJson())
+          .toList(),
     };
   }
 
@@ -273,17 +275,17 @@ class MedicalRecordModel extends Model {
   /// Returns the hash code for this [MedicalRecordModel].
   @override
   int get hashCode => Object.hash(
-        id,
-        patient,
-        Object.hashAll(diagnoses),
-        Object.hashAll(dentalConditions),
-        treatmentPlan,
-        acceptanceClause,
-        address,
-        legalId,
-        user,
-        Object.hashAll(appointments),
-        Object.hashAll(medications),
-        Object.hashAll(contacts),
-      );
+    id,
+    patient,
+    Object.hashAll(diagnoses),
+    Object.hashAll(dentalConditions),
+    treatmentPlan,
+    acceptanceClause,
+    address,
+    legalId,
+    user,
+    Object.hashAll(appointments),
+    Object.hashAll(medications),
+    Object.hashAll(contacts),
+  );
 }

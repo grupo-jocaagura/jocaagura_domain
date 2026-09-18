@@ -284,9 +284,7 @@ class DentalConditionModel extends Model {
         Utils.getStringFromDynamic(json[DentalConditionEnum.dentalId.name]),
       ),
       dentalRegion: getDentalRegionFromString(
-        Utils.getStringFromDynamic(
-          json[DentalConditionEnum.dentalRegion.name],
-        ),
+        Utils.getStringFromDynamic(json[DentalConditionEnum.dentalRegion.name]),
       ),
       condition: getToothConditionFromString(
         Utils.getStringFromDynamic(json[DentalConditionEnum.condition.name]),
@@ -338,8 +336,9 @@ class DentalConditionModel extends Model {
       DentalConditionEnum.dentalId.name: dentalId,
       DentalConditionEnum.dentalRegion.name: dentalRegion.name,
       DentalConditionEnum.condition.name: condition.name,
-      DentalConditionEnum.dateTimeOfRecord.name:
-          DateUtils.dateTimeToString(dateTimeOfRecord),
+      DentalConditionEnum.dateTimeOfRecord.name: DateUtils.dateTimeToString(
+        dateTimeOfRecord,
+      ),
     };
   }
 
@@ -495,11 +494,6 @@ class DentalConditionModel extends Model {
 
   /// Returns the hash code for this [DentalConditionModel].
   @override
-  int get hashCode => Object.hash(
-        id,
-        dentalRegion,
-        condition,
-        dateTimeOfRecord,
-        dentalId,
-      );
+  int get hashCode =>
+      Object.hash(id, dentalRegion, condition, dateTimeOfRecord, dentalId);
 }

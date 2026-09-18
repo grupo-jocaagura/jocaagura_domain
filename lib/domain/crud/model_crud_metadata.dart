@@ -99,9 +99,7 @@ class ModelCrudMetadata extends Model {
       ),
       deleted: json[ModelCrudMetadataEnum.deleted.name] == null
           ? null
-          : Utils.getBoolFromDynamic(
-              json[ModelCrudMetadataEnum.deleted.name],
-            ),
+          : Utils.getBoolFromDynamic(json[ModelCrudMetadataEnum.deleted.name]),
       deletedBy: json[ModelCrudMetadataEnum.deletedBy.name]?.toString(),
       deletedAt: json[ModelCrudMetadataEnum.deletedAt.name] == null
           ? null
@@ -180,11 +178,13 @@ class ModelCrudMetadata extends Model {
     final Map<String, dynamic> json = <String, dynamic>{
       ModelCrudMetadataEnum.recordId.name: recordId,
       ModelCrudMetadataEnum.createdBy.name: createdBy,
-      ModelCrudMetadataEnum.createdAt.name:
-          DateUtils.dateTimeToString(createdAt),
+      ModelCrudMetadataEnum.createdAt.name: DateUtils.dateTimeToString(
+        createdAt,
+      ),
       ModelCrudMetadataEnum.updatedBy.name: updatedBy,
-      ModelCrudMetadataEnum.updatedAt.name:
-          DateUtils.dateTimeToString(updatedAt),
+      ModelCrudMetadataEnum.updatedAt.name: DateUtils.dateTimeToString(
+        updatedAt,
+      ),
     };
     if (deleted != null) {
       json[ModelCrudMetadataEnum.deleted.name] = deleted;
@@ -193,8 +193,9 @@ class ModelCrudMetadata extends Model {
       json[ModelCrudMetadataEnum.deletedBy.name] = deletedBy;
     }
     if (deletedAt != null) {
-      json[ModelCrudMetadataEnum.deletedAt.name] =
-          DateUtils.dateTimeToString(deletedAt!);
+      json[ModelCrudMetadataEnum.deletedAt.name] = DateUtils.dateTimeToString(
+        deletedAt!,
+      );
     }
     if (version != null) {
       json[ModelCrudMetadataEnum.version.name] = version;
@@ -219,16 +220,16 @@ class ModelCrudMetadata extends Model {
 
   @override
   int get hashCode => Object.hash(
-        recordId,
-        createdBy,
-        createdAt,
-        updatedBy,
-        updatedAt,
-        deleted,
-        deletedBy,
-        deletedAt,
-        version,
-      );
+    recordId,
+    createdBy,
+    createdAt,
+    updatedBy,
+    updatedAt,
+    deleted,
+    deletedBy,
+    deletedAt,
+    version,
+  );
 
   @override
   String toString() => 'ModelCrudMetadata(${toJson()})';
@@ -314,8 +315,9 @@ class ModelCrudMetadata extends Model {
     bool bumpVersion = true,
   }) {
     final DateTime t = (timestamp ?? DateTime.now()).toUtc();
-    final int? newVersion =
-        bumpVersion ? ((current.version ?? 0) + 1) : current.version;
+    final int? newVersion = bumpVersion
+        ? ((current.version ?? 0) + 1)
+        : current.version;
 
     return current.copyWith(
       updatedBy: actor,
@@ -361,8 +363,9 @@ class ModelCrudMetadata extends Model {
     bool bumpVersion = true,
   }) {
     final DateTime t = (timestamp ?? DateTime.now()).toUtc();
-    final int? newVersion =
-        bumpVersion ? ((current.version ?? 0) + 1) : current.version;
+    final int? newVersion = bumpVersion
+        ? ((current.version ?? 0) + 1)
+        : current.version;
 
     return current.copyWith(
       deleted: true,

@@ -84,8 +84,9 @@ class ModelAclPlanAssignment extends Model {
       ModelAclPlanAssignmentEnum.id.name: id,
       ModelAclPlanAssignmentEnum.plan.name: plan.toJson(),
       ModelAclPlanAssignmentEnum.targetUser.name: targetUser.toJson(),
-      ModelAclPlanAssignmentEnum.assignedAt.name:
-          DateUtils.dateTimeToString(assignedAt),
+      ModelAclPlanAssignmentEnum.assignedAt.name: DateUtils.dateTimeToString(
+        assignedAt,
+      ),
     };
 
     if (assignedBy != null) {
@@ -118,13 +119,13 @@ class ModelAclPlanAssignment extends Model {
 
   @override
   int get hashCode => Object.hash(
-        id,
-        plan,
-        Utils.deepHash(targetUser.toJson()),
-        assignedAt,
-        Utils.deepHash(assignedBy?.toJson()),
-        notes,
-      );
+    id,
+    plan,
+    Utils.deepHash(targetUser.toJson()),
+    assignedAt,
+    Utils.deepHash(assignedBy?.toJson()),
+    notes,
+  );
 
   @override
   String toString() => 'ModelAclPlanAssignment(${toJson()})';

@@ -68,24 +68,26 @@ void main() {
     });
   });
   group('StoreModel', () {
-    test('Given address When toJson Then address is a JSON map (not string)',
-        () {
-      const StoreModel s = StoreModel(
-        id: 'id',
-        nit: 12345,
-        photoUrl: 'https://x/p.jpg',
-        coverPhotoUrl: 'https://x/c.jpg',
-        email: 'e@x.com',
-        ownerEmail: 'o@x.com',
-        name: 'N',
-        alias: 'A',
-        address: defaultAddressModel,
-        phoneNumber1: 111,
-        phoneNumber2: 222,
-      );
-      final dynamic addr = s.toJson()['address'];
-      expect(addr, isA<Map<String, dynamic>>());
-    });
+    test(
+      'Given address When toJson Then address is a JSON map (not string)',
+      () {
+        const StoreModel s = StoreModel(
+          id: 'id',
+          nit: 12345,
+          photoUrl: 'https://x/p.jpg',
+          coverPhotoUrl: 'https://x/c.jpg',
+          email: 'e@x.com',
+          ownerEmail: 'o@x.com',
+          name: 'N',
+          alias: 'A',
+          address: defaultAddressModel,
+          phoneNumber1: 111,
+          phoneNumber2: 222,
+        );
+        final dynamic addr = s.toJson()['address'];
+        expect(addr, isA<Map<String, dynamic>>());
+      },
+    );
 
     test('Given two equal stores When compare Then == true and hash equal', () {
       const StoreModel a = StoreModel(
@@ -118,11 +120,13 @@ void main() {
       expect(a.hashCode, equals(b.hashCode));
     });
 
-    test('Given nit When getVerificationNITNumber Then returns dv in [0,1..9]',
-        () {
-      final int dv = StoreModel.getVerificationNITNumber(900373106);
-      expect(dv, inInclusiveRange(0, 9));
-    });
+    test(
+      'Given nit When getVerificationNITNumber Then returns dv in [0,1..9]',
+      () {
+        final int dv = StoreModel.getVerificationNITNumber(900373106);
+        expect(dv, inInclusiveRange(0, 9));
+      },
+    );
 
     test('Given fromJson Then roundtrip preserves shape and address map', () {
       final Map<String, dynamic> json = <String, dynamic>{

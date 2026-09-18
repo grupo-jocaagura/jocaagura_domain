@@ -4,12 +4,7 @@ part of 'package:jocaagura_domain/jocaagura_domain.dart';
 /// GROUP LABELS
 /// ===========================================================================
 
-enum ModelGroupLabelsEnum {
-  pillar,
-  kind,
-  tags,
-  attributes,
-}
+enum ModelGroupLabelsEnum { pillar, kind, tags, attributes }
 
 /// High-level classification labels for a group.
 ///
@@ -41,9 +36,7 @@ class ModelGroupLabels extends Model {
         json[ModelGroupLabelsEnum.kind.name]?.toString(),
         ModelGroupKind.other,
       ),
-      tags: Utils.stringListFromDynamic(
-        json[ModelGroupLabelsEnum.tags.name],
-      ),
+      tags: Utils.stringListFromDynamic(json[ModelGroupLabelsEnum.tags.name]),
       attributes: Utils.mapFromDynamic(
         json[ModelGroupLabelsEnum.attributes.name],
       ),
@@ -94,12 +87,8 @@ class ModelGroupLabels extends Model {
           attributes == other.attributes;
 
   @override
-  int get hashCode => Object.hash(
-        pillar,
-        kind,
-        Object.hashAll(tags),
-        attributes,
-      );
+  int get hashCode =>
+      Object.hash(pillar, kind, Object.hashAll(tags), attributes);
 
   @override
   String toString() => 'ModelGroupLabels(${toJson()})';

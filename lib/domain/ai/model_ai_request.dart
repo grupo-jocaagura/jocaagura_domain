@@ -37,18 +37,19 @@ class ModelAiRequest extends Model {
   factory ModelAiRequest.fromJson(Map<String, dynamic> json) {
     return ModelAiRequest(
       id: Utils.getStringFromDynamic(json[ModelAiRequestEnum.id.name]),
-      provider:
-          Utils.getStringFromDynamic(json[ModelAiRequestEnum.provider.name]),
-      modelId:
-          Utils.getStringFromDynamic(json[ModelAiRequestEnum.modelId.name]),
+      provider: Utils.getStringFromDynamic(
+        json[ModelAiRequestEnum.provider.name],
+      ),
+      modelId: Utils.getStringFromDynamic(
+        json[ModelAiRequestEnum.modelId.name],
+      ),
       taskType: Utils.enumFromJson<ModelAiTaskTypeEnum>(
         ModelAiTaskTypeEnum.values,
         Utils.getStringFromDynamic(json[ModelAiRequestEnum.taskType.name]),
         ModelAiTaskTypeEnum.textGeneration,
       ),
-      systemInstruction: json.containsKey(
-        ModelAiRequestEnum.systemInstruction.name,
-      )
+      systemInstruction:
+          json.containsKey(ModelAiRequestEnum.systemInstruction.name)
           ? _aiNullableStringFromDynamic(
               json[ModelAiRequestEnum.systemInstruction.name],
             )
@@ -68,9 +69,8 @@ class ModelAiRequest extends Model {
               ),
             )
           : null,
-      expectedResponseSchema: json.containsKey(
-        ModelAiRequestEnum.expectedResponseSchema.name,
-      )
+      expectedResponseSchema:
+          json.containsKey(ModelAiRequestEnum.expectedResponseSchema.name)
           ? ModelJsonSchemaDocument.fromJson(
               Utils.mapFromDynamic(
                 json[ModelAiRequestEnum.expectedResponseSchema.name],
@@ -130,8 +130,9 @@ class ModelAiRequest extends Model {
       ModelAiRequestEnum.provider.name: provider,
       ModelAiRequestEnum.modelId.name: modelId,
       ModelAiRequestEnum.taskType.name: taskType.name,
-      ModelAiRequestEnum.messages.name:
-          messages.map((ModelAiMessage e) => e.toJson()).toList(),
+      ModelAiRequestEnum.messages.name: messages
+          .map((ModelAiMessage e) => e.toJson())
+          .toList(),
     };
 
     if (systemInstruction != null) {
@@ -168,16 +169,16 @@ class ModelAiRequest extends Model {
 
   @override
   int get hashCode => Object.hash(
-        id,
-        provider,
-        modelId,
-        taskType,
-        systemInstruction,
-        Utils.listHash(messages),
-        Utils.deepHash(references),
-        executionConfig,
-        expectedResponseSchema,
-      );
+    id,
+    provider,
+    modelId,
+    taskType,
+    systemInstruction,
+    Utils.listHash(messages),
+    Utils.deepHash(references),
+    executionConfig,
+    expectedResponseSchema,
+  );
 
   @override
   String toString() => 'ModelAiRequest(${toJson()})';

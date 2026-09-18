@@ -86,10 +86,12 @@ class MedicationModel extends Model {
       id: Utils.getStringFromDynamic(json[MedicationEnum.id.name]),
       name: Utils.getStringFromDynamic(json[MedicationEnum.name.name]),
       dosage: Utils.getStringFromDynamic(json[MedicationEnum.dosage.name]),
-      frequency:
-          Utils.getStringFromDynamic(json[MedicationEnum.frequency.name]),
-      startDate:
-          DateUtils.dateTimeFromDynamic(json[MedicationEnum.startDate.name]),
+      frequency: Utils.getStringFromDynamic(
+        json[MedicationEnum.frequency.name],
+      ),
+      startDate: DateUtils.dateTimeFromDynamic(
+        json[MedicationEnum.startDate.name],
+      ),
       endDate: DateUtils.dateTimeFromDynamic(json[MedicationEnum.endDate.name]),
     );
   }

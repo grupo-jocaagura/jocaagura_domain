@@ -133,18 +133,18 @@ class ModelGroupSettings extends Model {
           json[ModelGroupSettingsEnum.whoCanViewGroup.name]?.toString() ?? '',
       whoCanViewMembership:
           json[ModelGroupSettingsEnum.whoCanViewMembership.name]?.toString() ??
-              '',
+          '',
       whoCanJoin:
           json[ModelGroupSettingsEnum.whoCanJoin.name]?.toString() ?? '',
       whoCanPostMessage:
           json[ModelGroupSettingsEnum.whoCanPostMessage.name]?.toString() ?? '',
       messageModerationLevel:
           json[ModelGroupSettingsEnum.messageModerationLevel.name]
-                  ?.toString() ??
-              '',
+              ?.toString() ??
+          '',
       spamModerationLevel:
           json[ModelGroupSettingsEnum.spamModerationLevel.name]?.toString() ??
-              '',
+          '',
       includeInGlobalAddressList: Utils.getBoolFromDynamic(
         json[ModelGroupSettingsEnum.includeInGlobalAddressList.name],
         defaultValueIfNull: true,
@@ -245,8 +245,9 @@ class ModelGroupSettings extends Model {
           membersCanPostAsTheGroup,
       ModelGroupSettingsEnum.isArchived.name: isArchived,
       ModelGroupSettingsEnum.isCollaborativeInbox.name: isCollaborativeInbox,
-      ModelGroupSettingsEnum.fetchedAt.name:
-          DateUtils.dateTimeToString(fetchedAt),
+      ModelGroupSettingsEnum.fetchedAt.name: DateUtils.dateTimeToString(
+        fetchedAt,
+      ),
     };
     json[ModelGroupSettingsEnum.rawSettings.name] = rawSettings;
     return json;
@@ -275,22 +276,22 @@ class ModelGroupSettings extends Model {
 
   @override
   int get hashCode => Object.hash(
-        id,
-        groupId,
-        googleGroupId,
-        whoCanViewGroup,
-        whoCanViewMembership,
-        whoCanJoin,
-        whoCanPostMessage,
-        messageModerationLevel,
-        spamModerationLevel,
-        includeInGlobalAddressList,
-        membersCanPostAsTheGroup,
-        isArchived,
-        isCollaborativeInbox,
-        rawSettings,
-        fetchedAt,
-      );
+    id,
+    groupId,
+    googleGroupId,
+    whoCanViewGroup,
+    whoCanViewMembership,
+    whoCanJoin,
+    whoCanPostMessage,
+    messageModerationLevel,
+    spamModerationLevel,
+    includeInGlobalAddressList,
+    membersCanPostAsTheGroup,
+    isArchived,
+    isCollaborativeInbox,
+    rawSettings,
+    fetchedAt,
+  );
 
   @override
   String toString() => 'ModelGroupSettings(${toJson()})';

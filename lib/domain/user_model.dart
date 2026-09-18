@@ -70,7 +70,8 @@ class UserModel extends Model {
   factory UserModel.fromJson(Map<String, dynamic> json) {
     return UserModel(
       id: json[UserEnum.id.name]?.toString() ?? defaultUserModel.id,
-      displayName: json[UserEnum.displayName.name]?.toString() ??
+      displayName:
+          json[UserEnum.displayName.name]?.toString() ??
           defaultUserModel.displayName,
       photoUrl: Utils.getUrlFromDynamic(json[UserEnum.photoUrl.name]),
       email: Utils.getEmailFromDynamic(json[UserEnum.email.name]),
@@ -101,14 +102,13 @@ class UserModel extends Model {
     String? photoUrl,
     String? email,
     Map<String, dynamic>? jwt,
-  }) =>
-      UserModel(
-        id: id ?? this.id,
-        displayName: displayName ?? this.displayName,
-        photoUrl: photoUrl ?? this.photoUrl,
-        email: email ?? this.email,
-        jwt: jwt ?? this.jwt,
-      );
+  }) => UserModel(
+    id: id ?? this.id,
+    displayName: displayName ?? this.displayName,
+    photoUrl: photoUrl ?? this.photoUrl,
+    email: email ?? this.email,
+    jwt: jwt ?? this.jwt,
+  );
 
   /// Serializes this [UserModel] into a JSON map.
   @override

@@ -79,11 +79,7 @@ class DiagnosisModel extends Model {
   ///
   /// Useful for creating a modified diagnosis while preserving immutability.
   @override
-  DiagnosisModel copyWith({
-    String? id,
-    String? title,
-    String? description,
-  }) {
+  DiagnosisModel copyWith({String? id, String? title, String? description}) {
     return DiagnosisModel(
       id: id ?? this.id,
       title: title ?? this.title,
@@ -122,9 +118,5 @@ class DiagnosisModel extends Model {
   ///
   /// The hash code is based on all of the fields of the model.
   @override
-  int get hashCode => Object.hash(
-        id,
-        title,
-        description,
-      );
+  int get hashCode => Object.hash(id, title, description);
 }

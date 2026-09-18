@@ -73,9 +73,7 @@ void main() {
   });
 
   group('LedgerModel — fromJson & toJson', () {
-    test(
-        'Given JSON válido When fromJson Then crea listas inmutables y calcula balances',
-        () {
+    test('Given JSON válido When fromJson Then crea listas inmutables y calcula balances', () {
       // Arrange
       final Map<String, dynamic> json = <String, dynamic>{
         LedgerEnum.nameOfLedger.name: 'Primary',
@@ -172,9 +170,7 @@ void main() {
   });
 
   group('LedgerModel — equality & hashCode', () {
-    test(
-        'Given dos libros con mismas entradas (mismo orden) Then son iguales y hash coincide',
-        () {
+    test('Given dos libros con mismas entradas (mismo orden) Then son iguales y hash coincide', () {
       // Arrange
       final FinancialMovementModel i = FinancialMovementModel.fromDecimal(
         id: 'i3',
@@ -261,9 +257,7 @@ void main() {
   });
 
   group('LedgerModel — constructor principal (riesgo documentado)', () {
-    test(
-        'Given listas MUTABLES al ctor Then el modelo puede ser mutable externamente (documentado)',
-        () {
+    test('Given listas MUTABLES al ctor Then el modelo puede ser mutable externamente (documentado)', () {
       // Este test ilustra el riesgo (no es un hard-fail): el ctor principal no envuelve.
       final List<FinancialMovementModel> incomes = <FinancialMovementModel>[];
       final LedgerModel ledger = LedgerModel(
@@ -285,138 +279,129 @@ void main() {
   });
 
   group('LedgerModel.fromJson — Formas válidas de JSON', () {
-    test(
-      'Given listas bien formadas de Map<String,dynamic> '
-      'When fromJson '
-      'Then crea LedgerModel con balances correctos',
-      () {
-        // Arrange
-        final Map<String, dynamic> json = <String, dynamic>{
-          LedgerEnum.nameOfLedger.name: 'Primary',
-          LedgerEnum.incomeLedger.name: <Map<String, dynamic>>[
-            FinancialMovementModel.fromDecimal(
-              id: 'i1',
-              decimalAmount: 100.00,
-              date: DateTime(2025),
-              concept: 'Salary',
+    test('Given listas bien formadas de Map<String,dynamic> '
+        'When fromJson '
+        'Then crea LedgerModel con balances correctos', () {
+      // Arrange
+      final Map<String, dynamic> json = <String, dynamic>{
+        LedgerEnum.nameOfLedger.name: 'Primary',
+        LedgerEnum.incomeLedger.name: <Map<String, dynamic>>[
+          FinancialMovementModel.fromDecimal(
+            id: 'i1',
+            decimalAmount: 100.00,
+            date: DateTime(2025),
+            concept: 'Salary',
+            category: 'Income',
+            createdAt: DateTime(2025),
+            precision: 2,
+          ).toJson(),
+        ],
+        LedgerEnum.expenseLedger.name: <Map<String, dynamic>>[
+          FinancialMovementModel.fromDecimal(
+            id: 'e1',
+            decimalAmount: 30.50,
+            date: DateTime(2025, 1, 2),
+            concept: 'Groceries',
+            category: 'Expense',
+            createdAt: DateTime(2025, 1, 2),
+            precision: 2,
+          ).toJson(),
+        ],
+      };
+
+      // Act
+      final LedgerModel ledger = LedgerModel.fromJson(json);
+
+      // Assert
+      expect(ledger.nameOfLedger, 'Primary');
+      expect(ledger.incomeLedger.length, 1);
+      expect(ledger.expenseLedger.length, 1);
+      expect(ledger.decimalBalance, closeTo(69.50, 1e-9));
+      expect(ledger.balance, 6950);
+    });
+
+    test('Given listas de List<dynamic> mezclando Map y no-Map '
+        'When fromJson '
+        'Then ignora los no-Map y parsea solo los Map válidos', () {
+      // Arrange
+      final Map<String, dynamic> json = <String, dynamic>{
+        LedgerEnum.nameOfLedger.name: 'Mixed',
+        LedgerEnum.incomeLedger.name: <dynamic>[
+          // válido
+          FinancialMovementModel.fromDecimal(
+            id: 'i1',
+            decimalAmount: 10.00,
+            date: DateTime(2025, 1, 3),
+            concept: 'Gift',
+            category: 'Income',
+            createdAt: DateTime(2025, 1, 3),
+            precision: 2,
+          ).toJson(),
+          // ruido: no-Map
+          42,
+          'string',
+          null,
+          // válido con claves adicionales (deben ser ignoradas por el modelo)
+          <String, dynamic>{
+            ...FinancialMovementModel.fromDecimal(
+              id: 'i2',
+              decimalAmount: 5.50,
+              date: DateTime(2025, 1, 4),
+              concept: 'Tip',
               category: 'Income',
-              createdAt: DateTime(2025),
+              createdAt: DateTime(2025, 1, 4),
               precision: 2,
             ).toJson(),
-          ],
-          LedgerEnum.expenseLedger.name: <Map<String, dynamic>>[
-            FinancialMovementModel.fromDecimal(
-              id: 'e1',
-              decimalAmount: 30.50,
-              date: DateTime(2025, 1, 2),
-              concept: 'Groceries',
-              category: 'Expense',
-              createdAt: DateTime(2025, 1, 2),
-              precision: 2,
-            ).toJson(),
-          ],
-        };
+            'extra': 'ignore-me',
+          },
+        ],
+        LedgerEnum.expenseLedger.name: <dynamic>[
+          // válido
+          FinancialMovementModel.fromDecimal(
+            id: 'e1',
+            decimalAmount: 3.00,
+            date: DateTime(2025, 1, 5),
+            concept: 'Snacks',
+            category: 'Expense',
+            createdAt: DateTime(2025, 1, 5),
+            precision: 2,
+          ).toJson(),
+          // ruido: lista dentro de lista
+          <int>[1, 2, 3],
+        ],
+      };
 
-        // Act
-        final LedgerModel ledger = LedgerModel.fromJson(json);
+      // Act
+      final LedgerModel ledger = LedgerModel.fromJson(json);
 
-        // Assert
-        expect(ledger.nameOfLedger, 'Primary');
-        expect(ledger.incomeLedger.length, 1);
-        expect(ledger.expenseLedger.length, 1);
-        expect(ledger.decimalBalance, closeTo(69.50, 1e-9));
-        expect(ledger.balance, 6950);
-      },
-    );
+      // Assert: solo debe contar 2 ingresos válidos y 1 egreso válido
+      expect(ledger.incomeLedger.length, 2);
+      expect(ledger.expenseLedger.length, 1);
 
-    test(
-      'Given listas de List<dynamic> mezclando Map y no-Map '
-      'When fromJson '
-      'Then ignora los no-Map y parsea solo los Map válidos',
-      () {
-        // Arrange
-        final Map<String, dynamic> json = <String, dynamic>{
-          LedgerEnum.nameOfLedger.name: 'Mixed',
-          LedgerEnum.incomeLedger.name: <dynamic>[
-            // válido
-            FinancialMovementModel.fromDecimal(
-              id: 'i1',
-              decimalAmount: 10.00,
-              date: DateTime(2025, 1, 3),
-              concept: 'Gift',
-              category: 'Income',
-              createdAt: DateTime(2025, 1, 3),
-              precision: 2,
-            ).toJson(),
-            // ruido: no-Map
-            42,
-            'string',
-            null,
-            // válido con claves adicionales (deben ser ignoradas por el modelo)
-            <String, dynamic>{
-              ...FinancialMovementModel.fromDecimal(
-                id: 'i2',
-                decimalAmount: 5.50,
-                date: DateTime(2025, 1, 4),
-                concept: 'Tip',
-                category: 'Income',
-                createdAt: DateTime(2025, 1, 4),
-                precision: 2,
-              ).toJson(),
-              'extra': 'ignore-me',
-            },
-          ],
-          LedgerEnum.expenseLedger.name: <dynamic>[
-            // válido
-            FinancialMovementModel.fromDecimal(
-              id: 'e1',
-              decimalAmount: 3.00,
-              date: DateTime(2025, 1, 5),
-              concept: 'Snacks',
-              category: 'Expense',
-              createdAt: DateTime(2025, 1, 5),
-              precision: 2,
-            ).toJson(),
-            // ruido: lista dentro de lista
-            <int>[1, 2, 3],
-          ],
-        };
+      // (10.00 + 5.50) - 3.00 = 12.50
+      expect(ledger.decimalBalance, closeTo(12.50, 1e-9));
+      expect(ledger.balance, 1250);
+    });
 
-        // Act
-        final LedgerModel ledger = LedgerModel.fromJson(json);
+    test('Given incomeLedger/expenseLedger ausentes (null) '
+        'When fromJson '
+        'Then crea listas vacías y balance en 0', () {
+      // Arrange
+      final Map<String, dynamic> json = <String, dynamic>{
+        LedgerEnum.nameOfLedger.name: 'Empty',
+        // Sin incomeLedger
+        // Sin expenseLedger
+      };
 
-        // Assert: solo debe contar 2 ingresos válidos y 1 egreso válido
-        expect(ledger.incomeLedger.length, 2);
-        expect(ledger.expenseLedger.length, 1);
+      // Act
+      final LedgerModel ledger = LedgerModel.fromJson(json);
 
-        // (10.00 + 5.50) - 3.00 = 12.50
-        expect(ledger.decimalBalance, closeTo(12.50, 1e-9));
-        expect(ledger.balance, 1250);
-      },
-    );
-
-    test(
-      'Given incomeLedger/expenseLedger ausentes (null) '
-      'When fromJson '
-      'Then crea listas vacías y balance en 0',
-      () {
-        // Arrange
-        final Map<String, dynamic> json = <String, dynamic>{
-          LedgerEnum.nameOfLedger.name: 'Empty',
-          // Sin incomeLedger
-          // Sin expenseLedger
-        };
-
-        // Act
-        final LedgerModel ledger = LedgerModel.fromJson(json);
-
-        // Assert
-        expect(ledger.incomeLedger, isEmpty);
-        expect(ledger.expenseLedger, isEmpty);
-        expect(ledger.balance, 0);
-        expect(ledger.decimalBalance, 0.0);
-      },
-    );
+      // Assert
+      expect(ledger.incomeLedger, isEmpty);
+      expect(ledger.expenseLedger, isEmpty);
+      expect(ledger.balance, 0);
+      expect(ledger.decimalBalance, 0.0);
+    });
 
     test(
       'Given movimientos con diferentes precisiones '
@@ -476,39 +461,36 @@ void main() {
       },
     );
 
-    test(
-      'Given amount negativo dentro de items (permitido por contrato de movimiento) '
-      'When fromJson '
-      'Then normaliza a positivo por política del modelo de movimiento',
-      () {
-        // Arrange: forzamos un item con amount negativo en el JSON bruto
-        final FinancialMovementModel base = FinancialMovementModel.fromDecimal(
-          id: 'i1',
-          decimalAmount: 5.00,
-          date: DateTime(2025, 1, 8),
-          concept: 'Base',
-          category: 'Income',
-          createdAt: DateTime(2025, 1, 8),
-          precision: 2,
-        );
-        final Map<String, dynamic> badIncome = <String, dynamic>{
-          ...base.toJson(),
-          FinancialMovementEnum.amount.name: -base.amount, // < 0
-        };
+    test('Given amount negativo dentro de items (permitido por contrato de movimiento) '
+        'When fromJson '
+        'Then normaliza a positivo por política del modelo de movimiento', () {
+      // Arrange: forzamos un item con amount negativo en el JSON bruto
+      final FinancialMovementModel base = FinancialMovementModel.fromDecimal(
+        id: 'i1',
+        decimalAmount: 5.00,
+        date: DateTime(2025, 1, 8),
+        concept: 'Base',
+        category: 'Income',
+        createdAt: DateTime(2025, 1, 8),
+        precision: 2,
+      );
+      final Map<String, dynamic> badIncome = <String, dynamic>{
+        ...base.toJson(),
+        FinancialMovementEnum.amount.name: -base.amount, // < 0
+      };
 
-        final Map<String, dynamic> json = <String, dynamic>{
-          LedgerEnum.nameOfLedger.name: 'Negatives',
-          LedgerEnum.incomeLedger.name: <Map<String, dynamic>>[badIncome],
-          LedgerEnum.expenseLedger.name: <Map<String, dynamic>>[],
-        };
+      final Map<String, dynamic> json = <String, dynamic>{
+        LedgerEnum.nameOfLedger.name: 'Negatives',
+        LedgerEnum.incomeLedger.name: <Map<String, dynamic>>[badIncome],
+        LedgerEnum.expenseLedger.name: <Map<String, dynamic>>[],
+      };
 
-        // Act
-        final LedgerModel ledger = LedgerModel.fromJson(json);
+      // Act
+      final LedgerModel ledger = LedgerModel.fromJson(json);
 
-        // Assert: el movimiento interno se normaliza (por FinancialMovementModel.fromJson)
-        expect(ledger.incomeLedger.first.amount, base.amount);
-        expect(ledger.decimalBalance, closeTo(5.00, 1e-9));
-      },
-    );
+      // Assert: el movimiento interno se normaliza (por FinancialMovementModel.fromJson)
+      expect(ledger.incomeLedger.first.amount, base.amount);
+      expect(ledger.decimalBalance, closeTo(5.00, 1e-9));
+    });
   });
 }

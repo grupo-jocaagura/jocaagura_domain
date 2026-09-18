@@ -16,10 +16,7 @@ enum ModelDriveItemEnum {
 }
 
 /// Domain classification of a drive resource.
-enum ModelDriveKindEnum {
-  file,
-  folder,
-}
+enum ModelDriveKindEnum { file, folder }
 
 /// Base real payload for a document resource in the logical drive domain.
 ///
@@ -55,8 +52,9 @@ class ModelDriveItem extends Model {
       mimeType: Utils.getStringFromDynamic(
         json[ModelDriveItemEnum.mimeType.name],
       ),
-      parentId:
-          _nullableStringFromDynamic(json[ModelDriveItemEnum.parentId.name]),
+      parentId: _nullableStringFromDynamic(
+        json[ModelDriveItemEnum.parentId.name],
+      ),
       path: Utils.getStringFromDynamic(json[ModelDriveItemEnum.path.name]),
       webUrl: _nullableUrlFromDynamic(json[ModelDriveItemEnum.webUrl.name]),
       createdAt: DateUtils.dateTimeFromDynamic(
@@ -158,18 +156,18 @@ class ModelDriveItem extends Model {
 
   @override
   int get hashCode => Object.hash(
-        id,
-        name,
-        kind,
-        mimeType,
-        parentId,
-        path,
-        webUrl,
-        createdAt,
-        updatedAt,
-        trashed,
-        Utils.deepHash(meta),
-      );
+    id,
+    name,
+    kind,
+    mimeType,
+    parentId,
+    path,
+    webUrl,
+    createdAt,
+    updatedAt,
+    trashed,
+    Utils.deepHash(meta),
+  );
 
   @override
   String toString() => 'ModelDriveItem(${toJson()})';

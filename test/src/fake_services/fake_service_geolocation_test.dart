@@ -21,8 +21,9 @@ void main() {
 
     test('locationStream emits initial coords', () async {
       final List<Map<String, double>> events = <Map<String, double>>[];
-      final StreamSubscription<Map<String, double>> sub =
-          geo.locationStream().listen(events.add);
+      final StreamSubscription<Map<String, double>> sub = geo
+          .locationStream()
+          .listen(events.add);
       await Future<void>.delayed(Duration.zero);
       expect(events.first, <String, double>{'latitude': 0.0, 'longitude': 0.0});
       await sub.cancel();
@@ -30,20 +31,22 @@ void main() {
 
     test('simulateLocation pushes new coords', () async {
       final List<Map<String, double>> events = <Map<String, double>>[];
-      final StreamSubscription<Map<String, double>> sub =
-          geo.locationStream().listen(events.add);
+      final StreamSubscription<Map<String, double>> sub = geo
+          .locationStream()
+          .listen(events.add);
       geo.simulateLocation(latitude: 10.5, longitude: -20.5);
       await Future<void>.delayed(Duration.zero);
-      expect(
-        events.last,
-        <String, double>{'latitude': 10.5, 'longitude': -20.5},
-      );
+      expect(events.last, <String, double>{
+        'latitude': 10.5,
+        'longitude': -20.5,
+      });
       await sub.cancel();
     });
 
     test('getCurrentLocation latency simulation', () async {
-      final FakeServiceGeolocation geo2 =
-          FakeServiceGeolocation(latency: const Duration(milliseconds: 50));
+      final FakeServiceGeolocation geo2 = FakeServiceGeolocation(
+        latency: const Duration(milliseconds: 50),
+      );
       final Stopwatch sw = Stopwatch()..start();
       await geo2.getCurrentLocation();
       sw.stop();
@@ -52,22 +55,22 @@ void main() {
     });
 
     test('getCurrentLocation throws when throwOnGet is true', () {
-      final FakeServiceGeolocation geo2 =
-          FakeServiceGeolocation(throwOnGet: true);
-      expect(
-        () => geo2.getCurrentLocation(),
-        throwsA(isA<StateError>()),
+      final FakeServiceGeolocation geo2 = FakeServiceGeolocation(
+        throwOnGet: true,
       );
+      expect(() => geo2.getCurrentLocation(), throwsA(isA<StateError>()));
       geo2.dispose();
     });
 
     test('multiple listeners receive same events', () async {
       final List<Map<String, double>> events1 = <Map<String, double>>[];
       final List<Map<String, double>> events2 = <Map<String, double>>[];
-      final StreamSubscription<Map<String, double>> sub1 =
-          geo.locationStream().listen(events1.add);
-      final StreamSubscription<Map<String, double>> sub2 =
-          geo.locationStream().listen(events2.add);
+      final StreamSubscription<Map<String, double>> sub1 = geo
+          .locationStream()
+          .listen(events1.add);
+      final StreamSubscription<Map<String, double>> sub2 = geo
+          .locationStream()
+          .listen(events2.add);
       geo.simulateLocation(latitude: 1.1, longitude: 2.2);
       await Future<void>.delayed(Duration.zero);
       expect(events1, equals(events2));
@@ -101,8 +104,9 @@ void main() {
     };
 
     final List<Map<String, double>> events = <Map<String, double>>[];
-    final StreamSubscription<Map<String, double>> sub =
-        geo.locationStream().listen(events.add);
+    final StreamSubscription<Map<String, double>> sub = geo
+        .locationStream()
+        .listen(events.add);
 
     geo.simulateLocation(latitude: 1.23, longitude: 4.56);
     await Future<void>.delayed(Duration.zero);
@@ -120,8 +124,9 @@ void main() {
     test('Multiple simulateLocation calls emit in correct order', () async {
       final FakeServiceGeolocation geo = FakeServiceGeolocation();
       final List<Map<String, double>> events = <Map<String, double>>[];
-      final StreamSubscription<Map<String, double>> sub =
-          geo.locationStream().listen(events.add);
+      final StreamSubscription<Map<String, double>> sub = geo
+          .locationStream()
+          .listen(events.add);
 
       // Definimos una serie de ubicaciones a simular
       final List<Map<String, double>> locs = <Map<String, double>>[

@@ -7,7 +7,7 @@ import 'package:jocaagura_domain/jocaagura_domain.dart';
 /// -------------------------
 class _RepoFake implements RepositoryAuth {
   _RepoFake()
-      : _ctrl = StreamController<Either<ErrorItem, UserModel?>>.broadcast();
+    : _ctrl = StreamController<Either<ErrorItem, UserModel?>>.broadcast();
 
   final StreamController<Either<ErrorItem, UserModel?>> _ctrl;
 
@@ -31,24 +31,23 @@ class _RepoFake implements RepositoryAuth {
   @override
   Future<Either<ErrorItem, UserModel>> logInSilently(
     UserModel currentUser,
-  ) async =>
-      Right<ErrorItem, UserModel>(currentUser);
+  ) async => Right<ErrorItem, UserModel>(currentUser);
 
   @override
   Future<Either<ErrorItem, UserModel>> logInUserAndPassword(
     String email,
     String password,
-  ) async =>
-      Right<ErrorItem, UserModel>(
-        UserModel.fromJson(<String, dynamic>{'id': email, 'email': email}),
-      );
+  ) async => Right<ErrorItem, UserModel>(
+    UserModel.fromJson(<String, dynamic>{'id': email, 'email': email}),
+  );
 
   @override
   Future<Either<ErrorItem, UserModel>> logInWithGoogle() async =>
       Right<ErrorItem, UserModel>(
-        UserModel.fromJson(
-          const <String, dynamic>{'id': 'g', 'email': 'g@x.com'},
-        ),
+        UserModel.fromJson(const <String, dynamic>{
+          'id': 'g',
+          'email': 'g@x.com',
+        }),
       );
 
   @override
@@ -62,17 +61,15 @@ class _RepoFake implements RepositoryAuth {
   @override
   Future<Either<ErrorItem, UserModel>> refreshSession(
     UserModel currentUser,
-  ) async =>
-      Right<ErrorItem, UserModel>(currentUser);
+  ) async => Right<ErrorItem, UserModel>(currentUser);
 
   @override
   Future<Either<ErrorItem, UserModel>> signInUserAndPassword(
     String email,
     String password,
-  ) async =>
-      Right<ErrorItem, UserModel>(
-        UserModel.fromJson(<String, dynamic>{'id': email, 'email': email}),
-      );
+  ) async => Right<ErrorItem, UserModel>(
+    UserModel.fromJson(<String, dynamic>{'id': email, 'email': email}),
+  );
 }
 
 /// Usuario de prueba
@@ -81,21 +78,15 @@ UserModel _u(String email) =>
 
 void main() {
   group('BlocSession hooks', () {
-    test(
-        'addFunctionToProcessTValueOnStream with executeNow=true is called immediately with current snapshot',
-        () async {
+    test('addFunctionToProcessTValueOnStream with executeNow=true is called immediately with current snapshot', () async {
       final _RepoFake repo = _RepoFake();
       final BlocSession session = BlocSession.fromRepository(repository: repo);
 
       // Estado inicial del bloc es Unauthenticated (antes de boot)
       SessionState? lastSeen;
-      session.addFunctionToProcessTValueOnStream(
-        'immediate',
-        (SessionState s) {
-          lastSeen = s;
-        },
-        true,
-      );
+      session.addFunctionToProcessTValueOnStream('immediate', (SessionState s) {
+        lastSeen = s;
+      }, true);
 
       expect(lastSeen, isA<Unauthenticated>());
 
@@ -105,9 +96,7 @@ void main() {
       await repo.close();
     });
 
-    test(
-        'hook receives subsequent emissions (Unauthenticated -> Authenticated -> SessionError)',
-        () async {
+    test('hook receives subsequent emissions (Unauthenticated -> Authenticated -> SessionError)', () async {
       final _RepoFake repo = _RepoFake();
       final BlocSession session = BlocSession.fromRepository(repository: repo);
 
@@ -144,54 +133,60 @@ void main() {
     });
 
     test(
-        'deleteFunctionToProcessTValueOnStream detiene invocaciones posteriores',
-        () async {
-      final _RepoFake repo = _RepoFake();
-      final BlocSession session = BlocSession.fromRepository(repository: repo);
+      'deleteFunctionToProcessTValueOnStream detiene invocaciones posteriores',
+      () async {
+        final _RepoFake repo = _RepoFake();
+        final BlocSession session = BlocSession.fromRepository(
+          repository: repo,
+        );
 
-      int calls = 0;
-      session.addFunctionToProcessTValueOnStream('counter', (_) {
-        calls++;
-      });
+        int calls = 0;
+        session.addFunctionToProcessTValueOnStream('counter', (_) {
+          calls++;
+        });
 
-      await session.boot();
+        await session.boot();
 
-      // Primera emisión: debería incrementar
-      repo.addAuth(const Right<ErrorItem, UserModel?>(null));
-      await Future<void>.delayed(const Duration(milliseconds: 1));
-      expect(calls, greaterThanOrEqualTo(1));
+        // Primera emisión: debería incrementar
+        repo.addAuth(const Right<ErrorItem, UserModel?>(null));
+        await Future<void>.delayed(const Duration(milliseconds: 1));
+        expect(calls, greaterThanOrEqualTo(1));
 
-      // Elimina el hook y emite de nuevo
-      session.deleteFunctionToProcessTValueOnStream('counter');
-      final int before = calls;
+        // Elimina el hook y emite de nuevo
+        session.deleteFunctionToProcessTValueOnStream('counter');
+        final int before = calls;
 
-      repo.addAuth(Right<ErrorItem, UserModel?>(_u('b@x.com')));
-      await Future<void>.delayed(const Duration(milliseconds: 1));
+        repo.addAuth(Right<ErrorItem, UserModel?>(_u('b@x.com')));
+        await Future<void>.delayed(const Duration(milliseconds: 1));
 
-      // No debe incrementarse después de borrar
-      expect(calls, before);
+        // No debe incrementarse después de borrar
+        expect(calls, before);
 
-      session.dispose();
-      await repo.close();
-    });
+        session.dispose();
+        await repo.close();
+      },
+    );
 
     test(
-        'containsFunctionToProcessValueOnStream reflects registration lifecycle',
-        () async {
-      final _RepoFake repo = _RepoFake();
-      final BlocSession session = BlocSession.fromRepository(repository: repo);
+      'containsFunctionToProcessValueOnStream reflects registration lifecycle',
+      () async {
+        final _RepoFake repo = _RepoFake();
+        final BlocSession session = BlocSession.fromRepository(
+          repository: repo,
+        );
 
-      expect(session.containsFunctionToProcessValueOnStream('k'), isFalse);
+        expect(session.containsFunctionToProcessValueOnStream('k'), isFalse);
 
-      session.addFunctionToProcessTValueOnStream('k', (_) {});
-      expect(session.containsFunctionToProcessValueOnStream('k'), isTrue);
+        session.addFunctionToProcessTValueOnStream('k', (_) {});
+        expect(session.containsFunctionToProcessValueOnStream('k'), isTrue);
 
-      session.deleteFunctionToProcessTValueOnStream('k');
-      expect(session.containsFunctionToProcessValueOnStream('k'), isFalse);
+        session.deleteFunctionToProcessTValueOnStream('k');
+        expect(session.containsFunctionToProcessValueOnStream('k'), isFalse);
 
-      session.dispose();
-      await repo.close();
-    });
+        session.dispose();
+        await repo.close();
+      },
+    );
 
     test('replacing a hook with the same key swaps the function', () async {
       final _RepoFake repo = _RepoFake();

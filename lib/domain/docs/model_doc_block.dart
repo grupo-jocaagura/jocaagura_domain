@@ -1,26 +1,14 @@
 part of 'package:jocaagura_domain/jocaagura_domain.dart';
 
 /// Stable JSON keys used by [ModelDocBlock].
-enum ModelDocBlockEnum {
-  kind,
-  content,
-  level,
-}
+enum ModelDocBlockEnum { kind, content, level }
 
 /// Canonical block kinds supported by the docs module.
-enum ModelDocBlockKindEnum {
-  heading,
-  paragraph,
-  markdown,
-}
+enum ModelDocBlockKindEnum { heading, paragraph, markdown }
 
 /// Minimal block-based content unit for portable docs.
 class ModelDocBlock extends Model {
-  const ModelDocBlock({
-    required this.kind,
-    required this.content,
-    this.level,
-  });
+  const ModelDocBlock({required this.kind, required this.content, this.level});
 
   factory ModelDocBlock.fromJson(Map<String, dynamic> json) {
     return ModelDocBlock(

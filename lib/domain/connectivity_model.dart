@@ -35,10 +35,7 @@ enum ConnectionTypeEnum {
 ///
 /// - **connectionType**: The type of network connection.
 /// - **internetSpeed**: The internet speed in Mbps.
-enum ConnectivityModelEnum {
-  connectionType,
-  internetSpeed,
-}
+enum ConnectivityModelEnum { connectionType, internetSpeed }
 
 /// Default instance of [ConnectivityModel] with no connection and zero internet speed.
 const ConnectivityModel defaultConnectivityModel = ConnectivityModel(
@@ -83,8 +80,9 @@ class ConnectivityModel extends Model {
           json[ConnectivityModelEnum.connectionType.name],
         ),
       ),
-      internetSpeed:
-          Utils.getDouble(json[ConnectivityModelEnum.internetSpeed.name]),
+      internetSpeed: Utils.getDouble(
+        json[ConnectivityModelEnum.internetSpeed.name],
+      ),
     );
   }
 

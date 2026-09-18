@@ -104,14 +104,13 @@ class PersonModel extends Model {
     String? photoUrl,
     String? lastNames,
     Map<String, AttributeModel<dynamic>>? attributes,
-  }) =>
-      PersonModel(
-        id: id ?? this.id,
-        names: names ?? this.names,
-        photoUrl: photoUrl ?? this.photoUrl,
-        lastNames: lastNames ?? this.lastNames,
-        attributes: attributes ?? this.attributes,
-      );
+  }) => PersonModel(
+    id: id ?? this.id,
+    names: names ?? this.names,
+    photoUrl: photoUrl ?? this.photoUrl,
+    lastNames: lastNames ?? this.lastNames,
+    attributes: attributes ?? this.attributes,
+  );
 
   /// Serializes this [PersonModel] into a JSON map.
   @override

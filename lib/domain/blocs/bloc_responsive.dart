@@ -127,9 +127,7 @@ enum ScreenSizeEnum {
 /// assert(bloc.columnsNumber == bloc.sizeConfig.desktopColumnsNumber);
 /// ```
 class BlocResponsive extends BlocModule {
-  BlocResponsive({
-    this.sizeConfig = screenSizeConfig,
-  }) {
+  BlocResponsive({this.sizeConfig = screenSizeConfig}) {
     _blocSizeGeneral.addFunctionToProcessTValueOnStream(
       'updateDrawerWidth',
       (Size val) => _setDrawerWidth(),

@@ -57,9 +57,9 @@ abstract class NetworkErrorItems {
 
   /// Fallback for undefined network error cases.
   static ErrorItem unknown([String? reason]) => ErrorItem(
-        title: 'Unknown Network Error',
-        code: 'NET_UNKNOWN',
-        description: reason ?? 'An unknown network error has occurred.',
-        meta: const <String, dynamic>{sourceKey: sourceValue},
-      );
+    title: 'Unknown Network Error',
+    code: 'NET_UNKNOWN',
+    description: reason ?? 'An unknown network error has occurred.',
+    meta: const <String, dynamic>{sourceKey: sourceValue},
+  );
 }

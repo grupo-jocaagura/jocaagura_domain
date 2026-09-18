@@ -124,9 +124,7 @@ abstract class GatewayAuth {
   ///
   /// **Returns**
   /// - `Right(ackJson)` on success; `Left(ErrorItem)` on failure.
-  Future<Either<ErrorItem, Map<String, dynamic>>> recoverPassword(
-    String email,
-  );
+  Future<Either<ErrorItem, Map<String, dynamic>>> recoverPassword(String email);
 
   /// Log out the current user.
   ///

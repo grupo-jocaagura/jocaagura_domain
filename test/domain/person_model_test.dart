@@ -66,10 +66,7 @@ void main() {
         attributes: <String, AttributeModel<dynamic>>{},
       );
 
-      final PersonModel copy = original.copyWith(
-        id: '456',
-        names: 'Jane Doe',
-      );
+      final PersonModel copy = original.copyWith(id: '456', names: 'Jane Doe');
 
       expect(copy.id, '456');
       expect(copy.names, 'Jane Doe');

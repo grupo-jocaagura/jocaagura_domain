@@ -109,13 +109,15 @@ class FinancialMovementModel extends Model {
   factory FinancialMovementModel.fromJson(Map<String, dynamic> json) {
     return FinancialMovementModel(
       id: Utils.getStringFromDynamic(json[FinancialMovementEnum.id.name]),
-      amount:
-          Utils.getIntegerFromDynamic(json[FinancialMovementEnum.amount.name])
-              .abs(),
-      date:
-          DateUtils.dateTimeFromDynamic(json[FinancialMovementEnum.date.name]),
-      concept:
-          Utils.getStringFromDynamic(json[FinancialMovementEnum.concept.name]),
+      amount: Utils.getIntegerFromDynamic(
+        json[FinancialMovementEnum.amount.name],
+      ).abs(),
+      date: DateUtils.dateTimeFromDynamic(
+        json[FinancialMovementEnum.date.name],
+      ),
+      concept: Utils.getStringFromDynamic(
+        json[FinancialMovementEnum.concept.name],
+      ),
       category: Utils.getStringFromDynamic(
         json[FinancialMovementEnum.category.name],
       ),
@@ -206,8 +208,9 @@ class FinancialMovementModel extends Model {
       FinancialMovementEnum.concept.name: concept,
       FinancialMovementEnum.detailedDescription.name: detailedDescription,
       FinancialMovementEnum.category.name: category,
-      FinancialMovementEnum.createdAt.name:
-          DateUtils.dateTimeToString(createdAt),
+      FinancialMovementEnum.createdAt.name: DateUtils.dateTimeToString(
+        createdAt,
+      ),
       mathPrecisionKey: mathPrecision,
     };
   }

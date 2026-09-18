@@ -4,12 +4,7 @@ part of 'package:jocaagura_domain/jocaagura_domain.dart';
 ///
 /// The `name` of each enum value is used as the JSON key in [toJson] and
 /// consumed in [OnboardingState.fromJson].
-enum OnboardingStateEnum {
-  status,
-  stepIndex,
-  totalSteps,
-  error,
-}
+enum OnboardingStateEnum { status, stepIndex, totalSteps, error }
 
 /// Status for the onboarding flow.
 ///
@@ -201,11 +196,11 @@ class OnboardingState extends Model {
   /// Serializes this [OnboardingState] into a JSON map using stable keys and `enum.name`.
   @override
   Map<String, dynamic> toJson() => <String, dynamic>{
-        OnboardingStateEnum.status.name: status.name,
-        OnboardingStateEnum.stepIndex.name: stepIndex,
-        OnboardingStateEnum.totalSteps.name: totalSteps,
-        OnboardingStateEnum.error.name: error?.toJson(),
-      };
+    OnboardingStateEnum.status.name: status.name,
+    OnboardingStateEnum.stepIndex.name: stepIndex,
+    OnboardingStateEnum.totalSteps.name: totalSteps,
+    OnboardingStateEnum.error.name: error?.toJson(),
+  };
 
   /// Value equality based on all fields.
   @override

@@ -83,9 +83,7 @@ class MoneyUtils implements EntityUtil {
   }
 
   /// Agrupa movimientos por año y mes (formato 'yyyy-MM') y suma sus montos enteros.
-  static Map<String, int> totalByMonth(
-    List<FinancialMovementModel> movements,
-  ) {
+  static Map<String, int> totalByMonth(List<FinancialMovementModel> movements) {
     final Map<String, int> result = <String, int>{};
     for (final FinancialMovementModel m in movements) {
       final String key =
@@ -135,8 +133,9 @@ class MoneyUtils implements EntityUtil {
     List<FinancialMovementModel> movements, {
     bool ascending = true,
   }) {
-    final List<FinancialMovementModel> copy =
-        List<FinancialMovementModel>.from(movements);
+    final List<FinancialMovementModel> copy = List<FinancialMovementModel>.from(
+      movements,
+    );
     copy.sort(
       (FinancialMovementModel a, FinancialMovementModel b) =>
           ascending ? a.date.compareTo(b.date) : b.date.compareTo(a.date),

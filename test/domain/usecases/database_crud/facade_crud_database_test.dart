@@ -14,9 +14,7 @@ void main() {
       );
     });
 
-    test(
-        'Given repository When facade is created Then wires repository and use cases',
-        () {
+    test('Given repository When facade is created Then wires repository and use cases', () {
       expect(facade.repository, same(repo));
       expect(facade.read, isA<ReadDocUseCase<_TestModel>>());
       expect(facade.write, isA<WriteDocUseCase<_TestModel>>());
@@ -30,9 +28,7 @@ void main() {
       expect(facade.deleteMany, isA<DeleteManyDocsUseCase<_TestModel>>());
     });
 
-    test(
-        'Given stored model When readDoc is called Then delegates to repository read',
-        () async {
+    test('Given stored model When readDoc is called Then delegates to repository read', () async {
       const _TestModel model = _TestModel(id: 'u1', name: 'Alice');
       repo.seed(model);
 
@@ -43,21 +39,22 @@ void main() {
     });
 
     test(
-        'Given model When writeDoc is called Then delegates to repository write',
-        () async {
-      const _TestModel model = _TestModel(id: 'u1', name: 'Alice');
+      'Given model When writeDoc is called Then delegates to repository write',
+      () async {
+        const _TestModel model = _TestModel(id: 'u1', name: 'Alice');
 
-      final Either<ErrorItem, _TestModel> result =
-          await facade.writeDoc('u1', model);
+        final Either<ErrorItem, _TestModel> result = await facade.writeDoc(
+          'u1',
+          model,
+        );
 
-      expect(result, const Right<ErrorItem, _TestModel>(model));
-      expect(repo.saved['u1'], model);
-      expect(repo.calls, <String>['write:u1:Alice']);
-    });
+        expect(result, const Right<ErrorItem, _TestModel>(model));
+        expect(repo.saved['u1'], model);
+        expect(repo.calls, <String>['write:u1:Alice']);
+      },
+    );
 
-    test(
-        'Given existing model When deleteDoc is called Then delegates to repository delete',
-        () async {
+    test('Given existing model When deleteDoc is called Then delegates to repository delete', () async {
       repo.seed(const _TestModel(id: 'u1', name: 'Alice'));
 
       final Either<ErrorItem, Unit> result = await facade.deleteDoc('u1');
@@ -67,38 +64,43 @@ void main() {
       expect(repo.calls, <String>['delete:u1']);
     });
 
-    test('Given existing model When existsDoc is called Then returns true',
-        () async {
-      repo.seed(const _TestModel(id: 'u1', name: 'Alice'));
+    test(
+      'Given existing model When existsDoc is called Then returns true',
+      () async {
+        repo.seed(const _TestModel(id: 'u1', name: 'Alice'));
 
-      final Either<ErrorItem, bool> result = await facade.existsDoc('u1');
+        final Either<ErrorItem, bool> result = await facade.existsDoc('u1');
 
-      expect(result, const Right<ErrorItem, bool>(true));
-    });
-
-    test('Given missing model When existsDoc is called Then returns false',
-        () async {
-      final Either<ErrorItem, bool> result = await facade.existsDoc('missing');
-
-      expect(result, const Right<ErrorItem, bool>(false));
-    });
+        expect(result, const Right<ErrorItem, bool>(true));
+      },
+    );
 
     test(
-        'Given repository error When existsDoc is called Then propagates error',
-        () async {
-      repo.readErrors['u1'] = DatabaseErrorItems.unavailable;
+      'Given missing model When existsDoc is called Then returns false',
+      () async {
+        final Either<ErrorItem, bool> result = await facade.existsDoc(
+          'missing',
+        );
 
-      final Either<ErrorItem, bool> result = await facade.existsDoc('u1');
-
-      expect(
-        result,
-        const Left<ErrorItem, bool>(DatabaseErrorItems.unavailable),
-      );
-    });
+        expect(result, const Right<ErrorItem, bool>(false));
+      },
+    );
 
     test(
-        'Given existing model When mutateDoc is called Then reads transforms and writes',
-        () async {
+      'Given repository error When existsDoc is called Then propagates error',
+      () async {
+        repo.readErrors['u1'] = DatabaseErrorItems.unavailable;
+
+        final Either<ErrorItem, bool> result = await facade.existsDoc('u1');
+
+        expect(
+          result,
+          const Left<ErrorItem, bool>(DatabaseErrorItems.unavailable),
+        );
+      },
+    );
+
+    test('Given existing model When mutateDoc is called Then reads transforms and writes', () async {
       repo.seed(const _TestModel(id: 'u1', name: 'Alice'));
 
       final Either<ErrorItem, _TestModel> result = await facade.mutateDoc(
@@ -116,9 +118,7 @@ void main() {
       expect(repo.calls, <String>['read:u1', 'write:u1:Alice+']);
     });
 
-    test(
-        'Given existing model When patchDoc is called Then merges json and writes parsed model',
-        () async {
+    test('Given existing model When patchDoc is called Then merges json and writes parsed model', () async {
       repo.seed(const _TestModel(id: 'u1', name: 'Alice'));
 
       final Either<ErrorItem, _TestModel> result = await facade.patchDoc(
@@ -138,25 +138,25 @@ void main() {
       );
     });
 
-    test('Given missing model When ensureDoc is called Then creates it',
-        () async {
-      final Either<ErrorItem, _TestModel> result = await facade.ensureDoc(
-        docId: 'u2',
-        create: () => const _TestModel(id: 'u2', name: 'Created'),
-      );
-
-      expect(
-        result,
-        const Right<ErrorItem, _TestModel>(
-          _TestModel(id: 'u2', name: 'Created'),
-        ),
-      );
-      expect(repo.calls, <String>['read:u2', 'write:u2:Created']);
-    });
-
     test(
-        'Given existing model and no update When ensureDoc is called Then returns current without write',
-        () async {
+      'Given missing model When ensureDoc is called Then creates it',
+      () async {
+        final Either<ErrorItem, _TestModel> result = await facade.ensureDoc(
+          docId: 'u2',
+          create: () => const _TestModel(id: 'u2', name: 'Created'),
+        );
+
+        expect(
+          result,
+          const Right<ErrorItem, _TestModel>(
+            _TestModel(id: 'u2', name: 'Created'),
+          ),
+        );
+        expect(repo.calls, <String>['read:u2', 'write:u2:Created']);
+      },
+    );
+
+    test('Given existing model and no update When ensureDoc is called Then returns current without write', () async {
       repo.seed(const _TestModel(id: 'u1', name: 'Alice'));
 
       final Either<ErrorItem, _TestModel> result = await facade.ensureDoc(
@@ -166,16 +166,12 @@ void main() {
 
       expect(
         result,
-        const Right<ErrorItem, _TestModel>(
-          _TestModel(id: 'u1', name: 'Alice'),
-        ),
+        const Right<ErrorItem, _TestModel>(_TestModel(id: 'u1', name: 'Alice')),
       );
       expect(repo.calls, <String>['read:u1']);
     });
 
-    test(
-        'Given existing model and update When ensureDoc is called Then writes updated model',
-        () async {
+    test('Given existing model and update When ensureDoc is called Then writes updated model', () async {
       repo.seed(const _TestModel(id: 'u1', name: 'Alice'));
 
       final Either<ErrorItem, _TestModel> result = await facade.ensureDoc(
@@ -193,13 +189,11 @@ void main() {
       expect(repo.calls, <String>['read:u1', 'write:u1:Alice']);
     });
 
-    test(
-        'Given ids When readDocs is called Then reads sequentially and returns per-id results',
-        () async {
+    test('Given ids When readDocs is called Then reads sequentially and returns per-id results', () async {
       repo.seed(const _TestModel(id: 'u1', name: 'Alice'));
 
       final Either<ErrorItem, Map<String, Either<ErrorItem, _TestModel>>>
-          result = await facade.readDocs(<String>['u1', 'missing']);
+      result = await facade.readDocs(<String>['u1', 'missing']);
 
       final Map<String, Either<ErrorItem, _TestModel>> values = result.fold(
         (ErrorItem error) => fail('Expected Right but got $error'),
@@ -208,9 +202,7 @@ void main() {
 
       expect(
         values['u1'],
-        const Right<ErrorItem, _TestModel>(
-          _TestModel(id: 'u1', name: 'Alice'),
-        ),
+        const Right<ErrorItem, _TestModel>(_TestModel(id: 'u1', name: 'Alice')),
       );
       expect(
         values['missing'],
@@ -219,24 +211,20 @@ void main() {
       expect(repo.calls, <String>['read:u1', 'read:missing']);
     });
 
-    test(
-        'Given entries When writeDocs is called Then writes sequentially and returns per-id results',
-        () async {
+    test('Given entries When writeDocs is called Then writes sequentially and returns per-id results', () async {
       final Map<String, _TestModel> entries = <String, _TestModel>{
         'u1': const _TestModel(id: 'u1', name: 'Alice'),
         'u2': const _TestModel(id: 'u2', name: 'Bob'),
       };
 
       final Either<ErrorItem, Map<String, Either<ErrorItem, _TestModel>>>
-          result = await facade.writeDocs(entries);
+      result = await facade.writeDocs(entries);
 
       expect(result.isRight, isTrue);
       expect(repo.calls, <String>['write:u1:Alice', 'write:u2:Bob']);
     });
 
-    test(
-        'Given ids When deleteDocs is called Then deletes sequentially and returns per-id results',
-        () async {
+    test('Given ids When deleteDocs is called Then deletes sequentially and returns per-id results', () async {
       repo.seed(const _TestModel(id: 'u1', name: 'Alice'));
       repo.seed(const _TestModel(id: 'u2', name: 'Bob'));
 
@@ -251,11 +239,7 @@ void main() {
 }
 
 class _TestModel extends Model {
-  const _TestModel({
-    required this.id,
-    required this.name,
-    this.flag = false,
-  });
+  const _TestModel({required this.id, required this.name, this.flag = false});
 
   factory _TestModel.fromJson(Map<String, dynamic> json) {
     return _TestModel(
@@ -271,19 +255,11 @@ class _TestModel extends Model {
 
   @override
   Map<String, dynamic> toJson() {
-    return <String, dynamic>{
-      'id': id,
-      'name': name,
-      'flag': flag,
-    };
+    return <String, dynamic>{'id': id, 'name': name, 'flag': flag};
   }
 
   @override
-  _TestModel copyWith({
-    String? id,
-    String? name,
-    bool? flag,
-  }) {
+  _TestModel copyWith({String? id, String? name, bool? flag}) {
     return _TestModel(
       id: id ?? this.id,
       name: name ?? this.name,

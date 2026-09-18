@@ -18,13 +18,7 @@ part of 'package:jocaagura_domain/jocaagura_domain.dart';
 enum PerformanceLevel { low, basic, high, superior }
 
 /// JSON keys for [ModelPerformanceIndicator]. Enum-backed for roundtrip stability.
-enum PerformanceIndicatorEnum {
-  id,
-  goal,
-  label,
-  level,
-  code,
-}
+enum PerformanceIndicatorEnum { id, goal, label, level, code }
 
 /// Smallest performance indicator attached to a [ModelLearningGoal].
 ///
@@ -65,8 +59,9 @@ class ModelPerformanceIndicator extends Model {
 
   /// Builds from JSON-like map (enum-keyed).
   factory ModelPerformanceIndicator.fromJson(Map<String, dynamic> json) {
-    final String id =
-        Utils.getStringFromDynamic(json[PerformanceIndicatorEnum.id.name]);
+    final String id = Utils.getStringFromDynamic(
+      json[PerformanceIndicatorEnum.id.name],
+    );
 
     // Nested goal parsing (preferred). If absent, synthesize a minimal goal.
     ModelLearningGoal goal = defaultLearningGoal;
@@ -78,11 +73,13 @@ class ModelPerformanceIndicator extends Model {
     return ModelPerformanceIndicator(
       id: id,
       modelLearningGoal: goal,
-      label:
-          Utils.getStringFromDynamic(json[PerformanceIndicatorEnum.label.name]),
+      label: Utils.getStringFromDynamic(
+        json[PerformanceIndicatorEnum.label.name],
+      ),
       level: _parsePerformanceLevel(json[PerformanceIndicatorEnum.level.name]),
-      code:
-          Utils.getStringFromDynamic(json[PerformanceIndicatorEnum.code.name]),
+      code: Utils.getStringFromDynamic(
+        json[PerformanceIndicatorEnum.code.name],
+      ),
     );
   }
 
@@ -164,13 +161,7 @@ class ModelPerformanceIndicator extends Model {
   }
 
   @override
-  int get hashCode => Object.hash(
-        id,
-        modelLearningGoal,
-        label,
-        level,
-        code,
-      );
+  int get hashCode => Object.hash(id, modelLearningGoal, label, level, code);
 
   @override
   bool operator ==(Object other) =>

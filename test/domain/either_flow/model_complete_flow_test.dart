@@ -3,9 +3,7 @@ import 'package:jocaagura_domain/jocaagura_domain.dart';
 
 void main() {
   group('ModelCompleteFlow.immutable()', () {
-    test(
-        'Given steps with negative index When building immutable Then ignores negative-index steps',
-        () {
+    test('Given steps with negative index When building immutable Then ignores negative-index steps', () {
       // Arrange
       final ModelFlowStep valid = ModelFlowStep.immutable(
         index: 10,
@@ -38,41 +36,41 @@ void main() {
       expect(flow.stepsByIndex.containsKey(-1), isFalse);
     });
 
-    test('Given duplicate indices When building immutable Then last write wins',
-        () {
-      // Arrange
-      final ModelFlowStep first = ModelFlowStep.immutable(
-        index: 10,
-        title: 'First',
-        description: 'd',
-        failureCode: 'X',
-        nextOnSuccessIndex: -1,
-        nextOnFailureIndex: -1,
-      );
-
-      final ModelFlowStep second = ModelFlowStep.immutable(
-        index: 10,
-        title: 'Second',
-        description: 'd',
-        failureCode: 'X',
-        nextOnSuccessIndex: -1,
-        nextOnFailureIndex: -1,
-      );
-
-      // Act
-      final ModelCompleteFlow flow = ModelCompleteFlow.immutable(
-        name: 'Flow',
-        description: 'Desc',
-        steps: <ModelFlowStep>[first, second],
-      );
-
-      // Assert
-      expect(flow.stepsByIndex[10]?.title, equals('Second'));
-    });
-
     test(
-        'Given immutable flow When mutating stepsByIndex Then throws UnsupportedError',
-        () {
+      'Given duplicate indices When building immutable Then last write wins',
+      () {
+        // Arrange
+        final ModelFlowStep first = ModelFlowStep.immutable(
+          index: 10,
+          title: 'First',
+          description: 'd',
+          failureCode: 'X',
+          nextOnSuccessIndex: -1,
+          nextOnFailureIndex: -1,
+        );
+
+        final ModelFlowStep second = ModelFlowStep.immutable(
+          index: 10,
+          title: 'Second',
+          description: 'd',
+          failureCode: 'X',
+          nextOnSuccessIndex: -1,
+          nextOnFailureIndex: -1,
+        );
+
+        // Act
+        final ModelCompleteFlow flow = ModelCompleteFlow.immutable(
+          name: 'Flow',
+          description: 'Desc',
+          steps: <ModelFlowStep>[first, second],
+        );
+
+        // Assert
+        expect(flow.stepsByIndex[10]?.title, equals('Second'));
+      },
+    );
+
+    test('Given immutable flow When mutating stepsByIndex Then throws UnsupportedError', () {
       // Arrange
       final ModelCompleteFlow flow = ModelCompleteFlow.immutable(
         name: 'Flow',
@@ -99,9 +97,7 @@ void main() {
   });
 
   group('ModelCompleteFlow.immutableFromMap()', () {
-    test(
-        'Given map containing negative key When building immutableFromMap Then ignores negative keys',
-        () {
+    test('Given map containing negative key When building immutableFromMap Then ignores negative keys', () {
       // Arrange
       final Map<int, ModelFlowStep> map = <int, ModelFlowStep>{
         -1: ModelFlowStep.immutable(
@@ -136,9 +132,7 @@ void main() {
   });
 
   group('ModelCompleteFlow.fromJson() / toJson()', () {
-    test(
-        'Given JSON with stepsByIndex map When parsing Then builds flow and keeps immutability',
-        () {
+    test('Given JSON with stepsByIndex map When parsing Then builds flow and keeps immutability', () {
       // Arrange
       final Map<String, dynamic> json = <String, dynamic>{
         CompleteFlowEnum.name.name: 'AuthFlow',
@@ -179,9 +173,7 @@ void main() {
       );
     });
 
-    test(
-        'Given a flow When toJson and fromJson Then preserves equality (roundtrip)',
-        () {
+    test('Given a flow When toJson and fromJson Then preserves equality (roundtrip)', () {
       // Arrange
       final ModelCompleteFlow original = ModelCompleteFlow.immutable(
         name: 'Flow',
@@ -216,9 +208,7 @@ void main() {
       expect(roundtrip.hashCode, equals(original.hashCode));
     });
 
-    test(
-        'Given JSON with non-map stepsByIndex When parsing Then uses safe defaults',
-        () {
+    test('Given JSON with non-map stepsByIndex When parsing Then uses safe defaults', () {
       // Arrange
       final Map<String, dynamic> json = <String, dynamic>{
         CompleteFlowEnum.name.name: 'Flow',
@@ -237,9 +227,7 @@ void main() {
   });
 
   group('Views: stepsSorted / entryIndex / stepAt', () {
-    test(
-        'Given unsorted steps When reading stepsSorted Then returns them ordered by index',
-        () {
+    test('Given unsorted steps When reading stepsSorted Then returns them ordered by index', () {
       // Arrange
       final ModelCompleteFlow flow = ModelCompleteFlow.immutable(
         name: 'Flow',
@@ -275,9 +263,7 @@ void main() {
       expect(() => sorted.add(sorted.first), throwsUnsupportedError);
     });
 
-    test(
-        'Given non-empty flow When reading entryIndex Then returns smallest index',
-        () {
+    test('Given non-empty flow When reading entryIndex Then returns smallest index', () {
       // Arrange
       final ModelCompleteFlow flow = ModelCompleteFlow.immutable(
         name: 'Flow',
@@ -311,34 +297,33 @@ void main() {
 
   group('Mutations: upsertStep / removeStepAt', () {
     test(
-        'Given step with negative index When upserting Then returns same object',
-        () {
-      // Arrange
-      final ModelCompleteFlow flow = ModelCompleteFlow.immutable(
-        name: 'Flow',
-        description: 'Desc',
-      );
+      'Given step with negative index When upserting Then returns same object',
+      () {
+        // Arrange
+        final ModelCompleteFlow flow = ModelCompleteFlow.immutable(
+          name: 'Flow',
+          description: 'Desc',
+        );
 
-      final ModelFlowStep end = ModelFlowStep.immutable(
-        index: -1,
-        title: 'END',
-        description: 'd',
-        failureCode: 'END',
-        nextOnSuccessIndex: -1,
-        nextOnFailureIndex: -1,
-      );
+        final ModelFlowStep end = ModelFlowStep.immutable(
+          index: -1,
+          title: 'END',
+          description: 'd',
+          failureCode: 'END',
+          nextOnSuccessIndex: -1,
+          nextOnFailureIndex: -1,
+        );
 
-      // Act
-      final ModelCompleteFlow result = flow.upsertStep(end);
+        // Act
+        final ModelCompleteFlow result = flow.upsertStep(end);
 
-      // Assert
-      expect(identical(result, flow), isTrue);
-      expect(result.stepsByIndex, isEmpty);
-    });
+        // Assert
+        expect(identical(result, flow), isTrue);
+        expect(result.stepsByIndex, isEmpty);
+      },
+    );
 
-    test(
-        'Given empty flow When upserting valid step Then adds it and returns new object',
-        () {
+    test('Given empty flow When upserting valid step Then adds it and returns new object', () {
       // Arrange
       final ModelCompleteFlow flow = ModelCompleteFlow.immutable(
         name: 'Flow',
@@ -363,9 +348,7 @@ void main() {
       expect(result.stepsByIndex[10]?.title, equals('A'));
     });
 
-    test(
-        'Given flow with same step When upserting equal step Then returns same object',
-        () {
+    test('Given flow with same step When upserting equal step Then returns same object', () {
       // Arrange
       final ModelFlowStep step = ModelFlowStep.immutable(
         index: 10,
@@ -389,9 +372,7 @@ void main() {
       expect(identical(result, flow), isTrue);
     });
 
-    test(
-        'Given flow missing index When removeStepAt called Then returns same object',
-        () {
+    test('Given flow missing index When removeStepAt called Then returns same object', () {
       // Arrange
       final ModelCompleteFlow flow = ModelCompleteFlow.immutable(
         name: 'Flow',
@@ -415,9 +396,7 @@ void main() {
       expect(identical(result, flow), isTrue);
     });
 
-    test(
-        'Given flow with index When removeStepAt called Then removes and returns new object',
-        () {
+    test('Given flow with index When removeStepAt called Then removes and returns new object', () {
       // Arrange
       final ModelCompleteFlow flow = ModelCompleteFlow.immutable(
         name: 'Flow',
@@ -444,9 +423,7 @@ void main() {
   });
 
   group('ModelCompleteFlow.copyWith()', () {
-    test(
-        'Given flow When copyWith called with no args Then returns same object (identical)',
-        () {
+    test('Given flow When copyWith called with no args Then returns same object (identical)', () {
       // Arrange
       final ModelCompleteFlow flow = ModelCompleteFlow.immutable(
         name: 'Flow',
@@ -460,9 +437,7 @@ void main() {
       expect(identical(copied, flow), isTrue);
     });
 
-    test(
-        'Given flow When copyWith changes name Then returns new deeply immutable flow',
-        () {
+    test('Given flow When copyWith changes name Then returns new deeply immutable flow', () {
       // Arrange
       final ModelCompleteFlow flow = ModelCompleteFlow.immutable(
         name: 'Flow',

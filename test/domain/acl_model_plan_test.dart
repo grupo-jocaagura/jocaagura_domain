@@ -35,40 +35,31 @@ void main() {
       ],
     );
 
-    test(
-      'Given a canonical ACL plan When toJson and fromJson Then preserves the contract',
-      () {
-        final Map<String, dynamic> json = plan.toJson();
-        final ModelAclPlan roundtrip = ModelAclPlan.fromJson(json);
+    test('Given a canonical ACL plan When toJson and fromJson Then preserves the contract', () {
+      final Map<String, dynamic> json = plan.toJson();
+      final ModelAclPlan roundtrip = ModelAclPlan.fromJson(json);
 
-        expect(roundtrip, plan);
-        expect(roundtrip.toJson(), plan.toJson());
-      },
-    );
+      expect(roundtrip, plan);
+      expect(roundtrip.toJson(), plan.toJson());
+    });
 
-    test(
-      'Given canonical JSON When fromJson and toJson Then preserves JSON roundtrip',
-      () {
-        final Map<String, dynamic> json = plan.toJson();
+    test('Given canonical JSON When fromJson and toJson Then preserves JSON roundtrip', () {
+      final Map<String, dynamic> json = plan.toJson();
 
-        final ModelAclPlan parsed = ModelAclPlan.fromJson(json);
+      final ModelAclPlan parsed = ModelAclPlan.fromJson(json);
 
-        expect(parsed.toJson(), json);
-      },
-    );
+      expect(parsed.toJson(), json);
+    });
 
-    test(
-      'Given an ACL plan When copyWith overrides fields Then returns updated copy',
-      () {
-        final ModelAclPlan copy = plan.copyWith(
-          name: 'BienvenidoEditors',
-          description: null,
-        );
+    test('Given an ACL plan When copyWith overrides fields Then returns updated copy', () {
+      final ModelAclPlan copy = plan.copyWith(
+        name: 'BienvenidoEditors',
+        description: null,
+      );
 
-        expect(copy.name, 'BienvenidoEditors');
-        expect(copy.description, isNull);
-        expect(copy, isNot(plan));
-      },
-    );
+      expect(copy.name, 'BienvenidoEditors');
+      expect(copy.description, isNull);
+      expect(copy, isNot(plan));
+    });
   });
 }

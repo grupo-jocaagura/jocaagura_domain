@@ -12,10 +12,7 @@ class FakeServiceGyroscope implements ServiceGyroscope {
   ///
   /// [latency] simulates response delays.
   /// [throwOnGet] simulates failures on `getCurrentRotation()`.
-  FakeServiceGyroscope({
-    this.latency = Duration.zero,
-    this.throwOnGet = false,
-  });
+  FakeServiceGyroscope({this.latency = Duration.zero, this.throwOnGet = false});
 
   /// Default rotation when nothing has been simulated.
   static const Map<String, double> initialValue = <String, double>{
@@ -63,11 +60,7 @@ class FakeServiceGyroscope implements ServiceGyroscope {
     required double z,
   }) {
     _checkDisposed();
-    _bloc.value = <String, double>{
-      'x': x,
-      'y': y,
-      'z': z,
-    };
+    _bloc.value = <String, double>{'x': x, 'y': y, 'z': z};
   }
 
   void reset() {

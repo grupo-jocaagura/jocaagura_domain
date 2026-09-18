@@ -62,8 +62,8 @@ void main() {
 
     // Test de copyWith sin argumentos que debería devolver el mismo objeto
     test('copyWith without arguments returns the same object', () {
-      final MedicationModel copiedMedication =
-          defaultMedicationModel.copyWith();
+      final MedicationModel copiedMedication = defaultMedicationModel
+          .copyWith();
       expect(copiedMedication, equals(defaultMedicationModel));
       expect(
         copiedMedication.hashCode,
@@ -98,10 +98,12 @@ void main() {
         MedicationEnum.name.name: 'Amoxicilina',
         MedicationEnum.dosage.name: '250mg',
         MedicationEnum.frequency.name: 'Cada 12 horas',
-        MedicationEnum.startDate.name:
-            DateUtils.dateTimeToString(DateTime(2024, 07, 22)),
-        MedicationEnum.endDate.name:
-            DateUtils.dateTimeToString(DateTime(2024, 07, 27)),
+        MedicationEnum.startDate.name: DateUtils.dateTimeToString(
+          DateTime(2024, 07, 22),
+        ),
+        MedicationEnum.endDate.name: DateUtils.dateTimeToString(
+          DateTime(2024, 07, 27),
+        ),
       };
 
       final MedicationModel fromJsonMedication = MedicationModel.fromJson(json);
@@ -124,8 +126,8 @@ void main() {
 
     // Test del hashCode con copyWith sin argumentos
     test('hashCode remains the same when using copyWith without arguments', () {
-      final MedicationModel copiedMedication =
-          defaultMedicationModel.copyWith();
+      final MedicationModel copiedMedication = defaultMedicationModel
+          .copyWith();
       expect(copiedMedication.hashCode, defaultMedicationModel.hashCode);
     });
 

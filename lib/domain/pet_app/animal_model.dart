@@ -1,19 +1,10 @@
 part of '../../jocaagura_domain.dart';
 
 /// Enumeration representing different types of animals.
-enum AnimalTypeEnum {
-  fish,
-  feline,
-  canine,
-  bird,
-  reptile,
-}
+enum AnimalTypeEnum { fish, feline, canine, bird, reptile }
 
 /// Enumeration representing the gender of an animal.
-enum SexEnum {
-  male,
-  female,
-}
+enum SexEnum { male, female }
 
 /// Abstract class representing the model for an animal.
 /// This class serves as a blueprint for creating various animal models,

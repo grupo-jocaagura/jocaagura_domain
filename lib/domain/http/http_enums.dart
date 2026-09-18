@@ -3,13 +3,7 @@ part of 'package:jocaagura_domain/jocaagura_domain.dart';
 /// Supported HTTP methods for the transversal HTTP system.
 ///
 /// This enum is used instead of raw strings to keep method handling type-safe.
-enum HttpMethodEnum {
-  get,
-  post,
-  put,
-  patch,
-  delete,
-}
+enum HttpMethodEnum { get, post, put, patch, delete }
 
 /// High-level lifecycle bucket for HTTP requests.
 ///

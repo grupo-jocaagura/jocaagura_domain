@@ -60,7 +60,8 @@ class WsDbState<T extends Model> {
   }
 
   @override
-  String toString() => 'WsDbState{loading: $loading, docId: $docId, '
+  String toString() =>
+      'WsDbState{loading: $loading, docId: $docId, '
       'hasDoc: ${doc != null}, hasError: ${error != null}, '
       'isWatching: $isWatching}';
 

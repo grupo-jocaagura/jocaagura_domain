@@ -39,14 +39,14 @@ void main() {
 
     // Test copyWith
     test('copyWith updates values', () {
-      final DentalConditionModel updatedCondition =
-          dentalConditionModelDefault.copyWith(
-        id: 'newId',
-        dentalId: 12,
-        dentalRegion: DentalRegionEnum.occlusal,
-        condition: ToothConditionEnum.cavity,
-        dateTimeOfRecord: DateTime(2025, 07, 24),
-      );
+      final DentalConditionModel updatedCondition = dentalConditionModelDefault
+          .copyWith(
+            id: 'newId',
+            dentalId: 12,
+            dentalRegion: DentalRegionEnum.occlusal,
+            condition: ToothConditionEnum.cavity,
+            dateTimeOfRecord: DateTime(2025, 07, 24),
+          );
 
       expect(updatedCondition.id, 'newId');
       expect(updatedCondition.dentalId, 12);
@@ -56,8 +56,8 @@ void main() {
     });
 
     test('copyWith without arguments returns the same object', () {
-      final DentalConditionModel copiedCondition =
-          dentalConditionModelDefault.copyWith();
+      final DentalConditionModel copiedCondition = dentalConditionModelDefault
+          .copyWith();
       expect(copiedCondition, equals(dentalConditionModelDefault));
       expect(
         copiedCondition.hashCode,
@@ -88,8 +88,9 @@ void main() {
         DentalConditionEnum.dentalId.name: 12,
         DentalConditionEnum.dentalRegion.name: 'occlusal',
         DentalConditionEnum.condition.name: 'cavity',
-        DentalConditionEnum.dateTimeOfRecord.name:
-            DateUtils.dateTimeToString(DateTime(2025, 07, 24)),
+        DentalConditionEnum.dateTimeOfRecord.name: DateUtils.dateTimeToString(
+          DateTime(2025, 07, 24),
+        ),
       };
 
       final DentalConditionModel fromJsonCondition =
@@ -121,65 +122,67 @@ void main() {
 
   group('DentalConditionModel Method Tests', () {
     // Test getDentalRegionFromString
-    test('getDentalRegionFromString returns correct enum for valid strings',
-        () {
-      expect(
-        DentalConditionModel.getDentalRegionFromString('occlusal'),
-        DentalRegionEnum.occlusal,
-      );
-      expect(
-        DentalConditionModel.getDentalRegionFromString('vestibular'),
-        DentalRegionEnum.vestibular,
-      );
-      expect(
-        DentalConditionModel.getDentalRegionFromString('mesial'),
-        DentalRegionEnum.mesial,
-      );
-      expect(
-        DentalConditionModel.getDentalRegionFromString('distal'),
-        DentalRegionEnum.distal,
-      );
-      expect(
-        DentalConditionModel.getDentalRegionFromString('palatal'),
-        DentalRegionEnum.palatal,
-      );
-      expect(
-        DentalConditionModel.getDentalRegionFromString('lingual'),
-        DentalRegionEnum.lingual,
-      );
-      expect(
-        DentalConditionModel.getDentalRegionFromString('buccal'),
-        DentalRegionEnum.buccal,
-      );
-      expect(
-        DentalConditionModel.getDentalRegionFromString('labial'),
-        DentalRegionEnum.labial,
-      );
-      expect(
-        DentalConditionModel.getDentalRegionFromString('incisal'),
-        DentalRegionEnum.incisal,
-      );
-      expect(
-        DentalConditionModel.getDentalRegionFromString('gingival'),
-        DentalRegionEnum.gingival,
-      );
-      expect(
-        DentalConditionModel.getDentalRegionFromString('periodontal'),
-        DentalRegionEnum.periodontal,
-      );
-      expect(
-        DentalConditionModel.getDentalRegionFromString('maxillary'),
-        DentalRegionEnum.maxillary,
-      );
-      expect(
-        DentalConditionModel.getDentalRegionFromString('mandibular'),
-        DentalRegionEnum.mandibular,
-      );
-      expect(
-        DentalConditionModel.getDentalRegionFromString('none'),
-        DentalRegionEnum.none,
-      );
-    });
+    test(
+      'getDentalRegionFromString returns correct enum for valid strings',
+      () {
+        expect(
+          DentalConditionModel.getDentalRegionFromString('occlusal'),
+          DentalRegionEnum.occlusal,
+        );
+        expect(
+          DentalConditionModel.getDentalRegionFromString('vestibular'),
+          DentalRegionEnum.vestibular,
+        );
+        expect(
+          DentalConditionModel.getDentalRegionFromString('mesial'),
+          DentalRegionEnum.mesial,
+        );
+        expect(
+          DentalConditionModel.getDentalRegionFromString('distal'),
+          DentalRegionEnum.distal,
+        );
+        expect(
+          DentalConditionModel.getDentalRegionFromString('palatal'),
+          DentalRegionEnum.palatal,
+        );
+        expect(
+          DentalConditionModel.getDentalRegionFromString('lingual'),
+          DentalRegionEnum.lingual,
+        );
+        expect(
+          DentalConditionModel.getDentalRegionFromString('buccal'),
+          DentalRegionEnum.buccal,
+        );
+        expect(
+          DentalConditionModel.getDentalRegionFromString('labial'),
+          DentalRegionEnum.labial,
+        );
+        expect(
+          DentalConditionModel.getDentalRegionFromString('incisal'),
+          DentalRegionEnum.incisal,
+        );
+        expect(
+          DentalConditionModel.getDentalRegionFromString('gingival'),
+          DentalRegionEnum.gingival,
+        );
+        expect(
+          DentalConditionModel.getDentalRegionFromString('periodontal'),
+          DentalRegionEnum.periodontal,
+        );
+        expect(
+          DentalConditionModel.getDentalRegionFromString('maxillary'),
+          DentalRegionEnum.maxillary,
+        );
+        expect(
+          DentalConditionModel.getDentalRegionFromString('mandibular'),
+          DentalRegionEnum.mandibular,
+        );
+        expect(
+          DentalConditionModel.getDentalRegionFromString('none'),
+          DentalRegionEnum.none,
+        );
+      },
+    );
 
     test('getDentalRegionFromString returns none for invalid string', () {
       expect(
@@ -189,61 +192,63 @@ void main() {
     });
 
     // Test getToothConditionFromString
-    test('getToothConditionFromString returns correct enum for valid strings',
-        () {
-      expect(
-        DentalConditionModel.getToothConditionFromString('healthy'),
-        ToothConditionEnum.healthy,
-      );
-      expect(
-        DentalConditionModel.getToothConditionFromString('cavity'),
-        ToothConditionEnum.cavity,
-      );
-      expect(
-        DentalConditionModel.getToothConditionFromString('filled'),
-        ToothConditionEnum.filled,
-      );
-      expect(
-        DentalConditionModel.getToothConditionFromString('missing'),
-        ToothConditionEnum.missing,
-      );
-      expect(
-        DentalConditionModel.getToothConditionFromString('broken'),
-        ToothConditionEnum.broken,
-      );
-      expect(
-        DentalConditionModel.getToothConditionFromString('sensitive'),
-        ToothConditionEnum.sensitive,
-      );
-      expect(
-        DentalConditionModel.getToothConditionFromString('impacted'),
-        ToothConditionEnum.impacted,
-      );
-      expect(
-        DentalConditionModel.getToothConditionFromString('decayed'),
-        ToothConditionEnum.decayed,
-      );
-      expect(
-        DentalConditionModel.getToothConditionFromString('root canal'),
-        ToothConditionEnum.rootCanal,
-      );
-      expect(
-        DentalConditionModel.getToothConditionFromString('crown'),
-        ToothConditionEnum.crown,
-      );
-      expect(
-        DentalConditionModel.getToothConditionFromString('extraction needed'),
-        ToothConditionEnum.extractionNeeded,
-      );
-      expect(
-        DentalConditionModel.getToothConditionFromString('orthodontic issue'),
-        ToothConditionEnum.orthodonticIssue,
-      );
-      expect(
-        DentalConditionModel.getToothConditionFromString('none'),
-        ToothConditionEnum.none,
-      );
-    });
+    test(
+      'getToothConditionFromString returns correct enum for valid strings',
+      () {
+        expect(
+          DentalConditionModel.getToothConditionFromString('healthy'),
+          ToothConditionEnum.healthy,
+        );
+        expect(
+          DentalConditionModel.getToothConditionFromString('cavity'),
+          ToothConditionEnum.cavity,
+        );
+        expect(
+          DentalConditionModel.getToothConditionFromString('filled'),
+          ToothConditionEnum.filled,
+        );
+        expect(
+          DentalConditionModel.getToothConditionFromString('missing'),
+          ToothConditionEnum.missing,
+        );
+        expect(
+          DentalConditionModel.getToothConditionFromString('broken'),
+          ToothConditionEnum.broken,
+        );
+        expect(
+          DentalConditionModel.getToothConditionFromString('sensitive'),
+          ToothConditionEnum.sensitive,
+        );
+        expect(
+          DentalConditionModel.getToothConditionFromString('impacted'),
+          ToothConditionEnum.impacted,
+        );
+        expect(
+          DentalConditionModel.getToothConditionFromString('decayed'),
+          ToothConditionEnum.decayed,
+        );
+        expect(
+          DentalConditionModel.getToothConditionFromString('root canal'),
+          ToothConditionEnum.rootCanal,
+        );
+        expect(
+          DentalConditionModel.getToothConditionFromString('crown'),
+          ToothConditionEnum.crown,
+        );
+        expect(
+          DentalConditionModel.getToothConditionFromString('extraction needed'),
+          ToothConditionEnum.extractionNeeded,
+        );
+        expect(
+          DentalConditionModel.getToothConditionFromString('orthodontic issue'),
+          ToothConditionEnum.orthodonticIssue,
+        );
+        expect(
+          DentalConditionModel.getToothConditionFromString('none'),
+          ToothConditionEnum.none,
+        );
+      },
+    );
 
     test('getToothConditionFromString returns none for invalid string', () {
       expect(

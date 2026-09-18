@@ -25,12 +25,12 @@ enum MedicalDiagnosisTabModelEnum {
 /// Provides predefined values for all fields.
 MedicalDiagnosisTabModel defaultMMedicalDiagnosisModel =
     MedicalDiagnosisTabModel(
-  id: 'oxo',
-  condition: 'sane',
-  observation: 'No observation',
-  quantity: 0.0,
-  dateTimeOfRecord: DateTime(2024, 07, 21),
-);
+      id: 'oxo',
+      condition: 'sane',
+      observation: 'No observation',
+      quantity: 0.0,
+      dateTimeOfRecord: DateTime(2024, 07, 21),
+    );
 
 /// Represents a medical diagnosis record in an application that manages
 /// patient health data.
@@ -144,11 +144,6 @@ class MedicalDiagnosisTabModel extends Model {
 
   /// Returns the hash code for this [MedicalDiagnosisTabModel].
   @override
-  int get hashCode => Object.hash(
-        id,
-        condition,
-        observation,
-        quantity,
-        dateTimeOfRecord,
-      );
+  int get hashCode =>
+      Object.hash(id, condition, observation, quantity, dateTimeOfRecord);
 }

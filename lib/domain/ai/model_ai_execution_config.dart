@@ -42,10 +42,10 @@ class ModelAiExecutionConfig extends Model {
           : null,
       maxOutputTokens:
           json.containsKey(ModelAiExecutionConfigEnum.maxOutputTokens.name)
-              ? Utils.getIntegerFromDynamic(
-                  json[ModelAiExecutionConfigEnum.maxOutputTokens.name],
-                )
-              : null,
+          ? Utils.getIntegerFromDynamic(
+              json[ModelAiExecutionConfigEnum.maxOutputTokens.name],
+            )
+          : null,
       seed: json.containsKey(ModelAiExecutionConfigEnum.seed.name)
           ? Utils.getIntegerFromDynamic(
               json[ModelAiExecutionConfigEnum.seed.name],
@@ -53,13 +53,14 @@ class ModelAiExecutionConfig extends Model {
           : null,
       stopSequences:
           json.containsKey(ModelAiExecutionConfigEnum.stopSequences.name)
-              ? Utils.stringListFromDynamic(
-                  json[ModelAiExecutionConfigEnum.stopSequences.name],
-                )
-              : null,
-      deterministicPreferred: json.containsKey(
-        ModelAiExecutionConfigEnum.deterministicPreferred.name,
-      )
+          ? Utils.stringListFromDynamic(
+              json[ModelAiExecutionConfigEnum.stopSequences.name],
+            )
+          : null,
+      deterministicPreferred:
+          json.containsKey(
+            ModelAiExecutionConfigEnum.deterministicPreferred.name,
+          )
           ? Utils.getBoolFromDynamic(
               json[ModelAiExecutionConfigEnum.deterministicPreferred.name],
             )
@@ -149,14 +150,14 @@ class ModelAiExecutionConfig extends Model {
 
   @override
   int get hashCode => Object.hash(
-        temperature,
-        topP,
-        topK,
-        maxOutputTokens,
-        seed,
-        Utils.deepHash(stopSequences),
-        deterministicPreferred,
-      );
+    temperature,
+    topP,
+    topK,
+    maxOutputTokens,
+    seed,
+    Utils.deepHash(stopSequences),
+    deterministicPreferred,
+  );
 
   @override
   String toString() => 'ModelAiExecutionConfig(${toJson()})';

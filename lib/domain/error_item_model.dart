@@ -85,8 +85,9 @@ class ErrorItem extends Model {
     return ErrorItem(
       title: Utils.getStringFromDynamic(json[ErrorItemEnum.title.name]),
       code: Utils.getStringFromDynamic(json[ErrorItemEnum.code.name]),
-      description:
-          Utils.getStringFromDynamic(json[ErrorItemEnum.description.name]),
+      description: Utils.getStringFromDynamic(
+        json[ErrorItemEnum.description.name],
+      ),
       meta: Utils.mapFromDynamic(
         json[ErrorItemEnum.meta.name] ?? <String, dynamic>{},
       ),
@@ -120,12 +121,12 @@ class ErrorItem extends Model {
   /// Serializes this error to JSON.
   @override
   Map<String, dynamic> toJson() => <String, dynamic>{
-        ErrorItemEnum.title.name: title,
-        ErrorItemEnum.code.name: code,
-        ErrorItemEnum.description.name: description,
-        ErrorItemEnum.meta.name: meta,
-        ErrorItemEnum.errorLevel.name: errorLevel.name,
-      };
+    ErrorItemEnum.title.name: title,
+    ErrorItemEnum.code.name: code,
+    ErrorItemEnum.description.name: description,
+    ErrorItemEnum.meta.name: meta,
+    ErrorItemEnum.errorLevel.name: errorLevel.name,
+  };
 
   /// Returns a copy with selected fields replaced.
   @override

@@ -67,10 +67,9 @@ class ModelAssessment extends Model {
     required this.shuffleItems,
     required this.shuffleOptions,
     required int passScore,
-    Duration timeLimit = defaultTimeLimit,
-  })  : items = List<ModelLearningItem>.unmodifiable(items),
-        passScore = _clampPassScore(passScore),
-        _timeLimit = timeLimit;
+    this._timeLimit = defaultTimeLimit,
+  }) : items = List<ModelLearningItem>.unmodifiable(items),
+       passScore = _clampPassScore(passScore);
 
   /// Builds a [ModelAssessment] from JSON-like input.
   ///
@@ -80,10 +79,9 @@ class ModelAssessment extends Model {
   /// - `timeLimitMs`: `Duration.zero` if missing/invalid.
   /// - `passScore`: `0` if missing/invalid (then clamped 0..100).
   factory ModelAssessment.fromJson(Map<String, dynamic> json) {
-    final List<ModelLearningItem> parsedItems =
-        Utils.listFromDynamic(json[AssessmentEnum.items.name])
-            .map<ModelLearningItem>(ModelLearningItem.fromJson)
-            .toList();
+    final List<ModelLearningItem> parsedItems = Utils.listFromDynamic(
+      json[AssessmentEnum.items.name],
+    ).map<ModelLearningItem>(ModelLearningItem.fromJson).toList();
 
     final bool parsedShuffleItems = Utils.getBoolFromDynamic(
       json[AssessmentEnum.shuffleItems.name],
@@ -155,26 +153,27 @@ class ModelAssessment extends Model {
   /// Serializes to JSON using [AssessmentEnum] keys.
   @override
   Map<String, dynamic> toJson() => <String, dynamic>{
-        AssessmentEnum.id.name: id,
-        AssessmentEnum.title.name: title,
-        AssessmentEnum.items.name:
-            items.map((ModelLearningItem e) => e.toJson()).toList(),
-        AssessmentEnum.shuffleItems.name: shuffleItems,
-        AssessmentEnum.shuffleOptions.name: shuffleOptions,
-        AssessmentEnum.timeLimitMs.name: Utils.durationToJson(timeLimit),
-        AssessmentEnum.passScore.name: passScore,
-      };
+    AssessmentEnum.id.name: id,
+    AssessmentEnum.title.name: title,
+    AssessmentEnum.items.name: items
+        .map((ModelLearningItem e) => e.toJson())
+        .toList(),
+    AssessmentEnum.shuffleItems.name: shuffleItems,
+    AssessmentEnum.shuffleOptions.name: shuffleOptions,
+    AssessmentEnum.timeLimitMs.name: Utils.durationToJson(timeLimit),
+    AssessmentEnum.passScore.name: passScore,
+  };
 
   @override
   int get hashCode => Object.hashAll(<Object?>[
-        id,
-        title,
-        Utils.listHash(items),
-        shuffleItems,
-        shuffleOptions,
-        timeLimit,
-        passScore,
-      ]);
+    id,
+    title,
+    Utils.listHash(items),
+    shuffleItems,
+    shuffleOptions,
+    timeLimit,
+    passScore,
+  ]);
 
   @override
   bool operator ==(Object other) =>

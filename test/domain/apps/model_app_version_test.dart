@@ -3,34 +3,31 @@ import 'package:jocaagura_domain/jocaagura_domain.dart';
 
 void main() {
   group('ModelAppVersion – Constructor & Immutability', () {
-    test('Given local time When constructed Then buildAt is normalized to UTC',
-        () {
-      // Arrange
-      final DateTime local = DateTime(
-        2025,
-        10,
-        12,
-        9,
-      ).toLocal();
-      final bool isLocalUtc = local.isUtc; // sanity: should be false commonly
-      final String expectedIso = DateUtils.dateTimeToString(local.toUtc());
+    test(
+      'Given local time When constructed Then buildAt is normalized to UTC',
+      () {
+        // Arrange
+        final DateTime local = DateTime(2025, 10, 12, 9).toLocal();
+        final bool isLocalUtc = local.isUtc; // sanity: should be false commonly
+        final String expectedIso = DateUtils.dateTimeToString(local.toUtc());
 
-      // Act
-      final ModelAppVersion m = ModelAppVersion(
-        id: 'id-1',
-        appName: 'app',
-        version: '1.0.0',
-        buildNumber: 1,
-        platform: 'android',
-        channel: 'dev',
-        buildAt: local,
-      );
+        // Act
+        final ModelAppVersion m = ModelAppVersion(
+          id: 'id-1',
+          appName: 'app',
+          version: '1.0.0',
+          buildNumber: 1,
+          platform: 'android',
+          channel: 'dev',
+          buildAt: local,
+        );
 
-      // Assert
-      expect(isLocalUtc, isFalse);
-      expect(m.buildAt, expectedIso);
-      expect(m.buildAtDateTime.isUtc, isTrue);
-    });
+        // Assert
+        expect(isLocalUtc, isFalse);
+        expect(m.buildAt, expectedIso);
+        expect(m.buildAtDateTime.isUtc, isTrue);
+      },
+    );
 
     test('Given meta map When constructed Then meta is unmodifiable', () {
       final Map<String, dynamic> meta = <String, dynamic>{'k': 'v'};
@@ -116,9 +113,7 @@ void main() {
   });
 
   group('ModelAppVersion – copyWith', () {
-    test(
-        'Given copyWith When updating some fields Then returns a new immutable instance',
-        () {
+    test('Given copyWith When updating some fields Then returns a new immutable instance', () {
       final ModelAppVersion base = ModelAppVersion(
         id: 'base',
         appName: 'Pixel',
@@ -176,9 +171,7 @@ void main() {
       expect(back.buildAtDateTime.isUtc, isTrue);
     });
 
-    test(
-        'Given raw/dynamic meta in JSON When fromJson Then keys are normalized and deep equal',
-        () {
+    test('Given raw/dynamic meta in JSON When fromJson Then keys are normalized and deep equal', () {
       final Map<String, dynamic> json = <String, dynamic>{
         'id': 'x',
         'appName': 'app',
@@ -197,17 +190,17 @@ void main() {
       final ModelAppVersion m = ModelAppVersion.fromJson(json);
 
       // Claves '1' colisionan al stringificarse → queda una sola entrada '1': 'a'
-      final Map<String, dynamic> normalized =
-          Utils.mapFromDynamic(json['meta']);
+      final Map<String, dynamic> normalized = Utils.mapFromDynamic(
+        json['meta'],
+      );
 
       expect(Utils.deepEqualsMap(m.meta, normalized), isTrue);
     });
 
-    test(
-        'Given UTC string and local string buildAt When parsed Then stored as UTC in both cases',
-        () {
-      final String utcStr =
-          DateUtils.dateTimeToString(DateTime(2025, 10, 12, 12).toUtc());
+    test('Given UTC string and local string buildAt When parsed Then stored as UTC in both cases', () {
+      final String utcStr = DateUtils.dateTimeToString(
+        DateTime(2025, 10, 12, 12).toUtc(),
+      );
       // Simulamos que DateUtils.dateTimeFromDynamic acepta también `DateTime` local:
       final Map<String, dynamic> jsonUtc = <String, dynamic>{
         'id': 'a',

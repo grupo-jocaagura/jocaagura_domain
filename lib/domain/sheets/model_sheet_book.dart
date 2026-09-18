@@ -1,11 +1,7 @@
 part of 'package:jocaagura_domain/jocaagura_domain.dart';
 
 /// Stable JSON keys used by [ModelSheetBook].
-enum ModelSheetBookEnum {
-  id,
-  name,
-  tables,
-}
+enum ModelSheetBookEnum { id, name, tables }
 
 /// Logical book that groups normalized tables.
 class ModelSheetBook extends Model {
@@ -44,11 +40,12 @@ class ModelSheetBook extends Model {
 
   @override
   Map<String, dynamic> toJson() => <String, dynamic>{
-        ModelSheetBookEnum.id.name: id,
-        ModelSheetBookEnum.name.name: name,
-        ModelSheetBookEnum.tables.name:
-            tables.map((ModelSheetTable e) => e.toJson()).toList(),
-      };
+    ModelSheetBookEnum.id.name: id,
+    ModelSheetBookEnum.name.name: name,
+    ModelSheetBookEnum.tables.name: tables
+        .map((ModelSheetTable e) => e.toJson())
+        .toList(),
+  };
 
   @override
   bool operator ==(Object other) =>

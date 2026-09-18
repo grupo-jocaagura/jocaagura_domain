@@ -3,9 +3,7 @@ import 'package:jocaagura_domain/jocaagura_domain.dart';
 
 void main() {
   group('ModelAclPolicy.buildId', () {
-    test(
-        'Given trimmed appName/feature When buildId Then returns "<app>.<feature>"',
-        () {
+    test('Given trimmed appName/feature When buildId Then returns "<app>.<feature>"', () {
       final String id = ModelAclPolicy.buildId(
         appName: ' bienvenido ',
         feature: ' user.creation ',
@@ -100,24 +98,26 @@ void main() {
   });
 
   group('ModelAclPolicy.fromJson', () {
-    test('Given missing id When fromJson Then computes id from appName+feature',
-        () {
-      final Map<String, dynamic> json = <String, dynamic>{
-        ModelAclPolicyEnum.appName.name: 'bienvenido',
-        ModelAclPolicyEnum.feature.name: 'user.creation',
-        ModelAclPolicyEnum.minRoleType.name: RoleType.editor.name,
-        ModelAclPolicyEnum.isActive.name: true,
-        ModelAclPolicyEnum.note.name: 'Controls user creation flow',
-        ModelAclPolicyEnum.upsertAtIsoDate.name: '2026-01-18T00:00:00.000Z',
-        ModelAclPolicyEnum.upsertBy.name: 'admin@corp.com',
-      };
+    test(
+      'Given missing id When fromJson Then computes id from appName+feature',
+      () {
+        final Map<String, dynamic> json = <String, dynamic>{
+          ModelAclPolicyEnum.appName.name: 'bienvenido',
+          ModelAclPolicyEnum.feature.name: 'user.creation',
+          ModelAclPolicyEnum.minRoleType.name: RoleType.editor.name,
+          ModelAclPolicyEnum.isActive.name: true,
+          ModelAclPolicyEnum.note.name: 'Controls user creation flow',
+          ModelAclPolicyEnum.upsertAtIsoDate.name: '2026-01-18T00:00:00.000Z',
+          ModelAclPolicyEnum.upsertBy.name: 'admin@corp.com',
+        };
 
-      final ModelAclPolicy policy = ModelAclPolicy.fromJson(json);
+        final ModelAclPolicy policy = ModelAclPolicy.fromJson(json);
 
-      expect(policy.id, 'bienvenido.user.creation');
-      expect(policy.appName, 'bienvenido');
-      expect(policy.feature, 'user.creation');
-    });
+        expect(policy.id, 'bienvenido.user.creation');
+        expect(policy.appName, 'bienvenido');
+        expect(policy.feature, 'user.creation');
+      },
+    );
 
     test('Given provided id When fromJson Then keeps provided id', () {
       final Map<String, dynamic> json = <String, dynamic>{
@@ -158,21 +158,22 @@ void main() {
     });
 
     test(
-        'Given upsertAtIsoDate input When fromJson Then stores normalized value',
-        () {
-      final DateTime dt = DateTime.utc(2026, 1, 18, 10, 30);
-      final Map<String, dynamic> json = <String, dynamic>{
-        ModelAclPolicyEnum.appName.name: 'bienvenido',
-        ModelAclPolicyEnum.feature.name: 'x',
-        ModelAclPolicyEnum.upsertAtIsoDate.name: dt,
-      };
+      'Given upsertAtIsoDate input When fromJson Then stores normalized value',
+      () {
+        final DateTime dt = DateTime.utc(2026, 1, 18, 10, 30);
+        final Map<String, dynamic> json = <String, dynamic>{
+          ModelAclPolicyEnum.appName.name: 'bienvenido',
+          ModelAclPolicyEnum.feature.name: 'x',
+          ModelAclPolicyEnum.upsertAtIsoDate.name: dt,
+        };
 
-      final ModelAclPolicy policy = ModelAclPolicy.fromJson(json);
+        final ModelAclPolicy policy = ModelAclPolicy.fromJson(json);
 
-      // Compare against the same normalizer to avoid coupling to formatting details.
-      final String expected = DateUtils.normalizeIsoOrEmpty(dt);
-      expect(policy.upsertAtIsoDate, expected);
-    });
+        // Compare against the same normalizer to avoid coupling to formatting details.
+        final String expected = DateUtils.normalizeIsoOrEmpty(dt);
+        expect(policy.upsertAtIsoDate, expected);
+      },
+    );
   });
 
   group('ModelAclPolicy JSON roundtrip', () {
@@ -187,8 +188,9 @@ void main() {
         feature: 'user.creation',
         isActive: true,
         note: 'Controls user creation flow',
-        upsertAtIsoDate:
-            DateUtils.normalizeIsoOrEmpty('2026-01-18T00:00:00.000Z'),
+        upsertAtIsoDate: DateUtils.normalizeIsoOrEmpty(
+          '2026-01-18T00:00:00.000Z',
+        ),
         upsertBy: 'admin@corp.com',
       );
 
@@ -199,9 +201,7 @@ void main() {
       expect(back.hashCode, policy.hashCode);
     });
 
-    test(
-        'Given non-normalized upsertAtIsoDate When toJson Then emits normalized value',
-        () {
+    test('Given non-normalized upsertAtIsoDate When toJson Then emits normalized value', () {
       const ModelAclPolicy policy = ModelAclPolicy(
         id: 'a.b',
         minRoleType: RoleType.viewer,
@@ -209,8 +209,7 @@ void main() {
         feature: 'b',
         isActive: true,
         note: '',
-        upsertAtIsoDate:
-            '2026-01-18T00:00:00Z', // maybe already OK, but we still validate via normalizer
+        upsertAtIsoDate: '2026-01-18T00:00:00Z', // maybe already OK, but we still validate via normalizer
         upsertBy: 'x',
       );
 
@@ -222,14 +221,13 @@ void main() {
     });
   });
   group('ModelAclPolicy.roleMeetsMin (full matrix)', () {
-    test(
-        'Given RoleType enum When used as hierarchy Then order is admin, editor, viewer',
-        () {
+    test('Given RoleType enum When used as hierarchy Then order is admin, editor, viewer', () {
       // Sentinel: if someone changes enum order, this should fail and force a conscious update.
-      expect(
-        RoleType.values,
-        <RoleType>[RoleType.admin, RoleType.editor, RoleType.viewer],
-      );
+      expect(RoleType.values, <RoleType>[
+        RoleType.admin,
+        RoleType.editor,
+        RoleType.viewer,
+      ]);
     });
 
     test('Given admin When min=admin Then meets', () {
@@ -324,22 +322,22 @@ void main() {
   });
 
   group('DateUtils.normalizeIsoOrEmpty (indirect via ModelAclPolicy)', () {
-    test('Given null upsertAtIsoDate When fromJson Then stores empty string',
-        () {
-      final Map<String, dynamic> json = <String, dynamic>{
-        ModelAclPolicyEnum.appName.name: 'bienvenido',
-        ModelAclPolicyEnum.feature.name: 'x',
-        ModelAclPolicyEnum.upsertAtIsoDate.name: null,
-      };
-
-      final ModelAclPolicy policy = ModelAclPolicy.fromJson(json);
-
-      expect(policy.upsertAtIsoDate, '');
-    });
-
     test(
-        'Given DateTime upsertAtIsoDate When fromJson Then normalizes to UTC string',
-        () {
+      'Given null upsertAtIsoDate When fromJson Then stores empty string',
+      () {
+        final Map<String, dynamic> json = <String, dynamic>{
+          ModelAclPolicyEnum.appName.name: 'bienvenido',
+          ModelAclPolicyEnum.feature.name: 'x',
+          ModelAclPolicyEnum.upsertAtIsoDate.name: null,
+        };
+
+        final ModelAclPolicy policy = ModelAclPolicy.fromJson(json);
+
+        expect(policy.upsertAtIsoDate, '');
+      },
+    );
+
+    test('Given DateTime upsertAtIsoDate When fromJson Then normalizes to UTC string', () {
       final DateTime local = DateTime(2026, 1, 18, 10, 30); // local time
       final Map<String, dynamic> json = <String, dynamic>{
         ModelAclPolicyEnum.appName.name: 'bienvenido',
@@ -352,23 +350,30 @@ void main() {
       expect(policy.upsertAtIsoDate, DateUtils.normalizeIsoOrEmpty(local));
     });
 
-    test('Given int epoch millis When fromJson Then normalizes to UTC string',
-        () {
-      final int epochMillis =
-          DateTime.utc(2026, 1, 18, 10, 30).millisecondsSinceEpoch;
-      final Map<String, dynamic> json = <String, dynamic>{
-        ModelAclPolicyEnum.appName.name: 'bienvenido',
-        ModelAclPolicyEnum.feature.name: 'x',
-        ModelAclPolicyEnum.upsertAtIsoDate.name: epochMillis,
-      };
+    test(
+      'Given int epoch millis When fromJson Then normalizes to UTC string',
+      () {
+        final int epochMillis = DateTime.utc(
+          2026,
+          1,
+          18,
+          10,
+          30,
+        ).millisecondsSinceEpoch;
+        final Map<String, dynamic> json = <String, dynamic>{
+          ModelAclPolicyEnum.appName.name: 'bienvenido',
+          ModelAclPolicyEnum.feature.name: 'x',
+          ModelAclPolicyEnum.upsertAtIsoDate.name: epochMillis,
+        };
 
-      final ModelAclPolicy policy = ModelAclPolicy.fromJson(json);
+        final ModelAclPolicy policy = ModelAclPolicy.fromJson(json);
 
-      expect(
-        policy.upsertAtIsoDate,
-        DateUtils.normalizeIsoOrEmpty(epochMillis),
-      );
-    });
+        expect(
+          policy.upsertAtIsoDate,
+          DateUtils.normalizeIsoOrEmpty(epochMillis),
+        );
+      },
+    );
 
     test('Given empty string When fromJson Then stores empty string', () {
       final Map<String, dynamic> json = <String, dynamic>{
@@ -382,9 +387,7 @@ void main() {
       expect(policy.upsertAtIsoDate, '');
     });
 
-    test(
-        'Given invalid date string When fromJson Then returns trimmed original string',
-        () {
+    test('Given invalid date string When fromJson Then returns trimmed original string', () {
       final Map<String, dynamic> json = <String, dynamic>{
         ModelAclPolicyEnum.appName.name: 'bienvenido',
         ModelAclPolicyEnum.feature.name: 'x',
@@ -397,9 +400,7 @@ void main() {
       expect(policy.upsertAtIsoDate, '');
     });
 
-    test(
-        'Given parseable non-UTC string When fromJson Then converts to UTC output format',
-        () {
+    test('Given parseable non-UTC string When fromJson Then converts to UTC output format', () {
       // No 'Z' => treated as local by DateTime.parse/tryParse, then .toUtc() is applied.
       const String input = '2026-01-18T10:30:00';
       final Map<String, dynamic> json = <String, dynamic>{
@@ -415,9 +416,7 @@ void main() {
       // expect(policy.upsertAtIsoDate, isNot(input));
     });
 
-    test(
-        'Given parseable UTC string When fromJson Then keeps as UTC-normalized output',
-        () {
+    test('Given parseable UTC string When fromJson Then keeps as UTC-normalized output', () {
       const String input = '2026-01-18T10:30:00.000Z';
       final Map<String, dynamic> json = <String, dynamic>{
         ModelAclPolicyEnum.appName.name: 'bienvenido',

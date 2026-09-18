@@ -76,14 +76,7 @@ LegalIdTypeEnum getEnumValueFromString(String description) {
 }
 
 /// Enum representing the fields of a legal identification model.
-enum LegalIdEnum {
-  id,
-  idType,
-  names,
-  lastNames,
-  legalIdNumber,
-  attributes,
-}
+enum LegalIdEnum { id, idType, names, lastNames, legalIdNumber, attributes }
 
 /// A model representing a legal identification record.
 ///
@@ -107,8 +100,9 @@ class LegalIdModel extends Model {
       id: Utils.getStringFromDynamic(json[LegalIdEnum.id.name]),
       names: Utils.getStringFromDynamic(json[LegalIdEnum.names.name]),
       lastNames: Utils.getStringFromDynamic(json[LegalIdEnum.lastNames.name]),
-      legalIdNumber:
-          Utils.getStringFromDynamic(json[LegalIdEnum.legalIdNumber.name]),
+      legalIdNumber: Utils.getStringFromDynamic(
+        json[LegalIdEnum.legalIdNumber.name],
+      ),
     );
   }
 

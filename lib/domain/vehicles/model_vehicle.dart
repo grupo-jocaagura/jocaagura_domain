@@ -135,14 +135,16 @@ class ModelVehicle extends Model {
   factory ModelVehicle.fromJson(Map<String, dynamic> json) {
     return ModelVehicle(
       id: Utils.getStringFromDynamic(json[ModelVehicleEnum.id.name]),
-      displayName:
-          Utils.getStringFromDynamic(json[ModelVehicleEnum.displayName.name]),
+      displayName: Utils.getStringFromDynamic(
+        json[ModelVehicleEnum.displayName.name],
+      ),
       plate: Utils.getStringFromDynamic(json[ModelVehicleEnum.plate.name]),
       brand: Utils.getStringFromDynamic(json[ModelVehicleEnum.brand.name]),
       model: Utils.getStringFromDynamic(json[ModelVehicleEnum.model.name]),
       year: Utils.getIntegerFromDynamic(json[ModelVehicleEnum.year.name]),
-      description:
-          Utils.getStringFromDynamic(json[ModelVehicleEnum.description.name]),
+      description: Utils.getStringFromDynamic(
+        json[ModelVehicleEnum.description.name],
+      ),
       isActive: Utils.getBoolFromDynamic(
         json[ModelVehicleEnum.isActive.name],
         defaultValueIfNull: true,
@@ -151,8 +153,9 @@ class ModelVehicle extends Model {
         Utils.mapFromDynamic(json[ModelVehicleEnum.vehicleCategory.name]),
       ),
       tags: _tagsFromDynamic(json[ModelVehicleEnum.tags.name]),
-      attributes:
-          _attributesFromDynamic(json[ModelVehicleEnum.attributes.name]),
+      attributes: _attributesFromDynamic(
+        json[ModelVehicleEnum.attributes.name],
+      ),
     );
   }
 
@@ -247,8 +250,9 @@ class ModelVehicle extends Model {
       ModelVehicleEnum.description.name: description,
       ModelVehicleEnum.isActive.name: isActive,
       ModelVehicleEnum.vehicleCategory.name: vehicleCategory.toJson(),
-      ModelVehicleEnum.tags.name:
-          tags.map((ModelCategory tag) => tag.toJson()).toList(),
+      ModelVehicleEnum.tags.name: tags
+          .map((ModelCategory tag) => tag.toJson())
+          .toList(),
       ModelVehicleEnum.attributes.name: serializedAttributes,
     };
   }
@@ -273,18 +277,18 @@ class ModelVehicle extends Model {
 
   @override
   int get hashCode => Object.hash(
-        id,
-        displayName,
-        plate,
-        brand,
-        model,
-        year,
-        description,
-        isActive,
-        vehicleCategory,
-        Utils.listHash(tags),
-        _attributeMapHash(attributes),
-      );
+    id,
+    displayName,
+    plate,
+    brand,
+    model,
+    year,
+    description,
+    isActive,
+    vehicleCategory,
+    Utils.listHash(tags),
+    _attributeMapHash(attributes),
+  );
 
   @override
   String toString() => 'ModelVehicle(${toJson()})';
@@ -323,9 +327,9 @@ class ModelVehicle extends Model {
         final Map<String, dynamic> mapValue = Utils.mapFromDynamic(value);
         final String attributeName =
             Utils.getStringFromDynamic(mapValue[AttributeEnum.name.name])
-                    .isEmpty
-                ? key
-                : Utils.getStringFromDynamic(mapValue[AttributeEnum.name.name]);
+                .isEmpty
+            ? key
+            : Utils.getStringFromDynamic(mapValue[AttributeEnum.name.name]);
         final dynamic attributeValue = mapValue[AttributeEnum.value.name];
         if (AttributeModel.isDomainCompatible(attributeValue)) {
           parsed[key] = AttributeModel<dynamic>(

@@ -135,10 +135,12 @@ class ModelCompleteFlow extends Model {
   /// }
   /// ```
   factory ModelCompleteFlow.fromJson(Map<String, dynamic> json) {
-    final String nameTmp =
-        Utils.getStringFromDynamic(json[CompleteFlowEnum.name.name]);
-    final String descriptionTmp =
-        Utils.getStringFromDynamic(json[CompleteFlowEnum.description.name]);
+    final String nameTmp = Utils.getStringFromDynamic(
+      json[CompleteFlowEnum.name.name],
+    );
+    final String descriptionTmp = Utils.getStringFromDynamic(
+      json[CompleteFlowEnum.description.name],
+    );
 
     final dynamic rawStepsByIndex = json[CompleteFlowEnum.stepsByIndex.name];
     final Map<int, ModelFlowStep> tmp = <int, ModelFlowStep>{};
@@ -323,11 +325,8 @@ class ModelCompleteFlow extends Model {
   }
 
   @override
-  int get hashCode => Object.hash(
-        name,
-        description,
-        Utils.deepHash(stepsByIndex),
-      );
+  int get hashCode =>
+      Object.hash(name, description, Utils.deepHash(stepsByIndex));
 
   @override
   String toString() => '${toJson()}';

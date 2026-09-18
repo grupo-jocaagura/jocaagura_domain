@@ -50,7 +50,7 @@ class Debouncer {
   /// Preconditions:
   /// - [milliseconds] must be > 0 (debug-checked via assert).
   Debouncer({this.milliseconds = 500})
-      : assert(milliseconds > 0, 'milliseconds must be > 0');
+    : assert(milliseconds > 0, 'milliseconds must be > 0');
 
   /// Debounce duration in milliseconds before the action is executed.
   final int milliseconds;

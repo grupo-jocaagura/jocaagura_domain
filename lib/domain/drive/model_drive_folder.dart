@@ -1,9 +1,7 @@
 part of 'package:jocaagura_domain/jocaagura_domain.dart';
 
 /// Stable JSON keys used by [ModelDriveFolder].
-enum ModelDriveFolderEnum {
-  childrenCount,
-}
+enum ModelDriveFolderEnum { childrenCount }
 
 /// Concrete folder payload for the logical drive domain.
 class ModelDriveFolder extends ModelDriveItem {
@@ -19,17 +17,18 @@ class ModelDriveFolder extends ModelDriveItem {
     super.meta,
     this.childrenCount,
   }) : super(
-          kind: ModelDriveKindEnum.folder,
-          mimeType: 'application/vnd.jocaagura.folder',
-        );
+         kind: ModelDriveKindEnum.folder,
+         mimeType: 'application/vnd.jocaagura.folder',
+       );
 
   /// Rebuilds a [ModelDriveFolder] from JSON.
   factory ModelDriveFolder.fromJson(Map<String, dynamic> json) {
     return ModelDriveFolder(
       id: Utils.getStringFromDynamic(json[ModelDriveItemEnum.id.name]),
       name: Utils.getStringFromDynamic(json[ModelDriveItemEnum.name.name]),
-      parentId:
-          _nullableStringFromDynamic(json[ModelDriveItemEnum.parentId.name]),
+      parentId: _nullableStringFromDynamic(
+        json[ModelDriveItemEnum.parentId.name],
+      ),
       path: Utils.getStringFromDynamic(json[ModelDriveItemEnum.path.name]),
       webUrl: _nullableUrlFromDynamic(json[ModelDriveItemEnum.webUrl.name]),
       createdAt: DateUtils.dateTimeFromDynamic(

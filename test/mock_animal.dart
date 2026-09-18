@@ -72,14 +72,14 @@ class MockAnimal extends AnimalModel {
 
   @override
   int get hashCode => Object.hash(
-        energy,
-        weight,
-        intelligence,
-        animalType,
-        joyful,
-        hygiene,
-        gender,
-      );
+    energy,
+    weight,
+    intelligence,
+    animalType,
+    joyful,
+    hygiene,
+    gender,
+  );
 
   @override
   bool operator ==(Object other) {

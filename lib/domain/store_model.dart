@@ -116,20 +116,24 @@ class StoreModel extends Model {
       id: Utils.getStringFromDynamic(json[StoreModelEnum.id.name]),
       nit: Utils.getIntegerFromDynamic(json[StoreModelEnum.nit.name]),
       photoUrl: Utils.getUrlFromDynamic(json[StoreModelEnum.photoUrl.name]),
-      coverPhotoUrl:
-          Utils.getUrlFromDynamic(json[StoreModelEnum.coverPhotoUrl.name]),
+      coverPhotoUrl: Utils.getUrlFromDynamic(
+        json[StoreModelEnum.coverPhotoUrl.name],
+      ),
       email: Utils.getEmailFromDynamic(json[StoreModelEnum.email.name]),
-      ownerEmail:
-          Utils.getEmailFromDynamic(json[StoreModelEnum.ownerEmail.name]),
+      ownerEmail: Utils.getEmailFromDynamic(
+        json[StoreModelEnum.ownerEmail.name],
+      ),
       name: Utils.getStringFromDynamic(json[StoreModelEnum.name.name]),
       alias: Utils.getStringFromDynamic(json[StoreModelEnum.alias.name]),
       address: AddressModel.fromJson(
         Utils.mapFromDynamic(json[StoreModelEnum.address.name]),
       ),
-      phoneNumber1:
-          Utils.getIntegerFromDynamic(json[StoreModelEnum.phoneNumber1.name]),
-      phoneNumber2:
-          Utils.getIntegerFromDynamic(json[StoreModelEnum.phoneNumber2.name]),
+      phoneNumber1: Utils.getIntegerFromDynamic(
+        json[StoreModelEnum.phoneNumber1.name],
+      ),
+      phoneNumber2: Utils.getIntegerFromDynamic(
+        json[StoreModelEnum.phoneNumber2.name],
+      ),
     );
   }
 
@@ -217,18 +221,18 @@ class StoreModel extends Model {
 
   @override
   int get hashCode => Object.hash(
-        id,
-        nit,
-        photoUrl,
-        coverPhotoUrl,
-        email,
-        ownerEmail,
-        name,
-        alias,
-        address,
-        phoneNumber1,
-        phoneNumber2,
-      );
+    id,
+    nit,
+    photoUrl,
+    coverPhotoUrl,
+    email,
+    ownerEmail,
+    name,
+    alias,
+    address,
+    phoneNumber1,
+    phoneNumber2,
+  );
 
   @override
   String toString() {
@@ -290,8 +294,9 @@ class StoreModel extends Model {
       71,
     ];
 
-    final int len =
-        digits.length < weights.length ? digits.length : weights.length;
+    final int len = digits.length < weights.length
+        ? digits.length
+        : weights.length;
 
     int sum = 0;
     for (int i = 0; i < len; i++) {

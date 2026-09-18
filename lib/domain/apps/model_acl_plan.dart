@@ -1,13 +1,7 @@
 part of 'package:jocaagura_domain/jocaagura_domain.dart';
 
 /// Stable JSON keys used by [ModelAclPlan].
-enum ModelAclPlanEnum {
-  id,
-  name,
-  description,
-  appName,
-  acls,
-}
+enum ModelAclPlanEnum { id, name, description, appName, acls }
 
 /// Reusable bundle of concrete ACL grants for a specific app.
 class ModelAclPlan extends Model {
@@ -66,8 +60,9 @@ class ModelAclPlan extends Model {
       ModelAclPlanEnum.id.name: id,
       ModelAclPlanEnum.name.name: name,
       ModelAclPlanEnum.appName.name: appName,
-      ModelAclPlanEnum.acls.name:
-          acls.map((ModelAcl acl) => acl.toJson()).toList(growable: false),
+      ModelAclPlanEnum.acls.name: acls
+          .map((ModelAcl acl) => acl.toJson())
+          .toList(growable: false),
     };
 
     if (description != null) {
@@ -89,13 +84,8 @@ class ModelAclPlan extends Model {
           Utils.listEquals(acls, other.acls);
 
   @override
-  int get hashCode => Object.hash(
-        id,
-        name,
-        description,
-        appName,
-        Utils.listHash(acls),
-      );
+  int get hashCode =>
+      Object.hash(id, name, description, appName, Utils.listHash(acls));
 
   @override
   String toString() => 'ModelAclPlan(${toJson()})';

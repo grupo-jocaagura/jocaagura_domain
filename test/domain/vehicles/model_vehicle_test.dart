@@ -34,10 +34,7 @@ void main() {
       description: 'Urban delivery van',
       isActive: true,
       vehicleCategory: vehicleCategory,
-      tags: <ModelCategory>[
-        fleetTag,
-        urbanTag,
-      ],
+      tags: <ModelCategory>[fleetTag, urbanTag],
       attributes: <String, AttributeModel<dynamic>>{
         'color': colorAttribute,
         'passengerCapacity': passengerAttribute,
@@ -92,79 +89,71 @@ void main() {
       },
     );
 
-    test(
-      'Given missing optional collections When fromJson then defaults to empty collections and active state',
-      () {
-        final Map<String, dynamic> json = <String, dynamic>{
-          ModelVehicleEnum.id.name: 'vehicle-002',
-          ModelVehicleEnum.displayName.name: 'Vehicle 02',
-          ModelVehicleEnum.plate.name: '',
-          ModelVehicleEnum.brand.name: 'Toyota',
-          ModelVehicleEnum.model.name: 'Hilux',
-          ModelVehicleEnum.year.name: 0,
-          ModelVehicleEnum.description.name: '',
-          ModelVehicleEnum.vehicleCategory.name: defaultModelCategory.toJson(),
-        };
+    test('Given missing optional collections When fromJson then defaults to empty collections and active state', () {
+      final Map<String, dynamic> json = <String, dynamic>{
+        ModelVehicleEnum.id.name: 'vehicle-002',
+        ModelVehicleEnum.displayName.name: 'Vehicle 02',
+        ModelVehicleEnum.plate.name: '',
+        ModelVehicleEnum.brand.name: 'Toyota',
+        ModelVehicleEnum.model.name: 'Hilux',
+        ModelVehicleEnum.year.name: 0,
+        ModelVehicleEnum.description.name: '',
+        ModelVehicleEnum.vehicleCategory.name: defaultModelCategory.toJson(),
+      };
 
-        final ModelVehicle parsed = ModelVehicle.fromJson(json);
+      final ModelVehicle parsed = ModelVehicle.fromJson(json);
 
-        expect(parsed.tags, isEmpty);
-        expect(parsed.attributes, isEmpty);
-        expect(parsed.isActive, isTrue);
-        expect(parsed.toJson()[ModelVehicleEnum.tags.name], isEmpty);
-        expect(parsed.toJson()[ModelVehicleEnum.attributes.name], isEmpty);
-      },
-    );
+      expect(parsed.tags, isEmpty);
+      expect(parsed.attributes, isEmpty);
+      expect(parsed.isActive, isTrue);
+      expect(parsed.toJson()[ModelVehicleEnum.tags.name], isEmpty);
+      expect(parsed.toJson()[ModelVehicleEnum.attributes.name], isEmpty);
+    });
 
-    test(
-      'Given legacy-ish raw attributes map When fromJson then normalizes into AttributeModel dictionary',
-      () {
-        final Map<String, dynamic> json = <String, dynamic>{
-          ModelVehicleEnum.id.name: 'vehicle-003',
-          ModelVehicleEnum.displayName.name: 'Vehicle 03',
-          ModelVehicleEnum.plate.name: 'XYZ987',
-          ModelVehicleEnum.brand.name: 'Kia',
-          ModelVehicleEnum.model.name: 'Picanto',
-          ModelVehicleEnum.year.name: 2020,
-          ModelVehicleEnum.description.name: 'Compact urban vehicle',
-          ModelVehicleEnum.isActive.name: false,
-          ModelVehicleEnum.vehicleCategory.name: vehicleCategory.toJson(),
-          ModelVehicleEnum.tags.name: const <Map<String, dynamic>>[],
-          ModelVehicleEnum.attributes.name: <String, dynamic>{
-            'color': 'red',
-            'batteryLevel': <String, dynamic>{
-              'name': 'batteryLevel',
-              'value': 87,
-            },
+    test('Given legacy-ish raw attributes map When fromJson then normalizes into AttributeModel dictionary', () {
+      final Map<String, dynamic> json = <String, dynamic>{
+        ModelVehicleEnum.id.name: 'vehicle-003',
+        ModelVehicleEnum.displayName.name: 'Vehicle 03',
+        ModelVehicleEnum.plate.name: 'XYZ987',
+        ModelVehicleEnum.brand.name: 'Kia',
+        ModelVehicleEnum.model.name: 'Picanto',
+        ModelVehicleEnum.year.name: 2020,
+        ModelVehicleEnum.description.name: 'Compact urban vehicle',
+        ModelVehicleEnum.isActive.name: false,
+        ModelVehicleEnum.vehicleCategory.name: vehicleCategory.toJson(),
+        ModelVehicleEnum.tags.name: const <Map<String, dynamic>>[],
+        ModelVehicleEnum.attributes.name: <String, dynamic>{
+          'color': 'red',
+          'batteryLevel': <String, dynamic>{
+            'name': 'batteryLevel',
+            'value': 87,
           },
-        };
+        },
+      };
 
-        final ModelVehicle parsed = ModelVehicle.fromJson(json);
+      final ModelVehicle parsed = ModelVehicle.fromJson(json);
 
-        expect(parsed.isActive, isFalse);
-        expect(
-          parsed.attributes['color'],
-          equals(const AttributeModel<dynamic>(name: 'color', value: 'red')),
-        );
-        expect(
-          parsed.attributes['batteryLevel'],
-          equals(
-            const AttributeModel<dynamic>(name: 'batteryLevel', value: 87),
-          ),
-        );
-      },
-    );
+      expect(parsed.isActive, isFalse);
+      expect(
+        parsed.attributes['color'],
+        equals(const AttributeModel<dynamic>(name: 'color', value: 'red')),
+      );
+      expect(
+        parsed.attributes['batteryLevel'],
+        equals(const AttributeModel<dynamic>(name: 'batteryLevel', value: 87)),
+      );
+    });
 
     test(
       'Given model When copyWith overrides some fields then preserves the rest',
       () {
         final Map<String, AttributeModel<dynamic>> attributes =
             <String, AttributeModel<dynamic>>{
-          'fuelType': const AttributeModel<String>(
-            name: 'fuelType',
-            value: 'electric',
-          ),
-        };
+              'fuelType': const AttributeModel<String>(
+                name: 'fuelType',
+                value: 'electric',
+              ),
+            };
 
         final ModelVehicle copy = model.copyWith(
           displayName: 'Van 01 Updated',
@@ -185,45 +174,42 @@ void main() {
       },
     );
 
-    test(
-      'Given equal vehicles with distinct map instances When compared then equality and hashCode stay stable',
-      () {
-        const ModelVehicle same = ModelVehicle(
-          id: 'vehicle-001',
-          displayName: 'Van 01',
-          plate: 'ABC123',
-          brand: 'Renault',
-          model: 'Kangoo',
-          year: 2024,
-          description: 'Urban delivery van',
-          isActive: true,
-          vehicleCategory: ModelCategory(
-            category: 'cargo-van',
-            description: 'Different description but same normalized category',
+    test('Given equal vehicles with distinct map instances When compared then equality and hashCode stay stable', () {
+      const ModelVehicle same = ModelVehicle(
+        id: 'vehicle-001',
+        displayName: 'Van 01',
+        plate: 'ABC123',
+        brand: 'Renault',
+        model: 'Kangoo',
+        year: 2024,
+        description: 'Urban delivery van',
+        isActive: true,
+        vehicleCategory: ModelCategory(
+          category: 'cargo-van',
+          description: 'Different description but same normalized category',
+        ),
+        tags: <ModelCategory>[
+          ModelCategory(
+            category: 'fleet-a',
+            description: 'Another description',
           ),
-          tags: <ModelCategory>[
-            ModelCategory(
-              category: 'fleet-a',
-              description: 'Another description',
-            ),
-            ModelCategory(
-              category: 'urban-route',
-              description: 'Another tag description',
-            ),
-          ],
-          attributes: <String, AttributeModel<dynamic>>{
-            'color': AttributeModel<dynamic>(name: 'color', value: 'white'),
-            'passengerCapacity': AttributeModel<dynamic>(
-              name: 'passengerCapacity',
-              value: 2,
-            ),
-          },
-        );
+          ModelCategory(
+            category: 'urban-route',
+            description: 'Another tag description',
+          ),
+        ],
+        attributes: <String, AttributeModel<dynamic>>{
+          'color': AttributeModel<dynamic>(name: 'color', value: 'white'),
+          'passengerCapacity': AttributeModel<dynamic>(
+            name: 'passengerCapacity',
+            value: 2,
+          ),
+        },
+      );
 
-        expect(same, equals(model));
-        expect(same.hashCode, equals(model.hashCode));
-      },
-    );
+      expect(same, equals(model));
+      expect(same.hashCode, equals(model.hashCode));
+    });
 
     test('defaultModelVehicle stays useful for tests', () {
       expect(defaultModelVehicle.isActive, isTrue);
@@ -236,113 +222,104 @@ void main() {
     });
   });
   group('ModelVehicle.fromJson attributes list normalization', () {
-    test(
-      'Given empty attributes list When parsing Then returns an empty immutable attributes map',
-      () {
-        // Arrange
-        final Map<String, dynamic> json = <String, dynamic>{
-          ModelVehicleEnum.id.name: 'vehicle-1',
-          ModelVehicleEnum.displayName.name: 'Vehicle 1',
-          ModelVehicleEnum.plate.name: 'ABC123',
-          ModelVehicleEnum.brand.name: 'Brand',
-          ModelVehicleEnum.model.name: 'Model',
-          ModelVehicleEnum.year.name: 2024,
-          ModelVehicleEnum.description.name: 'Description',
-          ModelVehicleEnum.isActive.name: true,
-          ModelVehicleEnum.vehicleCategory.name: defaultModelCategory.toJson(),
-          ModelVehicleEnum.attributes.name: <dynamic>[],
-        };
+    test('Given empty attributes list When parsing Then returns an empty immutable attributes map', () {
+      // Arrange
+      final Map<String, dynamic> json = <String, dynamic>{
+        ModelVehicleEnum.id.name: 'vehicle-1',
+        ModelVehicleEnum.displayName.name: 'Vehicle 1',
+        ModelVehicleEnum.plate.name: 'ABC123',
+        ModelVehicleEnum.brand.name: 'Brand',
+        ModelVehicleEnum.model.name: 'Model',
+        ModelVehicleEnum.year.name: 2024,
+        ModelVehicleEnum.description.name: 'Description',
+        ModelVehicleEnum.isActive.name: true,
+        ModelVehicleEnum.vehicleCategory.name: defaultModelCategory.toJson(),
+        ModelVehicleEnum.attributes.name: <dynamic>[],
+      };
 
-        // Act
-        final ModelVehicle result = ModelVehicle.fromJson(json);
+      // Act
+      final ModelVehicle result = ModelVehicle.fromJson(json);
 
-        // Assert
-        expect(result.attributes, isEmpty);
-        expect(
-          () => result.attributes['newKey'] = const AttributeModel<String>(
-            name: 'newKey',
-            value: 'value',
-          ),
-          throwsUnsupportedError,
-        );
-      },
-    );
+      // Assert
+      expect(result.attributes, isEmpty);
+      expect(
+        () => result.attributes['newKey'] = const AttributeModel<String>(
+          name: 'newKey',
+          value: 'value',
+        ),
+        throwsUnsupportedError,
+      );
+    });
 
-    test(
-      'Given attributes list with valid names When parsing Then stores each attribute by its name',
-      () {
-        // Arrange
-        final Map<String, dynamic> json = <String, dynamic>{
-          ModelVehicleEnum.id.name: 'vehicle-1',
-          ModelVehicleEnum.displayName.name: 'Vehicle 1',
-          ModelVehicleEnum.plate.name: 'ABC123',
-          ModelVehicleEnum.brand.name: 'Brand',
-          ModelVehicleEnum.model.name: 'Model',
-          ModelVehicleEnum.year.name: 2024,
-          ModelVehicleEnum.description.name: 'Description',
-          ModelVehicleEnum.isActive.name: true,
-          ModelVehicleEnum.vehicleCategory.name: defaultModelCategory.toJson(),
-          ModelVehicleEnum.attributes.name: <Map<String, dynamic>>[
-            <String, dynamic>{
-              AttributeEnum.name.name: 'fuelLevel',
-              AttributeEnum.value.name: 0.75,
-            },
-            <String, dynamic>{
-              AttributeEnum.name.name: 'passengers',
-              AttributeEnum.value.name: 4,
-            },
-          ],
-        };
+    test('Given attributes list with valid names When parsing Then stores each attribute by its name', () {
+      // Arrange
+      final Map<String, dynamic> json = <String, dynamic>{
+        ModelVehicleEnum.id.name: 'vehicle-1',
+        ModelVehicleEnum.displayName.name: 'Vehicle 1',
+        ModelVehicleEnum.plate.name: 'ABC123',
+        ModelVehicleEnum.brand.name: 'Brand',
+        ModelVehicleEnum.model.name: 'Model',
+        ModelVehicleEnum.year.name: 2024,
+        ModelVehicleEnum.description.name: 'Description',
+        ModelVehicleEnum.isActive.name: true,
+        ModelVehicleEnum.vehicleCategory.name: defaultModelCategory.toJson(),
+        ModelVehicleEnum.attributes.name: <Map<String, dynamic>>[
+          <String, dynamic>{
+            AttributeEnum.name.name: 'fuelLevel',
+            AttributeEnum.value.name: 0.75,
+          },
+          <String, dynamic>{
+            AttributeEnum.name.name: 'passengers',
+            AttributeEnum.value.name: 4,
+          },
+        ],
+      };
 
-        // Act
-        final ModelVehicle result = ModelVehicle.fromJson(json);
+      // Act
+      final ModelVehicle result = ModelVehicle.fromJson(json);
 
-        // Assert
-        expect(result.attributes.length, 2);
-        expect(result.attributes.containsKey('fuelLevel'), isTrue);
-        expect(result.attributes.containsKey('passengers'), isTrue);
-        expect(result.attributes['fuelLevel']?.name, 'fuelLevel');
-        expect(result.attributes['fuelLevel']?.value, 0.75);
-        expect(result.attributes['passengers']?.name, 'passengers');
-        expect(result.attributes['passengers']?.value, 4);
-      },
-    );
+      // Assert
+      expect(result.attributes.length, 2);
+      expect(result.attributes.containsKey('fuelLevel'), isTrue);
+      expect(result.attributes.containsKey('passengers'), isTrue);
+      expect(result.attributes['fuelLevel']?.name, 'fuelLevel');
+      expect(result.attributes['fuelLevel']?.value, 0.75);
+      expect(result.attributes['passengers']?.name, 'passengers');
+      expect(result.attributes['passengers']?.value, 4);
+    });
 
-    test(
-      'Given attributes list with empty names When parsing Then skips unnamed attributes',
-      () {
-        // Arrange
-        final Map<String, dynamic> json = <String, dynamic>{
-          ModelVehicleEnum.id.name: 'vehicle-1',
-          ModelVehicleEnum.displayName.name: 'Vehicle 1',
-          ModelVehicleEnum.plate.name: 'ABC123',
-          ModelVehicleEnum.brand.name: 'Brand',
-          ModelVehicleEnum.model.name: 'Model',
-          ModelVehicleEnum.year.name: 2024,
-          ModelVehicleEnum.description.name: 'Description',
-          ModelVehicleEnum.isActive.name: true,
-          ModelVehicleEnum.vehicleCategory.name: defaultModelCategory.toJson(),
-          ModelVehicleEnum.attributes.name: <Map<String, dynamic>>[
-            <String, dynamic>{
-              AttributeEnum.name.name: '',
-              AttributeEnum.value.name: 'ignored',
-            },
-            <String, dynamic>{
-              AttributeEnum.name.name: 'cargoCapacity',
-              AttributeEnum.value.name: 1200,
-            },
-          ],
-        };
+    test('Given attributes list with empty names When parsing Then skips unnamed attributes', () {
+      // Arrange
+      final Map<String, dynamic> json = <String, dynamic>{
+        ModelVehicleEnum.id.name: 'vehicle-1',
+        ModelVehicleEnum.displayName.name: 'Vehicle 1',
+        ModelVehicleEnum.plate.name: 'ABC123',
+        ModelVehicleEnum.brand.name: 'Brand',
+        ModelVehicleEnum.model.name: 'Model',
+        ModelVehicleEnum.year.name: 2024,
+        ModelVehicleEnum.description.name: 'Description',
+        ModelVehicleEnum.isActive.name: true,
+        ModelVehicleEnum.vehicleCategory.name: defaultModelCategory.toJson(),
+        ModelVehicleEnum.attributes.name: <Map<String, dynamic>>[
+          <String, dynamic>{
+            AttributeEnum.name.name: '',
+            AttributeEnum.value.name: 'ignored',
+          },
+          <String, dynamic>{
+            AttributeEnum.name.name: 'cargoCapacity',
+            AttributeEnum.value.name: 1200,
+          },
+        ],
+      };
 
-        // Act
-        final ModelVehicle result = ModelVehicle.fromJson(json);
+      // Act
+      final ModelVehicle result = ModelVehicle.fromJson(json);
 
-        // Assert
-        expect(result.attributes.length, 1);
-        expect(result.attributes.containsKey('cargoCapacity'), isTrue);
-        expect(result.attributes.containsKey(''), isFalse);
-        expect(result.attributes['cargoCapacity']?.value, 1200);
-      },
-    );
+      // Assert
+      expect(result.attributes.length, 1);
+      expect(result.attributes.containsKey('cargoCapacity'), isTrue);
+      expect(result.attributes.containsKey(''), isFalse);
+      expect(result.attributes['cargoCapacity']?.value, 1200);
+    });
   });
 }

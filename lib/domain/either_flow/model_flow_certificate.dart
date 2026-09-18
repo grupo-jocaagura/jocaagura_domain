@@ -51,8 +51,9 @@ class ModelFlowCertificate extends Model {
         if (indexKey < 0) {
           continue;
         }
-        final Map<String, dynamic> completionJson =
-            Utils.mapFromDynamic(entry.value);
+        final Map<String, dynamic> completionJson = Utils.mapFromDynamic(
+          entry.value,
+        );
         tmp[indexKey] = ModelFlowStepCompletion.fromJson(completionJson);
       }
     }
@@ -68,9 +69,8 @@ class ModelFlowCertificate extends Model {
       candidate: UserModel.fromJson(
         Utils.mapFromDynamic(json[ModelFlowCertificateEnum.candidate.name]),
       ),
-      candidateDisplayName: json.containsKey(
-        ModelFlowCertificateEnum.candidateDisplayName.name,
-      )
+      candidateDisplayName:
+          json.containsKey(ModelFlowCertificateEnum.candidateDisplayName.name)
           ? _flowCertificateNullableStringFromDynamic(
               json[ModelFlowCertificateEnum.candidateDisplayName.name],
             )
@@ -78,8 +78,9 @@ class ModelFlowCertificate extends Model {
       createdAt: DateUtils.dateTimeFromDynamic(
         json[ModelFlowCertificateEnum.createdAt.name],
       ),
-      stepCompletionsByIndex:
-          Map<int, ModelFlowStepCompletion>.unmodifiable(tmp),
+      stepCompletionsByIndex: Map<int, ModelFlowStepCompletion>.unmodifiable(
+        tmp,
+      ),
       state: Utils.enumFromJson<ModelFlowCertificateStateEnum>(
         ModelFlowCertificateStateEnum.values,
         Utils.getStringFromDynamic(json[ModelFlowCertificateEnum.state.name]),
@@ -97,9 +98,8 @@ class ModelFlowCertificate extends Model {
               ),
             )
           : null,
-      certifierNotes: json.containsKey(
-        ModelFlowCertificateEnum.certifierNotes.name,
-      )
+      certifierNotes:
+          json.containsKey(ModelFlowCertificateEnum.certifierNotes.name)
           ? _flowCertificateNullableStringFromDynamic(
               json[ModelFlowCertificateEnum.certifierNotes.name],
             )
@@ -141,10 +141,8 @@ class ModelFlowCertificate extends Model {
       certificateKey: certificateKey ?? this.certificateKey,
       flow: flow ?? this.flow,
       candidate: candidate ?? this.candidate,
-      candidateDisplayName: identical(
-        candidateDisplayName,
-        _flowCertificateUnset,
-      )
+      candidateDisplayName:
+          identical(candidateDisplayName, _flowCertificateUnset)
           ? this.candidateDisplayName
           : candidateDisplayName as String?,
       createdAt: createdAt ?? this.createdAt,
@@ -181,8 +179,9 @@ class ModelFlowCertificate extends Model {
       ModelFlowCertificateEnum.certificateKey.name: certificateKey,
       ModelFlowCertificateEnum.flow.name: flow.toJson(),
       ModelFlowCertificateEnum.candidate.name: candidate.toJson(),
-      ModelFlowCertificateEnum.createdAt.name:
-          DateUtils.dateTimeToString(createdAt),
+      ModelFlowCertificateEnum.createdAt.name: DateUtils.dateTimeToString(
+        createdAt,
+      ),
       ModelFlowCertificateEnum.stepCompletionsByIndex.name: byIndex,
       ModelFlowCertificateEnum.state.name: state.name,
     };
@@ -233,18 +232,18 @@ class ModelFlowCertificate extends Model {
 
   @override
   int get hashCode => Object.hash(
-        id,
-        certificateKey,
-        flow,
-        Utils.deepHash(candidate.toJson()),
-        candidateDisplayName,
-        createdAt,
-        Utils.deepHash(stepCompletionsByIndex),
-        state,
-        certifiedAt,
-        Utils.deepHash(certifiedBy?.toJson()),
-        certifierNotes,
-      );
+    id,
+    certificateKey,
+    flow,
+    Utils.deepHash(candidate.toJson()),
+    candidateDisplayName,
+    createdAt,
+    Utils.deepHash(stepCompletionsByIndex),
+    state,
+    certifiedAt,
+    Utils.deepHash(certifiedBy?.toJson()),
+    certifierNotes,
+  );
 
   @override
   String toString() => 'ModelFlowCertificate(${toJson()})';

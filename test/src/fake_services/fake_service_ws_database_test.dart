@@ -36,13 +36,17 @@ void main() {
   tearDown(() {
     try {
       db.dispose();
-    } catch (_) {/* ignore double-dispose */}
+    } catch (_) {
+      /* ignore double-dispose */
+    }
   });
 
   group('FakeServiceWsDatabase — documentStream semantics', () {
     test('emits seed {} when document does not exist', () async {
-      final Stream<Map<String, dynamic>> s =
-          db.documentStream(collection: 'users', docId: 'nope');
+      final Stream<Map<String, dynamic>> s = db.documentStream(
+        collection: 'users',
+        docId: 'nope',
+      );
 
       await expectLater(s.take(1), emits(equals(<String, dynamic>{})));
     });
@@ -54,8 +58,10 @@ void main() {
         document: <String, dynamic>{'name': 'Alice', 'age': 30},
       );
 
-      final Stream<Map<String, dynamic>> s =
-          db.documentStream(collection: 'users', docId: 'u1');
+      final Stream<Map<String, dynamic>> s = db.documentStream(
+        collection: 'users',
+        docId: 'u1',
+      );
 
       final List<Map<String, dynamic>> events = <Map<String, dynamic>>[];
       final StreamSubscription<Map<String, dynamic>> sub = s.listen(events.add);
@@ -100,40 +106,43 @@ void main() {
       await sub.cancel();
     });
 
-    test('dedupe by content: repeated save with same payload does not re-emit',
-        () async {
-      final List<Map<String, dynamic>> events = <Map<String, dynamic>>[];
-      final StreamSubscription<Map<String, dynamic>> sub = db
-          .documentStream(collection: 'users', docId: 'u1')
-          .listen(events.add);
+    test(
+      'dedupe by content: repeated save with same payload does not re-emit',
+      () async {
+        final List<Map<String, dynamic>> events = <Map<String, dynamic>>[];
+        final StreamSubscription<Map<String, dynamic>> sub = db
+            .documentStream(collection: 'users', docId: 'u1')
+            .listen(events.add);
 
-      await db.saveDocument(
-        collection: 'users',
-        docId: 'u1',
-        document: <String, dynamic>{'n': 1},
-      );
-      await db.saveDocument(
-        collection: 'users',
-        docId: 'u1',
-        document: <String, dynamic>{'n': 1}, // mismo contenido
-      );
+        await db.saveDocument(
+          collection: 'users',
+          docId: 'u1',
+          document: <String, dynamic>{'n': 1},
+        );
+        await db.saveDocument(
+          collection: 'users',
+          docId: 'u1',
+          document: <String, dynamic>{'n': 1}, // mismo contenido
+        );
 
-      await Future<void>.delayed(const Duration(milliseconds: 5));
+        await Future<void>.delayed(const Duration(milliseconds: 5));
 
-      expect(events.length, 2);
-      expect(events[0], equals(<String, dynamic>{}));
-      expect(events[1], equals(<String, dynamic>{'n': 1}));
+        expect(events.length, 2);
+        expect(events[0], equals(<String, dynamic>{}));
+        expect(events[1], equals(<String, dynamic>{'n': 1}));
 
-      await sub.cancel();
-    });
+        await sub.cancel();
+      },
+    );
   });
 
   group('FakeServiceWsDatabase — collectionStream semantics', () {
     test('emits seed [] and later sorted list by docId', () async {
       final List<List<Map<String, dynamic>>> events =
           <List<Map<String, dynamic>>>[];
-      final StreamSubscription<List<Map<String, dynamic>>> sub =
-          db.collectionStream(collection: 'users').listen(events.add);
+      final StreamSubscription<List<Map<String, dynamic>>> sub = db
+          .collectionStream(collection: 'users')
+          .listen(events.add);
 
       // Guardamos ids fuera de orden
       await db.saveDocument(
@@ -164,8 +173,9 @@ void main() {
     test('dedupe by content on collection', () async {
       final List<List<Map<String, dynamic>>> events =
           <List<Map<String, dynamic>>>[];
-      final StreamSubscription<List<Map<String, dynamic>>> sub =
-          db.collectionStream(collection: 'c').listen(events.add);
+      final StreamSubscription<List<Map<String, dynamic>>> sub = db
+          .collectionStream(collection: 'c')
+          .listen(events.add);
 
       await db.saveDocument(
         collection: 'c',
@@ -198,8 +208,9 @@ void main() {
       final List<Map<String, Map<String, dynamic>>> events =
           <Map<String, Map<String, dynamic>>>[];
 
-      final StreamSubscription<Map<String, Map<String, dynamic>>> sub =
-          db.collectionRawStream(collection: 'ps').listen(events.add);
+      final StreamSubscription<Map<String, Map<String, dynamic>>> sub = db
+          .collectionRawStream(collection: 'ps')
+          .listen(events.add);
 
       await db.saveDocument(
         collection: 'ps',
@@ -225,26 +236,30 @@ void main() {
   });
 
   group('FakeServiceWsDatabase — deep copy semantics', () {
-    test('mutating the saved input after save does not affect stored state',
-        () async {
-      final Map<String, dynamic> original = <String, dynamic>{
-        'nested': <String, dynamic>{'a': 1},
-      };
-
-      await db.saveDocument(collection: 'c', docId: 'd', document: original);
-
-      (original['nested'] as Map<String, dynamic>)['a'] = 999;
-
-      final Map<String, dynamic> read =
-          await db.readDocument(collection: 'c', docId: 'd');
-
-      expect(
-        read,
-        equals(<String, dynamic>{
+    test(
+      'mutating the saved input after save does not affect stored state',
+      () async {
+        final Map<String, dynamic> original = <String, dynamic>{
           'nested': <String, dynamic>{'a': 1},
-        }),
-      );
-    });
+        };
+
+        await db.saveDocument(collection: 'c', docId: 'd', document: original);
+
+        (original['nested'] as Map<String, dynamic>)['a'] = 999;
+
+        final Map<String, dynamic> read = await db.readDocument(
+          collection: 'c',
+          docId: 'd',
+        );
+
+        expect(
+          read,
+          equals(<String, dynamic>{
+            'nested': <String, dynamic>{'a': 1},
+          }),
+        );
+      },
+    );
 
     test('mutating the read map does not affect internal state', () async {
       await db.saveDocument(
@@ -255,12 +270,16 @@ void main() {
         },
       );
 
-      final Map<String, dynamic> read1 =
-          await db.readDocument(collection: 'c', docId: 'd');
+      final Map<String, dynamic> read1 = await db.readDocument(
+        collection: 'c',
+        docId: 'd',
+      );
       (read1['k'] as Map<String, dynamic>)['x'] = 999;
 
-      final Map<String, dynamic> read2 =
-          await db.readDocument(collection: 'c', docId: 'd');
+      final Map<String, dynamic> read2 = await db.readDocument(
+        collection: 'c',
+        docId: 'd',
+      );
 
       expect(
         read2,
@@ -273,8 +292,9 @@ void main() {
 
   group('FakeServiceWsDatabase — simulated errors & latency', () {
     test('throwOnSave: save throws and state remains unchanged', () async {
-      final FakeServiceWsDatabase local =
-          FakeServiceWsDatabase(config: cfg(throwOnSave: true));
+      final FakeServiceWsDatabase local = FakeServiceWsDatabase(
+        config: cfg(throwOnSave: true),
+      );
 
       expect(
         local.saveDocument(
@@ -294,8 +314,9 @@ void main() {
     });
 
     test('throwOnDelete: delete throws and state remains unchanged', () async {
-      final FakeServiceWsDatabase local =
-          FakeServiceWsDatabase(config: cfg(throwOnDelete: true));
+      final FakeServiceWsDatabase local = FakeServiceWsDatabase(
+        config: cfg(throwOnDelete: true),
+      );
 
       await local.saveDocument(
         collection: 'c',
@@ -308,8 +329,10 @@ void main() {
         throwsA(isA<StateError>()),
       );
 
-      final Map<String, dynamic> read =
-          await local.readDocument(collection: 'c', docId: 'd');
+      final Map<String, dynamic> read = await local.readDocument(
+        collection: 'c',
+        docId: 'd',
+      );
       expect(read, equals(<String, dynamic>{'x': 1}));
 
       local.dispose();
@@ -317,8 +340,9 @@ void main() {
 
     test('latency is respected for save/read/delete', () async {
       const Duration L = Duration(milliseconds: 25);
-      final FakeServiceWsDatabase local =
-          FakeServiceWsDatabase(config: cfg(latency: L));
+      final FakeServiceWsDatabase local = FakeServiceWsDatabase(
+        config: cfg(latency: L),
+      );
 
       final Stopwatch sw = Stopwatch()..start();
       await local.saveDocument(
@@ -377,8 +401,9 @@ void main() {
       final StreamSubscription<Map<String, dynamic>> s1 = local
           .documentStream(collection: 'c', docId: 'd')
           .listen(docEvents.add);
-      final StreamSubscription<List<Map<String, dynamic>>> s2 =
-          local.collectionStream(collection: 'c').listen(colEvents.add);
+      final StreamSubscription<List<Map<String, dynamic>>> s2 = local
+          .collectionStream(collection: 'c')
+          .listen(colEvents.add);
 
       // Deja que lleguen semillas (si aplica)
       await Future<void>.delayed(const Duration(milliseconds: 2));

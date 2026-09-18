@@ -17,11 +17,7 @@ part of 'package:jocaagura_domain/jocaagura_domain.dart';
 ///   // { "amount": 1250, "mathPrecision": 2, "currency": "COP" }
 /// }
 /// ```
-enum ModelPriceEnum {
-  amount,
-  mathPrecision,
-  currency,
-}
+enum ModelPriceEnum { amount, mathPrecision, currency }
 
 /// Supported currency codes for prices and transactions.
 ///
@@ -111,8 +107,8 @@ class ModelPrice extends Model {
     required this.amount,
     required this.currency,
     this.mathPrecision = defaultMathprecision,
-  })  : assert(amount >= 0),
-        assert(mathPrecision >= 0);
+  }) : assert(amount >= 0),
+       assert(mathPrecision >= 0);
 
   /// Builds a [ModelPrice] from a JSON map.
   ///
@@ -134,10 +130,11 @@ class ModelPrice extends Model {
   /// ```
   factory ModelPrice.fromJson(Map<String, dynamic> json) {
     return ModelPrice(
-      amount:
-          Utils.getIntegerFromDynamic(json[ModelPriceEnum.amount.name]).abs(),
-      mathPrecision:
-          Utils.getIntegerFromDynamic(json[ModelPriceEnum.mathPrecision.name]),
+      amount: Utils.getIntegerFromDynamic(json[ModelPriceEnum.amount.name])
+          .abs(),
+      mathPrecision: Utils.getIntegerFromDynamic(
+        json[ModelPriceEnum.mathPrecision.name],
+      ),
       currency: CurrencyEnum.values.firstWhere(
         (CurrencyEnum e) =>
             e.name ==
@@ -168,10 +165,10 @@ class ModelPrice extends Model {
   /// `{ "amount": int, "mathPrecision": int, "currency": String }`.
   @override
   Map<String, dynamic> toJson() => <String, dynamic>{
-        ModelPriceEnum.amount.name: amount,
-        ModelPriceEnum.mathPrecision.name: mathPrecision,
-        ModelPriceEnum.currency.name: currency.name,
-      };
+    ModelPriceEnum.amount.name: amount,
+    ModelPriceEnum.mathPrecision.name: mathPrecision,
+    ModelPriceEnum.currency.name: currency.name,
+  };
 
   /// Returns a new [ModelPrice] overriding the provided fields.
   ///
@@ -193,14 +190,13 @@ class ModelPrice extends Model {
     int? amount,
     int? mathPrecision,
     CurrencyEnum? currency,
-  }) =>
-      ModelPrice(
-        amount: (amount ?? this.amount).abs(),
-        mathPrecision: (mathPrecision ?? this.mathPrecision) < 0
-            ? defaultMathprecision
-            : (mathPrecision ?? this.mathPrecision),
-        currency: currency ?? this.currency,
-      );
+  }) => ModelPrice(
+    amount: (amount ?? this.amount).abs(),
+    mathPrecision: (mathPrecision ?? this.mathPrecision) < 0
+        ? defaultMathprecision
+        : (mathPrecision ?? this.mathPrecision),
+    currency: currency ?? this.currency,
+  );
 
   /// Structural equality on `amount`, `mathPrecision`, and `currency`.
   @override

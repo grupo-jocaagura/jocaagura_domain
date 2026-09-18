@@ -74,8 +74,9 @@ class SignatureModel extends Model {
       id: Utils.getStringFromDynamic(json[SignatureEnum.id.name]),
       created: DateUtils.dateTimeFromDynamic(json[SignatureEnum.created.name]),
       appId: Utils.getStringFromDynamic(json[SignatureEnum.appId.name]),
-      png64Image:
-          Utils.getStringFromDynamic(json[SignatureEnum.png64Image.name]),
+      png64Image: Utils.getStringFromDynamic(
+        json[SignatureEnum.png64Image.name],
+      ),
     );
   }
 
@@ -115,11 +116,11 @@ class SignatureModel extends Model {
   /// the model in a database or sending it over a network.
   @override
   Map<String, dynamic> toJson() => <String, dynamic>{
-        SignatureEnum.id.name: id,
-        SignatureEnum.created.name: DateUtils.dateTimeToString(created),
-        SignatureEnum.appId.name: appId,
-        SignatureEnum.png64Image.name: png64Image,
-      };
+    SignatureEnum.id.name: id,
+    SignatureEnum.created.name: DateUtils.dateTimeToString(created),
+    SignatureEnum.appId.name: appId,
+    SignatureEnum.png64Image.name: png64Image,
+  };
 
   /// Checks if two [SignatureModel]s are equal.
   ///
@@ -138,12 +139,7 @@ class SignatureModel extends Model {
   ///
   /// The hash code is based on all of the fields of the model.
   @override
-  int get hashCode => Object.hash(
-        id,
-        created,
-        appId,
-        png64Image,
-      );
+  int get hashCode => Object.hash(id, created, appId, png64Image);
 
   Model fromJson(Map<String, dynamic> json) => SignatureModel.fromJson(json);
 }

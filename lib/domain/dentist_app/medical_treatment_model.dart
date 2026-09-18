@@ -22,11 +22,11 @@ enum MedicalTreatmentEnum {
 /// Provides predefined values for all fields.
 final MedicalTreatmentModel defaultMedicalTreatmentModel =
     MedicalTreatmentModel(
-  id: 'default_id',
-  concept: 'Tratamiento de ejemplo',
-  dateTimeOfRecord: DateTime(2024, 7, 28),
-  quantity: 1,
-);
+      id: 'default_id',
+      concept: 'Tratamiento de ejemplo',
+      dateTimeOfRecord: DateTime(2024, 7, 28),
+      quantity: 1,
+    );
 
 /// Represents a medical treatment record within an application that manages
 /// healthcare data.
@@ -73,13 +73,15 @@ class MedicalTreatmentModel extends Model {
   factory MedicalTreatmentModel.fromJson(Map<String, dynamic> json) {
     return MedicalTreatmentModel(
       id: Utils.getStringFromDynamic(json[MedicalTreatmentEnum.id.name]),
-      concept:
-          Utils.getStringFromDynamic(json[MedicalTreatmentEnum.concept.name]),
+      concept: Utils.getStringFromDynamic(
+        json[MedicalTreatmentEnum.concept.name],
+      ),
       dateTimeOfRecord: DateUtils.dateTimeFromDynamic(
         json[MedicalTreatmentEnum.dateTimeOfRecord.name],
       ),
-      quantity:
-          Utils.getIntegerFromDynamic(json[MedicalTreatmentEnum.quantity.name]),
+      quantity: Utils.getIntegerFromDynamic(
+        json[MedicalTreatmentEnum.quantity.name],
+      ),
     );
   }
 
@@ -119,8 +121,9 @@ class MedicalTreatmentModel extends Model {
     return <String, dynamic>{
       MedicalTreatmentEnum.id.name: id,
       MedicalTreatmentEnum.concept.name: concept,
-      MedicalTreatmentEnum.dateTimeOfRecord.name:
-          DateUtils.dateTimeToString(dateTimeOfRecord),
+      MedicalTreatmentEnum.dateTimeOfRecord.name: DateUtils.dateTimeToString(
+        dateTimeOfRecord,
+      ),
       MedicalTreatmentEnum.quantity.name: quantity,
     };
   }
@@ -141,10 +144,5 @@ class MedicalTreatmentModel extends Model {
   ///
   /// The hash code is based on all of the fields of the model.
   @override
-  int get hashCode => Object.hash(
-        id,
-        concept,
-        dateTimeOfRecord,
-        quantity,
-      );
+  int get hashCode => Object.hash(id, concept, dateTimeOfRecord, quantity);
 }

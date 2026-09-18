@@ -66,17 +66,15 @@ class TreatmentPlanModel extends Model {
   /// Constructs a new [TreatmentPlanModel] with the given [id] and a map of [medicalTreatments].
   ///
   /// Each treatment is identified by a unique key.
-  const TreatmentPlanModel({
-    required this.id,
-    required this.medicalTreatments,
-  });
+  const TreatmentPlanModel({required this.id, required this.medicalTreatments});
 
   /// Deserializes a JSON map into an instance of [TreatmentPlanModel].
   ///
   /// The JSON map must contain keys for 'id' and 'medicalTreatments' with a nested map of treatments.
   factory TreatmentPlanModel.fromJson(Map<String, dynamic> json) {
-    final Map<String, dynamic> tmp =
-        Utils.mapFromDynamic(json[TreatmentPlanEnum.medicalTreatments.name]);
+    final Map<String, dynamic> tmp = Utils.mapFromDynamic(
+      json[TreatmentPlanEnum.medicalTreatments.name],
+    );
     final Map<String, MedicalTreatmentModel> medicalTreatments =
         <String, MedicalTreatmentModel>{};
     tmp.forEach((String key, dynamic value) {
@@ -134,8 +132,5 @@ class TreatmentPlanModel extends Model {
 
   /// Returns the hash code for this [TreatmentPlanModel].
   @override
-  int get hashCode => Object.hash(
-        id,
-        Object.hashAll(medicalTreatments.values),
-      );
+  int get hashCode => Object.hash(id, Object.hashAll(medicalTreatments.values));
 }

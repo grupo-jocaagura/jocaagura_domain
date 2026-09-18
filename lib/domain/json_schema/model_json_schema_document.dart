@@ -46,9 +46,7 @@ class ModelJsonSchemaDocument extends Model {
   /// Rebuilds a [ModelJsonSchemaDocument] from JSON.
   factory ModelJsonSchemaDocument.fromJson(Map<String, dynamic> json) {
     return ModelJsonSchemaDocument(
-      id: Utils.getStringFromDynamic(
-        json[ModelJsonSchemaDocumentEnum.id.name],
-      ),
+      id: Utils.getStringFromDynamic(json[ModelJsonSchemaDocumentEnum.id.name]),
       schemaId: Utils.getStringFromDynamic(
         json[ModelJsonSchemaDocumentEnum.schemaId.name],
       ),
@@ -164,10 +162,12 @@ class ModelJsonSchemaDocument extends Model {
       ModelJsonSchemaDocumentEnum.schema.name: schema,
       ModelJsonSchemaDocumentEnum.example.name: example,
       ModelJsonSchemaDocumentEnum.tags.name: tags,
-      ModelJsonSchemaDocumentEnum.createdAt.name:
-          DateUtils.dateTimeToString(createdAt),
-      ModelJsonSchemaDocumentEnum.updatedAt.name:
-          DateUtils.dateTimeToString(updatedAt),
+      ModelJsonSchemaDocumentEnum.createdAt.name: DateUtils.dateTimeToString(
+        createdAt,
+      ),
+      ModelJsonSchemaDocumentEnum.updatedAt.name: DateUtils.dateTimeToString(
+        updatedAt,
+      ),
       ModelJsonSchemaDocumentEnum.isActive.name: isActive,
     };
   }
@@ -192,19 +192,19 @@ class ModelJsonSchemaDocument extends Model {
 
   @override
   int get hashCode => Object.hash(
-        id,
-        schemaId,
-        schemaTitle,
-        domainModel,
-        version,
-        schemaDescription,
-        Utils.deepHash(schema),
-        Utils.deepHash(example),
-        Utils.deepHash(tags),
-        createdAt,
-        updatedAt,
-        isActive,
-      );
+    id,
+    schemaId,
+    schemaTitle,
+    domainModel,
+    version,
+    schemaDescription,
+    Utils.deepHash(schema),
+    Utils.deepHash(example),
+    Utils.deepHash(tags),
+    createdAt,
+    updatedAt,
+    isActive,
+  );
 
   @override
   String toString() => 'ModelJsonSchemaDocument(${toJson()})';

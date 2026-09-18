@@ -103,8 +103,9 @@ class ModelFlowStep extends Model {
     List<String> constraints = const <String>[],
     Map<String, double> cost = const <String, double>{},
   }) {
-    final List<String> frozenConstraints =
-        List<String>.unmodifiable(List<String>.from(constraints));
+    final List<String> frozenConstraints = List<String>.unmodifiable(
+      List<String>.from(constraints),
+    );
 
     final Map<String, double> normalizedCost = <String, double>{};
     for (final MapEntry<String, double> entry in cost.entries) {
@@ -113,8 +114,9 @@ class ModelFlowStep extends Model {
       normalizedCost[entry.key] = normalized;
     }
 
-    final Map<String, double> frozenCost =
-        Map<String, double>.unmodifiable(normalizedCost);
+    final Map<String, double> frozenCost = Map<String, double>.unmodifiable(
+      normalizedCost,
+    );
 
     return ModelFlowStep(
       index: index,
@@ -132,31 +134,37 @@ class ModelFlowStep extends Model {
   ///
   /// This parser is lenient and never throws; it applies safe defaults.
   factory ModelFlowStep.fromJson(Map<String, dynamic> json) {
-    final int indexTmp =
-        Utils.getIntegerFromDynamic(json[FlowStepEnum.indexNumber.name]);
-    final String titleTmp =
-        Utils.getStringFromDynamic(json[FlowStepEnum.title.name]);
-    final String descriptionTmp =
-        Utils.getStringFromDynamic(json[FlowStepEnum.description.name]);
+    final int indexTmp = Utils.getIntegerFromDynamic(
+      json[FlowStepEnum.indexNumber.name],
+    );
+    final String titleTmp = Utils.getStringFromDynamic(
+      json[FlowStepEnum.title.name],
+    );
+    final String descriptionTmp = Utils.getStringFromDynamic(
+      json[FlowStepEnum.description.name],
+    );
 
-    final String failureCodeRaw =
-        Utils.getStringFromDynamic(json[FlowStepEnum.failureCode.name]);
+    final String failureCodeRaw = Utils.getStringFromDynamic(
+      json[FlowStepEnum.failureCode.name],
+    );
     final String failureCodeTmp = failureCodeRaw.isEmpty
         ? defaultModelFlowStepModel.failureCode
         : failureCodeRaw;
 
-    final int nextOnSuccessTmp =
-        Utils.getIntegerFromDynamic(json[FlowStepEnum.nextOnSuccessIndex.name]);
-    final int nextOnFailureTmp =
-        Utils.getIntegerFromDynamic(json[FlowStepEnum.nextOnFailureIndex.name]);
+    final int nextOnSuccessTmp = Utils.getIntegerFromDynamic(
+      json[FlowStepEnum.nextOnSuccessIndex.name],
+    );
+    final int nextOnFailureTmp = Utils.getIntegerFromDynamic(
+      json[FlowStepEnum.nextOnFailureIndex.name],
+    );
 
-    final List<String> constraintsTmp =
-        Utils.stringListFromDynamic(json[FlowStepEnum.constraints.name])
-            .cast<String>();
+    final List<String> constraintsTmp = Utils.stringListFromDynamic(
+      json[FlowStepEnum.constraints.name],
+    ).cast<String>();
 
-    final Map<dynamic, dynamic> costRaw =
-        Utils.mapFromDynamic(json[FlowStepEnum.cost.name])
-            .cast<dynamic, dynamic>();
+    final Map<dynamic, dynamic> costRaw = Utils.mapFromDynamic(
+      json[FlowStepEnum.cost.name],
+    ).cast<dynamic, dynamic>();
 
     final Map<String, double> costTmp = <String, double>{};
     for (final MapEntry<dynamic, dynamic> entry in costRaw.entries) {
@@ -218,7 +226,8 @@ class ModelFlowStep extends Model {
     List<String>? constraints,
     Map<String, double>? cost,
   }) {
-    final bool noChanges = index == null &&
+    final bool noChanges =
+        index == null &&
         title == null &&
         description == null &&
         failureCode == null &&
@@ -276,15 +285,15 @@ class ModelFlowStep extends Model {
 
   @override
   int get hashCode => Object.hash(
-        index,
-        title,
-        description,
-        failureCode,
-        nextOnSuccessIndex,
-        nextOnFailureIndex,
-        Utils.listHash(constraints),
-        Utils.deepHash(cost),
-      );
+    index,
+    title,
+    description,
+    failureCode,
+    nextOnSuccessIndex,
+    nextOnFailureIndex,
+    Utils.listHash(constraints),
+    Utils.deepHash(cost),
+  );
 
   @override
   String toString() => '${toJson()}';

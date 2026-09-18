@@ -86,8 +86,9 @@ class ModelGroupDynamicMembershipRule extends Model {
       id: json[ModelGroupDynamicMembershipRuleEnum.id.name]?.toString() ?? '',
       groupId:
           json[ModelGroupDynamicMembershipRuleEnum.groupId.name]?.toString() ??
-              '',
-      expression: json[ModelGroupDynamicMembershipRuleEnum.expression.name]
+          '',
+      expression:
+          json[ModelGroupDynamicMembershipRuleEnum.expression.name]
               ?.toString() ??
           '',
       status: Utils.enumFromJson<ModelGroupDynamicMembershipRuleStatus>(
@@ -97,11 +98,10 @@ class ModelGroupDynamicMembershipRule extends Model {
       ),
       lastEvaluatedAt:
           json[ModelGroupDynamicMembershipRuleEnum.lastEvaluatedAt.name] == null
-              ? null
-              : DateUtils.dateTimeFromDynamic(
-                  json[
-                      ModelGroupDynamicMembershipRuleEnum.lastEvaluatedAt.name],
-                ),
+          ? null
+          : DateUtils.dateTimeFromDynamic(
+              json[ModelGroupDynamicMembershipRuleEnum.lastEvaluatedAt.name],
+            ),
       estimatedMembers: Utils.getIntegerFromDynamic(
         json[ModelGroupDynamicMembershipRuleEnum.estimatedMembers.name],
       ),
@@ -169,13 +169,13 @@ class ModelGroupDynamicMembershipRule extends Model {
 
   @override
   int get hashCode => Object.hash(
-        id,
-        groupId,
-        expression,
-        status,
-        lastEvaluatedAt,
-        estimatedMembers,
-      );
+    id,
+    groupId,
+    expression,
+    status,
+    lastEvaluatedAt,
+    estimatedMembers,
+  );
 
   @override
   String toString() => 'ModelGroupDynamicMembershipRule(${toJson()})';

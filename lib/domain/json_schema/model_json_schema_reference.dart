@@ -11,14 +11,7 @@ enum ModelJsonSchemaReferenceEnum {
 }
 
 /// Canonical reference kinds between schema documents.
-enum JsonSchemaReferenceTypeEnum {
-  ref,
-  allOf,
-  anyOf,
-  oneOf,
-  items,
-  property,
-}
+enum JsonSchemaReferenceTypeEnum { ref, allOf, anyOf, oneOf, items, property }
 
 /// Immutable reference between two JSON Schema documents.
 ///
@@ -124,13 +117,13 @@ class ModelJsonSchemaReference extends Model {
 
   @override
   int get hashCode => Object.hash(
-        id,
-        sourceSchemaId,
-        targetSchemaId,
-        referenceType,
-        path,
-        referenceDescription,
-      );
+    id,
+    sourceSchemaId,
+    targetSchemaId,
+    referenceType,
+    path,
+    referenceDescription,
+  );
 
   @override
   String toString() => 'ModelJsonSchemaReference(${toJson()})';

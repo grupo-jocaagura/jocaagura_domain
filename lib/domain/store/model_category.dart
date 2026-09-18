@@ -37,18 +37,17 @@ const ModelCategory defaultModelCategory = ModelCategory(
 /// ```
 class ModelCategory extends Model {
   /// Creates a new immutable [ModelCategory] instance.
-  const ModelCategory({
-    required this.category,
-    required this.description,
-  });
+  const ModelCategory({required this.category, required this.description});
 
   /// Creates a [ModelCategory] from a JSON [Map].
   factory ModelCategory.fromJson(Map<String, dynamic> json) {
     return ModelCategory(
-      category:
-          Utils.getStringFromDynamic(json[ModelCategoryEnum.category.name]),
-      description:
-          Utils.getStringFromDynamic(json[ModelCategoryEnum.description.name]),
+      category: Utils.getStringFromDynamic(
+        json[ModelCategoryEnum.category.name],
+      ),
+      description: Utils.getStringFromDynamic(
+        json[ModelCategoryEnum.description.name],
+      ),
     );
   }
 
@@ -60,10 +59,7 @@ class ModelCategory extends Model {
 
   /// Creates a copy of this [ModelCategory] with optional new values.
   @override
-  ModelCategory copyWith({
-    String? category,
-    String? description,
-  }) {
+  ModelCategory copyWith({String? category, String? description}) {
     return ModelCategory(
       category: category ?? this.category,
       description: description ?? this.description,

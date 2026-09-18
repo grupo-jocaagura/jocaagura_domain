@@ -25,14 +25,18 @@ class ModelAiResponse extends Model {
 
   factory ModelAiResponse.fromJson(Map<String, dynamic> json) {
     return ModelAiResponse(
-      requestId:
-          Utils.getStringFromDynamic(json[ModelAiResponseEnum.requestId.name]),
-      provider:
-          Utils.getStringFromDynamic(json[ModelAiResponseEnum.provider.name]),
-      modelId:
-          Utils.getStringFromDynamic(json[ModelAiResponseEnum.modelId.name]),
-      content:
-          Utils.getStringFromDynamic(json[ModelAiResponseEnum.content.name]),
+      requestId: Utils.getStringFromDynamic(
+        json[ModelAiResponseEnum.requestId.name],
+      ),
+      provider: Utils.getStringFromDynamic(
+        json[ModelAiResponseEnum.provider.name],
+      ),
+      modelId: Utils.getStringFromDynamic(
+        json[ModelAiResponseEnum.modelId.name],
+      ),
+      content: Utils.getStringFromDynamic(
+        json[ModelAiResponseEnum.content.name],
+      ),
       parsedJson: json.containsKey(ModelAiResponseEnum.parsedJson.name)
           ? Utils.mapFromDynamic(json[ModelAiResponseEnum.parsedJson.name])
           : null,
@@ -119,14 +123,14 @@ class ModelAiResponse extends Model {
 
   @override
   int get hashCode => Object.hash(
-        requestId,
-        provider,
-        modelId,
-        content,
-        Utils.deepHash(parsedJson),
-        finishReason,
-        Utils.deepHash(usage),
-      );
+    requestId,
+    provider,
+    modelId,
+    content,
+    Utils.deepHash(parsedJson),
+    finishReason,
+    Utils.deepHash(usage),
+  );
 
   @override
   String toString() => 'ModelAiResponse(${toJson()})';

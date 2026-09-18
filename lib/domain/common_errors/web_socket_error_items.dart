@@ -60,11 +60,11 @@ abstract class WebSocketErrorItems {
 
   /// Generic fallback error for unrecognized WebSocket issues.
   static ErrorItem unknown({String? reason}) => ErrorItem(
-        title: 'Unknown WebSocket Error',
-        code: 'WS_UNKNOWN',
-        description: reason ?? 'An unknown WebSocket error has occurred.',
-        meta: const <String, dynamic>{sourceKey: sourceValue},
-      );
+    title: 'Unknown WebSocket Error',
+    code: 'WS_UNKNOWN',
+    description: reason ?? 'An unknown WebSocket error has occurred.',
+    meta: const <String, dynamic>{sourceKey: sourceValue},
+  );
 
   /// Returns a predefined [ErrorItem] based on the WebSocket error code.
   /// If the code is not recognized, returns [unknown].

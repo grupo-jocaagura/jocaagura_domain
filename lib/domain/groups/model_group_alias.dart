@@ -15,14 +15,7 @@ part of 'package:jocaagura_domain/jocaagura_domain.dart';
 ///   print(ModelGroupAliasEnum.aliasEmail.name); // "aliasEmail"
 /// }
 /// ```
-enum ModelGroupAliasEnum {
-  id,
-  groupId,
-  aliasEmail,
-  status,
-  errorItemId,
-  crud,
-}
+enum ModelGroupAliasEnum { id, groupId, aliasEmail, status, errorItemId, crud }
 
 /// Represents an email alias bound to a group.
 ///
@@ -171,14 +164,8 @@ class ModelGroupAlias extends Model {
           crud == other.crud;
 
   @override
-  int get hashCode => Object.hash(
-        id,
-        groupId,
-        aliasEmail,
-        status,
-        errorItemId,
-        crud,
-      );
+  int get hashCode =>
+      Object.hash(id, groupId, aliasEmail, status, errorItemId, crud);
 
   @override
   String toString() => 'ModelGroupAlias(${toJson()})';

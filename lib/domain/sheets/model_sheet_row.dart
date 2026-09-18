@@ -1,17 +1,11 @@
 part of 'package:jocaagura_domain/jocaagura_domain.dart';
 
 /// Stable JSON keys used by [ModelSheetRow].
-enum ModelSheetRowEnum {
-  idRow,
-  data,
-}
+enum ModelSheetRowEnum { idRow, data }
 
 /// Persisted normalized row payload governed by a table definition.
 class ModelSheetRow extends Model {
-  const ModelSheetRow({
-    required this.idRow,
-    required this.data,
-  });
+  const ModelSheetRow({required this.idRow, required this.data});
 
   factory ModelSheetRow.fromJson(Map<String, dynamic> json) {
     return ModelSheetRow(
@@ -24,21 +18,15 @@ class ModelSheetRow extends Model {
   final Map<String, dynamic> data;
 
   @override
-  ModelSheetRow copyWith({
-    String? idRow,
-    Map<String, dynamic>? data,
-  }) {
-    return ModelSheetRow(
-      idRow: idRow ?? this.idRow,
-      data: data ?? this.data,
-    );
+  ModelSheetRow copyWith({String? idRow, Map<String, dynamic>? data}) {
+    return ModelSheetRow(idRow: idRow ?? this.idRow, data: data ?? this.data);
   }
 
   @override
   Map<String, dynamic> toJson() => <String, dynamic>{
-        ModelSheetRowEnum.idRow.name: idRow,
-        ModelSheetRowEnum.data.name: data,
-      };
+    ModelSheetRowEnum.idRow.name: idRow,
+    ModelSheetRowEnum.data.name: data,
+  };
 
   @override
   bool operator ==(Object other) =>

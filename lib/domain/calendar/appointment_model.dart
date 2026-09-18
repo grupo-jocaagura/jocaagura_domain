@@ -85,8 +85,9 @@ class AppointmentModel extends Model {
     return AppointmentModel(
       id: Utils.getStringFromDynamic(json[AppointmentEnum.id.name]),
       date: DateUtils.dateTimeFromDynamic(json[AppointmentEnum.date.name]),
-      odontologist:
-          Utils.getStringFromDynamic(json[AppointmentEnum.odontologist.name]),
+      odontologist: Utils.getStringFromDynamic(
+        json[AppointmentEnum.odontologist.name],
+      ),
       purpose: Utils.getStringFromDynamic(json[AppointmentEnum.purpose.name]),
       status: Utils.getStringFromDynamic(json[AppointmentEnum.status.name]),
       notes: Utils.getStringFromDynamic(json[AppointmentEnum.notes.name]),

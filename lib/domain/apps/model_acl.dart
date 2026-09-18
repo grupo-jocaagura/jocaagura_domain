@@ -1,10 +1,6 @@
 part of 'package:jocaagura_domain/jocaagura_domain.dart';
 
-enum RoleType {
-  admin,
-  editor,
-  viewer,
-}
+enum RoleType { admin, editor, viewer }
 
 enum ModelAclEnum {
   id,
@@ -109,16 +105,16 @@ class ModelAcl extends Model {
   }
 
   const ModelAcl._defaults()
-      : id = 'default',
-        roleType = RoleType.viewer,
-        appName = '',
-        feature = '',
-        email = '',
-        isActive = false,
-        emailAutorizedBy = '',
-        autorizedAtIsoDate = '',
-        revokedAtIsoDate = '',
-        note = '';
+    : id = 'default',
+      roleType = RoleType.viewer,
+      appName = '',
+      feature = '',
+      email = '',
+      isActive = false,
+      emailAutorizedBy = '',
+      autorizedAtIsoDate = '',
+      revokedAtIsoDate = '',
+      note = '';
 
   static const ModelAcl defaultModelAcl = ModelAcl._defaults();
 
@@ -150,7 +146,8 @@ class ModelAcl extends Model {
     String? revokedAt,
     String? note,
   }) {
-    final bool noChanges = id == null &&
+    final bool noChanges =
+        id == null &&
         roleType == null &&
         appName == null &&
         feature == null &&
@@ -182,19 +179,21 @@ class ModelAcl extends Model {
   /// Serializes the model into a JSON map.
   @override
   Map<String, dynamic> toJson() => <String, dynamic>{
-        ModelAclEnum.id.name: id,
-        ModelAclEnum.roleType.name: roleType.name,
-        ModelAclEnum.appName.name: appName,
-        ModelAclEnum.feature.name: feature,
-        ModelAclEnum.email.name: email,
-        ModelAclEnum.isActive.name: isActive,
-        ModelAclEnum.emailAutorizedBy.name: emailAutorizedBy,
-        ModelAclEnum.autorizedAtIsoDate.name:
-            DateUtils.normalizeIsoOrEmpty(autorizedAtIsoDate),
-        ModelAclEnum.revokedAtIsoDate.name:
-            DateUtils.normalizeIsoOrEmpty(revokedAtIsoDate),
-        ModelAclEnum.note.name: note,
-      };
+    ModelAclEnum.id.name: id,
+    ModelAclEnum.roleType.name: roleType.name,
+    ModelAclEnum.appName.name: appName,
+    ModelAclEnum.feature.name: feature,
+    ModelAclEnum.email.name: email,
+    ModelAclEnum.isActive.name: isActive,
+    ModelAclEnum.emailAutorizedBy.name: emailAutorizedBy,
+    ModelAclEnum.autorizedAtIsoDate.name: DateUtils.normalizeIsoOrEmpty(
+      autorizedAtIsoDate,
+    ),
+    ModelAclEnum.revokedAtIsoDate.name: DateUtils.normalizeIsoOrEmpty(
+      revokedAtIsoDate,
+    ),
+    ModelAclEnum.note.name: note,
+  };
 
   /// `true` only when [autorizedAtIsoDate] is a valid non-empty ISO-8601 date.
   ///
@@ -233,17 +232,17 @@ class ModelAcl extends Model {
 
   @override
   int get hashCode => Object.hash(
-        id,
-        roleType,
-        appName,
-        feature,
-        email,
-        isActive,
-        emailAutorizedBy,
-        autorizedAtIsoDate,
-        revokedAtIsoDate,
-        note,
-      );
+    id,
+    roleType,
+    appName,
+    feature,
+    email,
+    isActive,
+    emailAutorizedBy,
+    autorizedAtIsoDate,
+    revokedAtIsoDate,
+    note,
+  );
 
   static DateTime? _tryParseIso(String value) {
     final String s = value.trim();

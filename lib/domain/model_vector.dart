@@ -166,10 +166,8 @@ class ModelVector extends Model {
   /// Returns a copy where non-finite components are replaced by [fallback] (default: 0.0).
   ///
   /// Useful to sanitize values coming from untrusted calculations or IO.
-  ModelVector sanitized({double fallback = 0.0}) => ModelVector(
-        dx.isFinite ? dx : fallback,
-        dy.isFinite ? dy : fallback,
-      );
+  ModelVector sanitized({double fallback = 0.0}) =>
+      ModelVector(dx.isFinite ? dx : fallback, dy.isFinite ? dy : fallback);
 
   /// Clamps the integer view of this vector into the inclusive range
   /// `[minX, maxX] x [minY, maxY]`, returning a **new** vector with clamped ints

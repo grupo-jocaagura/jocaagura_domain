@@ -45,18 +45,12 @@ void main() {
       expect(left2 == left, true);
 
       expect(
-        left.when(
-          (int l) => 'Left: $l',
-          (String r) => 'Right: $r',
-        ),
+        left.when((int l) => 'Left: $l', (String r) => 'Right: $r'),
         'Left: 42',
       );
 
       expect(
-        right.when(
-          (int l) => 'Left: $l',
-          (String r) => 'Right: $r',
-        ),
+        right.when((int l) => 'Left: $l', (String r) => 'Right: $r'),
         'Right: hello',
       );
     });
@@ -149,33 +143,35 @@ void main() {
       expect(transformCalled, false);
     });
 
-    test('Given Right When flatMap returns Right Then resolves next success',
-        () {
-      const Either<String, int> either = Right<String, int>(7);
+    test(
+      'Given Right When flatMap returns Right Then resolves next success',
+      () {
+        const Either<String, int> either = Right<String, int>(7);
 
-      final Either<String, String> result = either.flatMap<String>(
-        (int right) => Right<String, String>('value: ${right * 2}'),
-      );
+        final Either<String, String> result = either.flatMap<String>(
+          (int right) => Right<String, String>('value: ${right * 2}'),
+        );
 
-      expect(result, const Right<String, String>('value: 14'));
-    });
+        expect(result, const Right<String, String>('value: 14'));
+      },
+    );
 
-    test('Given Right When flatMap returns Left Then resolves next failure',
-        () {
-      const Either<String, int> either = Right<String, int>(7);
+    test(
+      'Given Right When flatMap returns Left Then resolves next failure',
+      () {
+        const Either<String, int> either = Right<String, int>(7);
 
-      final Either<String, String> result = either.flatMap<String>(
-        (int right) => const Left<String, String>('mapped failure'),
-      );
+        final Either<String, String> result = either.flatMap<String>(
+          (int right) => const Left<String, String>('mapped failure'),
+        );
 
-      expect(result, const Left<String, String>('mapped failure'));
-    });
+        expect(result, const Left<String, String>('mapped failure'));
+      },
+    );
   });
 
   group('Either.onLeft', () {
-    test(
-        'Given Left When onLeft is called Then executes action and returns same value',
-        () {
+    test('Given Left When onLeft is called Then executes action and returns same value', () {
       const Either<String, int> either = Left<String, int>('failure');
       String? captured;
 
@@ -201,9 +197,7 @@ void main() {
   });
 
   group('Either.onRight', () {
-    test(
-        'Given Right When onRight is called Then executes action and returns same value',
-        () {
+    test('Given Right When onRight is called Then executes action and returns same value', () {
       const Either<String, int> either = Right<String, int>(42);
       int? captured;
 
@@ -229,9 +223,7 @@ void main() {
   });
 
   group('Either equality and hashCode', () {
-    test(
-        'Given two Left values with same content When compared Then they are equal',
-        () {
+    test('Given two Left values with same content When compared Then they are equal', () {
       const Left<int, String> first = Left<int, String>(42);
       const Left<int, String> second = Left<int, String>(42);
 
@@ -239,18 +231,14 @@ void main() {
       expect(first.hashCode, second.hashCode);
     });
 
-    test(
-        'Given two Left values with different content When compared Then they are not equal',
-        () {
+    test('Given two Left values with different content When compared Then they are not equal', () {
       const Left<int, String> first = Left<int, String>(42);
       const Left<int, String> second = Left<int, String>(7);
 
       expect(first == second, false);
     });
 
-    test(
-        'Given two Right values with same content When compared Then they are equal',
-        () {
+    test('Given two Right values with same content When compared Then they are equal', () {
       const Right<int, String> first = Right<int, String>('hello');
       const Right<int, String> second = Right<int, String>('hello');
 
@@ -258,9 +246,7 @@ void main() {
       expect(first.hashCode, second.hashCode);
     });
 
-    test(
-        'Given two Right values with different content When compared Then they are not equal',
-        () {
+    test('Given two Right values with different content When compared Then they are not equal', () {
       const Right<int, String> first = Right<int, String>('hello');
       const Right<int, String> second = Right<int, String>('world');
 

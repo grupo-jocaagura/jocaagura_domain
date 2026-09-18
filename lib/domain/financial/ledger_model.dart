@@ -44,18 +44,23 @@ class LedgerModel extends Model {
   });
 
   factory LedgerModel.fromJson(Map<String, dynamic> json) {
-    final String name =
-        Utils.getStringFromDynamic(json[LedgerEnum.nameOfLedger.name]);
+    final String name = Utils.getStringFromDynamic(
+      json[LedgerEnum.nameOfLedger.name],
+    );
 
-    final List<Map<String, dynamic>> incomeRaw =
-        Utils.listFromDynamic(json[LedgerEnum.incomeLedger.name]);
-    final List<Map<String, dynamic>> expenseRaw =
-        Utils.listFromDynamic(json[LedgerEnum.expenseLedger.name]);
+    final List<Map<String, dynamic>> incomeRaw = Utils.listFromDynamic(
+      json[LedgerEnum.incomeLedger.name],
+    );
+    final List<Map<String, dynamic>> expenseRaw = Utils.listFromDynamic(
+      json[LedgerEnum.expenseLedger.name],
+    );
 
-    final List<FinancialMovementModel> incomes =
-        incomeRaw.map(FinancialMovementModel.fromJson).toList(growable: false);
-    final List<FinancialMovementModel> expenses =
-        expenseRaw.map(FinancialMovementModel.fromJson).toList(growable: false);
+    final List<FinancialMovementModel> incomes = incomeRaw
+        .map(FinancialMovementModel.fromJson)
+        .toList(growable: false);
+    final List<FinancialMovementModel> expenses = expenseRaw
+        .map(FinancialMovementModel.fromJson)
+        .toList(growable: false);
 
     return LedgerModel(
       nameOfLedger: name,
@@ -80,14 +85,14 @@ class LedgerModel extends Model {
 
   @override
   Map<String, dynamic> toJson() => <String, dynamic>{
-        LedgerEnum.nameOfLedger.name: nameOfLedger,
-        LedgerEnum.incomeLedger.name: incomeLedger
-            .map((FinancialMovementModel e) => e.toJson())
-            .toList(growable: false),
-        LedgerEnum.expenseLedger.name: expenseLedger
-            .map((FinancialMovementModel e) => e.toJson())
-            .toList(growable: false),
-      };
+    LedgerEnum.nameOfLedger.name: nameOfLedger,
+    LedgerEnum.incomeLedger.name: incomeLedger
+        .map((FinancialMovementModel e) => e.toJson())
+        .toList(growable: false),
+    LedgerEnum.expenseLedger.name: expenseLedger
+        .map((FinancialMovementModel e) => e.toJson())
+        .toList(growable: false),
+  };
 
   @override
   LedgerModel copyWith({
@@ -140,10 +145,10 @@ class LedgerModel extends Model {
 
   @override
   int get hashCode => Object.hash(
-        nameOfLedger,
-        _listHash(incomeLedger),
-        _listHash(expenseLedger),
-      );
+    nameOfLedger,
+    _listHash(incomeLedger),
+    _listHash(expenseLedger),
+  );
 
   @override
   String toString() =>

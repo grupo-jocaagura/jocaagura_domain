@@ -61,17 +61,20 @@ class WsDbConfig extends Model {
   /// defaults.
   factory WsDbConfig.fromJson(Map<String, dynamic> json) {
     final Map<String, dynamic> j = Utils.mapFromDynamic(json);
-    final int ms =
-        Utils.getIntegerFromDynamic(j[WsDbConfigEnum.latencyMs.name]);
+    final int ms = Utils.getIntegerFromDynamic(
+      j[WsDbConfigEnum.latencyMs.name],
+    );
     return WsDbConfig(
       latency: Duration(milliseconds: ms),
       throwOnSave: Utils.getBoolFromDynamic(j[WsDbConfigEnum.throwOnSave.name]),
-      throwOnDelete:
-          Utils.getBoolFromDynamic(j[WsDbConfigEnum.throwOnDelete.name]),
+      throwOnDelete: Utils.getBoolFromDynamic(
+        j[WsDbConfigEnum.throwOnDelete.name],
+      ),
       emitInitial: Utils.getBoolFromDynamic(j[WsDbConfigEnum.emitInitial.name]),
       deepCopies: Utils.getBoolFromDynamic(j[WsDbConfigEnum.deepCopies.name]),
-      dedupeByContent:
-          Utils.getBoolFromDynamic(j[WsDbConfigEnum.dedupeByContent.name]),
+      dedupeByContent: Utils.getBoolFromDynamic(
+        j[WsDbConfigEnum.dedupeByContent.name],
+      ),
       orderCollectionsByKey: Utils.getBoolFromDynamic(
         j[WsDbConfigEnum.orderCollectionsByKey.name],
       ),
@@ -159,15 +162,15 @@ class WsDbConfig extends Model {
 
   @override
   int get hashCode => Object.hash(
-        latency,
-        throwOnSave,
-        throwOnDelete,
-        emitInitial,
-        deepCopies,
-        dedupeByContent,
-        orderCollectionsByKey,
-        idKey,
-      );
+    latency,
+    throwOnSave,
+    throwOnDelete,
+    emitInitial,
+    deepCopies,
+    dedupeByContent,
+    orderCollectionsByKey,
+    idKey,
+  );
 
   @override
   String toString() => 'WsDbConfig(${toJson()})';

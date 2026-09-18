@@ -33,21 +33,25 @@ void main() {
       expect(Utils.deepEqualsDynamic(a, b), isTrue);
     });
 
-    test('Given lists with different order When compared Then returns false',
-        () {
-      final List<int> a = <int>[1, 2, 3];
-      final List<int> b = <int>[3, 2, 1];
+    test(
+      'Given lists with different order When compared Then returns false',
+      () {
+        final List<int> a = <int>[1, 2, 3];
+        final List<int> b = <int>[3, 2, 1];
 
-      expect(Utils.deepEqualsDynamic(a, b), isFalse);
-    });
+        expect(Utils.deepEqualsDynamic(a, b), isFalse);
+      },
+    );
 
-    test('Given lists with different length When compared Then returns false',
-        () {
-      final List<int> a = <int>[1, 2];
-      final List<int> b = <int>[1, 2, 3];
+    test(
+      'Given lists with different length When compared Then returns false',
+      () {
+        final List<int> a = <int>[1, 2];
+        final List<int> b = <int>[1, 2, 3];
 
-      expect(Utils.deepEqualsDynamic(a, b), isFalse);
-    });
+        expect(Utils.deepEqualsDynamic(a, b), isFalse);
+      },
+    );
 
     test('Given nested lists & maps equal When compared Then returns true', () {
       final dynamic a = <dynamic>[
@@ -57,7 +61,7 @@ void main() {
         },
         <String, dynamic>{
           'x': <String, dynamic>{'y': 1},
-        }
+        },
       ];
       final dynamic b = <dynamic>[
         <String, dynamic>{
@@ -66,46 +70,50 @@ void main() {
         },
         <String, dynamic>{
           'x': <String, dynamic>{'y': 1},
-        }
+        },
       ];
 
       expect(Utils.deepEqualsDynamic(a, b), isTrue);
     });
 
-    test('Given nested lists & maps different When compared Then returns false',
-        () {
-      final dynamic a = <dynamic>[
-        <String, dynamic>{
-          'k': 'v',
-          'n': <int>[1, 2],
-        },
-      ];
-      final dynamic b = <dynamic>[
-        <String, dynamic>{
-          'k': 'v',
-          'n': <int>[1, 3],
-        },
-      ];
+    test(
+      'Given nested lists & maps different When compared Then returns false',
+      () {
+        final dynamic a = <dynamic>[
+          <String, dynamic>{
+            'k': 'v',
+            'n': <int>[1, 2],
+          },
+        ];
+        final dynamic b = <dynamic>[
+          <String, dynamic>{
+            'k': 'v',
+            'n': <int>[1, 3],
+          },
+        ];
 
-      expect(Utils.deepEqualsDynamic(a, b), isFalse);
-    });
-
-    test('Given two NaNs at same position When compared Then returns false',
-        () {
-      final List<double> a = <double>[double.nan];
-      final List<double> b = <double>[double.nan];
-
-      expect(Utils.deepEqualsDynamic(a, b), isFalse);
-    });
-
-    test('Given -0.0 and 0.0 When compared Then returns true (Dart semantics)',
-        () {
-      expect(Utils.deepEqualsDynamic(-0.0, 0.0), isTrue);
-    });
+        expect(Utils.deepEqualsDynamic(a, b), isFalse);
+      },
+    );
 
     test(
-        'Given raw Map with non-string keys When compared Then returns true after normalization',
-        () {
+      'Given two NaNs at same position When compared Then returns false',
+      () {
+        final List<double> a = <double>[double.nan];
+        final List<double> b = <double>[double.nan];
+
+        expect(Utils.deepEqualsDynamic(a, b), isFalse);
+      },
+    );
+
+    test(
+      'Given -0.0 and 0.0 When compared Then returns true (Dart semantics)',
+      () {
+        expect(Utils.deepEqualsDynamic(-0.0, 0.0), isTrue);
+      },
+    );
+
+    test('Given raw Map with non-string keys When compared Then returns true after normalization', () {
       // Left is already string-keyed, right is raw/dynamic-keyed.
       final Map<String, dynamic> left = <String, dynamic>{'1': 'a'};
       final Map<dynamic, dynamic> right = <dynamic, dynamic>{1: 'a'};
@@ -114,9 +122,7 @@ void main() {
       expect(Utils.deepEqualsDynamic(left, right), isTrue);
     });
 
-    test(
-        'Given maps with key collision after stringification When compared Then reflects collision',
-        () {
+    test('Given maps with key collision after stringification When compared Then reflects collision', () {
       // Both non-string keys stringify to the same '1'
       final Map<dynamic, dynamic> m1 = <dynamic, dynamic>{1: 'a'};
       final Map<dynamic, dynamic> m2 = <dynamic, dynamic>{'1': 'a'};
@@ -125,10 +131,15 @@ void main() {
       expect(Utils.deepEqualsDynamic(m1, m2), isTrue);
     });
 
-    test('Given different types (map vs list) When compared Then returns false',
-        () {
-      expect(Utils.deepEqualsDynamic(<String, int>{'a': 1}, <int>[1]), isFalse);
-    });
+    test(
+      'Given different types (map vs list) When compared Then returns false',
+      () {
+        expect(
+          Utils.deepEqualsDynamic(<String, int>{'a': 1}, <int>[1]),
+          isFalse,
+        );
+      },
+    );
   });
 
   group('Utils.deepEqualsMap', () {
@@ -137,9 +148,7 @@ void main() {
       expect(Utils.deepEqualsMap(a, a), isTrue);
     });
 
-    test(
-        'Given same key-value pairs different order When compared Then returns true',
-        () {
+    test('Given same key-value pairs different order When compared Then returns true', () {
       final Map<String, dynamic> a = <String, dynamic>{'a': 1, 'b': 2};
       final Map<String, dynamic> b = <String, dynamic>{'b': 2, 'a': 1};
 
@@ -154,17 +163,18 @@ void main() {
     });
 
     test(
-        'Given same keys but different values When compared Then returns false',
-        () {
-      final Map<String, dynamic> a = <String, dynamic>{
-        'k': <int>[1, 2, 3],
-      };
-      final Map<String, dynamic> b = <String, dynamic>{
-        'k': <int>[1, 2, 4],
-      };
+      'Given same keys but different values When compared Then returns false',
+      () {
+        final Map<String, dynamic> a = <String, dynamic>{
+          'k': <int>[1, 2, 3],
+        };
+        final Map<String, dynamic> b = <String, dynamic>{
+          'k': <int>[1, 2, 4],
+        };
 
-      expect(Utils.deepEqualsMap(a, b), isFalse);
-    });
+        expect(Utils.deepEqualsMap(a, b), isFalse);
+      },
+    );
 
     test('Given nested structures equal When compared Then returns true', () {
       final Map<String, dynamic> a = <String, dynamic>{
@@ -179,23 +189,28 @@ void main() {
       expect(Utils.deepEqualsMap(a, b), isTrue);
     });
 
-    test('Given value is NaN in both maps When compared Then returns false',
-        () {
-      final Map<String, dynamic> a = <String, dynamic>{'n': double.nan};
-      final Map<String, dynamic> b = <String, dynamic>{'n': double.nan};
+    test(
+      'Given value is NaN in both maps When compared Then returns false',
+      () {
+        final Map<String, dynamic> a = <String, dynamic>{'n': double.nan};
+        final Map<String, dynamic> b = <String, dynamic>{'n': double.nan};
 
-      // deepEqualsDynamic ultimately uses == for primitives → NaN != NaN
-      expect(Utils.deepEqualsMap(a, b), isFalse);
-    });
+        // deepEqualsDynamic ultimately uses == for primitives → NaN != NaN
+        expect(Utils.deepEqualsMap(a, b), isFalse);
+      },
+    );
 
-    test('Given normalized dynamic maps When compared Then returns expected',
-        () {
+    test('Given normalized dynamic maps When compared Then returns expected', () {
       // Simulate callers that forgot to normalize before calling deepEqualsMap.
       // Enforce normalization and then compare.
-      final Map<String, dynamic> a =
-          Utils.mapFromDynamic(<dynamic, dynamic>{1: 'x', 'b': 2});
-      final Map<String, dynamic> b =
-          Utils.mapFromDynamic(<dynamic, dynamic>{'1': 'x', 'b': 2});
+      final Map<String, dynamic> a = Utils.mapFromDynamic(<dynamic, dynamic>{
+        1: 'x',
+        'b': 2,
+      });
+      final Map<String, dynamic> b = Utils.mapFromDynamic(<dynamic, dynamic>{
+        '1': 'x',
+        'b': 2,
+      });
 
       expect(Utils.deepEqualsMap(a, b), isTrue);
     });
@@ -329,17 +344,18 @@ void main() {
     });
 
     test(
-        'NaN en la misma posición → mismo hash (pero deepEqualsDynamic es false)',
-        () {
-      final List<double> a = <double>[double.nan];
-      final List<double> b = <double>[double.nan];
+      'NaN en la misma posición → mismo hash (pero deepEqualsDynamic es false)',
+      () {
+        final List<double> a = <double>[double.nan];
+        final List<double> b = <double>[double.nan];
 
-      // deepHash usa hashCode de primitivos → NaN.hashCode es estable
-      expect(Utils.deepHash(a), equals(Utils.deepHash(b)));
+        // deepHash usa hashCode de primitivos → NaN.hashCode es estable
+        expect(Utils.deepHash(a), equals(Utils.deepHash(b)));
 
-      // Recordatorio de contrato: igualdad profunda actual trata NaN != NaN
-      expect(Utils.deepEqualsDynamic(a, b), isFalse);
-    });
+        // Recordatorio de contrato: igualdad profunda actual trata NaN != NaN
+        expect(Utils.deepEqualsDynamic(a, b), isFalse);
+      },
+    );
 
     test('Anidación compleja: orden-insensible en Map y sensible en List', () {
       final Map<String, dynamic> a = <String, dynamic>{

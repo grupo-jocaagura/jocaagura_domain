@@ -1,13 +1,7 @@
 part of 'package:jocaagura_domain/jocaagura_domain.dart';
 
 /// Stable JSON keys used by [ModelSheetTable].
-enum ModelSheetTableEnum {
-  id,
-  name,
-  primaryKeyColumn,
-  columns,
-  rowsCount,
-}
+enum ModelSheetTableEnum { id, name, primaryKeyColumn, columns, rowsCount }
 
 /// Structural definition of a normalized sheet table.
 class ModelSheetTable extends Model {
@@ -68,8 +62,9 @@ class ModelSheetTable extends Model {
       ModelSheetTableEnum.id.name: id,
       ModelSheetTableEnum.name.name: name,
       ModelSheetTableEnum.primaryKeyColumn.name: primaryKeyColumn,
-      ModelSheetTableEnum.columns.name:
-          columns.map((ModelSheetColumn e) => e.toJson()).toList(),
+      ModelSheetTableEnum.columns.name: columns
+          .map((ModelSheetColumn e) => e.toJson())
+          .toList(),
     };
     if (rowsCount != null) {
       json[ModelSheetTableEnum.rowsCount.name] = rowsCount;
@@ -90,12 +85,12 @@ class ModelSheetTable extends Model {
 
   @override
   int get hashCode => Object.hash(
-        id,
-        name,
-        primaryKeyColumn,
-        Utils.listHash(columns),
-        rowsCount,
-      );
+    id,
+    name,
+    primaryKeyColumn,
+    Utils.listHash(columns),
+    rowsCount,
+  );
 
   @override
   String toString() => 'ModelSheetTable(${toJson()})';

@@ -34,13 +34,11 @@ import '../../jocaagura_domain.dart';
 class RepositoryWsDatabaseImpl<T extends Model>
     implements RepositoryWsDatabase<T> {
   RepositoryWsDatabaseImpl({
-    required GatewayWsDatabase gateway,
+    required this._gateway,
     required this.fromJson,
     ErrorMapper? mapper,
-    bool serializeWrites = false,
-  })  : _gateway = gateway,
-        _mapper = mapper ?? const DefaultErrorMapper(),
-        _serializeWrites = serializeWrites;
+    this._serializeWrites = false,
+  }) : _mapper = mapper ?? const DefaultErrorMapper();
 
   final GatewayWsDatabase _gateway;
   final T Function(Map<String, dynamic>) fromJson;
@@ -72,8 +70,9 @@ class RepositoryWsDatabaseImpl<T extends Model>
   @override
   Future<Either<ErrorItem, T>> read(String docId) async {
     _assertNotDisposed();
-    final Either<ErrorItem, Map<String, dynamic>> res =
-        await _gateway.read(docId);
+    final Either<ErrorItem, Map<String, dynamic>> res = await _gateway.read(
+      docId,
+    );
     return res.fold(
       (ErrorItem l) => Left<ErrorItem, T>(l),
       (Map<String, dynamic> json) => _decode(json),
@@ -83,33 +82,31 @@ class RepositoryWsDatabaseImpl<T extends Model>
   @override
   Future<Either<ErrorItem, T>> write(String docId, T entity) {
     _assertNotDisposed();
-    return _enqueuePerDoc<T>(
-      docId,
-      () async {
-        final Either<ErrorItem, Map<String, dynamic>> res =
-            await _gateway.write(docId, entity.toJson());
-        return res.fold(
-          (ErrorItem l) => Left<ErrorItem, T>(l),
-          (Map<String, dynamic> json) => _decode(json),
-        );
-      },
-    );
+    return _enqueuePerDoc<T>(docId, () async {
+      final Either<ErrorItem, Map<String, dynamic>> res = await _gateway.write(
+        docId,
+        entity.toJson(),
+      );
+      return res.fold(
+        (ErrorItem l) => Left<ErrorItem, T>(l),
+        (Map<String, dynamic> json) => _decode(json),
+      );
+    });
   }
 
   @override
   Future<Either<ErrorItem, Unit>> delete(String docId) {
     _assertNotDisposed();
-    return _enqueuePerDoc<Unit>(
-      docId,
-      () => _gateway.delete(docId),
-    );
+    return _enqueuePerDoc<Unit>(docId, () => _gateway.delete(docId));
   }
 
   @override
   Stream<Either<ErrorItem, T>> watch(String docId) {
     _assertNotDisposed();
     // Re-expose the gateway stream mapped to T (no custom streams).
-    return _gateway.watch(docId).map(
+    return _gateway
+        .watch(docId)
+        .map(
           (Either<ErrorItem, Map<String, dynamic>> e) => e.fold(
             (ErrorItem l) => Left<ErrorItem, T>(l),
             (Map<String, dynamic> json) => _decode(json),

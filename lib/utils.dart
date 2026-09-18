@@ -149,8 +149,9 @@ class Utils extends EntityUtil {
   /// - [email]: The string to validate.
   /// - Returns: `true` if the string is a valid email, `false` otherwise.
   static bool isEmail(String email) {
-    final RegExp re =
-        RegExp(r'^[A-Za-z0-9._%+\-]+@[A-Za-z0-9.\-]+\.[A-Za-z]{2,24}$');
+    final RegExp re = RegExp(
+      r'^[A-Za-z0-9._%+\-]+@[A-Za-z0-9.\-]+\.[A-Za-z]{2,24}$',
+    );
     return re.hasMatch(email);
   }
 
@@ -242,7 +243,8 @@ class Utils extends EntityUtil {
     final String resto = numeroString.substring(2);
 
     String resultado = '($prefijo)';
-    resultado += ' ${resto.substring(0, 1)} '
+    resultado +=
+        ' ${resto.substring(0, 1)} '
         '${resto.substring(1, 4)} '
         '${resto.substring(4)}';
 
@@ -324,10 +326,7 @@ class Utils extends EntityUtil {
   /// Utils.getIntegerFromDynamic(42.9);              // 42
   /// Utils.getIntegerFromDynamic(null);              // 0
   /// ```
-  static int getIntegerFromDynamic(
-    dynamic value, {
-    int defaultValue = 0,
-  }) {
+  static int getIntegerFromDynamic(dynamic value, {int defaultValue = 0}) {
     if (value == null) {
       return defaultValue;
     }
@@ -493,8 +492,9 @@ class Utils extends EntityUtil {
     final int firstDotIdx = mantissa.indexOf('.');
     if (firstDotIdx >= 0) {
       final String before = mantissa.substring(0, firstDotIdx + 1);
-      final String after =
-          mantissa.substring(firstDotIdx + 1).replaceAll('.', '');
+      final String after = mantissa
+          .substring(firstDotIdx + 1)
+          .replaceAll('.', '');
       mantissa = before + after;
     }
 
@@ -855,8 +855,9 @@ class Utils extends EntityUtil {
       final int minutes = int.parse(mhms.group(2)!);
       final int seconds = int.parse(mhms.group(3)!);
       final String msPart = mhms.group(4) ?? '';
-      final int millis =
-          msPart.isEmpty ? 0 : int.parse(msPart.padRight(3, '0'));
+      final int millis = msPart.isEmpty
+          ? 0
+          : int.parse(msPart.padRight(3, '0'));
       return Duration(
         hours: hours,
         minutes: minutes,
@@ -872,13 +873,10 @@ class Utils extends EntityUtil {
       final int minutes = int.parse(mms.group(1)!);
       final int seconds = int.parse(mms.group(2)!);
       final String msPart = mms.group(3) ?? '';
-      final int millis =
-          msPart.isEmpty ? 0 : int.parse(msPart.padRight(3, '0'));
-      return Duration(
-        minutes: minutes,
-        seconds: seconds,
-        milliseconds: millis,
-      );
+      final int millis = msPart.isEmpty
+          ? 0
+          : int.parse(msPart.padRight(3, '0'));
+      return Duration(minutes: minutes, seconds: seconds, milliseconds: millis);
     }
 
     // 4.5) ISO8601 subset: P[nD]T[nH][nM][nS] (days optional; seconds may be decimal)
@@ -916,10 +914,12 @@ class Utils extends EntityUtil {
     );
     final Match? mshort = short.firstMatch(s);
     if (mshort != null) {
-      final int hours =
-          mshort.group(1) != null ? int.parse(mshort.group(1)!) : 0;
-      final int minutes =
-          mshort.group(2) != null ? int.parse(mshort.group(2)!) : 0;
+      final int hours = mshort.group(1) != null
+          ? int.parse(mshort.group(1)!)
+          : 0;
+      final int minutes = mshort.group(2) != null
+          ? int.parse(mshort.group(2)!)
+          : 0;
 
       int seconds = 0;
       int millis = 0;
@@ -1032,8 +1032,8 @@ class Utils extends EntityUtil {
     if (value is List) {
       return value.map((dynamic e) => e.toString()).toList();
     }
-    final List<dynamic> raw =
-        convertJsonToList(value.toString()).cast<dynamic>();
+    final List<dynamic> raw = convertJsonToList(value.toString())
+        .cast<dynamic>();
     if (raw.isEmpty) {
       return const <String>[];
     }

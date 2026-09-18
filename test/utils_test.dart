@@ -7,8 +7,12 @@ import 'package:jocaagura_domain/jocaagura_domain.dart';
 void main() {
   group('Utils.duration (json/parse)', () {
     test('durationToJson returns milliseconds', () {
-      const Duration d =
-          Duration(hours: 1, minutes: 2, seconds: 3, milliseconds: 4);
+      const Duration d = Duration(
+        hours: 1,
+        minutes: 2,
+        seconds: 3,
+        milliseconds: 4,
+      );
       final int ms = Utils.durationToJson(d);
       expect(ms, 3723004);
     });
@@ -59,10 +63,7 @@ void main() {
         Utils.durationFromJson('PT1H30M5S'),
         const Duration(hours: 1, minutes: 30, seconds: 5),
       );
-      expect(
-        Utils.durationFromJson('PT2H'),
-        const Duration(hours: 2),
-      );
+      expect(Utils.durationFromJson('PT2H'), const Duration(hours: 2));
       expect(
         Utils.durationFromJson('P1DT2H'), // 1 day + 2 hours = 26h
         const Duration(hours: 26),
@@ -74,29 +75,24 @@ void main() {
     });
 
     test(
-        'fromMap: shorthand "2h45m", "90m", "30s", "1h2m3.5s" (case-insensitive)',
-        () {
-      expect(
-        Utils.durationFromJson('2h45m'),
-        const Duration(hours: 2, minutes: 45),
-      );
-      expect(
-        Utils.durationFromJson('90m'),
-        const Duration(minutes: 90),
-      );
-      expect(
-        Utils.durationFromJson('30s'),
-        const Duration(seconds: 30),
-      );
-      expect(
-        Utils.durationFromJson('1h2m3.5s'),
-        const Duration(hours: 1, minutes: 2, seconds: 3, milliseconds: 500),
-      );
-      expect(
-        Utils.durationFromJson('PT1H2M3S'.toLowerCase()),
-        const Duration(hours: 1, minutes: 2, seconds: 3),
-      );
-    });
+      'fromMap: shorthand "2h45m", "90m", "30s", "1h2m3.5s" (case-insensitive)',
+      () {
+        expect(
+          Utils.durationFromJson('2h45m'),
+          const Duration(hours: 2, minutes: 45),
+        );
+        expect(Utils.durationFromJson('90m'), const Duration(minutes: 90));
+        expect(Utils.durationFromJson('30s'), const Duration(seconds: 30));
+        expect(
+          Utils.durationFromJson('1h2m3.5s'),
+          const Duration(hours: 1, minutes: 2, seconds: 3, milliseconds: 500),
+        );
+        expect(
+          Utils.durationFromJson('PT1H2M3S'.toLowerCase()),
+          const Duration(hours: 1, minutes: 2, seconds: 3),
+        );
+      },
+    );
 
     test('fromMap: Duration input returned as-is', () {
       const Duration d = Duration(minutes: 5);
@@ -138,12 +134,14 @@ void main() {
       expect(resultMap, <String, String>{'key': 'value'});
     });
 
-    test('trying to trigger an error should convert a JSON string to a map',
-        () async {
-      dynamic jsonString;
-      final Map<String, dynamic> resultMap = Utils.mapFromDynamic(jsonString);
-      expect(resultMap, <String, String>{});
-    });
+    test(
+      'trying to trigger an error should convert a JSON string to a map',
+      () async {
+        dynamic jsonString;
+        final Map<String, dynamic> resultMap = Utils.mapFromDynamic(jsonString);
+        expect(resultMap, <String, String>{});
+      },
+    );
 
     test('getEmailFromMap should extract a valid email from a map', () {
       final Map<String, dynamic> validEmailMap = <String, dynamic>{
@@ -157,16 +155,18 @@ void main() {
       expect(email2, '');
     });
 
-    test('getEmailFromMap should return an empty string for an invalid email',
-        () {
-      final Map<String, String> invalidEmailMap = <String, String>{
-        'email': 'invalid-email',
-      };
+    test(
+      'getEmailFromMap should return an empty string for an invalid email',
+      () {
+        final Map<String, String> invalidEmailMap = <String, String>{
+          'email': 'invalid-email',
+        };
 
-      final String email = Utils.getEmailFromDynamic(invalidEmailMap);
+        final String email = Utils.getEmailFromDynamic(invalidEmailMap);
 
-      expect(email, '');
-    });
+        expect(email, '');
+      },
+    );
 
     test('getUrlFromMap should extract a valid URL from a map', () {
       final Map<String, String> validUrlMap = <String, String>{
@@ -279,8 +279,9 @@ void main() {
       'number': number,
     };
     test('return empty from null', () {
-      final String testString =
-          Utils.getStringFromDynamic(valueMap['Non existing']);
+      final String testString = Utils.getStringFromDynamic(
+        valueMap['Non existing'],
+      );
       expect(testString, '');
     });
     test('return number to String', () {
@@ -301,8 +302,9 @@ void main() {
       'number': number,
     };
     test('return 0 from null', () {
-      final int testNumber =
-          Utils.getIntegerFromDynamic(valueMap['Non existing']);
+      final int testNumber = Utils.getIntegerFromDynamic(
+        valueMap['Non existing'],
+      );
       expect(testNumber, 0);
     });
     test('return number from number', () {
@@ -332,10 +334,7 @@ void main() {
 
       final String result = Utils.getJsonEncode(invalidInput);
 
-      expect(
-        result.contains('error'),
-        isTrue,
-      );
+      expect(result.contains('error'), isTrue);
     });
   });
 
@@ -348,14 +347,16 @@ void main() {
     });
 
     test(
-        'Formato correcto para número de teléfono válido con menos de 10 dígitos',
-        () {
-      expect(Utils.getFormatedPhoneNumber(8923465), equals('(00) 0 892 3465'));
-    });
+      'Formato correcto para número de teléfono válido con menos de 10 dígitos',
+      () {
+        expect(
+          Utils.getFormatedPhoneNumber(8923465),
+          equals('(00) 0 892 3465'),
+        );
+      },
+    );
 
-    test(
-        'Formato correcto para número de teléfono válido con 10 dígitos pero prefijo inválido',
-        () {
+    test('Formato correcto para número de teléfono válido con 10 dígitos pero prefijo inválido', () {
       expect(
         Utils.getFormatedPhoneNumber(1234567890),
         equals('(12) 3 456 7890'),
@@ -363,27 +364,34 @@ void main() {
     });
 
     test(
-        'Formato correcto para número de teléfono con todos los dígitos iguales',
-        () {
-      expect(
-        Utils.getFormatedPhoneNumber(5555555555),
-        equals('(55) 5 555 5555'),
-      );
-    });
+      'Formato correcto para número de teléfono con todos los dígitos iguales',
+      () {
+        expect(
+          Utils.getFormatedPhoneNumber(5555555555),
+          equals('(55) 5 555 5555'),
+        );
+      },
+    );
 
     test(
-        'Formato correcto para número de teléfono con todos los dígitos iguales',
-        () {
-      expect(
-        Utils.getFormatedPhoneNumberAlt(5555555555),
-        equals('555 555 5555'),
-      );
-    });
+      'Formato correcto para número de teléfono con todos los dígitos iguales',
+      () {
+        expect(
+          Utils.getFormatedPhoneNumberAlt(5555555555),
+          equals('555 555 5555'),
+        );
+      },
+    );
 
-    test('Formato correcto para número de teléfono con menos de 10 dígitos',
-        () {
-      expect(Utils.getFormatedPhoneNumberAlt(8923465), equals('000 892 3465'));
-    });
+    test(
+      'Formato correcto para número de teléfono con menos de 10 dígitos',
+      () {
+        expect(
+          Utils.getFormatedPhoneNumberAlt(8923465),
+          equals('000 892 3465'),
+        );
+      },
+    );
 
     test('Formato correcto para número de teléfono con 10 dígitos', () {
       expect(
@@ -392,9 +400,7 @@ void main() {
       );
     });
 
-    test(
-        'Formato correcto para número de teléfono con todos los dígitos como ceros',
-        () {
+    test('Formato correcto para número de teléfono con todos los dígitos como ceros', () {
       expect(Utils.getFormatedPhoneNumberAlt(0), equals('000 000 0000'));
     });
   });
@@ -429,19 +435,21 @@ void main() {
   });
 
   group('Utils.listFromDynamic', () {
-    test('returns a list of maps when input is a list of Map<String, dynamic>',
-        () {
-      final List<Map<String, String>> input = <Map<String, String>>[
-        <String, String>{'key1': 'value1'},
-        <String, String>{'key2': 'value2'},
-      ];
+    test(
+      'returns a list of maps when input is a list of Map<String, dynamic>',
+      () {
+        final List<Map<String, String>> input = <Map<String, String>>[
+          <String, String>{'key1': 'value1'},
+          <String, String>{'key2': 'value2'},
+        ];
 
-      final List<Map<String, dynamic>> result = Utils.listFromDynamic(input);
+        final List<Map<String, dynamic>> result = Utils.listFromDynamic(input);
 
-      expect(result, isA<List<Map<String, dynamic>>>());
-      expect(result.length, 2);
-      expect(result, equals(input));
-    });
+        expect(result, isA<List<Map<String, dynamic>>>());
+        expect(result.length, 2);
+        expect(result, equals(input));
+      },
+    );
 
     test('returns an empty list when input is a list of non-map elements', () {
       final List<Object> input = <Object>[1, 2, 3, 'string'];
@@ -541,13 +549,14 @@ void main() {
 
     group('getDouble', () {
       test(
-          'null y valores no parseables respetan defaultValue (NaN por defecto)',
-          () {
-        expect(Utils.getDouble(null).isNaN, isTrue);
-        expect(Utils.getDouble('not_a_double').isNaN, isTrue);
-        expect(Utils.getDouble('.', 0.0), 0.0);
-        expect(Utils.getDouble('-', 0.0), 0.0);
-      });
+        'null y valores no parseables respetan defaultValue (NaN por defecto)',
+        () {
+          expect(Utils.getDouble(null).isNaN, isTrue);
+          expect(Utils.getDouble('not_a_double').isNaN, isTrue);
+          expect(Utils.getDouble('.', 0.0), 0.0);
+          expect(Utils.getDouble('-', 0.0), 0.0);
+        },
+      );
 
       test('NaN e infinitos se degradan al defaultValue', () {
         expect(Utils.getDouble(double.nan, 0.0), 0.0);
@@ -581,9 +590,7 @@ void main() {
   });
 
   group('listFromDynamic (branch else-if: Map<dynamic,dynamic>)', () {
-    test(
-        'Given list with Map<dynamic,dynamic> When parse Then normalizes keys to String',
-        () {
+    test('Given list with Map<dynamic,dynamic> When parse Then normalizes keys to String', () {
       // Arrange
       final List<dynamic> input = <dynamic>[
         <dynamic, dynamic>{1: 'a', true: 2}, // claves no String
@@ -603,9 +610,7 @@ void main() {
       );
     });
 
-    test(
-        'Given mixed list with non-Map items When parse Then ignores non-Map items',
-        () {
+    test('Given mixed list with non-Map items When parse Then ignores non-Map items', () {
       final List<dynamic> input = <dynamic>[
         <dynamic, dynamic>{0: 'zero'},
         'not a map',
@@ -625,9 +630,7 @@ void main() {
       );
     });
 
-    test(
-        'Given Map<dynamic,dynamic> with nested structures When parse Then keeps values as-is',
-        () {
+    test('Given Map<dynamic,dynamic> with nested structures When parse Then keeps values as-is', () {
       final List<dynamic> input = <dynamic>[
         <dynamic, dynamic>{
           'nested': <String, dynamic>{'a': 1},
@@ -647,9 +650,7 @@ void main() {
       expect(out.first['list'], isA<List<dynamic>>());
     });
 
-    test(
-        'Given empty Map<dynamic,dynamic> When parse Then returns empty normalized map entry',
-        () {
+    test('Given empty Map<dynamic,dynamic> When parse Then returns empty normalized map entry', () {
       final List<dynamic> input = <dynamic>[<dynamic, dynamic>{}];
 
       final List<Map<String, dynamic>> out = Utils.listFromDynamic(input);
@@ -659,9 +660,7 @@ void main() {
   });
 
   group('mapFromDynamic (all branches & edge cases)', () {
-    test(
-        'Given Map<String,dynamic> When passed Then returns same instance (no copy)',
-        () {
+    test('Given Map<String,dynamic> When passed Then returns same instance (no copy)', () {
       // Arrange
       final Map<String, dynamic> m = <String, dynamic>{'a': 1, 'b': true};
 
@@ -674,47 +673,51 @@ void main() {
     });
 
     test(
-        'Given Map<dynamic,dynamic> When passed Then normalizes keys to String',
-        () {
-      final Map<dynamic, dynamic> raw = <dynamic, dynamic>{
-        1: 'x',
-        true: 7,
-        'k': <String, dynamic>{'nested': 1},
-      };
-
-      final Map<String, dynamic> out = Utils.mapFromDynamic(raw);
-
-      expect(
-        out,
-        equals(<String, dynamic>{
-          '1': 'x',
-          'true': 7,
+      'Given Map<dynamic,dynamic> When passed Then normalizes keys to String',
+      () {
+        final Map<dynamic, dynamic> raw = <dynamic, dynamic>{
+          1: 'x',
+          true: 7,
           'k': <String, dynamic>{'nested': 1},
-        }),
-      );
-    });
+        };
 
-    test('Given JSON string (object) When decodes Then returns normalized map',
-        () {
-      const String json = '{"a":1,"b":false,"c":{"d":2},"e":[1,2,3]}';
+        final Map<String, dynamic> out = Utils.mapFromDynamic(raw);
 
-      final Map<String, dynamic> out = Utils.mapFromDynamic(json);
-
-      expect(out['a'], 1);
-      expect(out['b'], false);
-      expect(out['c'], isA<Map<String, dynamic>>());
-      expect(out['e'], isA<List<dynamic>>());
-    });
+        expect(
+          out,
+          equals(<String, dynamic>{
+            '1': 'x',
+            'true': 7,
+            'k': <String, dynamic>{'nested': 1},
+          }),
+        );
+      },
+    );
 
     test(
-        'Given JSON string with whitespace/unicode When decodes Then returns map',
-        () {
-      const String json = '  {  " título ": "Ok",  "π": 3.14 }  ';
+      'Given JSON string (object) When decodes Then returns normalized map',
+      () {
+        const String json = '{"a":1,"b":false,"c":{"d":2},"e":[1,2,3]}';
 
-      final Map<String, dynamic> out = Utils.mapFromDynamic(json);
+        final Map<String, dynamic> out = Utils.mapFromDynamic(json);
 
-      expect(out, equals(<String, dynamic>{' título ': 'Ok', 'π': 3.14}));
-    });
+        expect(out['a'], 1);
+        expect(out['b'], false);
+        expect(out['c'], isA<Map<String, dynamic>>());
+        expect(out['e'], isA<List<dynamic>>());
+      },
+    );
+
+    test(
+      'Given JSON string with whitespace/unicode When decodes Then returns map',
+      () {
+        const String json = '  {  " título ": "Ok",  "π": 3.14 }  ';
+
+        final Map<String, dynamic> out = Utils.mapFromDynamic(json);
+
+        expect(out, equals(<String, dynamic>{' título ': 'Ok', 'π': 3.14}));
+      },
+    );
 
     test('Given non-JSON string When decode fails Then returns empty map', () {
       final Map<String, dynamic> out = Utils.mapFromDynamic('not-json');
@@ -733,33 +736,26 @@ void main() {
       expect(out, isEmpty);
     });
 
-    test(
-        'Given non-string non-map whose toString() is valid JSON map Then decodes it',
-        () {
-      final Map<String, dynamic> out =
-          Utils.mapFromDynamic(_JsonLikeToString());
+    test('Given non-string non-map whose toString() is valid JSON map Then decodes it', () {
+      final Map<String, dynamic> out = Utils.mapFromDynamic(
+        _JsonLikeToString(),
+      );
       expect(out, equals(<String, dynamic>{'fromToString': 42}));
     });
 
-    test(
-        'Given null When toString -> "null" Then jsonDecode returns null => not a Map => {}',
-        () {
+    test('Given null When toString -> "null" Then jsonDecode returns null => not a Map => {}', () {
       final Map<String, dynamic> out = Utils.mapFromDynamic(null);
       expect(out, isEmpty);
     });
 
-    test(
-        'Given empty map literal {} When passed Then returns same (identity true)',
-        () {
+    test('Given empty map literal {} When passed Then returns same (identity true)', () {
       final Map<String, dynamic> empty = <String, dynamic>{};
       final Map<String, dynamic> out = Utils.mapFromDynamic(empty);
       expect(identical(out, empty), isTrue);
       expect(out, isEmpty);
     });
 
-    test(
-        'Given Map<dynamic,dynamic> with complex nested values Then only keys are normalized',
-        () {
+    test('Given Map<dynamic,dynamic> with complex nested values Then only keys are normalized', () {
       final Map<dynamic, dynamic> raw = <dynamic, dynamic>{
         9: <dynamic, dynamic>{
           'inner': <String, dynamic>{'x': 1},
@@ -779,67 +775,47 @@ void main() {
       expect(nested['list'], isA<List<dynamic>>());
     });
 
-    test(
-        'Given String that is JSON object with non-ASCII keys Then keys remain as decoded strings',
-        () {
+    test('Given String that is JSON object with non-ASCII keys Then keys remain as decoded strings', () {
       final String json = jsonEncode(<String, dynamic>{'á': 1, '世': 2});
       final Map<String, dynamic> out = Utils.mapFromDynamic(json);
       expect(out, equals(<String, dynamic>{'á': 1, '世': 2}));
     });
   });
   group('Utils.listEquals', () {
-    test(
-      'Given same instance When compared Then returns true (fast-path)',
-      () {
-        final List<int> a = <int>[1, 2, 3];
-        expect(Utils.listEquals<int>(a, a), isTrue);
-      },
-    );
+    test('Given same instance When compared Then returns true (fast-path)', () {
+      final List<int> a = <int>[1, 2, 3];
+      expect(Utils.listEquals<int>(a, a), isTrue);
+    });
 
-    test(
-      'Given equal content and order When compared Then returns true',
-      () {
-        final List<String> a = <String>['x', 'y'];
-        final List<String> b = <String>['x', 'y'];
-        expect(Utils.listEquals<String>(a, b), isTrue);
-      },
-    );
+    test('Given equal content and order When compared Then returns true', () {
+      final List<String> a = <String>['x', 'y'];
+      final List<String> b = <String>['x', 'y'];
+      expect(Utils.listEquals<String>(a, b), isTrue);
+    });
 
-    test(
-      'Given equal content but different order When compared Then returns false',
-      () {
-        final List<int> a = <int>[1, 2, 3];
-        final List<int> b = <int>[3, 2, 1];
-        expect(Utils.listEquals<int>(a, b), isFalse);
-      },
-    );
+    test('Given equal content but different order When compared Then returns false', () {
+      final List<int> a = <int>[1, 2, 3];
+      final List<int> b = <int>[3, 2, 1];
+      expect(Utils.listEquals<int>(a, b), isFalse);
+    });
 
-    test(
-      'Given different lengths When compared Then returns false',
-      () {
-        final List<int> a = <int>[1, 2, 3];
-        final List<int> b = <int>[1, 2, 3, 4];
-        expect(Utils.listEquals<int>(a, b), isFalse);
-      },
-    );
+    test('Given different lengths When compared Then returns false', () {
+      final List<int> a = <int>[1, 2, 3];
+      final List<int> b = <int>[1, 2, 3, 4];
+      expect(Utils.listEquals<int>(a, b), isFalse);
+    });
 
-    test(
-      'Given null elements When same pattern Then returns true',
-      () {
-        final List<String?> a = <String?>['a', null, 'c'];
-        final List<String?> b = <String?>['a', null, 'c'];
-        expect(Utils.listEquals<String?>(a, b), isTrue);
-      },
-    );
+    test('Given null elements When same pattern Then returns true', () {
+      final List<String?> a = <String?>['a', null, 'c'];
+      final List<String?> b = <String?>['a', null, 'c'];
+      expect(Utils.listEquals<String?>(a, b), isTrue);
+    });
 
-    test(
-      'Given custom equality type When same values Then returns true',
-      () {
-        final List<Box> a = <Box>[const Box(1), const Box(2)];
-        final List<Box> b = <Box>[const Box(1), const Box(2)];
-        expect(Utils.listEquals<Box>(a, b), isTrue);
-      },
-    );
+    test('Given custom equality type When same values Then returns true', () {
+      final List<Box> a = <Box>[const Box(1), const Box(2)];
+      final List<Box> b = <Box>[const Box(1), const Box(2)];
+      expect(Utils.listEquals<Box>(a, b), isTrue);
+    });
 
     test(
       'Given NaN at same index When compared Then returns false (IEEE754)',
@@ -862,78 +838,63 @@ void main() {
       },
     );
 
-    test(
-      'Given different order When hashed Then hashes typically differ',
-      () {
-        final List<String> a = <String>['a', 'b', 'c'];
-        final List<String> b = <String>['c', 'b', 'a'];
-        expect(Utils.listEquals<String>(a, b), isFalse);
-        expect(Utils.listHash<String>(a) == Utils.listHash<String>(b), isFalse);
-      },
-    );
+    test('Given different order When hashed Then hashes typically differ', () {
+      final List<String> a = <String>['a', 'b', 'c'];
+      final List<String> b = <String>['c', 'b', 'a'];
+      expect(Utils.listEquals<String>(a, b), isFalse);
+      expect(Utils.listHash<String>(a) == Utils.listHash<String>(b), isFalse);
+    });
 
-    test(
-      'Given null elements When hashed Then does not throw and is deterministic',
-      () {
-        final List<String?> a = <String?>['a', null, 'c'];
-        final int h1 = Utils.listHash<String?>(a);
-        final int h2 = Utils.listHash<String?>(a);
-        expect(h1, equals(h2));
-      },
-    );
+    test('Given null elements When hashed Then does not throw and is deterministic', () {
+      final List<String?> a = <String?>['a', null, 'c'];
+      final int h1 = Utils.listHash<String?>(a);
+      final int h2 = Utils.listHash<String?>(a);
+      expect(h1, equals(h2));
+    });
 
-    test(
-      'Given custom equality/HashCode When equal Then hashes match',
-      () {
-        final List<Box> a = <Box>[const Box(7), const Box(9)];
-        final List<Box> b = <Box>[const Box(7), const Box(9)];
-        expect(Utils.listEquals<Box>(a, b), isTrue);
-        expect(Utils.listHash<Box>(a), equals(Utils.listHash<Box>(b)));
-      },
-    );
+    test('Given custom equality/HashCode When equal Then hashes match', () {
+      final List<Box> a = <Box>[const Box(7), const Box(9)];
+      final List<Box> b = <Box>[const Box(7), const Box(9)];
+      expect(Utils.listEquals<Box>(a, b), isTrue);
+      expect(Utils.listHash<Box>(a), equals(Utils.listHash<Box>(b)));
+    });
 
-    test(
-      'Given shallow structure When elements are lists Then uses element hashCode (no deep hash)',
-      () {
-        final List<List<int>> a = <List<int>>[
-          <int>[1, 2],
-          <int>[3],
-        ];
-        final List<List<int>> b = <List<int>>[
-          <int>[1, 2],
-          <int>[3],
-        ];
+    test('Given shallow structure When elements are lists Then uses element hashCode (no deep hash)', () {
+      final List<List<int>> a = <List<int>>[
+        <int>[1, 2],
+        <int>[3],
+      ];
+      final List<List<int>> b = <List<int>>[
+        <int>[1, 2],
+        <int>[3],
+      ];
 
-        // By default List== is identity; these are different instances.
-        expect(Utils.listEquals<List<int>>(a, b), isFalse);
+      // By default List== is identity; these are different instances.
+      expect(Utils.listEquals<List<int>>(a, b), isFalse);
 
-        // Hash will also differ in general (because element hashCodes differ).
-        expect(
-          Utils.listHash<List<int>>(a) == Utils.listHash<List<int>>(b),
-          isFalse,
-        );
-      },
-    );
+      // Hash will also differ in general (because element hashCodes differ).
+      expect(
+        Utils.listHash<List<int>>(a) == Utils.listHash<List<int>>(b),
+        isFalse,
+      );
+    });
   });
 
   group('Utils.enumFromJson', () {
-    test(
-      'Given valid enum name When enumFromJson is called Then returns matching value',
-      () {
-        // Arrange
-        const _TestStatus fallback = _TestStatus.disabled;
+    test('Given valid enum name When enumFromJson is called Then returns matching value', () {
+      // Arrange
+      const _TestStatus fallback = _TestStatus.disabled;
 
-        // Act
-        final _TestStatus result = Utils.enumFromJson<_TestStatus>(
-          _TestStatus.values,
-          'active',
-          fallback,
-        );
+      // Act
+      final _TestStatus result = Utils.enumFromJson<_TestStatus>(
+        _TestStatus.values,
+        'active',
+        fallback,
+      );
 
-        // Assert
-        expect(result, _TestStatus.active);
-      },
-    );
+      // Assert
+      expect(result, _TestStatus.active);
+    });
 
     test(
       'Given null raw value When enumFromJson is called Then returns fallback',
@@ -953,124 +914,100 @@ void main() {
       },
     );
 
-    test(
-      'Given unknown enum name When enumFromJson is called Then returns fallback',
-      () {
-        // Arrange
-        const _TestStatus fallback = _TestStatus.pending;
+    test('Given unknown enum name When enumFromJson is called Then returns fallback', () {
+      // Arrange
+      const _TestStatus fallback = _TestStatus.pending;
 
-        // Act
-        final _TestStatus result = Utils.enumFromJson<_TestStatus>(
-          _TestStatus.values,
-          'unknown_status',
-          fallback,
-        );
+      // Act
+      final _TestStatus result = Utils.enumFromJson<_TestStatus>(
+        _TestStatus.values,
+        'unknown_status',
+        fallback,
+      );
 
-        // Assert
-        expect(result, fallback);
-      },
-    );
+      // Assert
+      expect(result, fallback);
+    });
 
-    test(
-      'Given same name with different case When enumFromJson is called Then returns fallback (case-sensitive)',
-      () {
-        // Arrange
-        const _TestStatus fallback = _TestStatus.pending;
+    test('Given same name with different case When enumFromJson is called Then returns fallback (case-sensitive)', () {
+      // Arrange
+      const _TestStatus fallback = _TestStatus.pending;
 
-        // Act
-        final _TestStatus result = Utils.enumFromJson<_TestStatus>(
-          _TestStatus.values,
-          'ACTIVE', // different case
-          fallback,
-        );
+      // Act
+      final _TestStatus result = Utils.enumFromJson<_TestStatus>(
+        _TestStatus.values,
+        'ACTIVE', // different case
+        fallback,
+      );
 
-        // Assert
-        expect(result, fallback);
-      },
-    );
+      // Assert
+      expect(result, fallback);
+    });
   });
 
   group('Utils.stringListFromDynamic', () {
-    test(
-      'Given null value When stringListFromDynamic is called Then returns empty list',
-      () {
-        // Act
-        final List<String> result = Utils.stringListFromDynamic(null);
+    test('Given null value When stringListFromDynamic is called Then returns empty list', () {
+      // Act
+      final List<String> result = Utils.stringListFromDynamic(null);
 
-        // Assert
-        expect(result, isEmpty);
-      },
-    );
+      // Assert
+      expect(result, isEmpty);
+    });
 
-    test(
-      'Given List<String> value When stringListFromDynamic is called Then returns same string contents',
-      () {
-        // Arrange
-        final List<String> source = <String>['a', 'b', 'c'];
+    test('Given List<String> value When stringListFromDynamic is called Then returns same string contents', () {
+      // Arrange
+      final List<String> source = <String>['a', 'b', 'c'];
 
-        // Act
-        final List<String> result = Utils.stringListFromDynamic(source);
+      // Act
+      final List<String> result = Utils.stringListFromDynamic(source);
 
-        // Assert
-        expect(result, <String>['a', 'b', 'c']);
-      },
-    );
+      // Assert
+      expect(result, <String>['a', 'b', 'c']);
+    });
 
-    test(
-      'Given List<dynamic> value When stringListFromDynamic is called Then converts all elements with toString',
-      () {
-        // Arrange
-        final List<dynamic> source = <dynamic>['x', 1, true, null];
+    test('Given List<dynamic> value When stringListFromDynamic is called Then converts all elements with toString', () {
+      // Arrange
+      final List<dynamic> source = <dynamic>['x', 1, true, null];
 
-        // Act
-        final List<String> result = Utils.stringListFromDynamic(source);
+      // Act
+      final List<String> result = Utils.stringListFromDynamic(source);
 
-        // Assert
-        expect(result, <String>['x', '1', 'true', 'null']);
-      },
-    );
+      // Assert
+      expect(result, <String>['x', '1', 'true', 'null']);
+    });
 
-    test(
-      'Given JSON array string When stringListFromDynamic is called Then parses and stringifies elements',
-      () {
-        // Arrange
-        const String jsonArray = '["foo", 2, false]';
+    test('Given JSON array string When stringListFromDynamic is called Then parses and stringifies elements', () {
+      // Arrange
+      const String jsonArray = '["foo", 2, false]';
 
-        // Act
-        final List<String> result = Utils.stringListFromDynamic(jsonArray);
+      // Act
+      final List<String> result = Utils.stringListFromDynamic(jsonArray);
 
-        // Assert
-        expect(result, <String>['foo', '2', 'false']);
-      },
-    );
+      // Assert
+      expect(result, <String>['foo', '2', 'false']);
+    });
 
-    test(
-      'Given scalar number When stringListFromDynamic is called Then wraps it into single-element list',
-      () {
-        // Arrange
-        const int scalar = 42;
+    test('Given scalar number When stringListFromDynamic is called Then wraps it into single-element list', () {
+      // Arrange
+      const int scalar = 42;
 
-        // Act
-        final List<String> result = Utils.stringListFromDynamic(scalar);
+      // Act
+      final List<String> result = Utils.stringListFromDynamic(scalar);
 
-        // Assert
-        expect(result, <String>['42']);
-      },
-    );
+      // Assert
+      expect(result, <String>['42']);
+    });
 
-    test(
-      'Given non-JSON string When stringListFromDynamic is called Then returns empty list',
-      () {
-        // Arrange
-        const String invalidJson = 'not a json';
+    test('Given non-JSON string When stringListFromDynamic is called Then returns empty list', () {
+      // Arrange
+      const String invalidJson = 'not a json';
 
-        // Act
-        final List<String> result = Utils.stringListFromDynamic(invalidJson);
+      // Act
+      final List<String> result = Utils.stringListFromDynamic(invalidJson);
 
-        // Assert
-        expect(result, isEmpty);
-      },
-    );
+      // Assert
+      expect(result, isEmpty);
+    });
   });
 }
 

@@ -21,11 +21,7 @@ part of 'package:jocaagura_domain/jocaagura_domain.dart';
 ///   print(op.name); // "update"
 /// }
 /// ```
-enum ModelCrudOperationKind {
-  create,
-  update,
-  delete,
-}
+enum ModelCrudOperationKind { create, update, delete }
 
 /// JSON keys for [ModelCrudLogEntry].
 ///
@@ -134,9 +130,8 @@ class ModelCrudLogEntry extends Model {
       ),
       diff: json[ModelCrudLogEntryEnum.diff.name] == null
           ? null
-          : Utils.mapFromDynamic(
-              json[ModelCrudLogEntryEnum.diff.name],
-            ).cast<String, dynamic>(),
+          : Utils.mapFromDynamic(json[ModelCrudLogEntryEnum.diff.name])
+                .cast<String, dynamic>(),
       env: json[ModelCrudLogEntryEnum.env.name]?.toString(),
       errorItemId: json[ModelCrudLogEntryEnum.errorItemId.name]?.toString(),
     );
@@ -192,8 +187,9 @@ class ModelCrudLogEntry extends Model {
       ModelCrudLogEntryEnum.entityId.name: entityId,
       ModelCrudLogEntryEnum.operation.name: operation.name,
       ModelCrudLogEntryEnum.performedBy.name: performedBy,
-      ModelCrudLogEntryEnum.performedAt.name:
-          DateUtils.dateTimeToString(performedAt),
+      ModelCrudLogEntryEnum.performedAt.name: DateUtils.dateTimeToString(
+        performedAt,
+      ),
     };
     if (diff != null) {
       json[ModelCrudLogEntryEnum.diff.name] = diff;
@@ -224,16 +220,16 @@ class ModelCrudLogEntry extends Model {
 
   @override
   int get hashCode => Object.hash(
-        id,
-        entityType,
-        entityId,
-        operation,
-        performedBy,
-        performedAt,
-        diff,
-        env,
-        errorItemId,
-      );
+    id,
+    entityType,
+    entityId,
+    operation,
+    performedBy,
+    performedAt,
+    diff,
+    env,
+    errorItemId,
+  );
 
   @override
   String toString() => 'ModelCrudLogEntry(${toJson()})';

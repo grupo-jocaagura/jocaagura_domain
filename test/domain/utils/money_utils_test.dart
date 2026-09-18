@@ -43,8 +43,10 @@ void main() {
     });
 
     test('filterByCategory returns correct filtered list', () {
-      final List<FinancialMovementModel> result =
-          MoneyUtils.filterByCategory(movements, 'Salario');
+      final List<FinancialMovementModel> result = MoneyUtils.filterByCategory(
+        movements,
+        'Salario',
+      );
       expect(result.length, 1);
       expect(result.first.id, '1');
     });
@@ -66,8 +68,9 @@ void main() {
     });
 
     test('getLatestMovement returns the most recent', () {
-      final FinancialMovementModel? latest =
-          MoneyUtils.getLatestMovement(movements);
+      final FinancialMovementModel? latest = MoneyUtils.getLatestMovement(
+        movements,
+      );
       expect(latest?.id, '3');
     });
 
@@ -78,16 +81,19 @@ void main() {
 
     test('sortByDate orders correctly ascending and descending', () {
       final List<FinancialMovementModel> asc = MoneyUtils.sortByDate(movements);
-      final List<FinancialMovementModel> desc =
-          MoneyUtils.sortByDate(movements, ascending: false);
+      final List<FinancialMovementModel> desc = MoneyUtils.sortByDate(
+        movements,
+        ascending: false,
+      );
       expect(asc.first.id, '1');
       expect(desc.first.id, '3');
     });
 
     test('totalByMonth and totalDecimalByMonth group correctly', () {
       final Map<String, int> intMap = MoneyUtils.totalByMonth(movements);
-      final Map<String, double> doubleMap =
-          MoneyUtils.totalDecimalByMonth(movements);
+      final Map<String, double> doubleMap = MoneyUtils.totalDecimalByMonth(
+        movements,
+      );
       expect(intMap['2025-01'], 1500);
       expect(intMap['2025-02'], 1500);
       expect(doubleMap['2025-01'], closeTo(0.15, 0.0001));
@@ -123,8 +129,9 @@ void main() {
         ),
       ];
 
-      final Map<String, double> result =
-          MoneyUtils.totalDecimalPerCategory(movements);
+      final Map<String, double> result = MoneyUtils.totalDecimalPerCategory(
+        movements,
+      );
 
       expect(result.length, 2);
       expect(result.containsKey('Salario'), isTrue);
@@ -134,8 +141,9 @@ void main() {
     });
 
     test('returns empty map when input list is empty', () {
-      final Map<String, double> result =
-          MoneyUtils.totalDecimalPerCategory(<FinancialMovementModel>[]);
+      final Map<String, double> result = MoneyUtils.totalDecimalPerCategory(
+        <FinancialMovementModel>[],
+      );
       expect(result, isEmpty);
     });
   });

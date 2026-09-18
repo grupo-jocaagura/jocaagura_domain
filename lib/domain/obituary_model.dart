@@ -42,8 +42,7 @@ final ObituaryModel defaultObituary = ObituaryModel(
   burialDate: DateTime(2023, 07, 05, 16, 30),
   vigilAddress: defaultAddressModel,
   burialAddress: defaultAddressModel,
-  message:
-      'Lamentamos profundamente tu perdida. Esperamos que tu memoria perdure como una fuente de inspiración y amor.',
+  message: 'Lamentamos profundamente tu perdida. Esperamos que tu memoria perdure como una fuente de inspiración y amor.',
 );
 
 /// Represents an obituary record within a memorial application.
@@ -90,12 +89,15 @@ class ObituaryModel extends Model {
       person: PersonModel.fromJson(
         Utils.mapFromDynamic(json[ObituaryEnum.person.name]),
       ),
-      creationDate:
-          DateUtils.dateTimeFromDynamic(json[ObituaryEnum.creationDate.name]),
-      vigilDate:
-          DateUtils.dateTimeFromDynamic(json[ObituaryEnum.vigilDate.name]),
-      burialDate:
-          DateUtils.dateTimeFromDynamic(json[ObituaryEnum.burialDate.name]),
+      creationDate: DateUtils.dateTimeFromDynamic(
+        json[ObituaryEnum.creationDate.name],
+      ),
+      vigilDate: DateUtils.dateTimeFromDynamic(
+        json[ObituaryEnum.vigilDate.name],
+      ),
+      burialDate: DateUtils.dateTimeFromDynamic(
+        json[ObituaryEnum.burialDate.name],
+      ),
       vigilAddress: AddressModel.fromJson(
         Utils.mapFromDynamic(json[ObituaryEnum.vigilAddress.name]),
       ),

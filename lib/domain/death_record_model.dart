@@ -8,13 +8,7 @@ part of '../jocaagura_domain.dart';
 /// - **person**: Information about the deceased person.
 /// - **address**: Address where the death was recorded.
 /// - **recordId**: Official record identifier.
-enum DeathRecordEnum {
-  id,
-  notaria,
-  person,
-  address,
-  recordId,
-}
+enum DeathRecordEnum { id, notaria, person, address, recordId }
 
 /// A default instance of [DeathRecordModel] for testing or initialization.
 const DeathRecordModel defaultDeathRecord = DeathRecordModel(

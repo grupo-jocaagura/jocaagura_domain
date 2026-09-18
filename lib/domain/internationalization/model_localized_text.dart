@@ -88,29 +88,24 @@ class ModelLocalizedText {
   /// }
   /// ```
   factory ModelLocalizedText.fromJson(Map<String, dynamic> json) {
-    final List<Map<String, dynamic>> rawTranslations =
-        Utils.listFromDynamic(json[translationsKey]);
+    final List<Map<String, dynamic>> rawTranslations = Utils.listFromDynamic(
+      json[translationsKey],
+    );
 
     final Map<ModelLanguage, String> translations = <ModelLanguage, String>{};
 
     for (final Map<String, dynamic> rawTranslation in rawTranslations) {
       final ModelLanguage language = ModelLanguage.fromJson(
-        Utils.mapFromDynamic(
-          rawTranslation[languageKey],
-        ),
+        Utils.mapFromDynamic(rawTranslation[languageKey]),
       );
 
-      final String text = Utils.getStringFromDynamic(
-        rawTranslation[textKey],
-      );
+      final String text = Utils.getStringFromDynamic(rawTranslation[textKey]);
 
       translations[language] = text;
     }
 
     final ModelLanguage fallbackLanguage = ModelLanguage.fromJson(
-      Utils.mapFromDynamic(
-        json[fallbackLanguageKey],
-      ),
+      Utils.mapFromDynamic(json[fallbackLanguageKey]),
     );
 
     return ModelLocalizedText(
@@ -144,22 +139,16 @@ class ModelLocalizedText {
     return identical(this, other) ||
         other is ModelLocalizedText &&
             fallbackLanguage == other.fallbackLanguage &&
-            _translationsAreEqual(
-              translations,
-              other.translations,
-            );
+            _translationsAreEqual(translations, other.translations);
   }
 
   @override
   int get hashCode {
-    final Iterable<int> translationHashes = translations.entries.map(
-      (MapEntry<ModelLanguage, String> entry) {
-        return Object.hash(
-          entry.key,
-          entry.value,
-        );
-      },
-    );
+    final Iterable<int> translationHashes = translations.entries.map((
+      MapEntry<ModelLanguage, String> entry,
+    ) {
+      return Object.hash(entry.key, entry.value);
+    });
 
     return Object.hash(
       fallbackLanguage,
@@ -219,17 +208,12 @@ class ModelLocalizedText {
   /// ```
   Map<String, dynamic> toJson() {
     final List<MapEntry<ModelLanguage, String>> sortedEntries =
-        translations.entries.toList()
-          ..sort(
-            (
-              MapEntry<ModelLanguage, String> first,
-              MapEntry<ModelLanguage, String> second,
-            ) {
-              return first.key.canonicalTag.compareTo(
-                second.key.canonicalTag,
-              );
-            },
-          );
+        translations.entries.toList()..sort((
+          MapEntry<ModelLanguage, String> first,
+          MapEntry<ModelLanguage, String> second,
+        ) {
+          return first.key.canonicalTag.compareTo(second.key.canonicalTag);
+        });
 
     return <String, dynamic>{
       translationsKey: sortedEntries
