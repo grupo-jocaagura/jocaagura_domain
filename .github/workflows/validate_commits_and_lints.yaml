@@ -20,6 +20,12 @@ jobs:
       GH_TOKEN: ${{ github.token }}
 
     steps:
+      - name: Test release policy
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          python .github/scripts/tests/test_release_policy.py -v
       - name: Start validation timer
         id: timer
         shell: bash
