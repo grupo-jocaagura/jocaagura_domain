@@ -5,6 +5,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 Recent entries aim to follow a normalized structure. Older historical entries may preserve some original headings where reclassification would risk changing the original intent.
 
+## [1.43.2] - 2026-09-18
+
+### CI/CD
+
+- Make pull request validation to `develop` read-only.
+- Remove automatic package version mutation from PR validation.
+- Remove CI-generated commits and branch pushes from the validation flow.
+- Add Flutter test coverage enforcement with a 90% minimum.
+- Add JSON Schema validation to the PR quality gates.
+- Add `flutter pub publish --dry-run` as a publication-readiness check.
+
+> Package version preparation and automated pub.dev publication remain outside this checkpoint.
+
 ## [1.43.1] - 2026-09-18
 
 ### CI/CD
