@@ -43,7 +43,8 @@ Recent entries aim to follow a normalized structure. Older historical entries ma
   * Added explicit fallback-language support using `ModelLanguage.undetermined` when no fallback is declared.
   * Added deterministic JSON round-trip support for localized text using stable public JSON keys and nested `ModelLanguage` serialization.
   * Exported the new internationalization models through the main `jocaagura_domain` library.
-
+  * Add deterministic release-policy validation for package version preparation.
+  * Add a manually triggered version-preparation workflow guarded by the exact `develop` source SHA.
 ### Changed
 
 * Updated analyzer exclusions for generated Flutter build and platform directories in the package and example project.

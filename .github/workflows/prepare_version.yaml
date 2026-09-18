@@ -1,0 +1,145 @@
+name: Prepare package version
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_version:
+        description: Target semantic version
+        required: true
+        type: string
+
+      expected_sha:
+        description: Exact develop SHA authorized for version preparation
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: prepare-version
+  cancel-in-progress: false
+
+jobs:
+  prepare:
+    name: Prepare version
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout develop
+        uses: actions/checkout@v6
+        with:
+          ref: develop
+          fetch-depth: 0
+
+      - name: Verify expected source SHA
+        shell: bash
+        env:
+          EXPECTED_SHA: ${{ inputs.expected_sha }}
+        run: |
+          set -euo pipefail
+
+          ACTUAL_SHA="$(git rev-parse HEAD)"
+
+          echo "Expected SHA: $EXPECTED_SHA"
+          echo "Actual SHA:   $ACTUAL_SHA"
+
+          if [[ "$ACTUAL_SHA" != "$EXPECTED_SHA" ]]; then
+            echo "::error::develop moved after release preparation was authorized."
+            exit 1
+          fi
+
+      - name: Validate release policy
+        shell: bash
+        env:
+          TARGET_VERSION: ${{ inputs.target_version }}
+        run: |
+          set -euo pipefail
+
+          python .github/scripts/release_policy.py \
+            --target-version "$TARGET_VERSION"
+
+      - name: Update pubspec version
+        shell: bash
+        env:
+          TARGET_VERSION: ${{ inputs.target_version }}
+        run: |
+          set -euo pipefail
+
+          python - "$TARGET_VERSION" <<'PY'
+          import re
+          import sys
+          from pathlib import Path
+
+          target = sys.argv[1]
+          path = Path("pubspec.yaml")
+          content = path.read_text(encoding="utf-8")
+
+          updated, count = re.subn(
+              r"^version:\s*.+$",
+              f"version: {target}",
+              content,
+              count=1,
+              flags=re.MULTILINE,
+          )
+
+          if count != 1:
+              raise SystemExit(
+                  "Expected exactly one top-level version declaration"
+              )
+
+          path.write_text(updated, encoding="utf-8")
+          PY
+
+      - name: Verify mutation scope
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          git diff --check
+
+          CHANGED_FILES="$(git diff --name-only)"
+
+          echo "$CHANGED_FILES"
+
+          if [[ "$CHANGED_FILES" != "pubspec.yaml" ]]; then
+            echo "::error::Version preparation may only modify pubspec.yaml."
+            exit 1
+          fi
+
+      - name: Show prepared diff
+        run: git diff -- pubspec.yaml
+
+      - name: Commit prepared version
+        shell: bash
+        env:
+          TARGET_VERSION: ${{ inputs.target_version }}
+        run: |
+          set -euo pipefail
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add pubspec.yaml
+
+          git commit \
+            -m "chore: prepare version ${TARGET_VERSION}"
+
+          git push origin HEAD:develop
+
+      - name: Write preparation summary
+        if: always()
+        shell: bash
+        env:
+          TARGET_VERSION: ${{ inputs.target_version }}
+          EXPECTED_SHA: ${{ inputs.expected_sha }}
+        run: |
+          {
+            echo "## Version preparation"
+            echo ""
+            echo "- Target version: \`${TARGET_VERSION}\`"
+            echo "- Expected source SHA: \`${EXPECTED_SHA}\`"
+            echo "- Allowed mutation: \`pubspec.yaml\` only"
+            echo "- Publication: none"
+          } >> "$GITHUB_STEP_SUMMARY"
