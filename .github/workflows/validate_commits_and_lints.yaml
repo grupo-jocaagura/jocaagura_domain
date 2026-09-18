@@ -1,122 +1,144 @@
-name: Validate commits (signed) & linters
+name: Validate commits & lints
 
 on:
-  push:
-    branches: ['**']
+  workflow_call:
 
 permissions:
   contents: read
-  actions: write
 
 concurrency:
-  group: validate-${{ github.ref }}
+  group: base-validation-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
   validate:
-    name: Validate commits
+    name: Base validation
     runs-on: ubuntu-latest
+    timeout-minutes: 15
+
     env:
-      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GH_TOKEN: ${{ github.token }}
+
     steps:
+      - name: Start validation timer
+        id: timer
+        shell: bash
+        run: |
+          echo "started_at=$(date +%s)" >> "$GITHUB_OUTPUT"
+
       - name: Checkout
         uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
-      # 1) Firmas de todos los commits (push y PR)
-      - name: Check commit signatures (all commits)
+      - name: Check commit signatures
+        id: commits
         shell: bash
         run: |
           set -euo pipefail
 
-          if ! command -v jq >/dev/null 2>&1; then
-            sudo apt-get update -y && sudo apt-get install -y jq
-          fi
-
           OWNER="${{ github.repository_owner }}"
           REPO="${{ github.event.repository.name }}"
-          EVENT="${{ github.event_name }}"
 
           get_commit_shas_push() {
-            local before="${{ github.event.before }}"
-            local after="${{ github.event.after }}"
+            local before
+            local after
 
-            # 1) Caso normal: compare entre before y after (cuando before != 0000...)
+            before="$(jq -r '.before // empty' "$GITHUB_EVENT_PATH")"
+            after="$(jq -r '.after // empty' "$GITHUB_EVENT_PATH")"
+
             if [[ -n "$before" && -n "$after" && ! "$before" =~ ^0+$ ]]; then
-              curl -sSf -H "Authorization: Bearer ${GH_TOKEN}" \
-                -H "Accept: application/vnd.github+json" \
-                "https://api.github.com/repos/${OWNER}/${REPO}/compare/${before}...${after}" \
-                | jq -r '.commits[].sha'
-              return 0
+              gh api --paginate \
+                "repos/${OWNER}/${REPO}/compare/${before}...${after}?per_page=100" \
+                --jq '.commits[].sha'
+              return
             fi
 
-            # 2) Primer push a la rama (before = 0000…): usar commits del payload
-            local payload_commits
-            payload_commits="$(jq -r '.commits // [] | .[].id' "$GITHUB_EVENT_PATH" | sed '/^$/d')"
-            if [[ -n "${payload_commits//[$'\t\r\n ']/}" ]]; then
-              printf "%s\n" "$payload_commits"
-              return 0
-            fi
-
-            # 3) Último recurso: usar el SHA de after
-            if [[ -n "$after" ]]; then
-              printf "%s\n" "$after"
-              return 0
+            if [[ -n "$after" && ! "$after" =~ ^0+$ ]]; then
+              git rev-list "$after"
+              return
             fi
 
             return 1
           }
 
-          get_commit_shas_pr() {
-            local pr="${{ github.event.pull_request.number }}"
-            if [[ -n "$pr" ]]; then
-              curl -sSf -H "Authorization: Bearer ${GH_TOKEN}" \
-                -H "Accept: application/vnd.github+json" \
-                "https://api.github.com/repos/${OWNER}/${REPO}/pulls/${pr}/commits" \
-                | jq -r '.[].sha'
+          get_commit_shas_pull_request() {
+            local base
+            local head
+
+            base="$(jq -r '.pull_request.base.sha // empty' "$GITHUB_EVENT_PATH")"
+            head="$(jq -r '.pull_request.head.sha // empty' "$GITHUB_EVENT_PATH")"
+
+            if [[ -z "$base" || -z "$head" ]]; then
+              return 1
             fi
+
+            gh api --paginate \
+              "repos/${OWNER}/${REPO}/compare/${base}...${head}?per_page=100" \
+              --jq '.commits[].sha'
           }
 
-          SHAS=""
-          if [[ "$EVENT" == "pull_request" ]]; then
-            SHAS="$(get_commit_shas_pr || true)"
-          else
-            SHAS="$(get_commit_shas_push || true)"
-          fi
+          case "$GITHUB_EVENT_NAME" in
+            push)
+              SHAS="$(get_commit_shas_push)"
+              ;;
+            pull_request)
+              SHAS="$(get_commit_shas_pull_request)"
+              ;;
+            workflow_dispatch)
+              SHAS="$(git rev-parse HEAD)"
+              ;;
+            *)
+              echo "::error title=Unsupported event::Cannot resolve commits for '${GITHUB_EVENT_NAME}'."
+              exit 1
+              ;;
+          esac
+
+          SHAS="$(
+            printf '%s\n' "$SHAS" |
+              sed '/^[[:space:]]*$/d' |
+              sort -u
+          )"
 
           if [[ -z "${SHAS//[$'\t\r\n ']/}" ]]; then
-            echo "::error title=No commits found::No se identificaron commits para verificar."
+            echo "::error title=No commits found::No commits were identified."
             exit 1
           fi
 
-          fail=false
+          failed=false
+          checked_count=0
           failed_count=0
-          while read -r SHA; do
+
+          while IFS= read -r SHA; do
             [[ -z "$SHA" ]] && continue
-            RESP="$(curl -sSf \
-              -H "Authorization: Bearer ${GH_TOKEN}" \
-              -H "Accept: application/vnd.github+json" \
-              "https://api.github.com/repos/${OWNER}/${REPO}/commits/${SHA}")" || {
-                echo "::error title=API error::Failed to fetch commit ${SHA}"
-                fail=true; ((failed_count++)) || true; continue;
-              }
-            VERIFIED="$(echo "$RESP" | jq -r '.commit.verification.verified')"
-            REASON="$(echo "$RESP" | jq -r '.commit.verification.reason')"
+
+            ((checked_count++)) || true
+
+            RESP="$(
+              gh api \
+                -H "Accept: application/vnd.github+json" \
+                "repos/${OWNER}/${REPO}/commits/${SHA}"
+            )"
+
+            VERIFIED="$(printf '%s' "$RESP" | jq -r '.commit.verification.verified')"
+            REASON="$(printf '%s' "$RESP" | jq -r '.commit.verification.reason')"
+
             if [[ "$VERIFIED" != "true" ]]; then
               echo "::error title=Unsigned/Unverified commit::${SHA} verified=false (reason=${REASON})"
-              fail=true; ((failed_count++)) || true
+              failed=true
+              ((failed_count++)) || true
             else
-              echo "✓ ${SHA} verified (signed)"
+              echo "✓ ${SHA} verified"
             fi
           done <<< "$SHAS"
 
-          if [[ "$fail" == "true" ]]; then
-            echo "::error title=Commit signature check failed::${failed_count} commit(s) unsigned/unverified."
+          echo "checked=${checked_count}" >> "$GITHUB_OUTPUT"
+          echo "failed=${failed_count}" >> "$GITHUB_OUTPUT"
+
+          if [[ "$failed" == "true" ]]; then
             exit 1
           fi
 
-      # 2) Flutter toolchain
       - name: Setup Flutter
         uses: flutter-actions/setup-flutter@v4
         with:
@@ -124,45 +146,160 @@ jobs:
           cache: true
           cache-sdk: true
 
-
-      - name: Flutter doctor (sanity)
-        run: flutter doctor -v
-
-      - name: Cache pub
-        uses: actions/cache@v5
-        with:
-          path: ~/.pub-cache
-          key: ${{ runner.os }}-pub-${{ hashFiles('**/pubspec.lock', '**/pubspec.yaml') }}
-          restore-keys: ${{ runner.os }}-pub-
-
-      # 3) Pub get (monorepo o single package)
-      - name: Pub get (all packages)
+      - name: Discover tracked Flutter packages
+        id: packages
         shell: bash
         run: |
           set -euo pipefail
-          # todos los pubspec.yaml versionados, excluyendo rutas generadas
-          mapfile -t PUBS < <(git ls-files | grep -E '/?pubspec\.yaml$' | grep -Ev '(^|/)(build|\.dart_tool)/')
-          for f in "${PUBS[@]}"; do
-            d="$(dirname "$f")"
-            echo ">> flutter pub get in $d"
-            (cd "$d" && flutter pub get)
-          done
 
-      # 4) Bloquear dependency_overrides
-      - name: Check dependency_overrides
-        shell: bash
-        run: |
-          set -euo pipefail
-          if grep -R --include="pubspec.yaml" -nE '^[[:space:]]*dependency_overrides:' . ; then
-            echo "::error title=dependency_overrides detectado::El repo no debe incluir dependency_overrides en pubspec.yaml"
+          PACKAGE_FILE="${RUNNER_TEMP}/tracked_pubspecs.txt"
+
+          git ls-files |
+            grep -E '(^|/)pubspec\.yaml$' |
+            grep -Ev '(^|/)(build|\.dart_tool)/' \
+            > "$PACKAGE_FILE" || true
+
+          if [[ ! -s "$PACKAGE_FILE" ]]; then
+            echo "::error title=No packages found::No tracked pubspec.yaml files were found."
             exit 1
           fi
-          echo "✓ No se encontraron dependency_overrides"
 
-      # 5) Formato estricto
-      - name: Enforce dart format
-        run: dart format --output=none --set-exit-if-changed .
+          PACKAGE_COUNT="$(
+            wc -l < "$PACKAGE_FILE" |
+              tr -d '[:space:]'
+          )"
 
-      # 6) Análisis estático (fatal en infos/warnings)
-      - name: Dart analyze (fatal on infos/warnings)
-        run: dart analyze --fatal-infos --fatal-warnings .
+          echo "count=${PACKAGE_COUNT}" >> "$GITHUB_OUTPUT"
+
+          while IFS= read -r pubspec; do
+            echo "  - $(dirname "$pubspec")"
+          done < "$PACKAGE_FILE"
+
+      - name: Pub get
+        id: pub_get
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          PACKAGE_FILE="${RUNNER_TEMP}/tracked_pubspecs.txt"
+
+          while IFS= read -r pubspec; do
+            directory="$(dirname "$pubspec")"
+
+            echo ">> flutter pub get: ${directory}"
+
+            (
+              cd "$directory"
+              flutter pub get
+            )
+          done < "$PACKAGE_FILE"
+
+      - name: Check dependency_overrides
+        id: overrides
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          PACKAGE_FILE="${RUNNER_TEMP}/tracked_pubspecs.txt"
+          found=false
+
+          while IFS= read -r pubspec; do
+            if grep -nE '^[[:space:]]*dependency_overrides:' "$pubspec"; then
+              echo "::error file=${pubspec},title=dependency_overrides detected::Tracked pubspec.yaml must not contain dependency_overrides."
+              found=true
+            fi
+          done < "$PACKAGE_FILE"
+
+          if [[ "$found" == "true" ]]; then
+            exit 1
+          fi
+
+          echo "✓ No dependency_overrides found"
+
+      - name: Reject tracked pubspec overrides
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          overrides="$(git ls-files -- '**/pubspec_overrides.yaml' 'pubspec_overrides.yaml')"
+
+          if [[ -n "$overrides" ]]; then
+            echo "::error::Do not commit pubspec_overrides.yaml files."
+            echo "$overrides"
+            exit 1
+          fi
+
+      - name: Enforce Dart format
+        id: format
+        run: |
+          dart format \
+            --output=none \
+            --set-exit-if-changed \
+            .
+
+      - name: Flutter analyze
+        id: analyze
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          PACKAGE_FILE="${RUNNER_TEMP}/tracked_pubspecs.txt"
+
+          while IFS= read -r pubspec; do
+            directory="$(dirname "$pubspec")"
+
+            echo ">> flutter analyze: ${directory}"
+
+            (
+              cd "$directory"
+              flutter analyze
+            )
+          done < "$PACKAGE_FILE"
+
+      - name: Write base validation summary
+        if: always()
+        shell: bash
+        env:
+          JOB_STATUS: ${{ job.status }}
+          STARTED_AT: ${{ steps.timer.outputs.started_at }}
+          COMMITS_CHECKED: ${{ steps.commits.outputs.checked }}
+          PACKAGES_CHECKED: ${{ steps.packages.outputs.count }}
+          COMMITS_OUTCOME: ${{ steps.commits.outcome }}
+          PUB_GET_OUTCOME: ${{ steps.pub_get.outcome }}
+          OVERRIDES_OUTCOME: ${{ steps.overrides.outcome }}
+          FORMAT_OUTCOME: ${{ steps.format.outcome }}
+          ANALYZE_OUTCOME: ${{ steps.analyze.outcome }}
+        run: |
+          set -euo pipefail
+
+          result() {
+            case "${1:-}" in
+              success) printf '✅ PASS' ;;
+              failure) printf '❌ FAIL' ;;
+              cancelled) printf '⚪ CANCELLED' ;;
+              skipped) printf '⏭️ SKIPPED' ;;
+              *) printf 'N/A' ;;
+            esac
+          }
+
+          finished_at="$(date +%s)"
+          duration="N/A"
+
+          if [[ "${STARTED_AT:-}" =~ ^[0-9]+$ ]]; then
+            duration="$((finished_at - STARTED_AT))s"
+          fi
+
+          {
+            echo "## Flutter Base Validation"
+            echo ""
+            echo "| Check | Result |"
+            echo "| --- | ---: |"
+            echo "| Commits checked | ${COMMITS_CHECKED:-N/A} |"
+            echo "| Commit signatures | $(result "${COMMITS_OUTCOME:-}") |"
+            echo "| Packages checked | ${PACKAGES_CHECKED:-N/A} |"
+            echo "| Dependencies | $(result "${PUB_GET_OUTCOME:-}") |"
+            echo "| dependency_overrides | $(result "${OVERRIDES_OUTCOME:-}") |"
+            echo "| Dart format | $(result "${FORMAT_OUTCOME:-}") |"
+            echo "| Flutter analyze | $(result "${ANALYZE_OUTCOME:-}") |"
+            echo "| Duration | ${duration} |"
+          } >> "$GITHUB_STEP_SUMMARY"

@@ -5,6 +5,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 Recent entries aim to follow a normalized structure. Older historical entries may preserve some original headings where reclassification would risk changing the original intent.
 
+## [1.43.1] - 2026-09-18
+
+### CI/CD
+
+- Add a reusable read-only base validation workflow.
+- Preserve signed commit validation and Flutter static analysis.
+- Add deterministic package discovery and dependency override checks.
+- Add structured validation summaries.
+- Prepare the repository for the staged CI/CD governance alignment tracked in #213.
+
+> Automated pub.dev publication certification is not part of this release.
+
 ## [1.43.0] - 2026-08-17
 
 ### Added
