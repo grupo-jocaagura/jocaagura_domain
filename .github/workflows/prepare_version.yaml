@@ -17,7 +17,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: prepare-version
+  group: prepare-version-develop
   cancel-in-progress: false
 
 jobs:
@@ -25,6 +25,10 @@ jobs:
     name: Prepare version
     runs-on: ubuntu-latest
     timeout-minutes: 10
+
+    env:
+      GH_TOKEN: ${{ github.token }}
+      TARGET_BRANCH: develop
 
     steps:
       - name: Checkout develop
@@ -34,6 +38,7 @@ jobs:
           fetch-depth: 0
 
       - name: Verify expected source SHA
+        id: source
         shell: bash
         env:
           EXPECTED_SHA: ${{ inputs.expected_sha }}
@@ -45,10 +50,17 @@ jobs:
           echo "Expected SHA: $EXPECTED_SHA"
           echo "Actual SHA:   $ACTUAL_SHA"
 
-          if [[ "$ACTUAL_SHA" != "$EXPECTED_SHA" ]]; then
-            echo "::error::develop moved after release preparation was authorized."
+          if [[ -z "$EXPECTED_SHA" ]]; then
+            echo "::error::expected_sha is required."
             exit 1
           fi
+
+          if [[ "$ACTUAL_SHA" != "$EXPECTED_SHA" ]]; then
+            echo "::error::develop moved after version preparation was authorized."
+            exit 1
+          fi
+
+          echo "source_sha=$ACTUAL_SHA" >> "$GITHUB_OUTPUT"
 
       - name: Validate release policy
         shell: bash
@@ -60,25 +72,28 @@ jobs:
           python .github/scripts/release_policy.py \
             --target-version "$TARGET_VERSION"
 
-      - name: Update pubspec version
+      - name: Build prepared pubspec
+        id: prepared
         shell: bash
         env:
           TARGET_VERSION: ${{ inputs.target_version }}
         run: |
           set -euo pipefail
 
-          python - "$TARGET_VERSION" <<'PY'
+          python - "$TARGET_VERSION" "$RUNNER_TEMP/pubspec.prepared.yaml" <<'PY'
           import re
           import sys
           from pathlib import Path
 
-          target = sys.argv[1]
-          path = Path("pubspec.yaml")
-          content = path.read_text(encoding="utf-8")
+          target_version = sys.argv[1]
+          output_path = Path(sys.argv[2])
+
+          source_path = Path("pubspec.yaml")
+          content = source_path.read_text(encoding="utf-8")
 
           updated, count = re.subn(
               r"^version:\s*.+$",
-              f"version: {target}",
+              f"version: {target_version}",
               content,
               count=1,
               flags=re.MULTILINE,
@@ -89,57 +104,273 @@ jobs:
                   "Expected exactly one top-level version declaration"
               )
 
-          path.write_text(updated, encoding="utf-8")
+          if updated == content:
+              raise SystemExit(
+                  "Version preparation produced no change"
+              )
+
+          output_path.write_text(
+              updated,
+              encoding="utf-8",
+              newline="\n",
+          )
           PY
 
-      - name: Verify mutation scope
+          PREPARED_VERSION="$(
+            grep -E '^version:' "$RUNNER_TEMP/pubspec.prepared.yaml" |
+              sed -E 's/^version:[[:space:]]*//'
+          )"
+
+          if [[ "$PREPARED_VERSION" != "$TARGET_VERSION" ]]; then
+            echo "::error::Prepared pubspec version does not match target."
+            exit 1
+          fi
+
+          echo "Prepared pubspec.yaml for version $PREPARED_VERSION"
+
+      - name: Encode prepared pubspec
+        id: content
         shell: bash
         run: |
           set -euo pipefail
 
-          git diff --check
+          CONTENT_BASE64="$(
+            base64 -w 0 "$RUNNER_TEMP/pubspec.prepared.yaml"
+          )"
 
-          CHANGED_FILES="$(git diff --name-only)"
+          if [[ -z "$CONTENT_BASE64" ]]; then
+            echo "::error::Prepared pubspec content is empty."
+            exit 1
+          fi
 
-          echo "$CHANGED_FILES"
+          echo "base64=$CONTENT_BASE64" >> "$GITHUB_OUTPUT"
+
+      - name: Create GitHub-signed version commit
+        id: commit
+        shell: bash
+        env:
+          EXPECTED_SHA: ${{ inputs.expected_sha }}
+          TARGET_VERSION: ${{ inputs.target_version }}
+          PUBSPEC_BASE64: ${{ steps.content.outputs.base64 }}
+        run: |
+          set -euo pipefail
+
+          QUERY='
+          mutation(
+            $repository: String!,
+            $branch: String!,
+            $expectedHeadOid: GitObjectID!,
+            $headline: String!,
+            $contents: Base64String!
+          ) {
+            createCommitOnBranch(
+              input: {
+                branch: {
+                  repositoryNameWithOwner: $repository
+                  branchName: $branch
+                }
+                expectedHeadOid: $expectedHeadOid
+                message: {
+                  headline: $headline
+                }
+                fileChanges: {
+                  additions: [
+                    {
+                      path: "pubspec.yaml"
+                      contents: $contents
+                    }
+                  ]
+                }
+              }
+            ) {
+              commit {
+                oid
+                url
+              }
+              ref {
+                name
+              }
+            }
+          }'
+
+          RESPONSE="$(
+            gh api graphql \
+              -f query="$QUERY" \
+              -F repository="$GITHUB_REPOSITORY" \
+              -F branch="$TARGET_BRANCH" \
+              -F expectedHeadOid="$EXPECTED_SHA" \
+              -F headline="chore: prepare version $TARGET_VERSION" \
+              -F contents="$PUBSPEC_BASE64"
+          )"
+
+          NEW_SHA="$(
+            printf '%s' "$RESPONSE" |
+              jq -r '.data.createCommitOnBranch.commit.oid'
+          )"
+
+          COMMIT_URL="$(
+            printf '%s' "$RESPONSE" |
+              jq -r '.data.createCommitOnBranch.commit.url'
+          )"
+
+          if [[ -z "$NEW_SHA" || "$NEW_SHA" == "null" ]]; then
+            echo "::error::GraphQL mutation did not return a commit SHA."
+            printf '%s\n' "$RESPONSE"
+            exit 1
+          fi
+
+          echo "Created commit: $NEW_SHA"
+          echo "Commit URL:     $COMMIT_URL"
+
+          echo "sha=$NEW_SHA" >> "$GITHUB_OUTPUT"
+          echo "url=$COMMIT_URL" >> "$GITHUB_OUTPUT"
+
+      - name: Verify generated commit provenance
+        id: verification
+        shell: bash
+        env:
+          NEW_SHA: ${{ steps.commit.outputs.sha }}
+          EXPECTED_SHA: ${{ inputs.expected_sha }}
+        run: |
+          set -euo pipefail
+
+          COMMIT="$(
+            gh api \
+              -H "Accept: application/vnd.github+json" \
+              "repos/${GITHUB_REPOSITORY}/commits/${NEW_SHA}"
+          )"
+
+          VERIFIED="$(
+            printf '%s' "$COMMIT" |
+              jq -r '.commit.verification.verified'
+          )"
+
+          REASON="$(
+            printf '%s' "$COMMIT" |
+              jq -r '.commit.verification.reason'
+          )"
+
+          VERIFIED_AT="$(
+            printf '%s' "$COMMIT" |
+              jq -r '.commit.verification.verified_at'
+          )"
+
+          PARENT_SHA="$(
+            printf '%s' "$COMMIT" |
+              jq -r '.parents[0].sha'
+          )"
+
+          echo "Verified:    $VERIFIED"
+          echo "Reason:      $REASON"
+          echo "Verified at: $VERIFIED_AT"
+          echo "Parent SHA:  $PARENT_SHA"
+
+          if [[ "$VERIFIED" != "true" ]]; then
+            echo "::error::Generated commit is not verified by GitHub."
+            exit 1
+          fi
+
+          if [[ "$PARENT_SHA" != "$EXPECTED_SHA" ]]; then
+            echo "::error::Generated commit parent does not match expected source SHA."
+            exit 1
+          fi
+
+          echo "verified=$VERIFIED" >> "$GITHUB_OUTPUT"
+          echo "reason=$REASON" >> "$GITHUB_OUTPUT"
+          echo "verified_at=$VERIFIED_AT" >> "$GITHUB_OUTPUT"
+
+      - name: Verify mutation scope
+        shell: bash
+        env:
+          NEW_SHA: ${{ steps.commit.outputs.sha }}
+        run: |
+          set -euo pipefail
+
+          CHANGED_FILES="$(
+            gh api \
+              -H "Accept: application/vnd.github+json" \
+              "repos/${GITHUB_REPOSITORY}/commits/${NEW_SHA}" \
+              --jq '.files[].filename'
+          )"
+
+          echo "Changed files:"
+          printf '%s\n' "$CHANGED_FILES"
+
+          FILE_COUNT="$(
+            printf '%s\n' "$CHANGED_FILES" |
+              sed '/^[[:space:]]*$/d' |
+              wc -l |
+              tr -d '[:space:]'
+          )"
+
+          if [[ "$FILE_COUNT" != "1" ]]; then
+            echo "::error::Version preparation must modify exactly one file."
+            exit 1
+          fi
 
           if [[ "$CHANGED_FILES" != "pubspec.yaml" ]]; then
             echo "::error::Version preparation may only modify pubspec.yaml."
             exit 1
           fi
 
-      - name: Show prepared diff
-        run: git diff -- pubspec.yaml
-
-      - name: Commit prepared version
+      - name: Verify resulting package version
         shell: bash
         env:
+          NEW_SHA: ${{ steps.commit.outputs.sha }}
           TARGET_VERSION: ${{ inputs.target_version }}
         run: |
           set -euo pipefail
 
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          CONTENT_BASE64="$(
+            gh api \
+              -H "Accept: application/vnd.github+json" \
+              "repos/${GITHUB_REPOSITORY}/contents/pubspec.yaml?ref=${NEW_SHA}" \
+              --jq '.content'
+          )"
 
-          git add pubspec.yaml
+          RESULT_VERSION="$(
+            printf '%s' "$CONTENT_BASE64" |
+              tr -d '\n' |
+              base64 --decode |
+              grep -E '^version:' |
+              sed -E 's/^version:[[:space:]]*//'
+          )"
 
-          git commit \
-            -m "chore: prepare version ${TARGET_VERSION}"
+          echo "Resulting version: $RESULT_VERSION"
 
-          git push origin HEAD:develop
+          if [[ "$RESULT_VERSION" != "$TARGET_VERSION" ]]; then
+            echo "::error::Resulting pubspec version does not match target."
+            exit 1
+          fi
 
-      - name: Write preparation summary
+      - name: Write version preparation summary
         if: always()
         shell: bash
         env:
           TARGET_VERSION: ${{ inputs.target_version }}
           EXPECTED_SHA: ${{ inputs.expected_sha }}
+          NEW_SHA: ${{ steps.commit.outputs.sha }}
+          COMMIT_URL: ${{ steps.commit.outputs.url }}
+          VERIFIED: ${{ steps.verification.outputs.verified }}
+          VERIFICATION_REASON: ${{ steps.verification.outputs.reason }}
+          VERIFIED_AT: ${{ steps.verification.outputs.verified_at }}
         run: |
           {
             echo "## Version preparation"
             echo ""
-            echo "- Target version: \`${TARGET_VERSION}\`"
-            echo "- Expected source SHA: \`${EXPECTED_SHA}\`"
-            echo "- Allowed mutation: \`pubspec.yaml\` only"
-            echo "- Publication: none"
+            echo "| Property | Value |"
+            echo "| --- | --- |"
+            echo "| Target branch | \`${TARGET_BRANCH}\` |"
+            echo "| Target version | \`${TARGET_VERSION}\` |"
+            echo "| Expected source SHA | \`${EXPECTED_SHA}\` |"
+            echo "| Generated commit | \`${NEW_SHA:-N/A}\` |"
+            echo "| GitHub verified | \`${VERIFIED:-N/A}\` |"
+            echo "| Verification reason | \`${VERIFICATION_REASON:-N/A}\` |"
+            echo "| Verified at | \`${VERIFIED_AT:-N/A}\` |"
+            echo "| Allowed mutation | \`pubspec.yaml\` only |"
+            echo "| Publication | none |"
+            echo ""
+            if [[ -n "${COMMIT_URL:-}" ]]; then
+              echo "Commit: ${COMMIT_URL}"
+            fi
           } >> "$GITHUB_STEP_SUMMARY"

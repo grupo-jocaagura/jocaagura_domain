@@ -15,9 +15,12 @@ Recent entries aim to follow a normalized structure. Older historical entries ma
 - Add Flutter test coverage enforcement with a 90% minimum.
 - Add JSON Schema validation to the PR quality gates.
 - Add `flutter pub publish --dry-run` as a publication-readiness check.
+- Add deterministic release-policy validation for package version preparation.
+- Add a manually triggered version-preparation workflow guarded by the exact `develop` source SHA.
+- Replace legacy user impersonation with GitHub-native GraphQL version commits using the workflow token.
+- Require exact-head compare-and-swap validation and post-commit signature verification for version preparation.
 
-> Package version preparation and automated pub.dev publication remain outside this checkpoint.
-
+> Package version preparation and automated pub.dev publication remain outside this checkpoint until CP3-B execution is certified.
 ## [1.43.1] - 2026-09-18
 
 ### CI/CD
