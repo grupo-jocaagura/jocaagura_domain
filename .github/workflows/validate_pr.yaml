@@ -1,129 +1,141 @@
-name: Validate PR and Update Version
+name: Validate PR to develop
 
 on:
   pull_request:
     branches:
       - develop
+  workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
+
+concurrency:
+  group: validate-develop-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  validate_and_update:
+  base_validation:
+    name: Base validation
+    uses: ./.github/workflows/validate_commits_and_lints.yaml
+
+  validate_pr:
     name: Validate PR to develop
     runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs:
+      - base_validation
 
     steps:
-      - name: Ensure PR targets develop branch
-        run: |
-          if [[ "${{ github.base_ref }}" != "develop" ]]; then
-            echo "❌ This PR must be based on 'develop'. Current base: ${{ github.base_ref }}"
-            exit 1
-          fi
-
-      - name: Checkout Code
+      - name: Checkout
         uses: actions/checkout@v6
         with:
-          ref: ${{ github.head_ref }}
           fetch-depth: 0
 
-      - name: Set up Flutter
-        uses: subosito/flutter-action@v2
+      - name: Setup Flutter
+        uses: flutter-actions/setup-flutter@v4
         with:
           channel: stable
           cache: true
+          cache-sdk: true
 
-      - name: Validate Changelog Update
-        run: |
-          if ! git diff --name-only ${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }} | grep -q CHANGELOG.md; then
-            echo "❌ CHANGELOG.md must be updated in this PR."
-            exit 1
-          fi
-
-      - name: Install Dependencies
-        run: flutter pub get
-
-      - name: Check Formatting (read-only)
-        run: dart format --output=none --set-exit-if-changed .
-
-      - name: Analyze Code
-        run: flutter analyze
-
-      - name: Run Tests
-        run: flutter test
-
-      - name: Install jq
-        run: sudo apt-get update && sudo apt-get install -y jq
-
-      - name: Configure SSH Signing Key
-        if: ${{ github.event.pull_request.head.repo.full_name == github.repository }}
-        run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_SIGNING_KEY }}" > ~/.ssh/commit_signing_key
-          chmod 600 ~/.ssh/commit_signing_key
-          eval $(ssh-agent -s)
-          ssh-add ~/.ssh/commit_signing_key
-          ssh-keygen -y -f ~/.ssh/commit_signing_key > ~/.ssh/commit_signing_key.pub
-          git config --global user.name "${{ secrets.BOT_NAME }}"
-          git config --global user.email "${{ secrets.BOT_EMAIL }}"
-          git config --global user.signingkey ~/.ssh/commit_signing_key
-          git config --global commit.gpgsign true
-          git config --global gpg.format ssh
-
-      - name: Increment Version Based on Label (same-repo PRs)
-        if: ${{ github.event.pull_request.head.repo.full_name == github.repository }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Validate target branch
+        if: github.event_name == 'pull_request'
+        shell: bash
         run: |
           set -euo pipefail
 
-          CURRENT_VERSION=$(grep '^version:' pubspec.yaml | awk '{print $2}')
-          echo "Current version: $CURRENT_VERSION"
-
-          LABELS_RESPONSE=$(curl -s -H "Authorization: Bearer $GITHUB_TOKEN" \
-            -H "Accept: application/vnd.github.v3+json" \
-            "https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/labels")
-
-          LABELS=$(echo "$LABELS_RESPONSE" | jq -r '.[].name')
-
-          if echo "$LABELS" | grep -q "major"; then
-            UPDATED_VERSION=$(echo "$CURRENT_VERSION" | awk -F. '{$1+=1; $2=0; $3=0}1' OFS=".")
-          elif echo "$LABELS" | grep -q "minor"; then
-            UPDATED_VERSION=$(echo "$CURRENT_VERSION" | awk -F. '{$2+=1; $3=0}1' OFS=".")
-          elif echo "$LABELS" | grep -q "patch"; then
-            UPDATED_VERSION=$(echo "$CURRENT_VERSION" | awk -F. '{$3+=1}1' OFS=".")
-          else
-            echo "❌ No version label found. Please add 'major', 'minor', or 'patch'."
+          if [[ "${{ github.base_ref }}" != "develop" ]]; then
+            echo "::error::This workflow only validates pull requests targeting develop."
             exit 1
           fi
 
-          echo "Updated version: $UPDATED_VERSION"
-          sed -i "s/^version:.*/version: $UPDATED_VERSION/" pubspec.yaml
-
-          git add pubspec.yaml
-          git commit -S -m "chore(version): bump to $UPDATED_VERSION"
-
-      - name: Sync PR branch and push with retry (same-repo PRs)
-        if: ${{ github.event.pull_request.head.repo.full_name == github.repository }}
+      - name: Validate CHANGELOG update
+        if: github.event_name == 'pull_request'
+        shell: bash
         run: |
-          set -e
-          BRANCH="${{ github.head_ref }}"
-          git config --global rebase.gpgSign true
+          set -euo pipefail
 
-          for i in 1 2 3; do
-            git fetch origin "$BRANCH"
-            git pull --rebase origin "$BRANCH" || true
-            if git push; then
-              echo "✅ Push OK"
-              exit 0
-            fi
-            echo "🔁 Reintentando ($i/3)..."
-            sleep $((i*2))
-          done
-          echo "❌ No se pudo pushear tras reintentos"; exit 1
+          BASE_SHA="${{ github.event.pull_request.base.sha }}"
+          HEAD_SHA="${{ github.event.pull_request.head.sha }}"
 
-      - name: Skipping version bump/push for fork PRs
-        if: ${{ github.event.pull_request.head.repo.full_name != github.repository }}
+          if ! git diff --name-only "${BASE_SHA}..${HEAD_SHA}" \
+            | grep -qx 'CHANGELOG.md'; then
+            echo "::error file=CHANGELOG.md::CHANGELOG.md must be updated in this PR."
+            exit 1
+          fi
+
+      - name: Install Flutter dependencies
+        run: flutter pub get
+
+      - name: Run tests with coverage
+        run: flutter test --coverage
+
+      - name: Enforce minimum line coverage
+        shell: bash
+        env:
+          MIN_COVERAGE: "90.00"
         run: |
-          echo "ℹ️ Fork PR detected: skipping automatic version bump & push."
-          echo "Please bump 'pubspec.yaml' locally or let a maintainer apply the label and update."
+          set -euo pipefail
+
+          if [[ ! -f coverage/lcov.info ]]; then
+            echo "::error::coverage/lcov.info was not generated."
+            exit 1
+          fi
+
+          read -r LF LH < <(
+            awk -F: '
+              /^LF:/ { found += $2 }
+              /^LH:/ { hit += $2 }
+              END { print found + 0, hit + 0 }
+            ' coverage/lcov.info
+          )
+
+          if [[ "$LF" -eq 0 ]]; then
+            echo "::error::No instrumented lines were found in coverage/lcov.info."
+            exit 1
+          fi
+
+          COVERAGE="$(
+            awk -v hit="$LH" -v found="$LF" \
+              'BEGIN { printf "%.2f", (hit / found) * 100 }'
+          )"
+
+          echo "Lines found: $LF"
+          echo "Lines hit:   $LH"
+          echo "Coverage:    $COVERAGE%"
+          echo "Minimum:     $MIN_COVERAGE%"
+
+          if ! awk -v actual="$COVERAGE" -v minimum="$MIN_COVERAGE" \
+            'BEGIN { exit !(actual >= minimum) }'; then
+            echo "::error::Line coverage $COVERAGE% is below required $MIN_COVERAGE%."
+            exit 1
+          fi
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install schema tooling
+        run: npm ci
+
+      - name: Validate JSON schemas
+        run: npm run validate:schemas
+
+      - name: Validate package publication
+        run: flutter pub publish --dry-run
+
+      - name: Write PR validation summary
+        if: always()
+        shell: bash
+        run: |
+          {
+            echo "## PR validation"
+            echo ""
+            echo "- Target: develop"
+            echo "- Repository mutation: none"
+            echo "- Version mutation: none"
+            echo "- Publication: dry-run only"
+            echo "- Minimum line coverage: 90.00%"
+          } >> "$GITHUB_STEP_SUMMARY"
