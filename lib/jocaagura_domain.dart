@@ -122,8 +122,6 @@ part 'domain/http/http_request_errors.dart';
 part 'domain/http/model_config_http_request.dart';
 part 'domain/http/request_context.dart';
 part 'domain/http/virtual_crud_service.dart';
-part 'domain/internationalization/model_language.dart';
-part 'domain/internationalization/model_localized_text.dart';
 part 'domain/json_schema/model_json_schema_document.dart';
 part 'domain/json_schema/model_json_schema_reference.dart';
 part 'domain/legal_id_model.dart';
