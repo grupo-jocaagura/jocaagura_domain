@@ -7,7 +7,7 @@ import 'dart:convert';
 import 'dart:math';
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide DateUtils;
 import 'package:jocaagura_domain_core/jocaagura_domain_core.dart';
 
 export 'package:jocaagura_domain_core/jocaagura_domain_core.dart';
@@ -35,7 +35,6 @@ export 'src/repositories/repository_connectivity_impl.dart';
 export 'src/repositories/repository_http_request_impl.dart';
 export 'src/repositories/repository_ws_database_impl.dart';
 
-part 'date_utils.dart';
 part 'domain/address_model.dart';
 part 'domain/ai/model_ai_execution_config.dart';
 part 'domain/ai/model_ai_message.dart';
@@ -182,7 +181,7 @@ part 'domain/user_model.dart';
 part 'domain/utils/money_utils.dart';
 part 'domain/vehicles/model_vehicle.dart';
 part 'per_key_fifo_executor.dart';
-part 'utils.dart';
+
 
 /// A base class for all domain data models.
 ///
