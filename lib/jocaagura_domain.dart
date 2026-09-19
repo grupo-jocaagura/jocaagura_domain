@@ -6,7 +6,6 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide DateUtils;
 import 'package:jocaagura_domain_core/jocaagura_domain_core.dart';
 
@@ -98,7 +97,6 @@ part 'domain/either_flow/model_flow_step_completion.dart';
 part 'domain/entity_bloc.dart';
 part 'domain/entity_provider.dart';
 part 'domain/entity_service.dart';
-part 'domain/error_item_model.dart';
 part 'domain/financial/financial_movement.dart';
 part 'domain/financial/ledger_model.dart';
 part 'domain/gateways/gateway_auth.dart';
@@ -214,3 +212,11 @@ abstract class Model {
   @override
   int get hashCode;
 }
+
+/// Default instance of [ErrorItem] representing a generic unknown error.
+const ErrorItem defaultErrorItem = ErrorItem(
+  title: 'Unknown Error',
+  code: 'ERR_UNKNOWN',
+  description: 'An unspecified error has occurred.',
+  meta: <String, dynamic>{'severity': 'low'},
+);
