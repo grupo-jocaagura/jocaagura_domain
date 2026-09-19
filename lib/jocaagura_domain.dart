@@ -8,6 +8,7 @@ import 'dart:math';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:jocaagura_domain_core/jocaagura_domain_core.dart';
 
 export 'package:jocaagura_domain_core/jocaagura_domain_core.dart';
 
@@ -98,7 +99,6 @@ part 'domain/either_flow/model_flow_step_completion.dart';
 part 'domain/entity_bloc.dart';
 part 'domain/entity_provider.dart';
 part 'domain/entity_service.dart';
-part 'domain/entity_util.dart';
 part 'domain/error_item_model.dart';
 part 'domain/financial/financial_movement.dart';
 part 'domain/financial/ledger_model.dart';
@@ -167,7 +167,6 @@ part 'domain/usecases/databases_crud/databases_crud_usecases.dart';
 part 'domain/usecases/databases_crud/facade_crud_database.dart';
 part 'domain/usecases/databases_crud/facade_ws_database_usecases.dart';
 part 'domain/usecases/http_request/http_request_usecases.dart';
-part 'domain/usecases/no_params.dart';
 part 'domain/usecases/session/get_current_user_usecase.dart';
 part 'domain/usecases/session/log_in_silently_usecase.dart';
 part 'domain/usecases/session/log_in_user_and_password_usecase.dart';
@@ -183,7 +182,6 @@ part 'domain/user_model.dart';
 part 'domain/utils/money_utils.dart';
 part 'domain/vehicles/model_vehicle.dart';
 part 'per_key_fifo_executor.dart';
-part 'unit.dart';
 part 'utils.dart';
 
 /// A base class for all domain data models.
