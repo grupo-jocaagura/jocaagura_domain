@@ -89,7 +89,6 @@ part 'domain/education/model_competency_standard.dart';
 part 'domain/education/model_learning_goal.dart';
 part 'domain/education/model_learning_item.dart';
 part 'domain/education/model_performance_indicator.dart';
-part 'domain/either.dart';
 part 'domain/either_flow/model_complete_flow.dart';
 part 'domain/either_flow/model_flow_certificate.dart';
 part 'domain/either_flow/model_flow_step.dart';
