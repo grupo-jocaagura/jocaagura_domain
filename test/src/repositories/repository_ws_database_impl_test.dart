@@ -1,10 +1,12 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart' show immutable;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:jocaagura_domain/jocaagura_domain.dart';
 
 // ---------- Fakes & helpers ----------
 
+@immutable
 class _UserModel extends Model {
   const _UserModel({required this.id, required this.name});
 

@@ -1,5 +1,7 @@
+import 'package:flutter/foundation.dart' show immutable;
 import 'package:jocaagura_domain/jocaagura_domain.dart';
 
+@immutable
 class MockAnimal extends AnimalModel {
   const MockAnimal({
     required super.energy,

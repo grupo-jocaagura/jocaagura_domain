@@ -1,0 +1,121 @@
+
+=== lib/domain/ui/model_main_menu_model.dart [ADAPTAR_FLUTTER] ===
+--- lib/domain/ui/model_main_menu_model.dart
+
++++ core/src/models/ui/model_main_menu_model.dart
+
+@@ -1,41 +1,93 @@
+
++class ModelIconData extends Model {
++const ModelIconData({
++required this.codePoint,
++this.fontFamily,
++this.fontPackage,
++this.matchTextDirection = false,
++});
++factory ModelIconData.fromJson(Map<String, dynamic> json) => ModelIconData(
++codePoint: json['codePoint'] as int,
++fontFamily: json['fontFamily'] as String?,
++fontPackage: json['fontPackage'] as String?,
++matchTextDirection: (json['matchTextDirection'] as bool?) ?? false,
++);
++final int codePoint;
++final String? fontFamily;
++final String? fontPackage;
++final bool matchTextDirection;
++@override
++ModelIconData copyWith({
++int? codePoint,
++Object? fontFamily = unit,
++Object? fontPackage = unit,
++bool? matchTextDirection,
++}) => ModelIconData(
++codePoint: codePoint ?? this.codePoint,
++fontFamily: identical(fontFamily, unit)
++? this.fontFamily
++: fontFamily as String?,
++fontPackage: identical(fontPackage, unit)
++? this.fontPackage
++: fontPackage as String?,
++matchTextDirection: matchTextDirection ?? this.matchTextDirection,
++);
++@override
++Map<String, dynamic> toJson() => <String, dynamic>{
++'codePoint': codePoint,
++'fontFamily': fontFamily,
++'fontPackage': fontPackage,
++'matchTextDirection': matchTextDirection,
++};
++@override
++bool operator ==(Object other) =>
++other is ModelIconData &&
++other.codePoint == codePoint &&
++other.fontFamily == fontFamily &&
++other.fontPackage == fontPackage &&
++other.matchTextDirection == matchTextDirection;
++@override
++int get hashCode =>
++Object.hash(codePoint, fontFamily, fontPackage, matchTextDirection);
++}
+ class ModelMainMenuModel extends Model {
+ const ModelMainMenuModel({
+ required this.iconData,
+-required this.onPressed,
+ required this.label,
+ this.description = '',
+ });
+-final IconData iconData;
+-final void Function() onPressed;
++factory ModelMainMenuModel.fromJson(Map<String, dynamic> json) =>
++ModelMainMenuModel(
++iconData: ModelIconData.fromJson(
++json['iconData'] as Map<String, dynamic>,
++),
++label: json['label'] as String,
++description: (json['description'] as String?) ?? '',
++);
++final ModelIconData iconData;
+ final String label;
+ final String description;
+ @override
+ ModelMainMenuModel copyWith({
+-IconData? iconData,
+-void Function()? onPressed,
++ModelIconData? iconData,
+ String? label,
+ String? description,
+-}) {
+-return ModelMainMenuModel(
++}) => ModelMainMenuModel(
+ iconData: iconData ?? this.iconData,
+-onPressed: onPressed ?? this.onPressed,
+ label: label ?? this.label,
+ description: description ?? this.description,
+ );
+-}
++@override
++Map<String, dynamic> toJson() => <String, dynamic>{
++'iconData': iconData.toJson(),
++'label': label,
++'description': description,
++};
+ @override
+ bool operator ==(Object other) =>
+-identical(this, other) ||
+ other is ModelMainMenuModel &&
+-runtimeType == other.runtimeType &&
+-iconData == other.iconData &&
+-label == other.label &&
+-description == other.description &&
+-hashCode == other.hashCode;
++other.iconData == iconData &&
++other.label == label &&
++other.description == description;
+ @override
+-int get hashCode => label.toLowerCase().hashCode;
+-@override
+-Map<String, dynamic> toJson() {
+-return <String, dynamic>{};
++int get hashCode => Object.hash(iconData, label, description);
+ }
+-}

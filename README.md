@@ -17,6 +17,51 @@ Paquete Flutter con modelos de dominio, utilidades, componentes reactivos, contr
 
 El objetivo del paquete es reducir duplicidad y mantener una base compartida entre aplicaciones del ecosistema.
 
+## Migración de ModelVector para la próxima major
+
+`ModelVector` ahora proviene de `jocaagura_domain_core` y sigue disponible
+desde el import habitual. Las conversiones de Flutter se trasladan a
+`UtilsFlutter`; este cambio requiere actualizar las llamadas del consumidor:
+
+| Antes | Ahora |
+| --- | --- |
+| `ModelVector.fromOffset(offset)` | `UtilsFlutter.fromOffset(offset)` |
+| `vector.offset` | `UtilsFlutter.toOffset(vector)` |
+
+```dart
+import 'package:flutter/widgets.dart';
+import 'package:jocaagura_domain/jocaagura_domain.dart';
+
+final ModelVector vector = UtilsFlutter.fromOffset(const Offset(3.25, -2.5));
+final Offset offset = UtilsFlutter.toOffset(vector);
+```
+
+Los dos métodos estáticos copian `dx` y `dy` sin redondeo, límites ni validación,
+conservando también cero con signo, infinito y NaN. El enum `ModelVectorEnum`
+y las constantes `defaultModelVector`, `unitX` y `unitY` siguen expuestos.
+El vector y el contrato base `Model` tienen identidad de tipo con los del core.
+`Model` sigue disponible desde el import habitual; los modelos locales también
+implementan ese contrato canónico, sin una clase base duplicada.
+
+## Catálogo canónico de modelos
+
+La fachada importa y reexporta `jocaagura_domain_core/jocaagura_domain_models.dart`.
+Los modelos, enums, valores por defecto y parámetros CRUD provienen del core
+`^1.3.0`; los consumidores mantienen el import habitual de `jocaagura_domain`.
+Los BLoCs, servicios, repositorios, casos de uso ejecutables y fakes permanecen
+en esta capa Flutter y utilizan esos mismos tipos canónicos.
+
+`ModelMainMenuModel` conserva su contrato Flutter (`IconData` y `onPressed`).
+La fachada excluye el modelo de menú homónimo del core para evitar conflictos;
+para usar su versión de datos, importa `jocaagura_domain_models.dart` con un
+prefijo. `ModelIconData` sí queda disponible desde la fachada.
+
+Esta migración adopta también las correcciones del core en decodificación JSON
+de `DeathRecordModel` y `LegalIdModel`, y sus contratos de igualdad/hash de
+colecciones. Estos cambios forman parte de la próxima major y pueden cambiar
+resultados de comparaciones, hashes y datos recuperados respecto a la versión
+anterior; no deben tratarse como un simple cambio de imports.
+
 ## Inicio rápido
 
 ### Requisitos

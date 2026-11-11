@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show immutable;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:jocaagura_domain/jocaagura_domain.dart';
 
@@ -238,6 +239,7 @@ void main() {
   });
 }
 
+@immutable
 class _TestModel extends Model {
   const _TestModel({required this.id, required this.name, this.flag = false});
 

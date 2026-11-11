@@ -13,7 +13,7 @@ void main() {
 
     test('fromOffset creates a ModelVector from an Offset', () {
       const Offset offset = Offset(1.0, 2.0);
-      final ModelVector vector = ModelVector.fromOffset(offset);
+      final ModelVector vector = UtilsFlutter.fromOffset(offset);
       expect(vector.dx, offset.dx);
       expect(vector.dy, offset.dy);
     });
@@ -87,7 +87,7 @@ void main() {
 
     test('offset getter should return correct Offset object', () {
       // Comprobar que el Offset retornado tenga los valores correctos
-      expect(vector.offset, equals(const Offset(dx, dy)));
+      expect(UtilsFlutter.toOffset(vector), equals(const Offset(dx, dy)));
     });
 
     test('toString should return the correct string representation', () {
@@ -333,8 +333,8 @@ void main() {
   group('Offset & equality/hash edge cases', () {
     test('offset conversion', () {
       const ModelVector v = ModelVector(3.0, -2.0);
-      expect(v.offset.dx, 3.0);
-      expect(v.offset.dy, -2.0);
+      expect(UtilsFlutter.toOffset(v).dx, 3.0);
+      expect(UtilsFlutter.toOffset(v).dy, -2.0);
     });
 
     test('0.0 vs -0.0 equality and hashCode surveillance', () {

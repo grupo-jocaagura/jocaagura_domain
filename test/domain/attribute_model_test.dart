@@ -1,3 +1,6 @@
+// Exercise the historical facade helper, deprecated by the canonical core.
+// ignore_for_file: deprecated_member_use
+
 import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
