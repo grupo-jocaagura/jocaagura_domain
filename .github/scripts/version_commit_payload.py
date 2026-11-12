@@ -12,6 +12,8 @@ QUERY = '''mutation CreateVersionCommit($input: CreateCommitOnBranchInput!) {
 
 def write_payload(output: Path, directory: Path, env: dict[str, str]) -> None:
     """Encode the two prepared files and preserve the exact-head CAS contract."""
+    if not env['TARGET_BRANCH'].startswith('codex/prepare-version-'):
+        raise ValueError('Version commits must target a preparation branch, never develop/master')
     repository = env['GITHUB_REPOSITORY']
     run_id = env['RUN_ID']
     attempt = env['RUN_ATTEMPT']
