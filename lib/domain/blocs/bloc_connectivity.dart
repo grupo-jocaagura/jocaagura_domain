@@ -22,18 +22,14 @@ part of '../../jocaagura_domain.dart';
 /// ```
 class BlocConnectivity extends BlocModule {
   BlocConnectivity({
-    required WatchConnectivityUseCase watch,
-    required GetConnectivitySnapshotUseCase snapshot,
-    required CheckConnectivityTypeUseCase checkType,
-    required CheckInternetSpeedUseCase checkSpeed,
+    required this._watch,
+    required this._snapshot,
+    required this._checkType,
+    required this._checkSpeed,
     ConnectivityModel initial = defaultConnectivityModel,
-  })  : _watch = watch,
-        _snapshot = snapshot,
-        _checkType = checkType,
-        _checkSpeed = checkSpeed,
-        _state = BlocGeneral<Either<ErrorItem, ConnectivityModel>>(
-          Right<ErrorItem, ConnectivityModel>(initial),
-        );
+  }) : _state = BlocGeneral<Either<ErrorItem, ConnectivityModel>>(
+         Right<ErrorItem, ConnectivityModel>(initial),
+       );
 
   final WatchConnectivityUseCase _watch;
   final GetConnectivitySnapshotUseCase _snapshot;
@@ -54,22 +50,28 @@ class BlocConnectivity extends BlocModule {
   /// Loads the initial snapshot and updates state.
   Future<void> loadInitial() async {
     final Either<ErrorItem, ConnectivityModel> res = await _snapshot();
-    res.fold((ErrorItem error) {
-      _state.value = Left<ErrorItem, ConnectivityModel>(error);
-    }, (ConnectivityModel model) {
-      _state.value = Right<ErrorItem, ConnectivityModel>(model);
-    });
+    res.fold(
+      (ErrorItem error) {
+        _state.value = Left<ErrorItem, ConnectivityModel>(error);
+      },
+      (ConnectivityModel model) {
+        _state.value = Right<ErrorItem, ConnectivityModel>(model);
+      },
+    );
   }
 
   /// Subscribes to continuous updates.
   void startWatching() {
     _sub?.cancel();
     _sub = _watch().listen((Either<ErrorItem, ConnectivityModel> either) {
-      either.fold((ErrorItem e) {
-        _state.value = Left<ErrorItem, ConnectivityModel>(e);
-      }, (ConnectivityModel model) {
-        _state.value = Right<ErrorItem, ConnectivityModel>(model);
-      });
+      either.fold(
+        (ErrorItem e) {
+          _state.value = Left<ErrorItem, ConnectivityModel>(e);
+        },
+        (ConnectivityModel model) {
+          _state.value = Right<ErrorItem, ConnectivityModel>(model);
+        },
+      );
     });
   }
 

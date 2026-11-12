@@ -43,10 +43,7 @@ void main() {
             defaultLegalIdModel.copyWith().toString(),
         isTrue,
       );
-      expect(
-        defaultLegalIdModel == defaultLegalIdModel.copyWith(),
-        isTrue,
-      );
+      expect(defaultLegalIdModel == defaultLegalIdModel.copyWith(), isTrue);
       // Add more assertions for each property as needed
     });
 
@@ -133,10 +130,7 @@ void main() {
         getEnumValueFromString('Cédula de Extranjería'),
         LegalIdTypeEnum.cedulaExtranjeria,
       );
-      expect(
-        getEnumValueFromString('PASAPORTE'),
-        LegalIdTypeEnum.pasaporte,
-      );
+      expect(getEnumValueFromString('PASAPORTE'), LegalIdTypeEnum.pasaporte);
       expect(
         getEnumValueFromString('LicencIa de Conducción'),
         LegalIdTypeEnum.licenciaConduccion,
@@ -145,10 +139,7 @@ void main() {
         getEnumValueFromString('Certificado de Nacido Vivo'),
         LegalIdTypeEnum.certificadoNacidoVivo,
       );
-      expect(
-        getEnumValueFromString('K3'),
-        LegalIdTypeEnum.cedula,
-      );
+      expect(getEnumValueFromString('K3'), LegalIdTypeEnum.cedula);
     });
   });
 }

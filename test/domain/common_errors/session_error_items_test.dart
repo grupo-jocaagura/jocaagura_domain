@@ -10,9 +10,7 @@ class _CustomLockValue {
 
 void main() {
   group('SessionErrorItems.getReason', () {
-    test(
-        'Given ErrorItem with string reason When getReason is called Then returns reason',
-        () {
+    test('Given ErrorItem with string reason When getReason is called Then returns reason', () {
       const ErrorItem error = SessionErrorItems.invalidCredentials;
 
       final String reason = SessionErrorItems.getReason(error);
@@ -20,9 +18,7 @@ void main() {
       expect(reason, 'invalid_credentials');
     });
 
-    test(
-        'Given ErrorItem without reason When getReason is called Then returns empty string',
-        () {
+    test('Given ErrorItem without reason When getReason is called Then returns empty string', () {
       const ErrorItem error = ErrorItem(
         title: 'Custom error',
         code: 'CUSTOM_ERROR',
@@ -34,9 +30,7 @@ void main() {
       expect(reason, '');
     });
 
-    test(
-        'Given ErrorItem with non-string reason When getReason is called Then returns empty string',
-        () {
+    test('Given ErrorItem with non-string reason When getReason is called Then returns empty string', () {
       const ErrorItem error = ErrorItem(
         title: 'Custom error',
         code: 'CUSTOM_ERROR',
@@ -51,9 +45,7 @@ void main() {
   });
 
   group('SessionErrorItems.fromReason', () {
-    test(
-        'Given known reason When fromReason is called Then returns matching auth error',
-        () {
+    test('Given known reason When fromReason is called Then returns matching auth error', () {
       final Map<String, ErrorItem> expectedItems = <String, ErrorItem>{
         'invalid_credentials': SessionErrorItems.invalidCredentials,
         'invalid_email': SessionErrorItems.invalidEmailFormat,
@@ -89,20 +81,17 @@ void main() {
       }
     });
 
-    test(
-        'Given known reason with spaces and uppercase When fromReason is called Then normalizes reason',
-        () {
+    test('Given known reason with spaces and uppercase When fromReason is called Then normalizes reason', () {
       final ErrorItem result = SessionErrorItems.fromReason(' TOKEN_EXPIRED ');
 
       expect(result.code, SessionErrorItems.tokenExpired.code);
       expect(SessionErrorItems.getReason(result), 'token_expired');
     });
 
-    test(
-        'Given unknown reason When fromReason is called Then returns unknown error preserving original reason',
-        () {
-      final ErrorItem result =
-          SessionErrorItems.fromReason('custom_provider_error');
+    test('Given unknown reason When fromReason is called Then returns unknown error preserving original reason', () {
+      final ErrorItem result = SessionErrorItems.fromReason(
+        'custom_provider_error',
+      );
 
       expect(result.code, SessionErrorItems.unknown.code);
       expect(result.title, SessionErrorItems.unknown.title);
@@ -111,9 +100,7 @@ void main() {
   });
 
   group('SessionErrorItems.mergeProviderMeta', () {
-    test(
-        'Given provider metadata When mergeProviderMeta is called Then merges values preserving base reason',
-        () {
+    test('Given provider metadata When mergeProviderMeta is called Then merges values preserving base reason', () {
       final DateTime lockUntil = DateTime.utc(2026, 6, 15, 10, 30);
 
       final ErrorItem result = SessionErrorItems.mergeProviderMeta(
@@ -135,9 +122,7 @@ void main() {
       );
     });
 
-    test(
-        'Given null and empty metadata When mergeProviderMeta is called Then does not add optional keys',
-        () {
+    test('Given null and empty metadata When mergeProviderMeta is called Then does not add optional keys', () {
       final ErrorItem result = SessionErrorItems.mergeProviderMeta(
         SessionErrorItems.permissionDenied,
         provider: '',
@@ -155,9 +140,7 @@ void main() {
       expect(result.meta.containsKey(SessionErrorItems.lockUntilKey), false);
     });
 
-    test(
-        'Given numeric lockUntil When mergeProviderMeta is called Then keeps numeric value',
-        () {
+    test('Given numeric lockUntil When mergeProviderMeta is called Then keeps numeric value', () {
       final ErrorItem result = SessionErrorItems.mergeProviderMeta(
         SessionErrorItems.accountLocked,
         lockUntil: 1781519400000,
@@ -166,9 +149,7 @@ void main() {
       expect(result.meta[SessionErrorItems.lockUntilKey], 1781519400000);
     });
 
-    test(
-        'Given string lockUntil When mergeProviderMeta is called Then keeps string value',
-        () {
+    test('Given string lockUntil When mergeProviderMeta is called Then keeps string value', () {
       final ErrorItem result = SessionErrorItems.mergeProviderMeta(
         SessionErrorItems.accountLocked,
         lockUntil: '2026-06-15T10:30:00.000Z',
@@ -180,18 +161,13 @@ void main() {
       );
     });
 
-    test(
-        'Given custom lockUntil object When mergeProviderMeta is called Then stores string representation',
-        () {
+    test('Given custom lockUntil object When mergeProviderMeta is called Then stores string representation', () {
       final ErrorItem result = SessionErrorItems.mergeProviderMeta(
         SessionErrorItems.accountLocked,
         lockUntil: const _CustomLockValue(),
       );
 
-      expect(
-        result.meta[SessionErrorItems.lockUntilKey],
-        'custom-lock-value',
-      );
+      expect(result.meta[SessionErrorItems.lockUntilKey], 'custom-lock-value');
     });
   });
 }

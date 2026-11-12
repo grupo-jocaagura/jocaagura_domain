@@ -24,33 +24,25 @@ void main() {
       tables: <ModelSheetTable>[table],
     );
 
-    test(
-      'Given a canonical book When toJson and fromJson Then preserves the contract',
-      () {
-        final Map<String, dynamic> json = book.toJson();
-        final ModelSheetBook roundtrip = ModelSheetBook.fromJson(json);
+    test('Given a canonical book When toJson and fromJson Then preserves the contract', () {
+      final Map<String, dynamic> json = book.toJson();
+      final ModelSheetBook roundtrip = ModelSheetBook.fromJson(json);
 
-        expect(roundtrip, book);
-        expect(roundtrip.toJson(), book.toJson());
-      },
-    );
+      expect(roundtrip, book);
+      expect(roundtrip.toJson(), book.toJson());
+    });
 
-    test(
-      'Given canonical JSON When fromJson and toJson Then preserves JSON roundtrip',
-      () {
-        final Map<String, dynamic> json = <String, dynamic>{
-          ModelSheetBookEnum.id.name: 'book_customers',
-          ModelSheetBookEnum.name.name: 'Customer Master Data',
-          ModelSheetBookEnum.tables.name: <Map<String, dynamic>>[
-            table.toJson(),
-          ],
-        };
+    test('Given canonical JSON When fromJson and toJson Then preserves JSON roundtrip', () {
+      final Map<String, dynamic> json = <String, dynamic>{
+        ModelSheetBookEnum.id.name: 'book_customers',
+        ModelSheetBookEnum.name.name: 'Customer Master Data',
+        ModelSheetBookEnum.tables.name: <Map<String, dynamic>>[table.toJson()],
+      };
 
-        final ModelSheetBook parsed = ModelSheetBook.fromJson(json);
+      final ModelSheetBook parsed = ModelSheetBook.fromJson(json);
 
-        expect(parsed.toJson(), json);
-      },
-    );
+      expect(parsed.toJson(), json);
+    });
 
     test(
       'Given a book When copyWith overrides fields Then returns updated copy',

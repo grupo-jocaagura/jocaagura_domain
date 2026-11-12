@@ -12,8 +12,10 @@ void main() {
           internetSpeed: 40,
         ),
       );
-      final GatewayConnectivityImpl gw =
-          GatewayConnectivityImpl(svc, const DefaultErrorMapper());
+      final GatewayConnectivityImpl gw = GatewayConnectivityImpl(
+        svc,
+        const DefaultErrorMapper(),
+      );
       final Either<ErrorItem, Map<String, dynamic>> res = await gw.snapshot();
       expect(res.isRight, isTrue);
       final Map<String, dynamic> map =
@@ -25,8 +27,10 @@ void main() {
 
     test('checkType / checkSpeed return partial payloads', () async {
       final FakeServiceConnectivity svc = FakeServiceConnectivity();
-      final GatewayConnectivityImpl gw =
-          GatewayConnectivityImpl(svc, const DefaultErrorMapper());
+      final GatewayConnectivityImpl gw = GatewayConnectivityImpl(
+        svc,
+        const DefaultErrorMapper(),
+      );
 
       svc.simulateConnection(ConnectionTypeEnum.mobile);
       final Either<ErrorItem, Map<String, dynamic>> t = await gw.checkType();
@@ -48,12 +52,15 @@ void main() {
 
     test('watch emits Right and yields Left on stream error', () async {
       final FakeServiceConnectivity svc = FakeServiceConnectivity();
-      final GatewayConnectivityImpl gw =
-          GatewayConnectivityImpl(svc, const DefaultErrorMapper());
+      final GatewayConnectivityImpl gw = GatewayConnectivityImpl(
+        svc,
+        const DefaultErrorMapper(),
+      );
       final List<Either<ErrorItem, Map<String, dynamic>>> items =
           <Either<ErrorItem, Map<String, dynamic>>>[];
-      final StreamSubscription<Either<ErrorItem, Map<String, dynamic>>> sub =
-          gw.watch().listen(items.add);
+      final StreamSubscription<Either<ErrorItem, Map<String, dynamic>>> sub = gw
+          .watch()
+          .listen(items.add);
 
       svc.simulateSpeed(10);
       await Future<void>.delayed(const Duration(milliseconds: 5));
@@ -73,8 +80,10 @@ void main() {
 
     test('snapshot maps thrown errors to Left', () async {
       final FakeServiceConnectivity svc = FakeServiceConnectivity();
-      final GatewayConnectivityImpl gw =
-          GatewayConnectivityImpl(svc, const DefaultErrorMapper());
+      final GatewayConnectivityImpl gw = GatewayConnectivityImpl(
+        svc,
+        const DefaultErrorMapper(),
+      );
       svc.simulateErrorOnCheckConnectivityOnce();
       final Either<ErrorItem, Map<String, dynamic>> res = await gw.snapshot();
       expect(res.isLeft, isTrue);

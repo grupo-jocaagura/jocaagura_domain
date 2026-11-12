@@ -16,14 +16,14 @@ class _StubGatewayOk implements GatewayConnectivity {
 
   @override
   Future<Either<ErrorItem, Map<String, dynamic>>> checkType() async =>
-      Right<ErrorItem, Map<String, dynamic>>(
-        <String, dynamic>{'connectionType': _curr.connectionType.name},
-      );
+      Right<ErrorItem, Map<String, dynamic>>(<String, dynamic>{
+        'connectionType': _curr.connectionType.name,
+      });
   @override
   Future<Either<ErrorItem, Map<String, dynamic>>> checkSpeed() async =>
-      Right<ErrorItem, Map<String, dynamic>>(
-        <String, dynamic>{'internetSpeed': _curr.internetSpeed},
-      );
+      Right<ErrorItem, Map<String, dynamic>>(<String, dynamic>{
+        'internetSpeed': _curr.internetSpeed,
+      });
   @override
   Map<String, dynamic> current() => _curr.toJson();
 }
@@ -105,8 +105,9 @@ void main() {
         gw,
         errorMapper: const DefaultErrorMapper(),
       );
-      final Either<ErrorItem, ConnectivityModel> first =
-          await repo.watch().first;
+      final Either<ErrorItem, ConnectivityModel> first = await repo
+          .watch()
+          .first;
       expect(first.isRight, isTrue);
       final ConnectivityModel model =
           (first as Right<ErrorItem, ConnectivityModel>).value;

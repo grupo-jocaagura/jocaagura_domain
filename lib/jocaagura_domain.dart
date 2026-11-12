@@ -3,11 +3,14 @@
 library jocaagura_domain;
 
 import 'dart:async';
-import 'dart:convert';
-import 'dart:math';
 
-import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
+import 'package:jocaagura_domain_core/jocaagura_domain_models.dart'
+    hide ModelMainMenuModel;
+import 'package:material_ui/material_ui.dart' hide DateUtils;
+
+export 'package:jocaagura_domain_core/jocaagura_domain_core.dart';
+export 'package:jocaagura_domain_core/jocaagura_domain_models.dart'
+    hide ModelMainMenuModel;
 
 export 'src/fake_services/fake_http_request_config.dart';
 export 'src/fake_services/fake_service_connectivity.dart';
@@ -31,19 +34,8 @@ export 'src/repositories/repository_auth_impl.dart';
 export 'src/repositories/repository_connectivity_impl.dart';
 export 'src/repositories/repository_http_request_impl.dart';
 export 'src/repositories/repository_ws_database_impl.dart';
+export 'utils_flutter.dart';
 
-part 'date_utils.dart';
-part 'domain/address_model.dart';
-part 'domain/ai/model_ai_execution_config.dart';
-part 'domain/ai/model_ai_message.dart';
-part 'domain/ai/model_ai_request.dart';
-part 'domain/ai/model_ai_response.dart';
-part 'domain/apps/model_acl.dart';
-part 'domain/apps/model_acl_plan.dart';
-part 'domain/apps/model_acl_plan_assignment.dart';
-part 'domain/apps/model_acl_policy.dart';
-part 'domain/apps/model_app_version.dart';
-part 'domain/attribute_model.dart';
 part 'domain/bloc.dart';
 part 'domain/bloc_core.dart';
 part 'domain/bloc_general.dart';
@@ -57,79 +49,21 @@ part 'domain/blocs/bloc_onboarding.dart';
 part 'domain/blocs/bloc_responsive.dart';
 part 'domain/blocs/bloc_session.dart';
 part 'domain/blocs/bloc_ws_database.dart';
-part 'domain/calendar/appointment_model.dart';
-part 'domain/calendar/contact_model.dart';
-part 'domain/citizen/signature_model.dart';
 part 'domain/common_errors/database_error_items.dart';
 part 'domain/common_errors/error_mapper.dart';
 part 'domain/common_errors/http_error_items.dart';
 part 'domain/common_errors/network_error_items.dart';
 part 'domain/common_errors/session_error_items.dart';
 part 'domain/common_errors/web_socket_error_items.dart';
-part 'domain/configs/ws_db_config.dart';
-part 'domain/connectivity_model.dart';
-part 'domain/crud/model_crud_log_entry.dart';
-part 'domain/crud/model_crud_metadata.dart';
-part 'domain/death_record_model.dart';
-part 'domain/debouncer.dart';
-part 'domain/dentist_app/acceptance_clause_model.dart';
-part 'domain/dentist_app/dental_condition_model.dart';
-part 'domain/dentist_app/diagnosis_model.dart';
-part 'domain/dentist_app/medical_record_model.dart';
-part 'domain/dentist_app/medical_treatment_model.dart';
-part 'domain/dentist_app/treatment_plan_model.dart';
-part 'domain/docs/model_doc_block.dart';
-part 'domain/docs/model_doc_document.dart';
-part 'domain/drive/model_drive_file.dart';
-part 'domain/drive/model_drive_folder.dart';
-part 'domain/drive/model_drive_item.dart';
-part 'domain/education/model_assessment.dart';
-part 'domain/education/model_competency_standard.dart';
-part 'domain/education/model_learning_goal.dart';
-part 'domain/education/model_learning_item.dart';
-part 'domain/education/model_performance_indicator.dart';
-part 'domain/either.dart';
-part 'domain/either_flow/model_complete_flow.dart';
-part 'domain/either_flow/model_flow_certificate.dart';
-part 'domain/either_flow/model_flow_step.dart';
-part 'domain/either_flow/model_flow_step_completion.dart';
 part 'domain/entity_bloc.dart';
 part 'domain/entity_provider.dart';
 part 'domain/entity_service.dart';
-part 'domain/entity_util.dart';
-part 'domain/error_item_model.dart';
-part 'domain/financial/financial_movement.dart';
-part 'domain/financial/ledger_model.dart';
 part 'domain/gateways/gateway_auth.dart';
 part 'domain/gateways/gateway_connectivity.dart';
 part 'domain/gateways/gateway_http_request.dart';
 part 'domain/gateways/gateway_ws_database.dart';
-part 'domain/graphics/model_graph.dart';
-part 'domain/graphics/model_graph_axis_spec.dart';
-part 'domain/graphics/model_point.dart';
-part 'domain/groups/model_group.dart';
-part 'domain/groups/model_group_alias.dart';
-part 'domain/groups/model_group_config.dart';
-part 'domain/groups/model_group_dynamic_membership_rule.dart';
-part 'domain/groups/model_group_labels.dart';
-part 'domain/groups/model_group_member.dart';
-part 'domain/groups/model_group_settings.dart';
-part 'domain/groups/model_group_sync_config.dart';
-part 'domain/groups/model_group_sync_job.dart';
-part 'domain/http/http_enums.dart';
 part 'domain/http/http_request_errors.dart';
-part 'domain/http/model_config_http_request.dart';
-part 'domain/http/request_context.dart';
 part 'domain/http/virtual_crud_service.dart';
-part 'domain/json_schema/model_json_schema_document.dart';
-part 'domain/json_schema/model_json_schema_reference.dart';
-part 'domain/legal_id_model.dart';
-part 'domain/medical/medical_diagnosis_tab_model.dart';
-part 'domain/medical/medication_model.dart';
-part 'domain/model_vector.dart';
-part 'domain/obituary_model.dart';
-part 'domain/person_model.dart';
-part 'domain/pet_app/animal_model.dart';
 part 'domain/repositories/repository_auth.dart';
 part 'domain/repositories/repository_connectivity.dart';
 part 'domain/repositories/repository_http_request.dart';
@@ -144,26 +78,12 @@ part 'domain/services/service_preferences.dart';
 part 'domain/services/service_session.dart';
 part 'domain/services/service_ws_database.dart';
 part 'domain/services/service_ws_db.dart';
-part 'domain/sheets/model_sheet_book.dart';
-part 'domain/sheets/model_sheet_column.dart';
-part 'domain/sheets/model_sheet_row.dart';
-part 'domain/sheets/model_sheet_table.dart';
-part 'domain/states/onboarding_state.dart';
-part 'domain/states/onboarding_step.dart';
-part 'domain/states/session_state.dart';
-part 'domain/states/ws_db_state.dart';
-part 'domain/store/model_category.dart';
-part 'domain/store/model_item.dart';
-part 'domain/store/model_price.dart';
-part 'domain/store_model.dart';
 part 'domain/ui/model_main_menu_model.dart';
-part 'domain/ui/screen_size_config.dart';
 part 'domain/usecases/connectivity/connectivity_usecases.dart';
 part 'domain/usecases/databases_crud/databases_crud_usecases.dart';
 part 'domain/usecases/databases_crud/facade_crud_database.dart';
 part 'domain/usecases/databases_crud/facade_ws_database_usecases.dart';
 part 'domain/usecases/http_request/http_request_usecases.dart';
-part 'domain/usecases/no_params.dart';
 part 'domain/usecases/session/get_current_user_usecase.dart';
 part 'domain/usecases/session/log_in_silently_usecase.dart';
 part 'domain/usecases/session/log_in_user_and_password_usecase.dart';
@@ -175,45 +95,3 @@ part 'domain/usecases/session/session_usecases.dart';
 part 'domain/usecases/session/sign_in_user_and_password_usecase.dart';
 part 'domain/usecases/session/watch_auth_state_changes_usecases.dart';
 part 'domain/usecases/usecase.dart';
-part 'domain/internationalization/model_language.dart';
-part 'domain/internationalization/model_localized_text.dart';
-part 'domain/user_model.dart';
-part 'domain/utils/money_utils.dart';
-part 'domain/vehicles/model_vehicle.dart';
-part 'per_key_fifo_executor.dart';
-part 'unit.dart';
-part 'utils.dart';
-
-/// A base class for all domain data models.
-///
-/// This abstract class provides common methods for JSON serialization,
-/// deserialization, copying, and conversion from a string. It also includes
-/// utility functions for working with JSON data.
-@immutable
-abstract class Model {
-  /// Creates a new instance of the [Model] class.
-  const Model();
-
-  /// Converts the entity model to a JSON [Map].
-  ///
-  /// Returns an empty [Map] by default. Override this method to customize
-  /// the JSON conversion for your entity model.
-  Map<String, dynamic> toJson();
-
-  /// Creates a copy of the entity model.
-  ///
-  /// Returns a new instance of the entity model with the same values, changing
-  /// some of them.
-  Model copyWith();
-
-  /// Checks whether the given [other] object is equal to this entity model.
-  ///
-  /// Returns `true` if the [other] object is an instance of [Model]
-  /// and has the same values as this entity model; otherwise, returns `false`.
-  @override
-  bool operator ==(Object other);
-
-  /// Gets the hash code for this entity model.
-  @override
-  int get hashCode;
-}

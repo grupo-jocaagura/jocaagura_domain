@@ -120,8 +120,9 @@ class _StubGateway implements GatewayAuth {
     this.current,
     this.signedIn,
     Stream<Either<ErrorItem, Map<String, dynamic>?>>? authStream,
-  }) : _stream = authStream ??
-            const Stream<Either<ErrorItem, Map<String, dynamic>?>>.empty();
+  }) : _stream =
+           authStream ??
+           const Stream<Either<ErrorItem, Map<String, dynamic>?>>.empty();
 
   final Either<ErrorItem, Map<String, dynamic>>? signIn;
   final Either<ErrorItem, Map<String, dynamic>>? login;
@@ -141,9 +142,10 @@ class _StubGateway implements GatewayAuth {
     String password,
   ) async {
     return signIn ??
-        Right<ErrorItem, Map<String, dynamic>>(
-          <String, dynamic>{'id': email, 'email': email},
-        );
+        Right<ErrorItem, Map<String, dynamic>>(<String, dynamic>{
+          'id': email,
+          'email': email,
+        });
   }
 
   @override
@@ -152,17 +154,19 @@ class _StubGateway implements GatewayAuth {
     String password,
   ) async {
     return login ??
-        Right<ErrorItem, Map<String, dynamic>>(
-          <String, dynamic>{'id': email, 'email': email},
-        );
+        Right<ErrorItem, Map<String, dynamic>>(<String, dynamic>{
+          'id': email,
+          'email': email,
+        });
   }
 
   @override
   Future<Either<ErrorItem, Map<String, dynamic>>> logInWithGoogle() async {
     return google ??
-        const Right<ErrorItem, Map<String, dynamic>>(
-          <String, dynamic>{'id': 'g', 'email': 'g@x.com'},
-        );
+        const Right<ErrorItem, Map<String, dynamic>>(<String, dynamic>{
+          'id': 'g',
+          'email': 'g@x.com',
+        });
   }
 
   @override
@@ -188,9 +192,10 @@ class _StubGateway implements GatewayAuth {
     String email,
   ) async {
     return recover ??
-        Right<ErrorItem, Map<String, dynamic>>(
-          <String, dynamic>{'ok': true, 'email': email},
-        );
+        Right<ErrorItem, Map<String, dynamic>>(<String, dynamic>{
+          'ok': true,
+          'email': email,
+        });
   }
 
   @override
@@ -198,26 +203,27 @@ class _StubGateway implements GatewayAuth {
     Map<String, dynamic> sessionJson,
   ) async {
     return logout ??
-        const Right<ErrorItem, Map<String, dynamic>>(
-          <String, dynamic>{'ok': true},
-        );
+        const Right<ErrorItem, Map<String, dynamic>>(<String, dynamic>{
+          'ok': true,
+        });
   }
 
   @override
   Future<Either<ErrorItem, Map<String, dynamic>>> getCurrentUser() async {
     return current ??
-        const Right<ErrorItem, Map<String, dynamic>>(
-          <String, dynamic>{'id': 'id', 'email': 'a@b.com'},
-        );
+        const Right<ErrorItem, Map<String, dynamic>>(<String, dynamic>{
+          'id': 'id',
+          'email': 'a@b.com',
+        });
     // Para simular "no session" como error, retorna Left
   }
 
   @override
   Future<Either<ErrorItem, Map<String, dynamic>>> isSignedIn() async {
     return signedIn ??
-        const Right<ErrorItem, Map<String, dynamic>>(
-          <String, dynamic>{'isSignedIn': true},
-        );
+        const Right<ErrorItem, Map<String, dynamic>>(<String, dynamic>{
+          'isSignedIn': true,
+        });
   }
 
   @override
@@ -231,60 +237,57 @@ Future<T> _expectRight<T>(
   void Function(T v)? verify,
 }) async {
   final Either<ErrorItem, T> r = await fut;
-  return r.fold(
-    (ErrorItem l) => fail('Expected Right, got Left: $l'),
-    (T v) {
-      verify?.call(v);
-      return v;
-    },
-  );
+  return r.fold((ErrorItem l) => fail('Expected Right, got Left: $l'), (T v) {
+    verify?.call(v);
+    return v;
+  });
 }
 
 Future<void> _expectLeft<T>(Future<Either<ErrorItem, T>> fut) async {
   final Either<ErrorItem, T> r = await fut;
-  r.fold(
-    (_) {},
-    (_) => fail('Expected Left, got Right'),
-  );
+  r.fold((_) {}, (_) => fail('Expected Left, got Right'));
 }
 
 void main() {
   group('RepositoryAuthImpl | happy paths', () {
-    test('StubGateway acepta todos los parámetros opcionales (silencia lints)',
-        () {
-      final _StubGateway g = _StubGateway(
-        signIn: const Right<ErrorItem, Map<String, dynamic>>(
-          <String, dynamic>{'id': 's', 'email': 's@x.com'},
-        ),
-        login: const Right<ErrorItem, Map<String, dynamic>>(
-          <String, dynamic>{'id': 'l', 'email': 'l@x.com'},
-        ),
-        google: const Right<ErrorItem, Map<String, dynamic>>(
-          <String, dynamic>{'id': 'g', 'email': 'g@x.com'},
-        ),
-        silent: const Right<ErrorItem, Map<String, dynamic>>(
-          <String, dynamic>{'id': 'z', 'email': 'z@x.com'},
-        ),
-        refresh: const Right<ErrorItem, Map<String, dynamic>>(
-          <String, dynamic>{'id': 'r', 'email': 'r@x.com'},
-        ),
-        recover: const Right<ErrorItem, Map<String, dynamic>>(
-          <String, dynamic>{'ok': true},
-        ),
-        logout: const Right<ErrorItem, Map<String, dynamic>>(
-          <String, dynamic>{'ok': true},
-        ),
-        current: const Right<ErrorItem, Map<String, dynamic>>(
-          <String, dynamic>{'id': 'c', 'email': 'c@x.com'},
-        ),
-        signedIn: const Right<ErrorItem, Map<String, dynamic>>(
-          <String, dynamic>{'isSignedIn': true},
-        ),
-        authStream:
-            const Stream<Either<ErrorItem, Map<String, dynamic>?>>.empty(),
-      );
-      expect(g, isA<_StubGateway>());
-    });
+    test(
+      'StubGateway acepta todos los parámetros opcionales (silencia lints)',
+      () {
+        final _StubGateway g = _StubGateway(
+          signIn: const Right<ErrorItem, Map<String, dynamic>>(
+            <String, dynamic>{'id': 's', 'email': 's@x.com'},
+          ),
+          login: const Right<ErrorItem, Map<String, dynamic>>(<String, dynamic>{
+            'id': 'l',
+            'email': 'l@x.com',
+          }),
+          google: const Right<ErrorItem, Map<String, dynamic>>(
+            <String, dynamic>{'id': 'g', 'email': 'g@x.com'},
+          ),
+          silent: const Right<ErrorItem, Map<String, dynamic>>(
+            <String, dynamic>{'id': 'z', 'email': 'z@x.com'},
+          ),
+          refresh: const Right<ErrorItem, Map<String, dynamic>>(
+            <String, dynamic>{'id': 'r', 'email': 'r@x.com'},
+          ),
+          recover: const Right<ErrorItem, Map<String, dynamic>>(
+            <String, dynamic>{'ok': true},
+          ),
+          logout: const Right<ErrorItem, Map<String, dynamic>>(
+            <String, dynamic>{'ok': true},
+          ),
+          current: const Right<ErrorItem, Map<String, dynamic>>(
+            <String, dynamic>{'id': 'c', 'email': 'c@x.com'},
+          ),
+          signedIn: const Right<ErrorItem, Map<String, dynamic>>(
+            <String, dynamic>{'isSignedIn': true},
+          ),
+          authStream:
+              const Stream<Either<ErrorItem, Map<String, dynamic>?>>.empty(),
+        );
+        expect(g, isA<_StubGateway>());
+      },
+    );
 
     test('logInUserAndPassword → Right(UserModel)', () async {
       final GatewayAuth gw = _StubGateway(
@@ -299,8 +302,10 @@ void main() {
         errorMapper: const _FakeErrorMapper(),
       );
 
-      final Either<ErrorItem, UserModel> r =
-          await repo.logInUserAndPassword('a@b.com', 'x');
+      final Either<ErrorItem, UserModel> r = await repo.logInUserAndPassword(
+        'a@b.com',
+        'x',
+      );
       r.fold(
         (ErrorItem l) => fail('should be Right'),
         (UserModel u) => expect(u.email, 'a@b.com'),
@@ -324,9 +329,10 @@ void main() {
     });
 
     test('logInSilently/refreshSession → Right(UserModel)', () async {
-      final UserModel current = UserModel.fromJson(
-        const <String, dynamic>{'id': 'id', 'email': 'a@b.com'},
-      );
+      final UserModel current = UserModel.fromJson(const <String, dynamic>{
+        'id': 'id',
+        'email': 'a@b.com',
+      });
       final RepositoryAuth repo = RepositoryAuthImpl(
         gateway: _StubGateway(),
         errorMapper: const _FakeErrorMapper(),
@@ -341,9 +347,10 @@ void main() {
         errorMapper: const _FakeErrorMapper(),
       );
       await _expectRight<void>(repo.recoverPassword('a@b.com'));
-      final UserModel u = UserModel.fromJson(
-        const <String, dynamic>{'id': 'id', 'email': 'a@b.com'},
-      );
+      final UserModel u = UserModel.fromJson(const <String, dynamic>{
+        'id': 'id',
+        'email': 'a@b.com',
+      });
       await _expectRight<void>(repo.logOutUser(u));
     });
 
@@ -396,9 +403,10 @@ void main() {
     test('payload inválido (ok:false) → Left', () async {
       final RepositoryAuth repo = RepositoryAuthImpl(
         gateway: _StubGateway(
-          login: const Right<ErrorItem, Map<String, dynamic>>(
-            <String, dynamic>{'ok': false, 'message': 'invalid'},
-          ),
+          login: const Right<ErrorItem, Map<String, dynamic>>(<String, dynamic>{
+            'ok': false,
+            'message': 'invalid',
+          }),
         ),
         errorMapper: const _FakeErrorMapper(),
       );
@@ -420,9 +428,10 @@ void main() {
     test('malformed json (payload inválido) → Left vía mapper', () async {
       final RepositoryAuth repo = RepositoryAuthImpl(
         gateway: _StubGateway(
-          login: const Right<ErrorItem, Map<String, dynamic>>(
-            <String, dynamic>{'ok': false, 'message': 'invalid'},
-          ),
+          login: const Right<ErrorItem, Map<String, dynamic>>(<String, dynamic>{
+            'ok': false,
+            'message': 'invalid',
+          }),
         ),
         errorMapper: const _FakeErrorMapper(),
       );
@@ -441,14 +450,16 @@ void main() {
 
       final List<Either<ErrorItem, UserModel?>> emissions =
           <Either<ErrorItem, UserModel?>>[];
-      final StreamSubscription<Either<ErrorItem, UserModel?>> sub =
-          repo.authStateChanges().listen(emissions.add);
+      final StreamSubscription<Either<ErrorItem, UserModel?>> sub = repo
+          .authStateChanges()
+          .listen(emissions.add);
 
       ctrl.add(const Right<ErrorItem, Map<String, dynamic>?>(null));
       ctrl.add(
-        const Right<ErrorItem, Map<String, dynamic>?>(
-          <String, dynamic>{'id': 'id', 'email': 'a@b.com'},
-        ),
+        const Right<ErrorItem, Map<String, dynamic>?>(<String, dynamic>{
+          'id': 'id',
+          'email': 'a@b.com',
+        }),
       );
       await Future<void>.delayed(const Duration(milliseconds: 1));
       await ctrl.close();
@@ -474,15 +485,16 @@ void main() {
       );
 
       final Completer<void> seenLeft = Completer<void>();
-      final StreamSubscription<Either<ErrorItem, UserModel?>> sub =
-          repo.authStateChanges().listen((Either<ErrorItem, UserModel?> e) {
-        e.fold((_) => seenLeft.complete(), (_) {});
-      });
+      final StreamSubscription<Either<ErrorItem, UserModel?>> sub = repo
+          .authStateChanges()
+          .listen((Either<ErrorItem, UserModel?> e) {
+            e.fold((_) => seenLeft.complete(), (_) {});
+          });
 
       ctrl.add(
-        const Right<ErrorItem, Map<String, dynamic>?>(
-          <String, dynamic>{'ok': false},
-        ),
+        const Right<ErrorItem, Map<String, dynamic>?>(<String, dynamic>{
+          'ok': false,
+        }),
       );
       await seenLeft.future;
       await ctrl.close();
@@ -492,19 +504,20 @@ void main() {
     test('Left(ErrorItem) desde el Gateway → Left en repo', () async {
       final Stream<Either<ErrorItem, Map<String, dynamic>?>> s =
           Stream<Either<ErrorItem, Map<String, dynamic>?>>.fromIterable(
-        <Either<ErrorItem, Map<String, dynamic>?>>[
-          const Left<ErrorItem, Map<String, dynamic>?>(
-            SessionErrorItems.networkUnavailable,
-          ),
-        ],
-      );
+            <Either<ErrorItem, Map<String, dynamic>?>>[
+              const Left<ErrorItem, Map<String, dynamic>?>(
+                SessionErrorItems.networkUnavailable,
+              ),
+            ],
+          );
       final RepositoryAuth repo = RepositoryAuthImpl(
         gateway: _StubGateway(authStream: s),
         errorMapper: const _FakeErrorMapper(),
       );
 
-      final Either<ErrorItem, UserModel?> first =
-          await repo.authStateChanges().first;
+      final Either<ErrorItem, UserModel?> first = await repo
+          .authStateChanges()
+          .first;
       first.fold(
         (ErrorItem l) => expect(l.code, 'AUTH_NETWORK_UNAVAILABLE'),
         (_) => fail('expected Left'),
@@ -512,9 +525,7 @@ void main() {
     });
   });
   group('RepositoryAuthImpl | branch coverage', () {
-    test(
-        'onOk(identity) en signInUserAndPassword → Right con el UserModel mapeado',
-        () async {
+    test('onOk(identity) en signInUserAndPassword → Right con el UserModel mapeado', () async {
       // El gateway entrega JSON válido; onOk devuelve el mismo UserModel (identidad).
       final GatewayAuth gw = _StubGateway(
         signIn: const Right<ErrorItem, Map<String, dynamic>>(<String, dynamic>{
@@ -528,41 +539,45 @@ void main() {
         errorMapper: const _FakeErrorMapper(),
       );
 
-      final Either<ErrorItem, UserModel> r =
-          await repo.signInUserAndPassword('onok@x.com', 'x');
-
-      r.fold(
-        (ErrorItem l) => fail('Esperado Right, got Left: $l'),
-        (UserModel u) {
-          expect(u.email, 'onok@x.com'); // se ejecutó onOk(u) => u
-          expect(u.id, 'u1');
-        },
+      final Either<ErrorItem, UserModel> r = await repo.signInUserAndPassword(
+        'onok@x.com',
+        'x',
       );
+
+      r.fold((ErrorItem l) => fail('Esperado Right, got Left: $l'), (
+        UserModel u,
+      ) {
+        expect(u.email, 'onok@x.com'); // se ejecutó onOk(u) => u
+        expect(u.id, 'u1');
+      });
     });
 
-    test('ackToVoid: ok:false en recoverPassword → Left (ramal pe!=null)',
-        () async {
-      final RepositoryAuth repo = RepositoryAuthImpl(
-        gateway: _StubGateway(
-          recover: const Right<ErrorItem, Map<String, dynamic>>(
-            <String, dynamic>{'ok': false, 'message': 'invalid'},
+    test(
+      'ackToVoid: ok:false en recoverPassword → Left (ramal pe!=null)',
+      () async {
+        final RepositoryAuth repo = RepositoryAuthImpl(
+          gateway: _StubGateway(
+            recover: const Right<ErrorItem, Map<String, dynamic>>(
+              <String, dynamic>{'ok': false, 'message': 'invalid'},
+            ),
           ),
-        ),
-        errorMapper: const _FakeErrorMapper(), // detecta ok:false
-      );
+          errorMapper: const _FakeErrorMapper(), // detecta ok:false
+        );
 
-      final Either<ErrorItem, void> r = await repo.recoverPassword('a@b.com');
-      r.fold(
-        (ErrorItem _) {}, // Left esperado
-        (_) => fail('Esperado Left, got Right'),
-      );
-    });
+        final Either<ErrorItem, void> r = await repo.recoverPassword('a@b.com');
+        r.fold(
+          (ErrorItem _) {}, // Left esperado
+          (_) => fail('Esperado Left, got Right'),
+        );
+      },
+    );
 
     test('isSignedIn: excepción en try interno → Left (ramal catch)', () async {
       final RepositoryAuth repo = RepositoryAuthImpl(
         gateway: _StubGateway(
-          signedIn:
-              Right<ErrorItem, Map<String, dynamic>>(_ThrowingIsSignedInMap()),
+          signedIn: Right<ErrorItem, Map<String, dynamic>>(
+            _ThrowingIsSignedInMap(),
+          ),
         ),
         errorMapper: const _FakeErrorMapper(),
       );
@@ -574,26 +589,30 @@ void main() {
       );
     });
     test(
-        'authStateChanges: excepción al parsear UserModel → Left (ramal catch)',
-        () async {
-      final Stream<Either<ErrorItem, Map<String, dynamic>?>> s =
-          Stream<Either<ErrorItem, Map<String, dynamic>?>>.fromIterable(
-        <Either<ErrorItem, Map<String, dynamic>?>>[
-          Right<ErrorItem, Map<String, dynamic>?>(_ThrowingUserFieldsMap()),
-        ],
-      );
+      'authStateChanges: excepción al parsear UserModel → Left (ramal catch)',
+      () async {
+        final Stream<Either<ErrorItem, Map<String, dynamic>?>> s =
+            Stream<Either<ErrorItem, Map<String, dynamic>?>>.fromIterable(
+              <Either<ErrorItem, Map<String, dynamic>?>>[
+                Right<ErrorItem, Map<String, dynamic>?>(
+                  _ThrowingUserFieldsMap(),
+                ),
+              ],
+            );
 
-      final RepositoryAuth repo = RepositoryAuthImpl(
-        gateway: _StubGateway(authStream: s),
-        errorMapper: const _FakeErrorMapper(),
-      );
+        final RepositoryAuth repo = RepositoryAuthImpl(
+          gateway: _StubGateway(authStream: s),
+          errorMapper: const _FakeErrorMapper(),
+        );
 
-      final Either<ErrorItem, UserModel?> first =
-          await repo.authStateChanges().first;
-      first.fold(
-        (ErrorItem _) {}, // Left esperado por catch(ex, st)
-        (_) => fail('Esperado Left por excepción de parsing'),
-      );
-    });
+        final Either<ErrorItem, UserModel?> first = await repo
+            .authStateChanges()
+            .first;
+        first.fold(
+          (ErrorItem _) {}, // Left esperado por catch(ex, st)
+          (_) => fail('Esperado Left por excepción de parsing'),
+        );
+      },
+    );
   });
 }

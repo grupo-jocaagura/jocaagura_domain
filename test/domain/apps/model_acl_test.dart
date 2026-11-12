@@ -3,9 +3,7 @@ import 'package:jocaagura_domain/jocaagura_domain.dart';
 
 void main() {
   group('ModelAcl - constructor & immutability', () {
-    test(
-        'Given const constructor When created Then fields match and defaults are empty',
-        () {
+    test('Given const constructor When created Then fields match and defaults are empty', () {
       // Arrange & Act
       const ModelAcl acl = ModelAcl(
         id: '1',
@@ -32,9 +30,7 @@ void main() {
   });
 
   group('ModelAcl.fromJson - parsing & normalization', () {
-    test(
-        'Given full valid json When fromJson Then parses all fields and normalizes dates',
-        () {
+    test('Given full valid json When fromJson Then parses all fields and normalizes dates', () {
       // Arrange
       final Map<String, dynamic> json = <String, dynamic>{
         ModelAclEnum.id.name: 'acl-1',
@@ -105,35 +101,35 @@ void main() {
       expect(acl.roleType, RoleType.viewer);
     });
 
-    test('Given int dates When fromJson Then normalizes to UTC ISO strings',
-        () {
-      // Arrange
-      final DateTime utc = DateTime.utc(2026, 1, 3);
-      final int ms = utc.millisecondsSinceEpoch;
-
-      final Map<String, dynamic> json = <String, dynamic>{
-        ModelAclEnum.id.name: 'acl-4',
-        ModelAclEnum.roleType.name: 'editor',
-        ModelAclEnum.appName.name: 'sat-p',
-        ModelAclEnum.feature.name: 'router',
-        ModelAclEnum.email.name: 'user@pragma.com.co',
-        ModelAclEnum.isActive.name: true,
-        ModelAclEnum.emailAutorizedBy.name: 'admin@pragma.com.co',
-        ModelAclEnum.autorizedAtIsoDate.name: ms,
-        ModelAclEnum.revokedAtIsoDate.name: ms,
-      };
-
-      // Act
-      final ModelAcl acl = ModelAcl.fromJson(json);
-
-      // Assert
-      expect(DateTime.parse(acl.autorizedAtIsoDate).toUtc(), utc);
-      expect(DateTime.parse(acl.revokedAtIsoDate).toUtc(), utc);
-    });
-
     test(
-        'Given invalid autorizedAtIsoDate When fromJson Then keeps raw string and isValidAcl=false',
-        () {
+      'Given int dates When fromJson Then normalizes to UTC ISO strings',
+      () {
+        // Arrange
+        final DateTime utc = DateTime.utc(2026, 1, 3);
+        final int ms = utc.millisecondsSinceEpoch;
+
+        final Map<String, dynamic> json = <String, dynamic>{
+          ModelAclEnum.id.name: 'acl-4',
+          ModelAclEnum.roleType.name: 'editor',
+          ModelAclEnum.appName.name: 'sat-p',
+          ModelAclEnum.feature.name: 'router',
+          ModelAclEnum.email.name: 'user@pragma.com.co',
+          ModelAclEnum.isActive.name: true,
+          ModelAclEnum.emailAutorizedBy.name: 'admin@pragma.com.co',
+          ModelAclEnum.autorizedAtIsoDate.name: ms,
+          ModelAclEnum.revokedAtIsoDate.name: ms,
+        };
+
+        // Act
+        final ModelAcl acl = ModelAcl.fromJson(json);
+
+        // Assert
+        expect(DateTime.parse(acl.autorizedAtIsoDate).toUtc(), utc);
+        expect(DateTime.parse(acl.revokedAtIsoDate).toUtc(), utc);
+      },
+    );
+
+    test('Given invalid autorizedAtIsoDate When fromJson Then keeps raw string and isValidAcl=false', () {
       // Arrange
       final Map<String, dynamic> json = <String, dynamic>{
         ModelAclEnum.id.name: 'acl-5',
@@ -155,9 +151,7 @@ void main() {
       expect(acl.autorizedAtDateTime, isNull);
     });
 
-    test(
-        'Given empty revokedAtIsoDate When fromJson Then revokedAtDateTime is null',
-        () {
+    test('Given empty revokedAtIsoDate When fromJson Then revokedAtDateTime is null', () {
       // Arrange
       final Map<String, dynamic> json = <String, dynamic>{
         ModelAclEnum.id.name: 'acl-6',
@@ -181,9 +175,7 @@ void main() {
   });
 
   group('ModelAcl.toJson - roundtrip & normalization', () {
-    test(
-        'Given model When toJson Then keys match enum names and roleType serialized by name',
-        () {
+    test('Given model When toJson Then keys match enum names and roleType serialized by name', () {
       // Arrange
       const ModelAcl acl = ModelAcl(
         id: 'acl-1',
@@ -216,9 +208,7 @@ void main() {
       expect(json[ModelAclEnum.note.name], 'ok');
     });
 
-    test(
-        'Given model with invalid autorizedAtIsoDate When toJson Then preserves raw (still invalid)',
-        () {
+    test('Given model with invalid autorizedAtIsoDate When toJson Then preserves raw (still invalid)', () {
       // Arrange
       const ModelAcl acl = ModelAcl(
         id: 'acl-raw',
@@ -238,9 +228,7 @@ void main() {
       expect(json[ModelAclEnum.autorizedAtIsoDate.name], '');
     });
 
-    test(
-        'Given json roundtrip When toJson then fromJson Then model equals original',
-        () {
+    test('Given json roundtrip When toJson then fromJson Then model equals original', () {
       // Arrange
       const ModelAcl acl = ModelAcl(
         id: 'acl-rt',
@@ -266,9 +254,7 @@ void main() {
   });
 
   group('ModelAcl trust getters - isValidAcl & DateTime getters', () {
-    test(
-        'Given valid autorizedAtIsoDate When isValidAcl Then true and autorizedAtDateTime is UTC',
-        () {
+    test('Given valid autorizedAtIsoDate When isValidAcl Then true and autorizedAtDateTime is UTC', () {
       // Arrange
       const ModelAcl acl = ModelAcl(
         id: 'acl-1',
@@ -292,9 +278,7 @@ void main() {
       expect(dt.toUtc(), DateTime.utc(2026, 1, 3));
     });
 
-    test(
-        'Given empty autorizedAtIsoDate When isValidAcl Then false and autorizedAtDateTime null',
-        () {
+    test('Given empty autorizedAtIsoDate When isValidAcl Then false and autorizedAtDateTime null', () {
       // Arrange
       const ModelAcl acl = ModelAcl(
         id: 'acl-2',
@@ -311,9 +295,7 @@ void main() {
       expect(acl.autorizedAtDateTime, isNull);
     });
 
-    test(
-        'Given invalid autorizedAtIsoDate When isValidAcl Then false and autorizedAtDateTime null',
-        () {
+    test('Given invalid autorizedAtIsoDate When isValidAcl Then false and autorizedAtDateTime null', () {
       // Arrange
       const ModelAcl acl = ModelAcl(
         id: 'acl-3',
@@ -354,9 +336,7 @@ void main() {
       expect(sameRef, acl);
     });
 
-    test(
-        'Given one change When copyWith Then returns new instance with that change',
-        () {
+    test('Given one change When copyWith Then returns new instance with that change', () {
       // Arrange
       const ModelAcl acl = ModelAcl(
         id: 'acl-1',
@@ -406,9 +386,7 @@ void main() {
   });
 
   group('ModelAcl equality & hashCode', () {
-    test(
-        'Given two identical instances When compared Then equals and hashCode match',
-        () {
+    test('Given two identical instances When compared Then equals and hashCode match', () {
       // Arrange
       const ModelAcl a = ModelAcl(
         id: 'acl-1',

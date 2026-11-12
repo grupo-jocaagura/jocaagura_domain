@@ -186,13 +186,8 @@ class BlocHttpRequest extends BlocModule {
     Map<String, dynamic> metadata = const <String, dynamic>{},
   }) async {
     _markActive(requestKey);
-    final Either<ErrorItem, ModelConfigHttpRequest> result =
-        await _facade.delete(
-      uri,
-      headers: headers,
-      timeout: timeout,
-      metadata: metadata,
-    );
+    final Either<ErrorItem, ModelConfigHttpRequest> result = await _facade
+        .delete(uri, headers: headers, timeout: timeout, metadata: metadata);
     _markInactive(requestKey);
     return result;
   }
@@ -207,11 +202,8 @@ class BlocHttpRequest extends BlocModule {
     Map<String, dynamic> extraMetadata = const <String, dynamic>{},
   }) async {
     _markActive(requestKey);
-    final Either<ErrorItem, ModelConfigHttpRequest> result =
-        await _facade.retry(
-      previousConfig,
-      extraMetadata: extraMetadata,
-    );
+    final Either<ErrorItem, ModelConfigHttpRequest> result = await _facade
+        .retry(previousConfig, extraMetadata: extraMetadata);
     _markInactive(requestKey);
     return result;
   }
@@ -237,11 +229,7 @@ class BlocHttpRequest extends BlocModule {
     void Function(Set<String> active) function, [
     bool executeNow = false,
   ]) {
-    _bloc.addFunctionToProcessTValueOnStream(
-      key,
-      function,
-      executeNow,
-    );
+    _bloc.addFunctionToProcessTValueOnStream(key, function, executeNow);
   }
 
   /// Removes a previously registered function associated with [key].

@@ -22,8 +22,9 @@ void main() {
     });
 
     test('3️⃣ copyWith preserves immutability and updates values', () {
-      final ModelCategory modified =
-          original.copyWith(description: 'Updated desc');
+      final ModelCategory modified = original.copyWith(
+        description: 'Updated desc',
+      );
 
       expect(modified.category, equals(original.category));
       expect(modified.description, equals('Updated desc'));

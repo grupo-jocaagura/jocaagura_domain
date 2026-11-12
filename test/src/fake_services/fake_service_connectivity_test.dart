@@ -20,8 +20,9 @@ void main() {
     test('simulateConnection / simulateSpeed emits', () async {
       final FakeServiceConnectivity svc = FakeServiceConnectivity();
       final List<ConnectivityModel> events = <ConnectivityModel>[];
-      final StreamSubscription<ConnectivityModel> sub =
-          svc.connectivityStream().listen(events.add);
+      final StreamSubscription<ConnectivityModel> sub = svc
+          .connectivityStream()
+          .listen(events.add);
 
       svc.simulateConnection(ConnectionTypeEnum.mobile);
       svc.simulateSpeed(12.5);
@@ -48,11 +49,9 @@ void main() {
     test('stream error injection', () async {
       final FakeServiceConnectivity svc = FakeServiceConnectivity();
       Object? capturedError;
-      final StreamSubscription<ConnectivityModel> sub =
-          svc.connectivityStream().listen(
-                (_) {},
-                onError: (Object e, _) => capturedError = e,
-              );
+      final StreamSubscription<ConnectivityModel> sub = svc
+          .connectivityStream()
+          .listen((_) {}, onError: (Object e, _) => capturedError = e);
       svc.simulateStreamErrorOnce();
       svc.simulateSpeed(1); // trigger next event
       await Future<void>.delayed(const Duration(milliseconds: 5));

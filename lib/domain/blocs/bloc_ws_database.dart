@@ -49,9 +49,7 @@ class BlocWsDatabase<T extends Model> extends BlocGeneral<WsDbState<T>> {
   /// Creates a BLoC wired to a [FacadeWsDatabaseUsecases].
   ///
   /// The initial state is [WsDbState.idle].
-  BlocWsDatabase({required FacadeWsDatabaseUsecases<T> facade})
-      : _facade = facade,
-        super(WsDbState<T>.idle());
+  BlocWsDatabase({required this._facade}) : super(WsDbState<T>.idle());
 
   /// Use cases facade (read/write/delete/watch/etc).
   final FacadeWsDatabaseUsecases<T> _facade;
@@ -96,14 +94,11 @@ class BlocWsDatabase<T extends Model> extends BlocGeneral<WsDbState<T>> {
   Future<Either<ErrorItem, Unit>> deleteDoc(String docId) async {
     _setLoading(docId: docId, loading: true);
     final Either<ErrorItem, Unit> res = await _facade.deleteDoc(docId);
-    res.fold(
-      (ErrorItem err) => _setError(err),
-      (_) {
-        if (value.docId == docId) {
-          value = value.copyWith(doc: null);
-        }
-      },
-    );
+    res.fold((ErrorItem err) => _setError(err), (_) {
+      if (value.docId == docId) {
+        value = value.copyWith(doc: null);
+      }
+    });
     _setLoading(loading: false);
     return res;
   }
@@ -161,18 +156,15 @@ class BlocWsDatabase<T extends Model> extends BlocGeneral<WsDbState<T>> {
   // Batch helpers are forwarded; state is not altered by default.
   Future<Either<ErrorItem, Map<String, Either<ErrorItem, T>>>> readDocs(
     List<String> ids,
-  ) =>
-      _facade.readDocs(ids);
+  ) => _facade.readDocs(ids);
 
   Future<Either<ErrorItem, Map<String, Either<ErrorItem, T>>>> writeDocs(
     Map<String, T> entries,
-  ) =>
-      _facade.writeDocs(entries);
+  ) => _facade.writeDocs(entries);
 
   Future<Either<ErrorItem, Map<String, Either<ErrorItem, Unit>>>> deleteDocs(
     List<String> ids,
-  ) =>
-      _facade.deleteDocs(ids);
+  ) => _facade.deleteDocs(ids);
 
   // ---------------------------------------------------------------------------
   // Realtime watch
@@ -190,8 +182,9 @@ class BlocWsDatabase<T extends Model> extends BlocGeneral<WsDbState<T>> {
 
     _setWatching(docId: docId, isWatching: true);
 
-    _watchSubs[docId] =
-        _facade.watchDoc(docId).listen((Either<ErrorItem, T> e) {
+    _watchSubs[docId] = _facade.watchDoc(docId).listen((
+      Either<ErrorItem, T> e,
+    ) {
       e.fold(
         (ErrorItem err) => _setError(err),
         (T entity) => _setDoc(docId: docId, doc: entity),
@@ -203,8 +196,9 @@ class BlocWsDatabase<T extends Model> extends BlocGeneral<WsDbState<T>> {
   ///
   /// Safe to call multiple times.
   Future<void> stopWatch(String docId) async {
-    final StreamSubscription<Either<ErrorItem, T>>? sub =
-        _watchSubs.remove(docId);
+    final StreamSubscription<Either<ErrorItem, T>>? sub = _watchSubs.remove(
+      docId,
+    );
     if (sub != null) {
       await sub.cancel();
       await _facade.detach(docId);
@@ -276,11 +270,7 @@ class BlocWsDatabase<T extends Model> extends BlocGeneral<WsDbState<T>> {
   }
 
   void _setDoc({required String docId, required T doc}) {
-    value = value.copyWith(
-      docId: docId,
-      doc: doc,
-      error: null,
-    );
+    value = value.copyWith(docId: docId, doc: doc, error: null);
   }
 
   void _setWatching({required bool isWatching, String? docId}) {

@@ -70,17 +70,16 @@ void main() {
 
   group('Either type flags', () {
     test(
-        'Given Left When flags are read Then isLeft is true and isRight is false',
-        () {
-      const Either<String, int> result = Left<String, int>('error');
+      'Given Left When flags are read Then isLeft is true and isRight is false',
+      () {
+        const Either<String, int> result = Left<String, int>('error');
 
-      expect(result.isLeft, isTrue);
-      expect(result.isRight, isFalse);
-    });
+        expect(result.isLeft, isTrue);
+        expect(result.isRight, isFalse);
+      },
+    );
 
-    test(
-        'Given Right When flags are read Then isRight is true and isLeft is false',
-        () {
+    test('Given Right When flags are read Then isRight is true and isLeft is false', () {
       const Either<String, int> result = Right<String, int>(1);
 
       expect(result.isRight, isTrue);

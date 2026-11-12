@@ -64,8 +64,8 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
 
-import 'package:flutter/material.dart' hide DateUtils;
 import 'package:jocaagura_domain/jocaagura_domain.dart';
+import 'package:material_ui/material_ui.dart' hide DateUtils;
 
 void main() {
   runApp(const PetShopApp());
@@ -100,9 +100,9 @@ class ServiceHttpRequestAdapter implements ServiceHttpRequest {
     Duration? timeout,
     Map<String, dynamic> metadata = const <String, dynamic>{},
   }) {
-    final Map<String, String> metaHeaders =
-        Utils.mapFromDynamic(metadata['headers'])
-            .map((String k, dynamic v) => MapEntry<String, String>(k, '$v'));
+    final Map<String, String> metaHeaders = Utils.mapFromDynamic(
+      metadata['headers'],
+    ).map((String k, dynamic v) => MapEntry<String, String>(k, '$v'));
 
     final Map<String, dynamic> mergedHeaders = <String, dynamic>{
       ...?headers,
@@ -112,8 +112,9 @@ class ServiceHttpRequestAdapter implements ServiceHttpRequest {
 
     return _service.get(
       url: uri.toString(),
-      headers:
-          mergedHeaders.isEmpty ? null : mergedHeaders.cast<String, String>(),
+      headers: mergedHeaders.isEmpty
+          ? null
+          : mergedHeaders.cast<String, String>(),
     );
   }
 
@@ -373,10 +374,7 @@ class VetCatsVirtualCrudService implements VirtualCrudService {
         breed: 'Mestizo',
         color: 'White with stripes',
         ageYears: 1.0,
-        owner: <String, dynamic>{
-          'id': 'owner-001',
-          'fullName': 'Albert',
-        },
+        owner: <String, dynamic>{'id': 'owner-001', 'fullName': 'Albert'},
         energy: 85,
         intelligence: 95,
         joyful: 88,
@@ -441,9 +439,7 @@ class VetCatsVirtualCrudService implements VirtualCrudService {
       uri: uri,
       statusCode: statusCode,
       reasonPhrase: reason,
-      metadata: const <String, dynamic>{
-        'source': 'VetCatsVirtualCrudService',
-      },
+      metadata: const <String, dynamic>{'source': 'VetCatsVirtualCrudService'},
     );
 
     return Utils.mapFromDynamic(<String, dynamic>{
@@ -461,8 +457,9 @@ class VetCatsVirtualCrudService implements VirtualCrudService {
   }
 
   Map<String, dynamic> _handleList(RequestContext ctx) {
-    final List<Map<String, dynamic>> items =
-        _db.values.map((CatPatient c) => c.toJson()).toList();
+    final List<Map<String, dynamic>> items = _db.values
+        .map((CatPatient c) => c.toJson())
+        .toList();
     return _okHttp(
       method: HttpMethodEnum.get,
       uri: ctx.uri,
@@ -533,16 +530,6 @@ class VetCatsVirtualCrudService implements VirtualCrudService {
         reason: 'Unprocessable Entity',
         code: 'validation_error',
         message: 'weightKg must be >= 0.1',
-      );
-    }
-    if (birthDate == null && ageYears == null) {
-      return _failHttp(
-        method: HttpMethodEnum.post,
-        uri: ctx.uri,
-        statusCode: 422,
-        reason: 'Unprocessable Entity',
-        code: 'validation_error',
-        message: 'Either birthDate or ageYears must be provided',
       );
     }
 
@@ -765,10 +752,7 @@ class _PetShopAppState extends State<PetShopApp> {
     );
 
     _fakeHttp = JocaaguraFakeHttpRequest(
-      services: <VirtualCrudService>[
-        catsService,
-        usersService,
-      ],
+      services: <VirtualCrudService>[catsService, usersService],
       config: config,
     );
 
@@ -800,10 +784,7 @@ class _PetShopAppState extends State<PetShopApp> {
     return MaterialApp(
       title: 'Pet Shop Vet API Demo',
       theme: ThemeData(useMaterial3: true, colorSchemeSeed: Colors.teal),
-      home: VetCatsHome(
-        baseUri: _baseUri,
-        blocHttpVet: _bloc,
-      ),
+      home: VetCatsHome(baseUri: _baseUri, blocHttpVet: _bloc),
     );
   }
 }
@@ -841,14 +822,17 @@ class _VetCatsHomeState extends State<VetCatsHome> {
   String? _error;
   ModelConfigHttpRequest? _lastConfig;
 
-  final TextEditingController _nameCtrl =
-      TextEditingController(text: 'Michi Nuevo');
+  final TextEditingController _nameCtrl = TextEditingController(
+    text: 'Michi Nuevo',
+  );
   final TextEditingController _weightCtrl = TextEditingController(text: '3.2');
-  final TextEditingController _genderCtrl =
-      TextEditingController(text: 'female');
+  final TextEditingController _genderCtrl = TextEditingController(
+    text: 'female',
+  );
   final TextEditingController _ageYearsCtrl = TextEditingController(text: '1');
-  final TextEditingController _emailCtrl =
-      TextEditingController(text: 'albert@example.com');
+  final TextEditingController _emailCtrl = TextEditingController(
+    text: 'albert@example.com',
+  );
   final TextEditingController _passCtrl = TextEditingController(text: '1234');
 
   String? _bearerToken;
@@ -863,50 +847,49 @@ class _VetCatsHomeState extends State<VetCatsHome> {
       'email': _emailCtrl.text.trim(),
       'password': _passCtrl.text.trim(),
     };
-    final Either<ErrorItem, ModelConfigHttpRequest> r =
-        await widget.blocHttpVet.post(
-      requestKey: 'auth.login',
-      uri: _loginUri(),
-      body: body,
-      metadata: const <String, dynamic>{
-        'feature': 'auth',
-        'operation': 'login',
-      },
-    );
+    final Either<ErrorItem, ModelConfigHttpRequest> r = await widget.blocHttpVet
+        .post(
+          requestKey: 'auth.login',
+          uri: _loginUri(),
+          body: body,
+          metadata: const <String, dynamic>{
+            'feature': 'auth',
+            'operation': 'login',
+          },
+        );
 
-    r.fold(
-      (ErrorItem e) => setState(() => _error = e.toString()),
-      (ModelConfigHttpRequest cfg) {
-        _lastConfig = cfg;
+    r.fold((ErrorItem e) => setState(() => _error = e.toString()), (
+      ModelConfigHttpRequest cfg,
+    ) {
+      _lastConfig = cfg;
 
-        // Esperado desde el VirtualService:
-        // body: { user: <json>, jwt: <map> }
-        final Object? jwtObj = cfg.body['jwt'];
-        final Object? userObj = cfg.body['user'];
+      // Esperado desde el VirtualService:
+      // body: { user: <json>, jwt: <map> }
+      final Object? jwtObj = cfg.body['jwt'];
+      final Object? userObj = cfg.body['user'];
 
-        String? token;
-        if (jwtObj is Map) {
-          token = Utils.getStringFromDynamic(jwtObj['token']);
-        }
+      String? token;
+      if (jwtObj is Map) {
+        token = Utils.getStringFromDynamic(jwtObj['token']);
+      }
 
-        if (token == null || token.isEmpty) {
-          setState(
-            () => _error =
-                'Login OK pero no llegó token en cfg.body["jwt"].token',
-          );
-          return;
-        }
+      if (token == null || token.isEmpty) {
+        setState(
+          () =>
+              _error = 'Login OK pero no llegó token en cfg.body["jwt"].token',
+        );
+        return;
+      }
 
-        final UserModel? user = (userObj is Map)
-            ? UserModel.fromJson(Utils.mapFromDynamic(userObj))
-            : null;
+      final UserModel? user = (userObj is Map)
+          ? UserModel.fromJson(Utils.mapFromDynamic(userObj))
+          : null;
 
-        setState(() {
-          _bearerToken = token;
-          _currentUser = user;
-        });
-      },
-    );
+      setState(() {
+        _bearerToken = token;
+        _currentUser = user;
+      });
+    });
   }
 
   Future<void> _loadMe() async {
@@ -918,36 +901,32 @@ class _VetCatsHomeState extends State<VetCatsHome> {
       return;
     }
 
-    final Either<ErrorItem, ModelConfigHttpRequest> r =
-        await widget.blocHttpVet.get(
-      requestKey: 'users.me',
-      uri: _meUri(),
-      metadata: <String, dynamic>{
-        'feature': 'auth',
-        'operation': 'me',
-        'headers': <String, String>{
-          'Authorization': 'Bearer $token',
-        },
-      },
-    );
+    final Either<ErrorItem, ModelConfigHttpRequest> r = await widget.blocHttpVet
+        .get(
+          requestKey: 'users.me',
+          uri: _meUri(),
+          metadata: <String, dynamic>{
+            'feature': 'auth',
+            'operation': 'me',
+            'headers': <String, String>{'Authorization': 'Bearer $token'},
+          },
+        );
 
-    r.fold(
-      (ErrorItem e) => setState(() => _error = e.toString()),
-      (ModelConfigHttpRequest cfg) {
-        _lastConfig = cfg;
+    r.fold((ErrorItem e) => setState(() => _error = e.toString()), (
+      ModelConfigHttpRequest cfg,
+    ) {
+      _lastConfig = cfg;
 
-        final Object? userObj = cfg.body['user'];
-        if (userObj is Map) {
-          final UserModel user =
-              UserModel.fromJson(Utils.mapFromDynamic(userObj));
-          setState(() => _currentUser = user);
-        } else {
-          setState(
-            () => _error = 'Me OK pero no llegó user en cfg.body["user"]',
-          );
-        }
-      },
-    );
+      final Object? userObj = cfg.body['user'];
+      if (userObj is Map) {
+        final UserModel user = UserModel.fromJson(
+          Utils.mapFromDynamic(userObj),
+        );
+        setState(() => _currentUser = user);
+      } else {
+        setState(() => _error = 'Me OK pero no llegó user en cfg.body["user"]');
+      }
+    });
   }
 
   @override
@@ -978,15 +957,15 @@ class _VetCatsHomeState extends State<VetCatsHome> {
       _error = null;
     });
 
-    final Either<ErrorItem, ModelConfigHttpRequest> r =
-        await widget.blocHttpVet.get(
-      requestKey: 'vet.cats.list',
-      uri: _catsUri(),
-      metadata: const <String, dynamic>{
-        'feature': 'vet',
-        'operation': 'listCats',
-      },
-    );
+    final Either<ErrorItem, ModelConfigHttpRequest> r = await widget.blocHttpVet
+        .get(
+          requestKey: 'vet.cats.list',
+          uri: _catsUri(),
+          metadata: const <String, dynamic>{
+            'feature': 'vet',
+            'operation': 'listCats',
+          },
+        );
 
     r.fold(
       (ErrorItem e) {
@@ -1003,12 +982,12 @@ class _VetCatsHomeState extends State<VetCatsHome> {
         final Object? itemsObj = cfg.body['items'];
         final List<CatPatient> cats = (itemsObj is List)
             ? itemsObj
-                .whereType<Map<dynamic, dynamic>>()
-                .map(
-                  (Map<dynamic, dynamic> m) =>
-                      CatPatient.fromJson(Utils.mapFromDynamic(m)),
-                )
-                .toList()
+                  .whereType<Map<dynamic, dynamic>>()
+                  .map(
+                    (Map<dynamic, dynamic> m) =>
+                        CatPatient.fromJson(Utils.mapFromDynamic(m)),
+                  )
+                  .toList()
             : <CatPatient>[];
 
         setState(() {
@@ -1026,37 +1005,35 @@ class _VetCatsHomeState extends State<VetCatsHome> {
       _error = null;
     });
 
-    final Either<ErrorItem, ModelConfigHttpRequest> r =
-        await widget.blocHttpVet.get(
-      requestKey: 'vet.cats.get.$id',
-      uri: _catsUri(id),
-      metadata: <String, dynamic>{
-        'feature': 'vet',
-        'operation': 'getCat',
-        'id': id,
-      },
-    );
+    final Either<ErrorItem, ModelConfigHttpRequest> r = await widget.blocHttpVet
+        .get(
+          requestKey: 'vet.cats.get.$id',
+          uri: _catsUri(id),
+          metadata: <String, dynamic>{
+            'feature': 'vet',
+            'operation': 'getCat',
+            'id': id,
+          },
+        );
 
-    r.fold(
-      (ErrorItem e) => setState(() => _error = e.toString()),
-      (ModelConfigHttpRequest cfg) {
-        _lastConfig = cfg;
+    r.fold((ErrorItem e) => setState(() => _error = e.toString()), (
+      ModelConfigHttpRequest cfg,
+    ) {
+      _lastConfig = cfg;
 
-        final Object? itemObj = cfg.body['item'];
-        if (itemObj is Map) {
-          final CatPatient c =
-              CatPatient.fromJson(Utils.mapFromDynamic(itemObj));
-          final int idx = _cats.indexWhere((CatPatient x) => x.id == id);
-          setState(() {
-            if (idx >= 0) {
-              final List<CatPatient> next = List<CatPatient>.from(_cats);
-              next[idx] = c;
-              _cats = next;
-            }
-          });
-        }
-      },
-    );
+      final Object? itemObj = cfg.body['item'];
+      if (itemObj is Map) {
+        final CatPatient c = CatPatient.fromJson(Utils.mapFromDynamic(itemObj));
+        final int idx = _cats.indexWhere((CatPatient x) => x.id == id);
+        setState(() {
+          if (idx >= 0) {
+            final List<CatPatient> next = List<CatPatient>.from(_cats);
+            next[idx] = c;
+            _cats = next;
+          }
+        });
+      }
+    });
   }
 
   Future<void> _create() async {
@@ -1074,32 +1051,32 @@ class _VetCatsHomeState extends State<VetCatsHome> {
       'notes': 'Created from Flutter demo',
     };
 
-    final Either<ErrorItem, ModelConfigHttpRequest> r =
-        await widget.blocHttpVet.post(
-      requestKey: 'vet.cats.create',
-      uri: _catsUri(),
-      body: body,
-      metadata: const <String, dynamic>{
-        'feature': 'vet',
-        'operation': 'createCat',
-      },
-    );
+    final Either<ErrorItem, ModelConfigHttpRequest> r = await widget.blocHttpVet
+        .post(
+          requestKey: 'vet.cats.create',
+          uri: _catsUri(),
+          body: body,
+          metadata: const <String, dynamic>{
+            'feature': 'vet',
+            'operation': 'createCat',
+          },
+        );
 
-    r.fold(
-      (ErrorItem e) => setState(() => _error = e.toString()),
-      (ModelConfigHttpRequest cfg) {
-        _lastConfig = cfg;
-        final Object? itemObj = cfg.body['item'];
-        if (itemObj is Map) {
-          final CatPatient created =
-              CatPatient.fromJson(Utils.mapFromDynamic(itemObj));
-          setState(() {
-            _cats = <CatPatient>[created, ..._cats];
-            _selectedId = created.id;
-          });
-        }
-      },
-    );
+    r.fold((ErrorItem e) => setState(() => _error = e.toString()), (
+      ModelConfigHttpRequest cfg,
+    ) {
+      _lastConfig = cfg;
+      final Object? itemObj = cfg.body['item'];
+      if (itemObj is Map) {
+        final CatPatient created = CatPatient.fromJson(
+          Utils.mapFromDynamic(itemObj),
+        );
+        setState(() {
+          _cats = <CatPatient>[created, ..._cats];
+          _selectedId = created.id;
+        });
+      }
+    });
   }
 
   Future<void> _updateSelected() async {
@@ -1117,25 +1094,24 @@ class _VetCatsHomeState extends State<VetCatsHome> {
       'updatedBy': 'flutter-demo',
     };
 
-    final Either<ErrorItem, ModelConfigHttpRequest> r =
-        await widget.blocHttpVet.put(
-      requestKey: 'vet.cats.update.$id',
-      uri: _catsUri(id),
-      body: patch,
-      metadata: <String, dynamic>{
-        'feature': 'vet',
-        'operation': 'updateCat',
-        'id': id,
-      },
-    );
+    final Either<ErrorItem, ModelConfigHttpRequest> r = await widget.blocHttpVet
+        .put(
+          requestKey: 'vet.cats.update.$id',
+          uri: _catsUri(id),
+          body: patch,
+          metadata: <String, dynamic>{
+            'feature': 'vet',
+            'operation': 'updateCat',
+            'id': id,
+          },
+        );
 
-    r.fold(
-      (ErrorItem e) => setState(() => _error = e.toString()),
-      (ModelConfigHttpRequest cfg) async {
-        _lastConfig = cfg;
-        await _loadOne(id);
-      },
-    );
+    r.fold((ErrorItem e) => setState(() => _error = e.toString()), (
+      ModelConfigHttpRequest cfg,
+    ) async {
+      _lastConfig = cfg;
+      await _loadOne(id);
+    });
   }
 
   Future<void> _deleteSelected() async {
@@ -1146,27 +1122,26 @@ class _VetCatsHomeState extends State<VetCatsHome> {
 
     setState(() => _error = null);
 
-    final Either<ErrorItem, ModelConfigHttpRequest> r =
-        await widget.blocHttpVet.delete(
-      requestKey: 'vet.cats.delete.$id',
-      uri: _catsUri(id),
-      metadata: <String, dynamic>{
-        'feature': 'vet',
-        'operation': 'deleteCat',
-        'id': id,
-      },
-    );
+    final Either<ErrorItem, ModelConfigHttpRequest> r = await widget.blocHttpVet
+        .delete(
+          requestKey: 'vet.cats.delete.$id',
+          uri: _catsUri(id),
+          metadata: <String, dynamic>{
+            'feature': 'vet',
+            'operation': 'deleteCat',
+            'id': id,
+          },
+        );
 
-    r.fold(
-      (ErrorItem e) => setState(() => _error = e.toString()),
-      (ModelConfigHttpRequest cfg) {
-        _lastConfig = cfg;
-        setState(() {
-          _cats = _cats.where((CatPatient c) => c.id != id).toList();
-          _selectedId = _cats.isEmpty ? null : _cats.first.id;
-        });
-      },
-    );
+    r.fold((ErrorItem e) => setState(() => _error = e.toString()), (
+      ModelConfigHttpRequest cfg,
+    ) {
+      _lastConfig = cfg;
+      setState(() {
+        _cats = _cats.where((CatPatient c) => c.id != id).toList();
+        _selectedId = _cats.isEmpty ? null : _cats.first.id;
+      });
+    });
   }
 
   Future<void> _retryLast() async {
@@ -1177,22 +1152,21 @@ class _VetCatsHomeState extends State<VetCatsHome> {
 
     setState(() => _error = null);
 
-    final Either<ErrorItem, ModelConfigHttpRequest> r =
-        await widget.blocHttpVet.retry(
-      requestKey: 'vet.retry.${Random().nextInt(9999)}',
-      previousConfig: last,
-      extraMetadata: const <String, dynamic>{'retry': true},
-    );
+    final Either<ErrorItem, ModelConfigHttpRequest> r = await widget.blocHttpVet
+        .retry(
+          requestKey: 'vet.retry.${Random().nextInt(9999)}',
+          previousConfig: last,
+          extraMetadata: const <String, dynamic>{'retry': true},
+        );
 
-    r.fold(
-      (ErrorItem e) => setState(() => _error = e.toString()),
-      (ModelConfigHttpRequest cfg) async {
-        _lastConfig = cfg;
-        // In this demo, retry is mostly to show the flow.
-        // Refresh list to reflect any changes.
-        await _loadList();
-      },
-    );
+    r.fold((ErrorItem e) => setState(() => _error = e.toString()), (
+      ModelConfigHttpRequest cfg,
+    ) async {
+      _lastConfig = cfg;
+      // In this demo, retry is mostly to show the flow.
+      // Refresh list to reflect any changes.
+      await _loadList();
+    });
   }
 
   @override
@@ -1200,9 +1174,9 @@ class _VetCatsHomeState extends State<VetCatsHome> {
     final CatPatient? selected = _selectedId == null
         ? null
         : _cats.cast<CatPatient?>().firstWhere(
-              (CatPatient? c) => c?.id == _selectedId,
-              orElse: () => null,
-            );
+            (CatPatient? c) => c?.id == _selectedId,
+            orElse: () => null,
+          );
 
     return Scaffold(
       appBar: AppBar(
@@ -1287,8 +1261,9 @@ class _VetCatsHomeState extends State<VetCatsHome> {
                       return ListTile(
                         selected: selected,
                         title: Text(c.name),
-                        subtitle:
-                            Text('${c.id} • ${c.gender} • ${c.weightKg}kg'),
+                        subtitle: Text(
+                          '${c.id} • ${c.gender} • ${c.weightKg}kg',
+                        ),
                         onTap: () async {
                           setState(() => _selectedId = c.id);
                           await _loadOne(c.id);
@@ -1488,8 +1463,9 @@ class _VetCatsHomeState extends State<VetCatsHome> {
                               child: SingleChildScrollView(
                                 child: Text(
                                   _prettyJson(selected.toJson()),
-                                  style:
-                                      const TextStyle(fontFamily: 'monospace'),
+                                  style: const TextStyle(
+                                    fontFamily: 'monospace',
+                                  ),
                                 ),
                               ),
                             ),
@@ -1731,9 +1707,10 @@ class AuthUsersVirtualCrudService implements VirtualCrudService {
     }
 
     // Find by email (simple)
-    final UserModel? user = _users.values
-        .cast<UserModel?>()
-        .firstWhere((UserModel? u) => u?.email == email, orElse: () => null);
+    final UserModel? user = _users.values.cast<UserModel?>().firstWhere(
+      (UserModel? u) => u?.email == email,
+      orElse: () => null,
+    );
 
     if (user == null) {
       return _fail(
@@ -1766,10 +1743,7 @@ class AuthUsersVirtualCrudService implements VirtualCrudService {
       uri: ctx.uri,
       statusCode: 200,
       reason: 'OK',
-      body: <String, dynamic>{
-        'user': enriched.toJson(),
-        'jwt': jwt,
-      },
+      body: <String, dynamic>{'user': enriched.toJson(), 'jwt': jwt},
       metadata: <String, dynamic>{'issuedToken': token},
     );
   }
@@ -1824,8 +1798,9 @@ class AuthUsersVirtualCrudService implements VirtualCrudService {
   }
 
   Map<String, dynamic> _list(RequestContext ctx) {
-    final List<Map<String, dynamic>> items =
-        _users.values.map((UserModel u) => u.toJson()).toList();
+    final List<Map<String, dynamic>> items = _users.values
+        .map((UserModel u) => u.toJson())
+        .toList();
 
     return _ok(
       method: HttpMethodEnum.get,

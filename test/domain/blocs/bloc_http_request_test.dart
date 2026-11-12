@@ -53,11 +53,11 @@ class _FakeUsecaseHttpRequestGet extends UsecaseHttpRequestGet {
 
   Either<ErrorItem, ModelConfigHttpRequest> result =
       Right<ErrorItem, ModelConfigHttpRequest>(
-    ModelConfigHttpRequest(
-      method: HttpMethodEnum.get,
-      uri: Uri.parse('https://example.com/get'),
-    ),
-  );
+        ModelConfigHttpRequest(
+          method: HttpMethodEnum.get,
+          uri: Uri.parse('https://example.com/get'),
+        ),
+      );
 
   bool delay = false;
 
@@ -90,11 +90,11 @@ class _FakeUsecaseHttpRequestPost extends UsecaseHttpRequestPost {
 
   Either<ErrorItem, ModelConfigHttpRequest> result =
       Right<ErrorItem, ModelConfigHttpRequest>(
-    ModelConfigHttpRequest(
-      method: HttpMethodEnum.post,
-      uri: Uri.parse('https://example.com/post'),
-    ),
-  );
+        ModelConfigHttpRequest(
+          method: HttpMethodEnum.post,
+          uri: Uri.parse('https://example.com/post'),
+        ),
+      );
 
   bool delay = false;
 
@@ -130,11 +130,11 @@ class _FakeUsecaseHttpRequestPut extends UsecaseHttpRequestPut {
 
   Either<ErrorItem, ModelConfigHttpRequest> result =
       Right<ErrorItem, ModelConfigHttpRequest>(
-    ModelConfigHttpRequest(
-      method: HttpMethodEnum.put,
-      uri: Uri.parse('https://example.com/put'),
-    ),
-  );
+        ModelConfigHttpRequest(
+          method: HttpMethodEnum.put,
+          uri: Uri.parse('https://example.com/put'),
+        ),
+      );
 
   bool delay = false;
 
@@ -170,11 +170,11 @@ class _FakeUsecaseHttpRequestDelete extends UsecaseHttpRequestDelete {
 
   Either<ErrorItem, ModelConfigHttpRequest> result =
       Right<ErrorItem, ModelConfigHttpRequest>(
-    ModelConfigHttpRequest(
-      method: HttpMethodEnum.delete,
-      uri: Uri.parse('https://example.com/delete'),
-    ),
-  );
+        ModelConfigHttpRequest(
+          method: HttpMethodEnum.delete,
+          uri: Uri.parse('https://example.com/delete'),
+        ),
+      );
 
   bool delay = false;
 
@@ -207,11 +207,11 @@ class _FakeUsecaseHttpRequestRetry extends UsecaseHttpRequestRetry {
 
   Either<ErrorItem, ModelConfigHttpRequest> result =
       Right<ErrorItem, ModelConfigHttpRequest>(
-    ModelConfigHttpRequest(
-      method: HttpMethodEnum.get,
-      uri: Uri.parse('https://example.com/retry'),
-    ),
-  );
+        ModelConfigHttpRequest(
+          method: HttpMethodEnum.get,
+          uri: Uri.parse('https://example.com/retry'),
+        ),
+      );
 
   bool delay = false;
 
@@ -234,87 +234,80 @@ class _FakeUsecaseHttpRequestRetry extends UsecaseHttpRequestRetry {
 
 void main() {
   group('BlocHttpRequest - estado inicial y helpers básicos', () {
-    test(
-      'Given un BlocHttpRequest recién creado '
-      'When se inspecciona el estado '
-      'Then no tiene requests activos y hasActiveRequests es false',
-      () {
-        // Arrange
-        final _FakeUsecaseHttpRequestGet fakeGet = _FakeUsecaseHttpRequestGet();
-        final _FakeUsecaseHttpRequestPost fakePost =
-            _FakeUsecaseHttpRequestPost();
-        final _FakeUsecaseHttpRequestPut fakePut = _FakeUsecaseHttpRequestPut();
-        final _FakeUsecaseHttpRequestDelete fakeDelete =
-            _FakeUsecaseHttpRequestDelete();
-        final _FakeUsecaseHttpRequestRetry fakeRetry =
-            _FakeUsecaseHttpRequestRetry();
+    test('Given un BlocHttpRequest recién creado '
+        'When se inspecciona el estado '
+        'Then no tiene requests activos y hasActiveRequests es false', () {
+      // Arrange
+      final _FakeUsecaseHttpRequestGet fakeGet = _FakeUsecaseHttpRequestGet();
+      final _FakeUsecaseHttpRequestPost fakePost =
+          _FakeUsecaseHttpRequestPost();
+      final _FakeUsecaseHttpRequestPut fakePut = _FakeUsecaseHttpRequestPut();
+      final _FakeUsecaseHttpRequestDelete fakeDelete =
+          _FakeUsecaseHttpRequestDelete();
+      final _FakeUsecaseHttpRequestRetry fakeRetry =
+          _FakeUsecaseHttpRequestRetry();
 
-        final FacadeHttpRequestUsecases facade = FacadeHttpRequestUsecases(
-          get: fakeGet,
-          post: fakePost,
-          put: fakePut,
-          delete: fakeDelete,
-          retry: fakeRetry,
-        );
+      final FacadeHttpRequestUsecases facade = FacadeHttpRequestUsecases(
+        get: fakeGet,
+        post: fakePost,
+        put: fakePut,
+        delete: fakeDelete,
+        retry: fakeRetry,
+      );
 
-        final BlocHttpRequest bloc = BlocHttpRequest(facade);
+      final BlocHttpRequest bloc = BlocHttpRequest(facade);
 
-        // Assert
-        expect(bloc.activeRequests, isEmpty);
-        expect(bloc.hasActiveRequests, isFalse);
-      },
-    );
+      // Assert
+      expect(bloc.activeRequests, isEmpty);
+      expect(bloc.hasActiveRequests, isFalse);
+    });
   });
 
   group('BlocHttpRequest - tracking de GET', () {
-    test(
-      'Given un GET con delay '
-      'When se invoca get '
-      'Then requestKey se marca activo mientras está en vuelo y se limpia al terminar',
-      () async {
-        // Arrange
-        final _FakeUsecaseHttpRequestGet fakeGet = _FakeUsecaseHttpRequestGet()
-          ..delay = true;
-        final FacadeHttpRequestUsecases facade = FacadeHttpRequestUsecases(
-          get: fakeGet,
-          post: _FakeUsecaseHttpRequestPost(),
-          put: _FakeUsecaseHttpRequestPut(),
-          delete: _FakeUsecaseHttpRequestDelete(),
-          retry: _FakeUsecaseHttpRequestRetry(),
-        );
+    test('Given un GET con delay '
+        'When se invoca get '
+        'Then requestKey se marca activo mientras está en vuelo y se limpia al terminar', () async {
+      // Arrange
+      final _FakeUsecaseHttpRequestGet fakeGet = _FakeUsecaseHttpRequestGet()
+        ..delay = true;
+      final FacadeHttpRequestUsecases facade = FacadeHttpRequestUsecases(
+        get: fakeGet,
+        post: _FakeUsecaseHttpRequestPost(),
+        put: _FakeUsecaseHttpRequestPut(),
+        delete: _FakeUsecaseHttpRequestDelete(),
+        retry: _FakeUsecaseHttpRequestRetry(),
+      );
 
-        final BlocHttpRequest bloc = BlocHttpRequest(facade);
+      final BlocHttpRequest bloc = BlocHttpRequest(facade);
 
-        const String requestKey = 'userProfile.fetchMe';
-        final Uri uri = Uri.parse('https://api.example.com/v1/users/me');
-        final Map<String, dynamic> metadata = <String, dynamic>{
-          'feature': 'userProfile',
-        };
+      const String requestKey = 'userProfile.fetchMe';
+      final Uri uri = Uri.parse('https://api.example.com/v1/users/me');
+      final Map<String, dynamic> metadata = <String, dynamic>{
+        'feature': 'userProfile',
+      };
 
-        // Act
-        final Future<Either<ErrorItem, ModelConfigHttpRequest>> future =
-            bloc.get(
-          requestKey: requestKey,
-          uri: uri,
-          metadata: metadata,
-        );
+      // Act
+      final Future<Either<ErrorItem, ModelConfigHttpRequest>> future = bloc.get(
+        requestKey: requestKey,
+        uri: uri,
+        metadata: metadata,
+      );
 
-        // Mientras está corriendo
-        expect(bloc.hasActiveRequests, isTrue);
-        expect(bloc.isActive(requestKey), isTrue);
+      // Mientras está corriendo
+      expect(bloc.hasActiveRequests, isTrue);
+      expect(bloc.isActive(requestKey), isTrue);
 
-        final Either<ErrorItem, ModelConfigHttpRequest> result = await future;
+      final Either<ErrorItem, ModelConfigHttpRequest> result = await future;
 
-        // Assert final
-        expect(result, isA<Right<ErrorItem, ModelConfigHttpRequest>>());
-        expect(bloc.hasActiveRequests, isFalse);
-        expect(bloc.isActive(requestKey), isFalse);
+      // Assert final
+      expect(result, isA<Right<ErrorItem, ModelConfigHttpRequest>>());
+      expect(bloc.hasActiveRequests, isFalse);
+      expect(bloc.isActive(requestKey), isFalse);
 
-        // Delegación a fakeGet
-        expect(fakeGet.lastUri, equals(uri));
-        expect(fakeGet.lastMetadata, equals(metadata));
-      },
-    );
+      // Delegación a fakeGet
+      expect(fakeGet.lastUri, equals(uri));
+      expect(fakeGet.lastMetadata, equals(metadata));
+    });
   });
 
   group('BlocHttpRequest - POST/PUT/DELETE tracking y errores', () {
@@ -344,13 +337,13 @@ void main() {
         final Map<String, dynamic> body = <String, dynamic>{'name': 'Alice'};
 
         // Act
-        final Future<Either<ErrorItem, ModelConfigHttpRequest>> future =
-            bloc.post(
-          requestKey: requestKey,
-          uri: uri,
-          headers: headers,
-          body: body,
-        );
+        final Future<Either<ErrorItem, ModelConfigHttpRequest>> future = bloc
+            .post(
+              requestKey: requestKey,
+              uri: uri,
+              headers: headers,
+              body: body,
+            );
 
         expect(bloc.hasActiveRequests, isTrue);
         expect(bloc.isActive(requestKey), isTrue);
@@ -368,195 +361,177 @@ void main() {
       },
     );
 
-    test(
-      'Given fakePost.result = Left '
-      'When post es invocado '
-      'Then BlocHttpRequest devuelve Left con el mismo ErrorItem',
-      () async {
-        // Arrange
-        const ErrorItem error = ErrorItem(
-          title: 'Validation error',
-          code: 'INVALID_DATA',
-          description: 'Missing fields',
-          errorLevel: ErrorLevelEnum.warning,
-        );
+    test('Given fakePost.result = Left '
+        'When post es invocado '
+        'Then BlocHttpRequest devuelve Left con el mismo ErrorItem', () async {
+      // Arrange
+      const ErrorItem error = ErrorItem(
+        title: 'Validation error',
+        code: 'INVALID_DATA',
+        description: 'Missing fields',
+        errorLevel: ErrorLevelEnum.warning,
+      );
 
-        final _FakeUsecaseHttpRequestPost fakePost =
-            _FakeUsecaseHttpRequestPost()
-              ..result = const Left<ErrorItem, ModelConfigHttpRequest>(error);
+      final _FakeUsecaseHttpRequestPost fakePost = _FakeUsecaseHttpRequestPost()
+        ..result = const Left<ErrorItem, ModelConfigHttpRequest>(error);
 
-        final FacadeHttpRequestUsecases facade = FacadeHttpRequestUsecases(
-          get: _FakeUsecaseHttpRequestGet(),
-          post: fakePost,
-          put: _FakeUsecaseHttpRequestPut(),
-          delete: _FakeUsecaseHttpRequestDelete(),
-          retry: _FakeUsecaseHttpRequestRetry(),
-        );
+      final FacadeHttpRequestUsecases facade = FacadeHttpRequestUsecases(
+        get: _FakeUsecaseHttpRequestGet(),
+        post: fakePost,
+        put: _FakeUsecaseHttpRequestPut(),
+        delete: _FakeUsecaseHttpRequestDelete(),
+        retry: _FakeUsecaseHttpRequestRetry(),
+      );
 
-        final BlocHttpRequest bloc = BlocHttpRequest(facade);
+      final BlocHttpRequest bloc = BlocHttpRequest(facade);
 
-        // Act
-        final Either<ErrorItem, ModelConfigHttpRequest> result =
-            await bloc.post(
-          requestKey: 'users.create',
-          uri: Uri.parse('https://api.example.com/users'),
-        );
+      // Act
+      final Either<ErrorItem, ModelConfigHttpRequest> result = await bloc.post(
+        requestKey: 'users.create',
+        uri: Uri.parse('https://api.example.com/users'),
+      );
 
-        // Assert
-        expect(result, isA<Left<ErrorItem, ModelConfigHttpRequest>>());
-        final Left<ErrorItem, ModelConfigHttpRequest> left =
-            result as Left<ErrorItem, ModelConfigHttpRequest>;
-        expect(left.value, same(error));
-      },
-    );
+      // Assert
+      expect(result, isA<Left<ErrorItem, ModelConfigHttpRequest>>());
+      final Left<ErrorItem, ModelConfigHttpRequest> left =
+          result as Left<ErrorItem, ModelConfigHttpRequest>;
+      expect(left.value, same(error));
+    });
 
-    test(
-      'Given un PUT exitoso '
-      'When put es invocado '
-      'Then se trackea el requestKey y se propaga el Right',
-      () async {
-        // Arrange
-        final _FakeUsecaseHttpRequestPut fakePut = _FakeUsecaseHttpRequestPut()
-          ..delay = true;
+    test('Given un PUT exitoso '
+        'When put es invocado '
+        'Then se trackea el requestKey y se propaga el Right', () async {
+      // Arrange
+      final _FakeUsecaseHttpRequestPut fakePut = _FakeUsecaseHttpRequestPut()
+        ..delay = true;
 
-        final FacadeHttpRequestUsecases facade = FacadeHttpRequestUsecases(
-          get: _FakeUsecaseHttpRequestGet(),
-          post: _FakeUsecaseHttpRequestPost(),
-          put: fakePut,
-          delete: _FakeUsecaseHttpRequestDelete(),
-          retry: _FakeUsecaseHttpRequestRetry(),
-        );
+      final FacadeHttpRequestUsecases facade = FacadeHttpRequestUsecases(
+        get: _FakeUsecaseHttpRequestGet(),
+        post: _FakeUsecaseHttpRequestPost(),
+        put: fakePut,
+        delete: _FakeUsecaseHttpRequestDelete(),
+        retry: _FakeUsecaseHttpRequestRetry(),
+      );
 
-        final BlocHttpRequest bloc = BlocHttpRequest(facade);
+      final BlocHttpRequest bloc = BlocHttpRequest(facade);
 
-        const String requestKey = 'users.update';
-        final Uri uri = Uri.parse('https://api.example.com/users/1');
+      const String requestKey = 'users.update';
+      final Uri uri = Uri.parse('https://api.example.com/users/1');
 
-        // Act
-        final Future<Either<ErrorItem, ModelConfigHttpRequest>> future =
-            bloc.put(
-          requestKey: requestKey,
-          uri: uri,
-          body: const <String, dynamic>{'name': 'Bob'},
-        );
+      // Act
+      final Future<Either<ErrorItem, ModelConfigHttpRequest>> future = bloc.put(
+        requestKey: requestKey,
+        uri: uri,
+        body: const <String, dynamic>{'name': 'Bob'},
+      );
 
-        expect(bloc.hasActiveRequests, isTrue);
-        expect(bloc.isActive(requestKey), isTrue);
+      expect(bloc.hasActiveRequests, isTrue);
+      expect(bloc.isActive(requestKey), isTrue);
 
-        final Either<ErrorItem, ModelConfigHttpRequest> result = await future;
+      final Either<ErrorItem, ModelConfigHttpRequest> result = await future;
 
-        // Assert
-        expect(result, isA<Right<ErrorItem, ModelConfigHttpRequest>>());
-        expect(bloc.hasActiveRequests, isFalse);
-        expect(bloc.isActive(requestKey), isFalse);
-        expect(fakePut.lastUri, equals(uri));
-      },
-    );
+      // Assert
+      expect(result, isA<Right<ErrorItem, ModelConfigHttpRequest>>());
+      expect(bloc.hasActiveRequests, isFalse);
+      expect(bloc.isActive(requestKey), isFalse);
+      expect(fakePut.lastUri, equals(uri));
+    });
 
-    test(
-      'Given fakeDelete.result = Left '
-      'When delete es invocado '
-      'Then devuelve Left y el requestKey termina inactivo',
-      () async {
-        // Arrange
-        const ErrorItem error = ErrorItem(
-          title: 'Delete error',
-          code: 'DELETE_FAIL',
-          description: 'Cannot delete',
-          errorLevel: ErrorLevelEnum.severe,
-        );
+    test('Given fakeDelete.result = Left '
+        'When delete es invocado '
+        'Then devuelve Left y el requestKey termina inactivo', () async {
+      // Arrange
+      const ErrorItem error = ErrorItem(
+        title: 'Delete error',
+        code: 'DELETE_FAIL',
+        description: 'Cannot delete',
+        errorLevel: ErrorLevelEnum.severe,
+      );
 
-        final _FakeUsecaseHttpRequestDelete fakeDelete =
-            _FakeUsecaseHttpRequestDelete()
-              ..delay = true
-              ..result = const Left<ErrorItem, ModelConfigHttpRequest>(error);
+      final _FakeUsecaseHttpRequestDelete fakeDelete =
+          _FakeUsecaseHttpRequestDelete()
+            ..delay = true
+            ..result = const Left<ErrorItem, ModelConfigHttpRequest>(error);
 
-        final FacadeHttpRequestUsecases facade = FacadeHttpRequestUsecases(
-          get: _FakeUsecaseHttpRequestGet(),
-          post: _FakeUsecaseHttpRequestPost(),
-          put: _FakeUsecaseHttpRequestPut(),
-          delete: fakeDelete,
-          retry: _FakeUsecaseHttpRequestRetry(),
-        );
+      final FacadeHttpRequestUsecases facade = FacadeHttpRequestUsecases(
+        get: _FakeUsecaseHttpRequestGet(),
+        post: _FakeUsecaseHttpRequestPost(),
+        put: _FakeUsecaseHttpRequestPut(),
+        delete: fakeDelete,
+        retry: _FakeUsecaseHttpRequestRetry(),
+      );
 
-        final BlocHttpRequest bloc = BlocHttpRequest(facade);
+      final BlocHttpRequest bloc = BlocHttpRequest(facade);
 
-        const String requestKey = 'users.delete';
-        final Uri uri = Uri.parse('https://api.example.com/users/1');
+      const String requestKey = 'users.delete';
+      final Uri uri = Uri.parse('https://api.example.com/users/1');
 
-        // Act
-        final Future<Either<ErrorItem, ModelConfigHttpRequest>> future =
-            bloc.delete(
-          requestKey: requestKey,
-          uri: uri,
-        );
+      // Act
+      final Future<Either<ErrorItem, ModelConfigHttpRequest>> future = bloc
+          .delete(requestKey: requestKey, uri: uri);
 
-        expect(bloc.hasActiveRequests, isTrue);
-        expect(bloc.isActive(requestKey), isTrue);
+      expect(bloc.hasActiveRequests, isTrue);
+      expect(bloc.isActive(requestKey), isTrue);
 
-        final Either<ErrorItem, ModelConfigHttpRequest> result = await future;
+      final Either<ErrorItem, ModelConfigHttpRequest> result = await future;
 
-        // Assert
-        expect(result, isA<Left<ErrorItem, ModelConfigHttpRequest>>());
-        expect(bloc.hasActiveRequests, isFalse);
-        expect(bloc.isActive(requestKey), isFalse);
-      },
-    );
+      // Assert
+      expect(result, isA<Left<ErrorItem, ModelConfigHttpRequest>>());
+      expect(bloc.hasActiveRequests, isFalse);
+      expect(bloc.isActive(requestKey), isFalse);
+    });
   });
 
   group('BlocHttpRequest - retry', () {
-    test(
-      'Given un retry exitoso '
-      'When retry es invocado '
-      'Then se trackea el requestKey y se propaga el resultado',
-      () async {
-        // Arrange
-        final _FakeUsecaseHttpRequestRetry fakeRetry =
-            _FakeUsecaseHttpRequestRetry()..delay = true;
+    test('Given un retry exitoso '
+        'When retry es invocado '
+        'Then se trackea el requestKey y se propaga el resultado', () async {
+      // Arrange
+      final _FakeUsecaseHttpRequestRetry fakeRetry =
+          _FakeUsecaseHttpRequestRetry()..delay = true;
 
-        final FacadeHttpRequestUsecases facade = FacadeHttpRequestUsecases(
-          get: _FakeUsecaseHttpRequestGet(),
-          post: _FakeUsecaseHttpRequestPost(),
-          put: _FakeUsecaseHttpRequestPut(),
-          delete: _FakeUsecaseHttpRequestDelete(),
-          retry: fakeRetry,
-        );
+      final FacadeHttpRequestUsecases facade = FacadeHttpRequestUsecases(
+        get: _FakeUsecaseHttpRequestGet(),
+        post: _FakeUsecaseHttpRequestPost(),
+        put: _FakeUsecaseHttpRequestPut(),
+        delete: _FakeUsecaseHttpRequestDelete(),
+        retry: fakeRetry,
+      );
 
-        final BlocHttpRequest bloc = BlocHttpRequest(facade);
+      final BlocHttpRequest bloc = BlocHttpRequest(facade);
 
-        const String requestKey = 'users.retryFetch';
-        final ModelConfigHttpRequest previousConfig = ModelConfigHttpRequest(
-          method: HttpMethodEnum.get,
-          uri: Uri.parse('https://api.example.com/users/1'),
-          metadata: const <String, dynamic>{'feature': 'userProfile'},
-        );
+      const String requestKey = 'users.retryFetch';
+      final ModelConfigHttpRequest previousConfig = ModelConfigHttpRequest(
+        method: HttpMethodEnum.get,
+        uri: Uri.parse('https://api.example.com/users/1'),
+        metadata: const <String, dynamic>{'feature': 'userProfile'},
+      );
 
-        final Map<String, dynamic> extraMetadata = <String, dynamic>{
-          'retryReason': 'timeout',
-        };
+      final Map<String, dynamic> extraMetadata = <String, dynamic>{
+        'retryReason': 'timeout',
+      };
 
-        // Act
-        final Future<Either<ErrorItem, ModelConfigHttpRequest>> future =
-            bloc.retry(
-          requestKey: requestKey,
-          previousConfig: previousConfig,
-          extraMetadata: extraMetadata,
-        );
+      // Act
+      final Future<Either<ErrorItem, ModelConfigHttpRequest>> future = bloc
+          .retry(
+            requestKey: requestKey,
+            previousConfig: previousConfig,
+            extraMetadata: extraMetadata,
+          );
 
-        expect(bloc.hasActiveRequests, isTrue);
-        expect(bloc.isActive(requestKey), isTrue);
+      expect(bloc.hasActiveRequests, isTrue);
+      expect(bloc.isActive(requestKey), isTrue);
 
-        final Either<ErrorItem, ModelConfigHttpRequest> result = await future;
+      final Either<ErrorItem, ModelConfigHttpRequest> result = await future;
 
-        // Assert
-        expect(result, isA<Right<ErrorItem, ModelConfigHttpRequest>>());
-        expect(bloc.hasActiveRequests, isFalse);
-        expect(bloc.isActive(requestKey), isFalse);
+      // Assert
+      expect(result, isA<Right<ErrorItem, ModelConfigHttpRequest>>());
+      expect(bloc.hasActiveRequests, isFalse);
+      expect(bloc.isActive(requestKey), isFalse);
 
-        expect(fakeRetry.lastPreviousConfig, same(previousConfig));
-        expect(fakeRetry.lastExtraMetadata, equals(extraMetadata));
-      },
-    );
+      expect(fakeRetry.lastPreviousConfig, same(previousConfig));
+      expect(fakeRetry.lastExtraMetadata, equals(extraMetadata));
+    });
   });
 
   group('BlocHttpRequest - clear / clearAll', () {
@@ -581,11 +556,8 @@ void main() {
         const String requestKey = 'users.list';
         final Uri uri = Uri.parse('https://api.example.com/users');
 
-        final Future<Either<ErrorItem, ModelConfigHttpRequest>> future =
-            bloc.get(
-          requestKey: requestKey,
-          uri: uri,
-        );
+        final Future<Either<ErrorItem, ModelConfigHttpRequest>> future = bloc
+            .get(requestKey: requestKey, uri: uri);
 
         expect(bloc.isActive(requestKey), isTrue);
 
@@ -623,18 +595,18 @@ void main() {
 
         final BlocHttpRequest bloc = BlocHttpRequest(facade);
 
-        final Future<Either<ErrorItem, ModelConfigHttpRequest>> future1 =
-            bloc.get(
-          requestKey: 'users.list',
-          uri: Uri.parse('https://api.example.com/users'),
-        );
+        final Future<Either<ErrorItem, ModelConfigHttpRequest>> future1 = bloc
+            .get(
+              requestKey: 'users.list',
+              uri: Uri.parse('https://api.example.com/users'),
+            );
 
-        final Future<Either<ErrorItem, ModelConfigHttpRequest>> future2 =
-            bloc.post(
-          requestKey: 'orders.create',
-          uri: Uri.parse('https://api.example.com/orders'),
-          body: const <String, dynamic>{'amount': 10},
-        );
+        final Future<Either<ErrorItem, ModelConfigHttpRequest>> future2 = bloc
+            .post(
+              requestKey: 'orders.create',
+              uri: Uri.parse('https://api.example.com/orders'),
+              body: const <String, dynamic>{'amount': 10},
+            );
 
         expect(bloc.hasActiveRequests, isTrue);
         expect(bloc.activeRequests.length, equals(2));
@@ -672,13 +644,11 @@ void main() {
         final List<Set<String>> notifications = <Set<String>>[];
 
         // Act
-        bloc.addFunctionToProcessActiveRequestsOnStream(
-          'logger',
-          (Set<String> active) {
-            notifications.add(active);
-          },
-          true,
-        );
+        bloc.addFunctionToProcessActiveRequestsOnStream('logger', (
+          Set<String> active,
+        ) {
+          notifications.add(active);
+        }, true);
 
         // Assert básico
         expect(bloc.containsKeyFunction('logger'), isTrue);
@@ -686,192 +656,168 @@ void main() {
         expect(notifications.first, equals(<String>{}));
 
         // Disparamos un cambio
-        final Future<Either<ErrorItem, ModelConfigHttpRequest>> future =
-            bloc.get(
-          requestKey: 'test.request',
-          uri: Uri.parse('https://api.example.com/test'),
-        );
+        final Future<Either<ErrorItem, ModelConfigHttpRequest>> future = bloc
+            .get(
+              requestKey: 'test.request',
+              uri: Uri.parse('https://api.example.com/test'),
+            );
         await future;
 
         expect(
-          notifications.any(
-            (Set<String> s) => s.contains('test.request'),
-          ),
+          notifications.any((Set<String> s) => s.contains('test.request')),
           isTrue,
         );
       },
     );
 
-    test(
-      'Given una función registrada '
-      'When deleteFunctionToProcessActiveRequestsOnStream es llamada '
-      'Then la función deja de estar registrada',
-      () {
-        // Arrange
-        final FacadeHttpRequestUsecases facade = FacadeHttpRequestUsecases(
-          get: _FakeUsecaseHttpRequestGet(),
-          post: _FakeUsecaseHttpRequestPost(),
-          put: _FakeUsecaseHttpRequestPut(),
-          delete: _FakeUsecaseHttpRequestDelete(),
-          retry: _FakeUsecaseHttpRequestRetry(),
-        );
-        final BlocHttpRequest bloc = BlocHttpRequest(facade);
+    test('Given una función registrada '
+        'When deleteFunctionToProcessActiveRequestsOnStream es llamada '
+        'Then la función deja de estar registrada', () {
+      // Arrange
+      final FacadeHttpRequestUsecases facade = FacadeHttpRequestUsecases(
+        get: _FakeUsecaseHttpRequestGet(),
+        post: _FakeUsecaseHttpRequestPost(),
+        put: _FakeUsecaseHttpRequestPut(),
+        delete: _FakeUsecaseHttpRequestDelete(),
+        retry: _FakeUsecaseHttpRequestRetry(),
+      );
+      final BlocHttpRequest bloc = BlocHttpRequest(facade);
 
-        bloc.addFunctionToProcessActiveRequestsOnStream(
-          'logger',
-          (_) {},
-        );
-        expect(bloc.containsKeyFunction('logger'), isTrue);
+      bloc.addFunctionToProcessActiveRequestsOnStream('logger', (_) {});
+      expect(bloc.containsKeyFunction('logger'), isTrue);
 
-        // Act
-        bloc.deleteFunctionToProcessActiveRequestsOnStream('logger');
+      // Act
+      bloc.deleteFunctionToProcessActiveRequestsOnStream('logger');
 
-        // Assert
-        expect(bloc.containsKeyFunction('logger'), isFalse);
-      },
-    );
+      // Assert
+      expect(bloc.containsKeyFunction('logger'), isFalse);
+    });
 
-    test(
-      'Given un BlocHttpRequest '
-      'When dispose es invocado '
-      'Then no lanza',
-      () {
-        final FacadeHttpRequestUsecases facade = FacadeHttpRequestUsecases(
-          get: _FakeUsecaseHttpRequestGet(),
-          post: _FakeUsecaseHttpRequestPost(),
-          put: _FakeUsecaseHttpRequestPut(),
-          delete: _FakeUsecaseHttpRequestDelete(),
-          retry: _FakeUsecaseHttpRequestRetry(),
-        );
-        final BlocHttpRequest bloc = BlocHttpRequest(facade);
+    test('Given un BlocHttpRequest '
+        'When dispose es invocado '
+        'Then no lanza', () {
+      final FacadeHttpRequestUsecases facade = FacadeHttpRequestUsecases(
+        get: _FakeUsecaseHttpRequestGet(),
+        post: _FakeUsecaseHttpRequestPost(),
+        put: _FakeUsecaseHttpRequestPut(),
+        delete: _FakeUsecaseHttpRequestDelete(),
+        retry: _FakeUsecaseHttpRequestRetry(),
+      );
+      final BlocHttpRequest bloc = BlocHttpRequest(facade);
 
-        expect(() => bloc.dispose(), returnsNormally);
-      },
-    );
+      expect(() => bloc.dispose(), returnsNormally);
+    });
   });
   group('BlocHttpRequest - stream de Set<String>', () {
-    test(
-      'Given un listener suscrito al stream '
-      'When se ejecuta un GET con delay '
-      'Then el stream emite un set con el requestKey activo y luego un set sin él',
-      () async {
-        // Arrange
-        final _FakeUsecaseHttpRequestGet fakeGet = _FakeUsecaseHttpRequestGet()
-          ..delay = true;
+    test('Given un listener suscrito al stream '
+        'When se ejecuta un GET con delay '
+        'Then el stream emite un set con el requestKey activo y luego un set sin él', () async {
+      // Arrange
+      final _FakeUsecaseHttpRequestGet fakeGet = _FakeUsecaseHttpRequestGet()
+        ..delay = true;
 
-        final FacadeHttpRequestUsecases facade = FacadeHttpRequestUsecases(
-          get: fakeGet,
-          post: _FakeUsecaseHttpRequestPost(),
-          put: _FakeUsecaseHttpRequestPut(),
-          delete: _FakeUsecaseHttpRequestDelete(),
-          retry: _FakeUsecaseHttpRequestRetry(),
-        );
+      final FacadeHttpRequestUsecases facade = FacadeHttpRequestUsecases(
+        get: fakeGet,
+        post: _FakeUsecaseHttpRequestPost(),
+        put: _FakeUsecaseHttpRequestPut(),
+        delete: _FakeUsecaseHttpRequestDelete(),
+        retry: _FakeUsecaseHttpRequestRetry(),
+      );
 
-        final BlocHttpRequest bloc = BlocHttpRequest(facade);
+      final BlocHttpRequest bloc = BlocHttpRequest(facade);
 
-        const String requestKey = 'userProfile.fetchMe';
-        final Uri uri = Uri.parse('https://api.example.com/v1/users/me');
+      const String requestKey = 'userProfile.fetchMe';
+      final Uri uri = Uri.parse('https://api.example.com/v1/users/me');
 
-        final List<Set<String>> emissions = <Set<String>>[];
+      final List<Set<String>> emissions = <Set<String>>[];
 
-        // Nos suscribimos al stream
-        final StreamSubscription<Set<String>> sub =
-            bloc.stream.listen(emissions.add);
+      // Nos suscribimos al stream
+      final StreamSubscription<Set<String>> sub = bloc.stream.listen(
+        emissions.add,
+      );
 
-        // Act: lanzamos la petición
-        final Future<Either<ErrorItem, ModelConfigHttpRequest>> future =
-            bloc.get(
-          requestKey: requestKey,
-          uri: uri,
-        );
+      // Act: lanzamos la petición
+      final Future<Either<ErrorItem, ModelConfigHttpRequest>> future = bloc.get(
+        requestKey: requestKey,
+        uri: uri,
+      );
 
-        // Esperamos a que termine
-        await future;
-        await Future<void>.delayed(
-          Duration.zero,
-        ); // aseguramos flush del stream
+      // Esperamos a que termine
+      await future;
+      await Future<void>.delayed(Duration.zero); // aseguramos flush del stream
 
-        await sub.cancel();
+      await sub.cancel();
 
-        // Assert: debe haber al menos un estado con la key activa
-        expect(
-          emissions.any((Set<String> s) => s.contains(requestKey)),
-          isTrue,
-          reason: 'El stream nunca emitió el requestKey activo',
-        );
+      // Assert: debe haber al menos un estado con la key activa
+      expect(
+        emissions.any((Set<String> s) => s.contains(requestKey)),
+        isTrue,
+        reason: 'El stream nunca emitió el requestKey activo',
+      );
 
-        // Y al menos un estado final sin la key
-        expect(
-          emissions.any((Set<String> s) => !s.contains(requestKey)),
-          isTrue,
-          reason: 'El stream nunca emitió un estado sin el requestKey',
-        );
-      },
-    );
+      // Y al menos un estado final sin la key
+      expect(
+        emissions.any((Set<String> s) => !s.contains(requestKey)),
+        isTrue,
+        reason: 'El stream nunca emitió un estado sin el requestKey',
+      );
+    });
 
-    test(
-      'Given dos requests en paralelo '
-      'When se observan las emisiones del stream '
-      'Then en algún punto contiene ambos keys y termina vacío',
-      () async {
-        // Arrange
-        final _FakeUsecaseHttpRequestGet fakeGet = _FakeUsecaseHttpRequestGet()
-          ..delay = true;
-        final _FakeUsecaseHttpRequestPost fakePost =
-            _FakeUsecaseHttpRequestPost()..delay = true;
+    test('Given dos requests en paralelo '
+        'When se observan las emisiones del stream '
+        'Then en algún punto contiene ambos keys y termina vacío', () async {
+      // Arrange
+      final _FakeUsecaseHttpRequestGet fakeGet = _FakeUsecaseHttpRequestGet()
+        ..delay = true;
+      final _FakeUsecaseHttpRequestPost fakePost = _FakeUsecaseHttpRequestPost()
+        ..delay = true;
 
-        final FacadeHttpRequestUsecases facade = FacadeHttpRequestUsecases(
-          get: fakeGet,
-          post: fakePost,
-          put: _FakeUsecaseHttpRequestPut(),
-          delete: _FakeUsecaseHttpRequestDelete(),
-          retry: _FakeUsecaseHttpRequestRetry(),
-        );
+      final FacadeHttpRequestUsecases facade = FacadeHttpRequestUsecases(
+        get: fakeGet,
+        post: fakePost,
+        put: _FakeUsecaseHttpRequestPut(),
+        delete: _FakeUsecaseHttpRequestDelete(),
+        retry: _FakeUsecaseHttpRequestRetry(),
+      );
 
-        final BlocHttpRequest bloc = BlocHttpRequest(facade);
+      final BlocHttpRequest bloc = BlocHttpRequest(facade);
 
-        const String key1 = 'users.list';
-        const String key2 = 'orders.create';
+      const String key1 = 'users.list';
+      const String key2 = 'orders.create';
 
-        final Uri uri1 = Uri.parse('https://api.example.com/users');
-        final Uri uri2 = Uri.parse('https://api.example.com/orders');
+      final Uri uri1 = Uri.parse('https://api.example.com/users');
+      final Uri uri2 = Uri.parse('https://api.example.com/orders');
 
-        final List<Set<String>> emissions = <Set<String>>[];
-        final StreamSubscription<Set<String>> sub =
-            bloc.stream.listen(emissions.add);
+      final List<Set<String>> emissions = <Set<String>>[];
+      final StreamSubscription<Set<String>> sub = bloc.stream.listen(
+        emissions.add,
+      );
 
-        // Act: lanzamos dos requests en paralelo
-        final Future<Either<ErrorItem, ModelConfigHttpRequest>> future1 =
-            bloc.get(
-          requestKey: key1,
-          uri: uri1,
-        );
+      // Act: lanzamos dos requests en paralelo
+      final Future<Either<ErrorItem, ModelConfigHttpRequest>> future1 = bloc
+          .get(requestKey: key1, uri: uri1);
 
-        final Future<Either<ErrorItem, ModelConfigHttpRequest>> future2 =
-            bloc.post(
-          requestKey: key2,
-          uri: uri2,
-          body: const <String, dynamic>{'amount': 10},
-        );
+      final Future<Either<ErrorItem, ModelConfigHttpRequest>> future2 = bloc
+          .post(
+            requestKey: key2,
+            uri: uri2,
+            body: const <String, dynamic>{'amount': 10},
+          );
 
-        await Future.wait(<Future<dynamic>>[future1, future2]);
-        await Future<void>.delayed(Duration.zero); // flush de emisiones
-        await sub.cancel();
+      await Future.wait(<Future<dynamic>>[future1, future2]);
+      await Future<void>.delayed(Duration.zero); // flush de emisiones
+      await sub.cancel();
 
-        // Assert: al menos una emisión con ambos keys activos
-        expect(
-          emissions.any(
-            (Set<String> s) => s.contains(key1) && s.contains(key2),
-          ),
-          isTrue,
-          reason:
-              'El stream nunca emitió un estado donde ambos requestKeys estuvieran activos',
-        );
+      // Assert: al menos una emisión con ambos keys activos
+      expect(
+        emissions.any((Set<String> s) => s.contains(key1) && s.contains(key2)),
+        isTrue,
+        reason: 'El stream nunca emitió un estado donde ambos requestKeys estuvieran activos',
+      );
 
-        // Y debe terminar vacío (última emisión sin keys)
-        expect(emissions, isNotEmpty);
-        expect(emissions.last, equals(<String>{}));
-      },
-    );
+      // Y debe terminar vacío (última emisión sin keys)
+      expect(emissions, isNotEmpty);
+      expect(emissions.last, equals(<String>{}));
+    });
   });
 }

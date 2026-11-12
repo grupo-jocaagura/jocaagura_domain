@@ -26,6 +26,7 @@ part of '../../jocaagura_domain.dart';
 /// ```
 ///
 /// This class can be used to build dynamic and interactive menus in Flutter applications.
+@immutable
 class ModelMainMenuModel extends Model {
   /// Constructs a new [ModelMainMenuModel] with the given [iconData], [onPressed],
   /// [label], and an optional [description].

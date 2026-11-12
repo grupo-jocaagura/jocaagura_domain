@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'dart:math' show Random, max, min;
 
-import 'package:flutter/material.dart';
 import 'package:jocaagura_domain/jocaagura_domain.dart';
+import 'package:material_ui/material_ui.dart';
 
 void main() {
   runApp(const PizzaPricesApp());
@@ -35,8 +35,9 @@ class PizzaPricesPage extends StatefulWidget {
 
 class _PizzaPricesPageState extends State<PizzaPricesPage> {
   // Business state holder (domain Bloc).
-  final BlocGeneral<ModelGraph> _bloc =
-      BlocGeneral<ModelGraph>(demoPizzaPrices2024Graph());
+  final BlocGeneral<ModelGraph> _bloc = BlocGeneral<ModelGraph>(
+    demoPizzaPrices2024Graph(),
+  );
 
   Timer? _timer;
   final Random _rng = Random(2024);
@@ -76,9 +77,7 @@ class _PizzaPricesPageState extends State<PizzaPricesPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Pizza Prices 2024 • ${widget.regionName}'),
-      ),
+      appBar: AppBar(title: Text('Pizza Prices 2024 • ${widget.regionName}')),
       body: StreamBuilder<ModelGraph>(
         stream: _bloc.stream,
         initialData: _bloc.value,
@@ -95,15 +94,9 @@ class _PizzaPricesPageState extends State<PizzaPricesPage> {
                   children: <Widget>[
                     _Header(graph: graph),
                     const SizedBox(height: 12),
-                    Expanded(
-                      flex: 2,
-                      child: _GraphCard(graph: graph),
-                    ),
+                    Expanded(flex: 2, child: _GraphCard(graph: graph)),
                     const SizedBox(height: 12),
-                    Expanded(
-                      flex: 3,
-                      child: _TableCard(graph: graph),
-                    ),
+                    Expanded(flex: 3, child: _TableCard(graph: graph)),
                   ],
                 ),
               );
@@ -177,10 +170,16 @@ class _PizzaPricesPageState extends State<PizzaPricesPage> {
     final double maxY = pts.map((ModelPoint p) => p.vector.dy).reduce(max);
 
     final ModelGraph next = ModelGraph(
-      xAxis:
-          ModelGraphAxisSpec(title: current.xAxis.title, min: minX, max: maxX),
-      yAxis:
-          ModelGraphAxisSpec(title: current.yAxis.title, min: minY, max: maxY),
+      xAxis: ModelGraphAxisSpec(
+        title: current.xAxis.title,
+        min: minX,
+        max: maxX,
+      ),
+      yAxis: ModelGraphAxisSpec(
+        title: current.yAxis.title,
+        min: minY,
+        max: maxY,
+      ),
       points: pts,
       title: current.title.isEmpty ? 'Precio Pizza — $region' : current.title,
       subtitle: 'Serie mensual 2024 (+ futuro simulado)',
@@ -432,8 +431,11 @@ class _SimpleLineChartPainter extends CustomPainter {
 
     // X ticks (use first, mid, last label if possible)
     final List<ModelPoint> pts = graph.points;
-    final List<int> idxs =
-        <int>{0, (pts.length / 2).floor(), pts.length - 1}.toList()..sort();
+    final List<int> idxs = <int>{
+      0,
+      (pts.length / 2).floor(),
+      pts.length - 1,
+    }.toList()..sort();
     for (final int i in idxs) {
       final ModelPoint p = pts[i];
       final double xx = sx(p.vector.dx);
@@ -451,10 +453,7 @@ class _SimpleLineChartPainter extends CustomPainter {
       final double textX = xx - (tp.width / 2);
       tp.paint(
         canvas,
-        Offset(
-          textX.clamp(plot.left, plot.right - tp.width),
-          plot.bottom + 6,
-        ),
+        Offset(textX.clamp(plot.left, plot.right - tp.width), plot.bottom + 6),
       );
     }
   }

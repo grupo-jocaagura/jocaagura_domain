@@ -95,7 +95,7 @@ extension RepeatLastValueExtension<T> on Stream<T> {
         currentListeners.clear(); // Clear after iterating
       },
     );
-    return Stream<T>.multi((final MultiStreamController<T> controller) {
+    return Stream<T>.multi((MultiStreamController<T> controller) {
       if (done) {
         controller.close();
         return;

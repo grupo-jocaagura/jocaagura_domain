@@ -3,8 +3,9 @@ import 'package:jocaagura_domain/jocaagura_domain.dart';
 
 void main() {
   group('SignatureModel', () {
-    final String dateToCompare =
-        DateUtils.dateTimeToString(DateTime(2024, 07, 07));
+    final String dateToCompare = DateUtils.dateTimeToString(
+      DateTime(2024, 07, 07),
+    );
 
     test('should create a default model without errors', () {
       expect(defaultSignatureModel.id, '0');
@@ -45,8 +46,10 @@ void main() {
 
     test('copyWith should modify the necessary fields', () {
       final SignatureModel original = defaultSignatureModel;
-      final SignatureModel modified =
-          original.copyWith(id: 'newId', appId: 'newApp');
+      final SignatureModel modified = original.copyWith(
+        id: 'newId',
+        appId: 'newApp',
+      );
 
       expect(modified.id, 'newId');
       expect(modified.appId, 'newApp');

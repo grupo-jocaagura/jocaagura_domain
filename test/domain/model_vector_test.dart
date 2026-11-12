@@ -13,7 +13,7 @@ void main() {
 
     test('fromOffset creates a ModelVector from an Offset', () {
       const Offset offset = Offset(1.0, 2.0);
-      final ModelVector vector = ModelVector.fromOffset(offset);
+      final ModelVector vector = UtilsFlutter.fromOffset(offset);
       expect(vector.dx, offset.dx);
       expect(vector.dy, offset.dy);
     });
@@ -53,10 +53,7 @@ void main() {
     });
 
     test('should handle integer values in JSON', () {
-      final Map<String, dynamic> json = <String, dynamic>{
-        'dx': 3,
-        'dy': 4,
-      };
+      final Map<String, dynamic> json = <String, dynamic>{'dx': 3, 'dy': 4};
       final ModelVector vector = ModelVector.fromJson(json);
 
       expect(vector.dx, 3.0);
@@ -64,10 +61,7 @@ void main() {
     });
 
     test('should handle string values in JSON', () {
-      final Map<String, dynamic> json = <String, dynamic>{
-        'dx': '7',
-        'dy': '8',
-      };
+      final Map<String, dynamic> json = <String, dynamic>{'dx': '7', 'dy': '8'};
       final ModelVector vector = ModelVector.fromJson(json);
 
       expect(vector.dx, 7.0);
@@ -81,14 +75,8 @@ void main() {
       };
       final ModelVector vector = ModelVector.fromJson(json);
 
-      expect(
-        vector.dx.isNaN,
-        true,
-      );
-      expect(
-        vector.dy.isNaN,
-        true,
-      );
+      expect(vector.dx.isNaN, true);
+      expect(vector.dy.isNaN, true);
     });
   });
   group('ModelVector', () {
@@ -99,7 +87,7 @@ void main() {
 
     test('offset getter should return correct Offset object', () {
       // Comprobar que el Offset retornado tenga los valores correctos
-      expect(vector.offset, equals(const Offset(dx, dy)));
+      expect(UtilsFlutter.toOffset(vector), equals(const Offset(dx, dy)));
     });
 
     test('toString should return the correct string representation', () {
@@ -273,10 +261,7 @@ void main() {
       expect(v1.isFiniteVector, isFalse);
       expect(v1.isValidVector, isFalse);
 
-      expect(
-        v2.isFiniteVector,
-        isFalse,
-      );
+      expect(v2.isFiniteVector, isFalse);
       expect(v2.isFiniteVector, equals(v2.dx.isFinite && v2.dy.isFinite));
       expect(v2.isValidVector, isFalse);
     });
@@ -303,21 +288,25 @@ void main() {
       expect(s.dy, -7.0);
     });
 
-    test('clampInt clamps by integer view (rounded) then stores as doubles',
-        () {
-      // x=10.9 -> 11, y=-3.1 -> -3, bounds [0..5]x[0..5] -> (5,0)
-      const ModelVector v = ModelVector(10.9, -3.1);
-      final ModelVector c = v.clampInt(minX: 0, minY: 0, maxX: 5, maxY: 5);
-      expect(c.dx, 5.0);
-      expect(c.dy, 0.0);
+    test(
+      'clampInt clamps by integer view (rounded) then stores as doubles',
+      () {
+        // x=10.9 -> 11, y=-3.1 -> -3, bounds [0..5]x[0..5] -> (5,0)
+        const ModelVector v = ModelVector(10.9, -3.1);
+        final ModelVector c = v.clampInt(minX: 0, minY: 0, maxX: 5, maxY: 5);
+        expect(c.dx, 5.0);
+        expect(c.dy, 0.0);
 
-      // Inside bounds remains unchanged once clamped (as ints)
-      const ModelVector w =
-          ModelVector(2.49, 4.5); // (2,5) -> clamp to (2,5) then store double
-      final ModelVector cw = w.clampInt(minX: 0, minY: 0, maxX: 5, maxY: 5);
-      expect(cw.dx, 2.0);
-      expect(cw.dy, 5.0);
-    });
+        // Inside bounds remains unchanged once clamped (as ints)
+        const ModelVector w = ModelVector(
+          2.49,
+          4.5,
+        ); // (2,5) -> clamp to (2,5) then store double
+        final ModelVector cw = w.clampInt(minX: 0, minY: 0, maxX: 5, maxY: 5);
+        expect(cw.dx, 2.0);
+        expect(cw.dy, 5.0);
+      },
+    );
   });
 
   group('copyWithInts & copyWith', () {
@@ -344,8 +333,8 @@ void main() {
   group('Offset & equality/hash edge cases', () {
     test('offset conversion', () {
       const ModelVector v = ModelVector(3.0, -2.0);
-      expect(v.offset.dx, 3.0);
-      expect(v.offset.dy, -2.0);
+      expect(UtilsFlutter.toOffset(v).dx, 3.0);
+      expect(UtilsFlutter.toOffset(v).dy, -2.0);
     });
 
     test('0.0 vs -0.0 equality and hashCode surveillance', () {

@@ -46,9 +46,9 @@ import '../../jocaagura_domain.dart';
 class FakeHttpRequest implements ServiceHttpRequest {
   /// Creates a new fake HTTP service with the provided [config].
   FakeHttpRequest({FakeHttpRequestConfig config = FakeHttpRequestConfig.none})
-      : _config = config,
-        _canned = _buildCanned(config),
-        _errors = Map<String, String>.unmodifiable(config.errorRoutes);
+    : _config = config,
+      _canned = _buildCanned(config),
+      _errors = Map<String, String>.unmodifiable(config.errorRoutes);
 
   final FakeHttpRequestConfig _config;
 
@@ -224,8 +224,8 @@ class FakeHttpRequest implements ServiceHttpRequest {
       final String uri = rawUri is String
           ? rawUri
           : rawUri != null
-              ? rawUri.toString()
-              : '';
+          ? rawUri.toString()
+          : '';
 
       final Map<String, dynamic> headers = raw['headers'] is Map
           ? Utils.mapFromDynamic(raw['headers'])
@@ -243,8 +243,8 @@ class FakeHttpRequest implements ServiceHttpRequest {
         'statusCode': raw['statusCode'] is int
             ? raw['statusCode'] as int
             : raw['httpStatus'] is int
-                ? raw['httpStatus'] as int
-                : 200,
+            ? raw['httpStatus'] as int
+            : 200,
         'reasonPhrase': raw['reasonPhrase']?.toString() ?? 'OK',
         'headers': headers,
         'body': body,
@@ -257,39 +257,32 @@ class FakeHttpRequest implements ServiceHttpRequest {
 
     final Map<String, Map<String, dynamic>> fromResponses =
         Map<String, Map<String, dynamic>>.fromEntries(
-      config.cannedResponses.entries.map(
-        (MapEntry<String, Map<String, dynamic>> entry) =>
-            MapEntry<String, Map<String, dynamic>>(
-          entry.key,
-          normalizeRaw(entry.value),
-        ),
-      ),
-    );
+          config.cannedResponses.entries.map(
+            (MapEntry<String, Map<String, dynamic>> entry) =>
+                MapEntry<String, Map<String, dynamic>>(
+                  entry.key,
+                  normalizeRaw(entry.value),
+                ),
+          ),
+        );
 
     final Map<String, Map<String, dynamic>> fromConfigs =
         <String, Map<String, dynamic>>{};
-    config.cannedConfigs.forEach(
-      (String key, ModelConfigHttpRequest value) {
-        fromConfigs[key] = normalizeRaw(
-          <String, dynamic>{
-            'method': value.method.name,
-            'uri': value.uri.toString(),
-            'statusCode': 200,
-            'reasonPhrase': 'OK',
-            'headers': value.headers,
-            'body': value.body,
-            'metadata': value.metadata,
-            'timeout': value.timeout?.inMilliseconds,
-          },
-        );
-      },
-    );
+    config.cannedConfigs.forEach((String key, ModelConfigHttpRequest value) {
+      fromConfigs[key] = normalizeRaw(<String, dynamic>{
+        'method': value.method.name,
+        'uri': value.uri.toString(),
+        'statusCode': 200,
+        'reasonPhrase': 'OK',
+        'headers': value.headers,
+        'body': value.body,
+        'metadata': value.metadata,
+        'timeout': value.timeout?.inMilliseconds,
+      });
+    });
 
     return Map<String, Map<String, dynamic>>.unmodifiable(
-      <String, Map<String, dynamic>>{
-        ...fromResponses,
-        ...fromConfigs,
-      },
+      <String, Map<String, dynamic>>{...fromResponses, ...fromConfigs},
     );
   }
 

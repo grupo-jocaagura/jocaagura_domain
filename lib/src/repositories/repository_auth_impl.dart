@@ -47,13 +47,10 @@ import '../../jocaagura_domain.dart';
 class RepositoryAuthImpl implements RepositoryAuth {
   /// Creates a new [RepositoryAuthImpl].
   ///
-  /// - [gateway]: underlying data source for auth calls.
+  /// - [_gateway]: underlying data source for auth calls.
   /// - [errorMapper]: optional error mapper; defaults to [DefaultErrorMapper].
-  RepositoryAuthImpl({
-    required GatewayAuth gateway,
-    ErrorMapper? errorMapper,
-  })  : _gateway = gateway,
-        _err = errorMapper ?? const DefaultErrorMapper();
+  RepositoryAuthImpl({required this._gateway, ErrorMapper? errorMapper})
+    : _err = errorMapper ?? const DefaultErrorMapper();
 
   final GatewayAuth _gateway;
   final ErrorMapper _err;
@@ -97,8 +94,8 @@ class RepositoryAuthImpl implements RepositoryAuth {
     String email,
     String password,
   ) async {
-    final Either<ErrorItem, Map<String, dynamic>> r =
-        await _gateway.signInUserAndPassword(email, password);
+    final Either<ErrorItem, Map<String, dynamic>> r = await _gateway
+        .signInUserAndPassword(email, password);
     return r.fold(
       Left.new,
       (Map<String, dynamic> json) => _mapUser<UserModel>(
@@ -114,8 +111,8 @@ class RepositoryAuthImpl implements RepositoryAuth {
     String email,
     String password,
   ) async {
-    final Either<ErrorItem, Map<String, dynamic>> r =
-        await _gateway.logInUserAndPassword(email, password);
+    final Either<ErrorItem, Map<String, dynamic>> r = await _gateway
+        .logInUserAndPassword(email, password);
     return r.fold(
       Left.new,
       (Map<String, dynamic> json) => _mapUser<UserModel>(
@@ -128,8 +125,8 @@ class RepositoryAuthImpl implements RepositoryAuth {
 
   @override
   Future<Either<ErrorItem, UserModel>> logInWithGoogle() async {
-    final Either<ErrorItem, Map<String, dynamic>> r =
-        await _gateway.logInWithGoogle();
+    final Either<ErrorItem, Map<String, dynamic>> r = await _gateway
+        .logInWithGoogle();
     return r.fold(
       Left.new,
       (Map<String, dynamic> json) => _mapUser<UserModel>(
@@ -144,8 +141,8 @@ class RepositoryAuthImpl implements RepositoryAuth {
   Future<Either<ErrorItem, UserModel>> logInSilently(
     UserModel currentUser,
   ) async {
-    final Either<ErrorItem, Map<String, dynamic>> r =
-        await _gateway.logInSilently(currentUser.toJson());
+    final Either<ErrorItem, Map<String, dynamic>> r = await _gateway
+        .logInSilently(currentUser.toJson());
     return r.fold(
       Left.new,
       (Map<String, dynamic> json) => _mapUser<UserModel>(
@@ -160,8 +157,8 @@ class RepositoryAuthImpl implements RepositoryAuth {
   Future<Either<ErrorItem, UserModel>> refreshSession(
     UserModel currentUser,
   ) async {
-    final Either<ErrorItem, Map<String, dynamic>> r =
-        await _gateway.refreshSession(currentUser.toJson());
+    final Either<ErrorItem, Map<String, dynamic>> r = await _gateway
+        .refreshSession(currentUser.toJson());
     return r.fold(
       Left.new,
       (Map<String, dynamic> json) => _mapUser<UserModel>(
@@ -174,34 +171,31 @@ class RepositoryAuthImpl implements RepositoryAuth {
 
   @override
   Future<Either<ErrorItem, void>> recoverPassword(String email) async {
-    final Either<ErrorItem, Map<String, dynamic>> r =
-        await _gateway.recoverPassword(email);
+    final Either<ErrorItem, Map<String, dynamic>> r = await _gateway
+        .recoverPassword(email);
     return r.fold(
       Left.new,
-      (Map<String, dynamic> json) => ackToVoid(
-        json,
-        location: 'RepositoryAuthImpl.recoverPassword',
-      ),
+      (Map<String, dynamic> json) =>
+          ackToVoid(json, location: 'RepositoryAuthImpl.recoverPassword'),
     );
   }
 
   @override
   Future<Either<ErrorItem, void>> logOutUser(UserModel user) async {
-    final Either<ErrorItem, Map<String, dynamic>> r =
-        await _gateway.logOutUser(user.toJson());
+    final Either<ErrorItem, Map<String, dynamic>> r = await _gateway.logOutUser(
+      user.toJson(),
+    );
     return r.fold(
       Left.new,
-      (Map<String, dynamic> json) => ackToVoid(
-        json,
-        location: 'RepositoryAuthImpl.logOutUser',
-      ),
+      (Map<String, dynamic> json) =>
+          ackToVoid(json, location: 'RepositoryAuthImpl.logOutUser'),
     );
   }
 
   @override
   Future<Either<ErrorItem, UserModel>> getCurrentUser() async {
-    final Either<ErrorItem, Map<String, dynamic>> r =
-        await _gateway.getCurrentUser();
+    final Either<ErrorItem, Map<String, dynamic>> r = await _gateway
+        .getCurrentUser();
     return r.fold(
       Left.new,
       (Map<String, dynamic> json) => _mapUser<UserModel>(
@@ -214,26 +208,25 @@ class RepositoryAuthImpl implements RepositoryAuth {
 
   @override
   Future<Either<ErrorItem, bool>> isSignedIn() async {
-    final Either<ErrorItem, Map<String, dynamic>> r =
-        await _gateway.isSignedIn();
-    return r.fold(
-      Left.new,
-      (Map<String, dynamic> json) {
-        final ErrorItem? pe =
-            _err.fromPayload(json, location: 'RepositoryAuthImpl.isSignedIn');
-        if (pe != null) {
-          return Left<ErrorItem, bool>(pe);
-        }
-        try {
-          final bool signed = Utils.getBoolFromDynamic(json['isSignedIn']);
-          return Right<ErrorItem, bool>(signed);
-        } catch (e, s) {
-          return Left<ErrorItem, bool>(
-            _err.fromException(e, s, location: 'RepositoryAuthImpl.isSignedIn'),
-          );
-        }
-      },
-    );
+    final Either<ErrorItem, Map<String, dynamic>> r = await _gateway
+        .isSignedIn();
+    return r.fold(Left.new, (Map<String, dynamic> json) {
+      final ErrorItem? pe = _err.fromPayload(
+        json,
+        location: 'RepositoryAuthImpl.isSignedIn',
+      );
+      if (pe != null) {
+        return Left<ErrorItem, bool>(pe);
+      }
+      try {
+        final bool signed = Utils.getBoolFromDynamic(json['isSignedIn']);
+        return Right<ErrorItem, bool>(signed);
+      } catch (e, s) {
+        return Left<ErrorItem, bool>(
+          _err.fromException(e, s, location: 'RepositoryAuthImpl.isSignedIn'),
+        );
+      }
+    });
   }
 
   @override

@@ -5,6 +5,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 Recent entries aim to follow a normalized structure. Older historical entries may preserve some original headings where reclassification would risk changing the original intent.
 
+## Unreleased
+
+### Fixed
+
+- Correct formatting in the core catalog identity test and GitHub expression
+  quoting in the legacy publication workflow so Actions can validate the branch.
+
+### Changed
+
+- **Breaking:** require Flutter `>=3.50.0` and Dart `>=3.14.0 <4.0.0`
+  in the package and its example.
+- Replace deprecated Flutter Material/Cupertino umbrella imports with
+  `material_ui` and `cupertino_ui`; update example formatting and retired lint
+  rules for Dart 3.14. Remove an unreachable null check in the HTTP example.
+- Consume and reexport the core 1.3.0 model catalog instead of local duplicate
+  models, defaults, enums and CRUD parameter DTOs. Keep executable use cases and
+  the Flutter menu adapter; hide the core menu type from this facade to avoid a
+  name collision. Adopt the canonical JSON decoding and collection equality/hash
+  behavior, including the core fixes for death records and legal identity data.
+- Remove the local `Model` base implementation and use the canonical core
+  contract throughout the package, preserving its existing public export.
+- Preserve the previous inherited immutability contract with explicit
+  `@immutable` annotations on local model subclasses.
+- **Breaking:** expose the canonical core `ModelVector`. Replace
+  `ModelVector.fromOffset(offset)` with `UtilsFlutter.fromOffset(offset)` and
+  `vector.offset` with `UtilsFlutter.toOffset(vector)`. Both conversions preserve
+  the original coordinates without rounding or validation. The vector enum and
+  constants remain available through the existing package entrypoint.
+- Require `jocaagura_domain_core: ^1.3.0` as the dependency baseline for the
+  domain migration tracked in #212. Release pipeline certification remains
+  pending under #213.
+
 ## [1.43.2] - 2026-09-18
 
 ### CI/CD

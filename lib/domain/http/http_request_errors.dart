@@ -128,8 +128,7 @@ const ErrorItem kHttpServerErrorItem = ErrorItem(
 const ErrorItem kHttpGatewayTimeoutErrorItem = ErrorItem(
   title: 'Tiempo de espera en el servidor intermedio',
   code: 'HTTP_GATEWAY_TIMEOUT',
-  description:
-      'Un servidor intermedio no respondió a tiempo al reenviar la solicitud (504).',
+  description: 'Un servidor intermedio no respondió a tiempo al reenviar la solicitud (504).',
   errorLevel: ErrorLevelEnum.severe,
   meta: <String, dynamic>{
     'category': 'network',
@@ -157,9 +156,8 @@ const ErrorItem kHttpUnknownErrorItem = ErrorItem(
 /// - Ajusta `code` según `statusCode`/`httpStatus` cuando está disponible.
 /// - Mapea explícitamente `TimeoutException` a [kHttpTimeoutErrorItem].
 class DefaultHttpErrorMapper implements ErrorMapper {
-  const DefaultHttpErrorMapper({
-    DefaultErrorMapper? delegate,
-  }) : _delegate = delegate ?? const DefaultErrorMapper();
+  const DefaultHttpErrorMapper({DefaultErrorMapper? delegate})
+    : _delegate = delegate ?? const DefaultErrorMapper();
 
   /// Mapper genérico reutilizado como base.
   final DefaultErrorMapper _delegate;
@@ -197,10 +195,7 @@ class DefaultHttpErrorMapper implements ErrorMapper {
       code: generic.code,
       description: generic.description,
       errorLevel: generic.errorLevel,
-      meta: <String, dynamic>{
-        ...generic.meta,
-        'transport': 'http',
-      },
+      meta: <String, dynamic>{...generic.meta, 'transport': 'http'},
     );
   }
 
@@ -210,10 +205,7 @@ class DefaultHttpErrorMapper implements ErrorMapper {
     String location = 'unknown',
   }) {
     // Primero intentamos con las convenciones del mapper genérico.
-    final ErrorItem? base = _delegate.fromPayload(
-      payload,
-      location: location,
-    );
+    final ErrorItem? base = _delegate.fromPayload(payload, location: location);
 
     if (base == null) {
       return null;

@@ -1,0 +1,121 @@
+Inventario de migracion #212 — core 1.3.0 — 2026-11-11
+
+Fuente: checkout feature/212-migrate-domain-to-domain-core, base 1aad79c;
+dependencia resuelta desde pub.dev a 1.3.0. La clasificacion inicial se conserva
+abajo como contexto; el estado actual y los CSV regenerados reflejan el retiro.
+
+ESTADO ACTUAL TRAS CONSUMIR EL CATALOGO
+Se retiraron los 81 archivos duplicados restantes, los 10 DTOs CRUD locales y
+defaultErrorItem local. La fachada importa/reexporta jocaagura_domain_models.dart
+con hide ModelMainMenuModel; conserva el adaptador Flutter homonimo.
+Los CSV regenerados describen los 83 archivos actuales del barrel, sus parts y
+exports locales: 80 conservar, 1 adaptar Flutter y 2 archivos mixtos estructurales
+(barrel y usecases). Ya no quedan candidatos ELIMINAR_TRAS_VALIDAR.
+Se mantienen las pruebas historicas ejecutandose contra los tipos del core.
+La igualdad/hash de colecciones y los fixes de decodificacion son ahora los del
+core; se documentan en README/CHANGELOG como parte de la migracion major.
+
+Validacion: analyze sin problemas; suite completa 1620 PASS / 2 skips;
+test adicional de identidad del catalogo PASS; cobertura 2392/2625 = 91.12%;
+AJV PASS. Dry-run exit 65: advierte 82 archivos tracked eliminados del checkout,
+11 archivos tracked modificados y version no incremental. Repetir tras preparar
+el commit y la version major mediante el proceso autorizado; no se publico.
+
+ACTUALIZACION POSTERIOR AL INVENTARIO
+Se aprobo el breaking change de conversiones Flutter de ModelVector:
+ModelVector.fromOffset(offset) -> UtilsFlutter.fromOffset(offset)
+vector.offset -> UtilsFlutter.toOffset(vector)
+Ambos metodos preservan dx/dy sin redondeo ni validacion. Se retiro el part local
+de ModelVector y se importa/reexporta selectivamente el tipo canonico, su enum y
+sus constantes. UtilsFlutter se expone desde el barrel historico.
+El resto de este documento y los CSV describen el inventario previo a ese cambio;
+volver a ejecutar el script genera la matriz del estado actual.
+Tambien se retiro la implementacion local de Model: los modelos locales y
+ModelVector ahora comparten el contrato nominal del core mediante el import y
+reexport existentes. El resto de sustituciones del inventario sigue pendiente.
+
+HALLAZGO PRINCIPAL
+El barrel actual importa/reexporta jocaagura_domain_core.dart, que contiene
+primitivas. Los modelos de 1.3.0 estan en jocaagura_domain_models.dart.
+Importar/reexportar este segundo entrypoint es necesario para ofrecerlos desde
+domain. No hacerlo sin retirar/resolver antes los nombres locales en conflicto.
+Los entrypoints API y mappers son catalogos adicionales, no reemplazos automaticos
+de los modelos historicos. Evaluar su exposicion por separado.
+
+ENTREGABLES
+core-1.3.0-files.csv: una fila por archivo del barrel, sus parts y exports locales.
+core-1.3.0-symbols.csv: tipos, enums, extensiones y constantes detectados por archivo.
+core-1.3.0-differences.txt: diferencias sin comentarios para cada candidato distinto.
+Reproducir: python tool/inventory_core_migration.py
+
+CLASIFICACION (archivos, no numero de modelos)
+81 ELIMINAR_TRAS_VALIDAR: retirar implementacion local y referencia part;
+   mantener sus nombres publicos mediante el export de modelos/core.
+   59 tienen codigo normalizado identico (sin comentarios, espacios, part of
+   y @immutable). Los otros 22 requieren revisar diferencias antes de sustituir.
+2 ADAPTAR_FLUTTER: ModelVector y ModelMainMenuModel.
+2 ADAPTAR_MIXTO: barrel principal y databases_crud_usecases.dart.
+79 CONSERVAR: infraestructura, blocs, servicios, gateways, repositorios,
+   usecases, errores complementarios, fakes y otras integraciones.
+Total: 164 archivos. La matriz CSV enumera todos, incluidos los 22 exports locales.
+
+RETIRO DE IMPLEMENTACIONES
+Los candidatos cubren AI, ACL/apps, calendario, ciudadano, CRUD metadata,
+odontologia, documentos, drive, educacion, flows, finanzas, graficos, grupos,
+HTTP data, JSON schemas, identidad, medicina, mascotas, sheets, estados,
+comercio, usuario, vehiculos, ScreenSizeConfig, MoneyUtils y Debouncer.
+No borrar tests por eliminar implementaciones: deben seguir probando la fachada
+historica contra el tipo canonico. Mantener enums, defaults y helpers del catalogo.
+El detalle autoritativo de rutas y simbolos esta en los CSV.
+
+ADAPTACIONES OBLIGATORIAS
+1. lib/jocaagura_domain.dart: retirar solo Model y defaultErrorItem locales cuando
+   se adopten los canonicos; conservar barrel y parts complementarios. Model debe
+   ser el MISMO tipo nominal entre core, modelos y las capas Flutter.
+2. databases_crud_usecases.dart: retirar solo los 10 DTOs canonicos:
+   DeleteManyParams, DeleteParams, EnsureParams, MutateParams, PatchParams,
+   ReadManyParams, ReadParams, WatchParams, WriteManyParams, WriteParams.
+   Conservar usecases ejecutables y adaptar su uso de esos DTOs.
+3. ModelVector: core no ofrece factory fromOffset ni getter offset. El getter
+   puede vivir en una extension Flutter; una extension no preserva la invocacion
+   del factory ModelVector.fromOffset. Se requiere una decision explicita entre
+   facade compatible y nuevo helper con migracion de consumidores. No afirmar
+   identidad nominal y compatibilidad completa del constructor simultaneamente.
+4. ModelMainMenuModel: el core usa ModelIconData y no tiene onPressed; domain
+   usa IconData y callback. Mantener un adaptador Flutter con conversion explicita
+   al dato core y resolver el nombre exportado (hide/prefijo/nombre de adaptador).
+   Un reexport directo no conserva el constructor historico ni su JSON.
+
+DIFERENCIAS DE COMPORTAMIENTO QUE REQUIEREN DECISION
+- AttributeModel, PersonModel, UserModel, ModelCrudLogEntry, modelos clinicos,
+  LedgerModel, grupos y LegalIdModel: revisar igualdad/hash de colecciones.
+- AcceptanceClauseModel, DentalConditionModel y MedicalDiagnosisTabModel:
+  core compara campos en lugar de depender solo de hashCode.
+- DeathRecordModel.fromJson: core corrige la asignacion de person/address/recordId.
+- LegalIdModel.fromJson: core recupera attributes antes omitidos.
+- ModelAssessment: core expone parametro timeLimit; revisar constructor publico.
+- Algunos decoders eliminan debugPrint; preservar datos no implica conservar logs.
+Estas diferencias exceden la allowlist previa (Either/Left/Right/SDK). Deben
+registrarse y aceptarse explicitamente o preservarse mediante una adaptacion
+justificada. La version major por si sola no autoriza cambios semanticos extra.
+
+ORDEN PROPUESTO (sin ejecutar aun)
+1. Congelar esta matriz y caracterizar diferencias de JSON/igualdad/constructores.
+2. Decidir compatibilidad de vector/menu y cambios semanticos heredados del core.
+3. Sustituir Model/Debouncer y adoptar el entrypoint de modelos, retirando en el
+   mismo cambio los parts en conflicto. Migrar por familias si se usan exports
+   selectivos temporales; no mantener implementaciones paralelas como destino final.
+4. Extraer DTOs de usecases y adaptar imports internos en infraestructura/fakes.
+5. Validar imports historicos, identidad nominal entre paquetes, defaults, JSON,
+   schemas, suite/cobertura y consumidores representativos.
+6. Documentar catalogo final y breaking changes; despues integrar a develop.
+   La certificacion de pipeline #213 sigue siendo trabajo posterior.
+
+LIMITES
+Inventario estatico con extraccion lexical de declaraciones a nivel de archivo;
+no es un informe del analyzer ni una prueba de compatibilidad de API. Los CSV
+no enumeran todos los metodos/funciones globales; el diff permite revisar el codigo
+restante, incluidos helpers. Igualdad normalizada no demuestra independencia del
+comportamiento de dependencias. CONSERVAR significa sin equivalente nominal
+detectado en core/modelos, no certificacion de que no requiera ajustes de tipos.
+No se ejecutaron nuevas pruebas de migracion porque aqui no se movio codigo.

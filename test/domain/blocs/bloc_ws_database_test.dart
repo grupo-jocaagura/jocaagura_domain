@@ -15,14 +15,13 @@ UserModel makeUser({
   String email = 'john.doe@example.com',
   String photo = 'https://example.com/profile.jpg',
   Map<String, dynamic> jwt = const <String, dynamic>{},
-}) =>
-    UserModel(
-      id: id,
-      displayName: name,
-      email: email,
-      photoUrl: photo,
-      jwt: jwt,
-    );
+}) => UserModel(
+  id: id,
+  displayName: name,
+  email: email,
+  photoUrl: photo,
+  jwt: jwt,
+);
 
 // Pequeño delay para permitir que fluyan eventos de streams/microtasks.
 Future<void> flush() => Future<void>.delayed(const Duration(milliseconds: 1));
@@ -98,8 +97,8 @@ void main() {
 
     test('writeDoc éxito: actualiza doc', () async {
       final UserModel u = makeUser(name: 'Alice');
-      repo.onWrite =
-          (String id, UserModel e) async => Right<ErrorItem, UserModel>(u);
+      repo.onWrite = (String id, UserModel e) async =>
+          Right<ErrorItem, UserModel>(u);
 
       final Either<ErrorItem, UserModel> res = await bloc.writeDoc(kDoc, u);
       expect(res.isRight, isTrue);
@@ -127,8 +126,8 @@ void main() {
       await bloc.readDoc(kDoc);
       expect(bloc.value.doc, isNotNull);
 
-      repo.onDelete =
-          (String id) async => const Right<ErrorItem, Unit>(Unit.value);
+      repo.onDelete = (String id) async =>
+          const Right<ErrorItem, Unit>(Unit.value);
 
       final Either<ErrorItem, Unit> res = await bloc.deleteDoc(kDoc);
       expect(res.isRight, isTrue);
@@ -156,8 +155,8 @@ void main() {
       // read inexistente -> simulate notFound
       repo.onRead = (String _) async =>
           const Left<ErrorItem, UserModel>(DatabaseErrorItems.notFound);
-      repo.onWrite =
-          (String _, UserModel e) async => Right<ErrorItem, UserModel>(e);
+      repo.onWrite = (String _, UserModel e) async =>
+          Right<ErrorItem, UserModel>(e);
 
       final Either<ErrorItem, UserModel> ensured = await bloc.ensureDoc(
         docId: kDoc,
@@ -167,10 +166,10 @@ void main() {
       expect(bloc.value.doc, equals(base));
 
       // mutate -> read + write
-      repo.onRead =
-          (String _) async => Right<ErrorItem, UserModel>(bloc.value.doc!);
-      repo.onWrite =
-          (String _, UserModel e) async => Right<ErrorItem, UserModel>(e);
+      repo.onRead = (String _) async =>
+          Right<ErrorItem, UserModel>(bloc.value.doc!);
+      repo.onWrite = (String _, UserModel e) async =>
+          Right<ErrorItem, UserModel>(e);
       final Either<ErrorItem, UserModel> mutated = await bloc.mutateDoc(
         kDoc,
         (UserModel current) => current.copyWith(displayName: 'Mutated'),
@@ -179,10 +178,10 @@ void main() {
       expect(bloc.value.doc!.displayName, 'Mutated');
 
       // patch -> read + write usando fromJson del facade
-      repo.onRead =
-          (String _) async => Right<ErrorItem, UserModel>(bloc.value.doc!);
-      repo.onWrite =
-          (String _, UserModel e) async => Right<ErrorItem, UserModel>(e);
+      repo.onRead = (String _) async =>
+          Right<ErrorItem, UserModel>(bloc.value.doc!);
+      repo.onWrite = (String _, UserModel e) async =>
+          Right<ErrorItem, UserModel>(e);
       final Either<ErrorItem, UserModel> patched = await bloc.patchDoc(
         kDoc,
         <String, dynamic>{UserEnum.displayName.name: 'Patched'},
@@ -191,34 +190,36 @@ void main() {
       expect(bloc.value.doc!.displayName, 'Patched');
     });
 
-    test('watch: startWatch emite datos y stopWatch detiene/llama detach',
-        () async {
-      // Prepara repo.watch + read/write no usados aquí.
-      // Arranca watch
-      await bloc.startWatch(kDoc);
-      expect(bloc.value.isWatching, isTrue);
-      expect(bloc.value.docId, kDoc);
+    test(
+      'watch: startWatch emite datos y stopWatch detiene/llama detach',
+      () async {
+        // Prepara repo.watch + read/write no usados aquí.
+        // Arranca watch
+        await bloc.startWatch(kDoc);
+        expect(bloc.value.isWatching, isTrue);
+        expect(bloc.value.docId, kDoc);
 
-      // Emite un Right
-      final UserModel u1 = makeUser(jwt: <String, dynamic>{'countRef': 1});
-      repo.emit(kDoc, Right<ErrorItem, UserModel>(u1));
-      await flush();
-      expect(bloc.value.doc, equals(u1));
+        // Emite un Right
+        final UserModel u1 = makeUser(jwt: <String, dynamic>{'countRef': 1});
+        repo.emit(kDoc, Right<ErrorItem, UserModel>(u1));
+        await flush();
+        expect(bloc.value.doc, equals(u1));
 
-      // Emite un Left (error)
-      repo.emit(
-        kDoc,
-        const Left<ErrorItem, UserModel>(DatabaseErrorItems.timeout),
-      );
-      await flush();
-      expect(bloc.value.error, isNotNull);
-      expect(bloc.value.error!.code, DatabaseErrorItems.timeout.code);
+        // Emite un Left (error)
+        repo.emit(
+          kDoc,
+          const Left<ErrorItem, UserModel>(DatabaseErrorItems.timeout),
+        );
+        await flush();
+        expect(bloc.value.error, isNotNull);
+        expect(bloc.value.error!.code, DatabaseErrorItems.timeout.code);
 
-      // Stop
-      await bloc.stopWatch(kDoc);
-      expect(bloc.value.isWatching, isFalse);
-      expect(repo.detachCount, greaterThan(0));
-    });
+        // Stop
+        await bloc.stopWatch(kDoc);
+        expect(bloc.value.isWatching, isFalse);
+        expect(repo.detachCount, greaterThan(0));
+      },
+    );
 
     test('startWatch reinicia suscripción (prev detiene + detach)', () async {
       await bloc.startWatch(kDoc);

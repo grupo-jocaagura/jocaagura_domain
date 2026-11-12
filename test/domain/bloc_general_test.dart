@@ -8,28 +8,20 @@ void main() {
       expect(bloc.valueOrNull, 0);
     });
 
-    test(
-        'addFunctionToProcessTValueOnStream adds function and executes if executeNow is true',
-        () {
+    test('addFunctionToProcessTValueOnStream adds function and executes if executeNow is true', () {
       final BlocGeneral<int> bloc = BlocGeneral<int>(0);
       bool isExecuted = false;
 
-      bloc.addFunctionToProcessTValueOnStream(
-        'test',
-        (int value) {
-          isExecuted = true;
-          expect(value, 0);
-        },
-        true,
-      );
+      bloc.addFunctionToProcessTValueOnStream('test', (int value) {
+        isExecuted = true;
+        expect(value, 0);
+      }, true);
 
       expect(isExecuted, true);
       expect(bloc.containsKeyFunction('test'), true);
     });
 
-    test(
-        'addFunctionToProcessTValueOnStream does not execute immediately if executeNow is false',
-        () {
+    test('addFunctionToProcessTValueOnStream does not execute immediately if executeNow is false', () {
       final BlocGeneral<int> bloc = BlocGeneral<int>(0);
       bool isExecuted = false;
 
@@ -51,9 +43,7 @@ void main() {
       expect(bloc.containsKeyFunction('test'), false);
     });
 
-    test(
-        'containsKeyFunction returns true for existing key and false for non-existing key',
-        () {
+    test('containsKeyFunction returns true for existing key and false for non-existing key', () {
       final BlocGeneral<int> bloc = BlocGeneral<int>(0);
       bloc.addFunctionToProcessTValueOnStream('test', (int value) {});
 
@@ -84,9 +74,7 @@ void main() {
       bloc.value = 10;
       expect(bloc.value, 10);
       await Future<void>.delayed(
-        const Duration(
-          milliseconds: 100,
-        ),
+        const Duration(milliseconds: 100),
       ); // Allow time for stream processing
       expect(function1Executed, true);
       expect(function2Executed, true);

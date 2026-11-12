@@ -3,36 +3,38 @@ import 'package:jocaagura_domain/jocaagura_domain.dart';
 
 void main() {
   group('JocaaguraFakeHttpRequest', () {
-    test('Given disposed instance When calling get Then throws StateError',
-        () async {
-      final JocaaguraFakeHttpRequest http = JocaaguraFakeHttpRequest(
-        services: <VirtualCrudService>[],
-      );
+    test(
+      'Given disposed instance When calling get Then throws StateError',
+      () async {
+        final JocaaguraFakeHttpRequest http = JocaaguraFakeHttpRequest(
+          services: <VirtualCrudService>[],
+        );
 
-      http.dispose();
+        http.dispose();
 
-      expect(
-        () => http.get(url: 'https://example.com/ping'),
-        throwsA(isA<StateError>()),
-      );
-    });
-
-    test('Given config.throwOnGet When calling get Then throws StateError',
-        () async {
-      final JocaaguraFakeHttpRequest http = JocaaguraFakeHttpRequest(
-        services: <VirtualCrudService>[],
-        config: const FakeHttpRequestConfig(throwOnGet: true),
-      );
-
-      expect(
-        () => http.get(url: 'https://example.com/ping'),
-        throwsA(isA<StateError>()),
-      );
-    });
+        expect(
+          () => http.get(url: 'https://example.com/ping'),
+          throwsA(isA<StateError>()),
+        );
+      },
+    );
 
     test(
-        'Given per-route error When calling matching route Then throws StateError with message',
-        () async {
+      'Given config.throwOnGet When calling get Then throws StateError',
+      () async {
+        final JocaaguraFakeHttpRequest http = JocaaguraFakeHttpRequest(
+          services: <VirtualCrudService>[],
+          config: const FakeHttpRequestConfig(throwOnGet: true),
+        );
+
+        expect(
+          () => http.get(url: 'https://example.com/ping'),
+          throwsA(isA<StateError>()),
+        );
+      },
+    );
+
+    test('Given per-route error When calling matching route Then throws StateError with message', () async {
       const String key = 'GET https://example.com/ping';
       final JocaaguraFakeHttpRequest http = JocaaguraFakeHttpRequest(
         services: <VirtualCrudService>[],
@@ -49,53 +51,59 @@ void main() {
       );
     });
 
-    test('Given cannedResponses When calling route Then returns canned payload',
-        () async {
-      const String key = 'GET https://example.com/ping';
-      final JocaaguraFakeHttpRequest http = JocaaguraFakeHttpRequest(
-        services: <VirtualCrudService>[],
-        config: const FakeHttpRequestConfig(
-          cannedResponses: <String, Map<String, dynamic>>{
-            key: <String, dynamic>{'ok': true, 'source': 'canned'},
-          },
-        ),
-      );
+    test(
+      'Given cannedResponses When calling route Then returns canned payload',
+      () async {
+        const String key = 'GET https://example.com/ping';
+        final JocaaguraFakeHttpRequest http = JocaaguraFakeHttpRequest(
+          services: <VirtualCrudService>[],
+          config: const FakeHttpRequestConfig(
+            cannedResponses: <String, Map<String, dynamic>>{
+              key: <String, dynamic>{'ok': true, 'source': 'canned'},
+            },
+          ),
+        );
 
-      final Map<String, dynamic> res =
-          await http.get(url: 'https://example.com/ping');
+        final Map<String, dynamic> res = await http.get(
+          url: 'https://example.com/ping',
+        );
 
-      expect(res['ok'], isTrue);
-      expect(res['source'], 'canned');
-    });
-
-    test('Given services in order When both canHandle Then first one wins',
-        () async {
-      final _SpyService first = _SpyService(
-        canHandleFn: (RequestContext ctx) => true,
-        handleFn: (RequestContext ctx) async =>
-            <String, dynamic>{'from': 'first'},
-      );
-      final _SpyService second = _SpyService(
-        canHandleFn: (RequestContext ctx) => true,
-        handleFn: (RequestContext ctx) async =>
-            <String, dynamic>{'from': 'second'},
-      );
-
-      final JocaaguraFakeHttpRequest http = JocaaguraFakeHttpRequest(
-        services: <VirtualCrudService>[first, second],
-      );
-
-      final Map<String, dynamic> res =
-          await http.get(url: 'https://example.com/any');
-
-      expect(res['from'], 'first');
-      expect(first.handleCalls, 1);
-      expect(second.handleCalls, 0);
-    });
+        expect(res['ok'], isTrue);
+        expect(res['source'], 'canned');
+      },
+    );
 
     test(
-        'Given no canned and no service match When calling Then throws StateError',
-        () async {
+      'Given services in order When both canHandle Then first one wins',
+      () async {
+        final _SpyService first = _SpyService(
+          canHandleFn: (RequestContext ctx) => true,
+          handleFn: (RequestContext ctx) async => <String, dynamic>{
+            'from': 'first',
+          },
+        );
+        final _SpyService second = _SpyService(
+          canHandleFn: (RequestContext ctx) => true,
+          handleFn: (RequestContext ctx) async => <String, dynamic>{
+            'from': 'second',
+          },
+        );
+
+        final JocaaguraFakeHttpRequest http = JocaaguraFakeHttpRequest(
+          services: <VirtualCrudService>[first, second],
+        );
+
+        final Map<String, dynamic> res = await http.get(
+          url: 'https://example.com/any',
+        );
+
+        expect(res['from'], 'first');
+        expect(first.handleCalls, 1);
+        expect(second.handleCalls, 0);
+      },
+    );
+
+    test('Given no canned and no service match When calling Then throws StateError', () async {
       final _SpyService s = _SpyService(
         canHandleFn: (RequestContext ctx) => false,
         handleFn: (RequestContext ctx) async => <String, dynamic>{'x': 1},
@@ -132,27 +140,28 @@ void main() {
     });
 
     test(
-        'Given queryParameters When calling get Then uri includes query string',
-        () async {
-      final _SpyService s = _SpyService(
-        canHandleFn: (RequestContext ctx) =>
-            ctx.uri.queryParameters['q'] == '1',
-        handleFn: (RequestContext ctx) async => <String, dynamic>{
-          'q': ctx.uri.queryParameters['q'],
-        },
-      );
+      'Given queryParameters When calling get Then uri includes query string',
+      () async {
+        final _SpyService s = _SpyService(
+          canHandleFn: (RequestContext ctx) =>
+              ctx.uri.queryParameters['q'] == '1',
+          handleFn: (RequestContext ctx) async => <String, dynamic>{
+            'q': ctx.uri.queryParameters['q'],
+          },
+        );
 
-      final JocaaguraFakeHttpRequest http = JocaaguraFakeHttpRequest(
-        services: <VirtualCrudService>[s],
-      );
+        final JocaaguraFakeHttpRequest http = JocaaguraFakeHttpRequest(
+          services: <VirtualCrudService>[s],
+        );
 
-      final Map<String, dynamic> res = await http.get(
-        url: 'https://example.com/search',
-        queryParameters: <String, dynamic>{'q': 1},
-      );
+        final Map<String, dynamic> res = await http.get(
+          url: 'https://example.com/search',
+          queryParameters: <String, dynamic>{'q': 1},
+        );
 
-      expect(res['q'], '1');
-    });
+        expect(res['q'], '1');
+      },
+    );
   });
 }
 
@@ -161,11 +170,7 @@ void main() {
 /// -------------------
 
 class _SpyService implements VirtualCrudService {
-  _SpyService({
-    required bool Function(RequestContext) canHandleFn,
-    required Future<Map<String, dynamic>> Function(RequestContext) handleFn,
-  })  : _canHandleFn = canHandleFn,
-        _handleFn = handleFn;
+  _SpyService({required this._canHandleFn, required this._handleFn});
 
   final bool Function(RequestContext) _canHandleFn;
   final Future<Map<String, dynamic>> Function(RequestContext) _handleFn;

@@ -26,25 +26,25 @@ Future<Either<ErrorItem, Unit>> activateStep(OnboardingStep step) async {
 
 void main() {
   group('OnboardingStep – contratos de onEnter', () {
-    test('Given onEnter null When activateStep Then éxito inmediato (Right)',
-        () async {
-      // Arrange
-      const OnboardingStep step = OnboardingStep(title: 'Bienvenida');
-
-      // Act
-      final Either<ErrorItem, Unit> r = await activateStep(step);
-
-      // Assert
-      expect(
-        r.isRight,
-        isTrue,
-        reason: 'onEnter == null debe asumirse como éxito',
-      );
-    });
-
     test(
-        'Given onEnter éxito When activateStep Then retorna Right y respeta autoAdvance',
-        () async {
+      'Given onEnter null When activateStep Then éxito inmediato (Right)',
+      () async {
+        // Arrange
+        const OnboardingStep step = OnboardingStep(title: 'Bienvenida');
+
+        // Act
+        final Either<ErrorItem, Unit> r = await activateStep(step);
+
+        // Assert
+        expect(
+          r.isRight,
+          isTrue,
+          reason: 'onEnter == null debe asumirse como éxito',
+        );
+      },
+    );
+
+    test('Given onEnter éxito When activateStep Then retorna Right y respeta autoAdvance', () async {
       // Arrange
       const Duration delay = Duration(milliseconds: 50);
       final OnboardingStep step = OnboardingStep(
@@ -58,9 +58,7 @@ void main() {
       expect(r.isRight, isTrue);
     });
 
-    test(
-        'Given onEnter error (Left) When activateStep Then no autoAdvance y permanece (Left)',
-        () async {
+    test('Given onEnter error (Left) When activateStep Then no autoAdvance y permanece (Left)', () async {
       // Arrange
       int tick = 0;
       final OnboardingStep step = OnboardingStep(
@@ -97,9 +95,7 @@ void main() {
       );
     });
 
-    test(
-        'Given onEnter lanza excepción When activateStep Then viola contrato y propaga',
-        () async {
+    test('Given onEnter lanza excepción When activateStep Then viola contrato y propaga', () async {
       // Arrange
       final OnboardingStep step = OnboardingStep(
         title: 'Configuración',
@@ -120,33 +116,32 @@ void main() {
 
   group('OnboardingStep – semántica de autoAdvanceAfter', () {
     test(
-        'Given éxito y autoAdvanceAfter When activateStep Then espera el delay',
-        () async {
-      // Arrange
-      const Duration delay = Duration(milliseconds: 60);
-      final OnboardingStep step = OnboardingStep(
-        title: 'Sincronización',
-        autoAdvanceAfter: delay,
-        onEnter: () async => const Right<ErrorItem, Unit>(unit),
-      );
+      'Given éxito y autoAdvanceAfter When activateStep Then espera el delay',
+      () async {
+        // Arrange
+        const Duration delay = Duration(milliseconds: 60);
+        final OnboardingStep step = OnboardingStep(
+          title: 'Sincronización',
+          autoAdvanceAfter: delay,
+          onEnter: () async => const Right<ErrorItem, Unit>(unit),
+        );
 
-      // Act
-      final DateTime start = DateTime.now();
-      final Either<ErrorItem, Unit> r = await activateStep(step);
-      final Duration elapsed = DateTime.now().difference(start);
+        // Act
+        final DateTime start = DateTime.now();
+        final Either<ErrorItem, Unit> r = await activateStep(step);
+        final Duration elapsed = DateTime.now().difference(start);
 
-      // Assert
-      expect(r.isRight, isTrue);
-      expect(
-        elapsed.inMilliseconds,
-        greaterThanOrEqualTo(delay.inMilliseconds),
-        reason: 'Debe respetar el tiempo de auto-advance sólo en éxito',
-      );
-    });
+        // Assert
+        expect(r.isRight, isTrue);
+        expect(
+          elapsed.inMilliseconds,
+          greaterThanOrEqualTo(delay.inMilliseconds),
+          reason: 'Debe respetar el tiempo de auto-advance sólo en éxito',
+        );
+      },
+    );
 
-    test(
-        'Given onEnter null y autoAdvanceAfter When activateStep Then éxito y espera delay',
-        () async {
+    test('Given onEnter null y autoAdvanceAfter When activateStep Then éxito y espera delay', () async {
       // Arrange
       const Duration delay = Duration(milliseconds: 40);
       const OnboardingStep step = OnboardingStep(

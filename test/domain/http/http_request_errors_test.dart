@@ -78,58 +78,49 @@ class _FakeNullPayloadErrorMapper extends DefaultErrorMapper {
 
 void main() {
   group('DefaultHttpErrorMapper.fromException', () {
-    test(
-      'Given a TimeoutException '
-      'When fromException is called '
-      'Then it returns an ErrorItem based on kHttpTimeoutErrorItem with extra meta',
-      () {
-        // Arrange
-        const DefaultHttpErrorMapper mapper = DefaultHttpErrorMapper(
-          delegate: _FakeDelegateErrorMapper(),
-        );
+    test('Given a TimeoutException '
+        'When fromException is called '
+        'Then it returns an ErrorItem based on kHttpTimeoutErrorItem with extra meta', () {
+      // Arrange
+      const DefaultHttpErrorMapper mapper = DefaultHttpErrorMapper(
+        delegate: _FakeDelegateErrorMapper(),
+      );
 
-        final TimeoutException error = TimeoutException(
-          'Operation timed out',
-          const Duration(seconds: 10),
-        );
+      final TimeoutException error = TimeoutException(
+        'Operation timed out',
+        const Duration(seconds: 10),
+      );
 
-        // Act
-        final ErrorItem item = mapper.fromException(
-          error,
-          StackTrace.current,
-          location: 'MyLocation',
-        );
+      // Act
+      final ErrorItem item = mapper.fromException(
+        error,
+        StackTrace.current,
+        location: 'MyLocation',
+      );
 
-        // Assert - campos básicos del template
-        expect(item.code, equals(kHttpTimeoutErrorItem.code));
-        expect(item.title, equals(kHttpTimeoutErrorItem.title));
-        expect(item.errorLevel, equals(kHttpTimeoutErrorItem.errorLevel));
-        expect(
-          item.description,
-          contains(kHttpTimeoutErrorItem.description),
-        );
-        expect(
-          item.description,
-          contains('Operation timed out'),
-        );
+      // Assert - campos básicos del template
+      expect(item.code, equals(kHttpTimeoutErrorItem.code));
+      expect(item.title, equals(kHttpTimeoutErrorItem.title));
+      expect(item.errorLevel, equals(kHttpTimeoutErrorItem.errorLevel));
+      expect(item.description, contains(kHttpTimeoutErrorItem.description));
+      expect(item.description, contains('Operation timed out'));
 
-        // Assert - meta enriquecido
-        expect(
-          item.meta['category'],
-          equals(kHttpTimeoutErrorItem.meta['category']),
-        );
-        expect(
-          item.meta['transport'],
-          equals(kHttpTimeoutErrorItem.meta['transport']),
-        );
-        expect(
-          item.meta['retryable'],
-          equals(kHttpTimeoutErrorItem.meta['retryable']),
-        );
-        expect(item.meta['location'], equals('MyLocation'));
-        expect(item.meta['type'], equals('TimeoutException'));
-      },
-    );
+      // Assert - meta enriquecido
+      expect(
+        item.meta['category'],
+        equals(kHttpTimeoutErrorItem.meta['category']),
+      );
+      expect(
+        item.meta['transport'],
+        equals(kHttpTimeoutErrorItem.meta['transport']),
+      );
+      expect(
+        item.meta['retryable'],
+        equals(kHttpTimeoutErrorItem.meta['retryable']),
+      );
+      expect(item.meta['location'], equals('MyLocation'));
+      expect(item.meta['type'], equals('TimeoutException'));
+    });
 
     test(
       'Given a non-timeout exception '
@@ -166,30 +157,27 @@ void main() {
   });
 
   group('DefaultHttpErrorMapper.fromPayload - base null handling', () {
-    test(
-      'Given a delegate that returns null fromPayload '
-      'When fromPayload is called '
-      'Then DefaultHttpErrorMapper also returns null',
-      () {
-        // Arrange
-        const DefaultHttpErrorMapper mapper = DefaultHttpErrorMapper(
-          delegate: _FakeNullPayloadErrorMapper(),
-        );
+    test('Given a delegate that returns null fromPayload '
+        'When fromPayload is called '
+        'Then DefaultHttpErrorMapper also returns null', () {
+      // Arrange
+      const DefaultHttpErrorMapper mapper = DefaultHttpErrorMapper(
+        delegate: _FakeNullPayloadErrorMapper(),
+      );
 
-        final Map<String, dynamic> payload = <String, dynamic>{
-          'message': 'something went wrong',
-        };
+      final Map<String, dynamic> payload = <String, dynamic>{
+        'message': 'something went wrong',
+      };
 
-        // Act
-        final ErrorItem? item = mapper.fromPayload(
-          payload,
-          location: 'NullLocation',
-        );
+      // Act
+      final ErrorItem? item = mapper.fromPayload(
+        payload,
+        location: 'NullLocation',
+      );
 
-        // Assert
-        expect(item, isNull);
-      },
-    );
+      // Assert
+      expect(item, isNull);
+    });
   });
 
   group('DefaultHttpErrorMapper.fromPayload - status code mapping', () {
@@ -197,109 +185,82 @@ void main() {
       delegate: _FakeDelegateErrorMapper(),
     );
 
-    test(
-      'Given a payload with statusCode 400/401/403/404/409/429 '
-      'When fromPayload is called '
-      'Then it remaps the code to the corresponding HTTP constant',
-      () {
-        // 400 Bad Request
-        final ErrorItem? badRequest = mapper.fromPayload(
-          <String, dynamic>{
-            'code': 'BASE_400',
-            'statusCode': 400,
-          },
-          location: 'Loc',
-        );
-        expect(badRequest, isNotNull);
-        expect(badRequest!.code, equals(kHttpBadRequestErrorItem.code));
-        expect(badRequest.meta['transport'], equals('http'));
-        expect(badRequest.meta['httpStatus'], equals(400));
-        expect(badRequest.meta['source'], equals('delegate_payload'));
+    test('Given a payload with statusCode 400/401/403/404/409/429 '
+        'When fromPayload is called '
+        'Then it remaps the code to the corresponding HTTP constant', () {
+      // 400 Bad Request
+      final ErrorItem? badRequest = mapper.fromPayload(<String, dynamic>{
+        'code': 'BASE_400',
+        'statusCode': 400,
+      }, location: 'Loc');
+      expect(badRequest, isNotNull);
+      expect(badRequest!.code, equals(kHttpBadRequestErrorItem.code));
+      expect(badRequest.meta['transport'], equals('http'));
+      expect(badRequest.meta['httpStatus'], equals(400));
+      expect(badRequest.meta['source'], equals('delegate_payload'));
 
-        // 401 Unauthorized
-        final ErrorItem? unauthorized = mapper.fromPayload(
-          <String, dynamic>{
-            'code': 'BASE_401',
-            'statusCode': 401,
-          },
-          location: 'Loc',
-        );
-        expect(unauthorized, isNotNull);
-        expect(unauthorized!.code, equals(kHttpUnauthorizedErrorItem.code));
-        expect(unauthorized.meta['httpStatus'], equals(401));
+      // 401 Unauthorized
+      final ErrorItem? unauthorized = mapper.fromPayload(<String, dynamic>{
+        'code': 'BASE_401',
+        'statusCode': 401,
+      }, location: 'Loc');
+      expect(unauthorized, isNotNull);
+      expect(unauthorized!.code, equals(kHttpUnauthorizedErrorItem.code));
+      expect(unauthorized.meta['httpStatus'], equals(401));
 
-        // 403 Forbidden
-        final ErrorItem? forbidden = mapper.fromPayload(
-          <String, dynamic>{
-            'code': 'BASE_403',
-            'statusCode': 403,
-          },
-          location: 'Loc',
-        );
-        expect(forbidden, isNotNull);
-        expect(forbidden!.code, equals(kHttpForbiddenErrorItem.code));
-        expect(forbidden.meta['httpStatus'], equals(403));
+      // 403 Forbidden
+      final ErrorItem? forbidden = mapper.fromPayload(<String, dynamic>{
+        'code': 'BASE_403',
+        'statusCode': 403,
+      }, location: 'Loc');
+      expect(forbidden, isNotNull);
+      expect(forbidden!.code, equals(kHttpForbiddenErrorItem.code));
+      expect(forbidden.meta['httpStatus'], equals(403));
 
-        // 404 Not Found
-        final ErrorItem? notFound = mapper.fromPayload(
-          <String, dynamic>{
-            'code': 'BASE_404',
-            'statusCode': 404,
-          },
-          location: 'Loc',
-        );
-        expect(notFound, isNotNull);
-        expect(notFound!.code, equals(kHttpNotFoundErrorItem.code));
-        expect(notFound.meta['httpStatus'], equals(404));
+      // 404 Not Found
+      final ErrorItem? notFound = mapper.fromPayload(<String, dynamic>{
+        'code': 'BASE_404',
+        'statusCode': 404,
+      }, location: 'Loc');
+      expect(notFound, isNotNull);
+      expect(notFound!.code, equals(kHttpNotFoundErrorItem.code));
+      expect(notFound.meta['httpStatus'], equals(404));
 
-        // 409 Conflict
-        final ErrorItem? conflict = mapper.fromPayload(
-          <String, dynamic>{
-            'code': 'BASE_409',
-            'statusCode': 409,
-          },
-          location: 'Loc',
-        );
-        expect(conflict, isNotNull);
-        expect(conflict!.code, equals(kHttpConflictErrorItem.code));
-        expect(conflict.meta['httpStatus'], equals(409));
+      // 409 Conflict
+      final ErrorItem? conflict = mapper.fromPayload(<String, dynamic>{
+        'code': 'BASE_409',
+        'statusCode': 409,
+      }, location: 'Loc');
+      expect(conflict, isNotNull);
+      expect(conflict!.code, equals(kHttpConflictErrorItem.code));
+      expect(conflict.meta['httpStatus'], equals(409));
 
-        // 429 Too Many Requests
-        final ErrorItem? tooMany = mapper.fromPayload(
-          <String, dynamic>{
-            'code': 'BASE_429',
-            'statusCode': 429,
-          },
-          location: 'Loc',
-        );
-        expect(tooMany, isNotNull);
-        expect(tooMany!.code, equals(kHttpTooManyRequestsErrorItem.code));
-        expect(tooMany.meta['httpStatus'], equals(429));
-      },
-    );
+      // 429 Too Many Requests
+      final ErrorItem? tooMany = mapper.fromPayload(<String, dynamic>{
+        'code': 'BASE_429',
+        'statusCode': 429,
+      }, location: 'Loc');
+      expect(tooMany, isNotNull);
+      expect(tooMany!.code, equals(kHttpTooManyRequestsErrorItem.code));
+      expect(tooMany.meta['httpStatus'], equals(429));
+    });
 
-    test(
-      'Given a payload with httpStatus in the 5xx range '
-      'When fromPayload is called '
-      'Then it remaps the code to HTTP_SERVER_ERROR',
-      () {
-        // Arrange - usamos httpStatus en lugar de statusCode
-        final ErrorItem? serverError = mapper.fromPayload(
-          <String, dynamic>{
-            'code': 'BASE_503',
-            'httpStatus': 503,
-          },
-          location: 'Loc',
-        );
+    test('Given a payload with httpStatus in the 5xx range '
+        'When fromPayload is called '
+        'Then it remaps the code to HTTP_SERVER_ERROR', () {
+      // Arrange - usamos httpStatus en lugar de statusCode
+      final ErrorItem? serverError = mapper.fromPayload(<String, dynamic>{
+        'code': 'BASE_503',
+        'httpStatus': 503,
+      }, location: 'Loc');
 
-        // Assert
-        expect(serverError, isNotNull);
-        expect(serverError!.code, equals(kHttpServerErrorItem.code));
-        expect(serverError.meta['httpStatus'], equals(503));
-        expect(serverError.meta['transport'], equals('http'));
-        expect(serverError.meta['source'], equals('delegate_payload'));
-      },
-    );
+      // Assert
+      expect(serverError, isNotNull);
+      expect(serverError!.code, equals(kHttpServerErrorItem.code));
+      expect(serverError.meta['httpStatus'], equals(503));
+      expect(serverError.meta['transport'], equals('http'));
+      expect(serverError.meta['source'], equals('delegate_payload'));
+    });
 
     test(
       'Given a payload without statusCode/httpStatus '
@@ -307,12 +268,9 @@ void main() {
       'Then it preserves the base code and only adds transport=http to meta',
       () {
         // Arrange
-        final ErrorItem? item = mapper.fromPayload(
-          <String, dynamic>{
-            'code': 'BASE_ORIGINAL',
-          },
-          location: 'NoStatusLocation',
-        );
+        final ErrorItem? item = mapper.fromPayload(<String, dynamic>{
+          'code': 'BASE_ORIGINAL',
+        }, location: 'NoStatusLocation');
 
         // Assert
         expect(item, isNotNull);

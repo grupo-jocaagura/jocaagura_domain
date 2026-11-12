@@ -7,8 +7,7 @@ void main() {
       requestId: 'ai_req_customer_summary_001',
       provider: 'gemini',
       modelId: 'gemini-2.5-pro',
-      content:
-          '{"summary":"El dominio prioriza interoperabilidad y contratos JSON canonicos.","highlights":["Schemas versionados en v1","Roundtrip JSON en modelos Dart","Base agnostica para backend y Apps Script"]}',
+      content: '{"summary":"El dominio prioriza interoperabilidad y contratos JSON canonicos.","highlights":["Schemas versionados en v1","Roundtrip JSON en modelos Dart","Base agnostica para backend y Apps Script"]}',
       parsedJson: <String, dynamic>{
         'summary':
             'El dominio prioriza interoperabilidad y contratos JSON canonicos.',
@@ -19,48 +18,36 @@ void main() {
         ],
       },
       finishReason: 'stop',
-      usage: <String, dynamic>{
-        'inputTokens': 312,
-        'outputTokens': 97,
-      },
+      usage: <String, dynamic>{'inputTokens': 312, 'outputTokens': 97},
     );
 
-    test(
-      'Given a canonical response When toJson and fromJson Then preserves the contract',
-      () {
-        final Map<String, dynamic> json = response.toJson();
-        final ModelAiResponse roundtrip = ModelAiResponse.fromJson(json);
+    test('Given a canonical response When toJson and fromJson Then preserves the contract', () {
+      final Map<String, dynamic> json = response.toJson();
+      final ModelAiResponse roundtrip = ModelAiResponse.fromJson(json);
 
-        expect(roundtrip, response);
-        expect(roundtrip.toJson(), response.toJson());
-      },
-    );
+      expect(roundtrip, response);
+      expect(roundtrip.toJson(), response.toJson());
+    });
 
-    test(
-      'Given canonical JSON When fromJson and toJson Then preserves JSON roundtrip',
-      () {
-        final Map<String, dynamic> json = response.toJson();
+    test('Given canonical JSON When fromJson and toJson Then preserves JSON roundtrip', () {
+      final Map<String, dynamic> json = response.toJson();
 
-        final ModelAiResponse parsed = ModelAiResponse.fromJson(json);
+      final ModelAiResponse parsed = ModelAiResponse.fromJson(json);
 
-        expect(parsed.toJson(), json);
-      },
-    );
+      expect(parsed.toJson(), json);
+    });
 
-    test(
-      'Given a response When copyWith overrides fields Then returns updated copy',
-      () {
-        final ModelAiResponse copy = response.copyWith(
-          provider: 'openai',
-          modelId: 'gpt-5.4',
-          finishReason: 'completed',
-        );
+    test('Given a response When copyWith overrides fields Then returns updated copy', () {
+      final ModelAiResponse copy = response.copyWith(
+        provider: 'openai',
+        modelId: 'gpt-5.4',
+        finishReason: 'completed',
+      );
 
-        expect(copy.provider, 'openai');
-        expect(copy.modelId, 'gpt-5.4');
-        expect(copy.finishReason, 'completed');
-        expect(copy, isNot(response));
-      },
-    );
+      expect(copy.provider, 'openai');
+      expect(copy.modelId, 'gpt-5.4');
+      expect(copy.finishReason, 'completed');
+      expect(copy, isNot(response));
+    });
   });
 }

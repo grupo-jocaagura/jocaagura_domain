@@ -23,8 +23,9 @@ class MockEntityService extends EntityService {
   }
 
   bool updateEntity(String id, Map<String, dynamic> updatedFields) {
-    final int entityIndex = _entities
-        .indexWhere((Map<String, dynamic> entity) => entity['id'] == id);
+    final int entityIndex = _entities.indexWhere(
+      (Map<String, dynamic> entity) => entity['id'] == id,
+    );
     if (entityIndex != -1) {
       _entities[entityIndex] = <String, dynamic>{
         ..._entities[entityIndex],

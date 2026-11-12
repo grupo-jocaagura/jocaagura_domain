@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'dart:math';
 
-import 'package:flutter/material.dart';
 import 'package:jocaagura_domain/jocaagura_domain.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// ###########################################################################
 /// # WS Contacts Demo (document + collection)
@@ -37,8 +37,9 @@ class _WsCrudContactsDemoAppState extends State<WsCrudContactsDemoApp> {
     // 1) Service (reemplaza aquí por tu servicio real)
     _service = FakeServiceWsDb(
       config: WsDbConfig(
-        latency:
-            Duration(milliseconds: 250 + Random().nextInt(350)), // 250–600ms
+        latency: Duration(
+          milliseconds: 250 + Random().nextInt(350),
+        ), // 250–600ms
       ),
     );
 
@@ -143,12 +144,12 @@ class _WsContactsHomeState extends State<WsContactsHome> {
   }
 
   ContactModel _fromForm() => ContactModel(
-        id: _id.text.trim(),
-        name: _name.text.trim(),
-        relationship: _relationship.text.trim(),
-        phoneNumber: _phone.text.trim(),
-        email: _email.text.trim(),
-      );
+    id: _id.text.trim(),
+    name: _name.text.trim(),
+    relationship: _relationship.text.trim(),
+    phoneNumber: _phone.text.trim(),
+    email: _email.text.trim(),
+  );
 
   void _fillForm(ContactModel c) {
     _id.text = c.id;
@@ -162,15 +163,14 @@ class _WsContactsHomeState extends State<WsContactsHome> {
     if (_id.text.trim().isEmpty) {
       return;
     }
-    final Either<ErrorItem, ContactModel> res =
-        await widget.contactsBloc.readDoc(_id.text.trim());
-    res.fold(
-      (ErrorItem e) => _snack('READ error: ${e.code}'),
-      (ContactModel c) {
-        _fillForm(c);
-        _snack('READ ok: ${c.id}');
-      },
-    );
+    final Either<ErrorItem, ContactModel> res = await widget.contactsBloc
+        .readDoc(_id.text.trim());
+    res.fold((ErrorItem e) => _snack('READ error: ${e.code}'), (
+      ContactModel c,
+    ) {
+      _fillForm(c);
+      _snack('READ ok: ${c.id}');
+    });
   }
 
   Future<void> _write() async {
@@ -178,23 +178,23 @@ class _WsContactsHomeState extends State<WsContactsHome> {
     if (c.id.isEmpty) {
       return;
     }
-    final Either<ErrorItem, ContactModel> res =
-        await widget.contactsBloc.writeDoc(c.id, c);
-    res.fold(
-      (ErrorItem e) => _snack('WRITE error: ${e.code}'),
-      (ContactModel saved) {
-        _fillForm(saved);
-        _snack('WRITE ok: ${saved.id}');
-      },
-    );
+    final Either<ErrorItem, ContactModel> res = await widget.contactsBloc
+        .writeDoc(c.id, c);
+    res.fold((ErrorItem e) => _snack('WRITE error: ${e.code}'), (
+      ContactModel saved,
+    ) {
+      _fillForm(saved);
+      _snack('WRITE ok: ${saved.id}');
+    });
   }
 
   Future<void> _delete() async {
     if (_id.text.trim().isEmpty) {
       return;
     }
-    final Either<ErrorItem, Unit> res =
-        await widget.contactsBloc.deleteDoc(_id.text.trim());
+    final Either<ErrorItem, Unit> res = await widget.contactsBloc.deleteDoc(
+      _id.text.trim(),
+    );
     res.fold(
       (ErrorItem e) => _snack('DELETE error: ${e.code}'),
       (_) => _snack('DELETE ok'),
@@ -366,39 +366,40 @@ class _WsContactsHomeState extends State<WsContactsHome> {
               child: StreamBuilder<WsDbState<ContactModel>>(
                 stream: widget.contactsBloc.stream,
                 initialData: widget.contactsBloc.value,
-                builder: (
-                  BuildContext context,
-                  AsyncSnapshot<WsDbState<ContactModel>> snap,
-                ) {
-                  final WsDbState<ContactModel> s =
-                      snap.data ?? WsDbState<ContactModel>.idle();
-                  final ContactModel? c = s.doc;
-                  return Padding(
-                    padding: const EdgeInsets.all(12),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: <Widget>[
-                        _kv('loading', '${s.loading}'),
-                        _kv('docId', s.docId),
-                        _kv('isWatching', '${s.isWatching}'),
-                        _kv('error', s.error?.code ?? 'null'),
-                        const Divider(),
-                        const Text(
-                          'doc snapshot',
-                          style: TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                        const SizedBox(height: 6),
-                        Expanded(
-                          child: SingleChildScrollView(
-                            child: Text(
-                              c == null ? 'null' : c.toJson().toString(),
+                builder:
+                    (
+                      BuildContext context,
+                      AsyncSnapshot<WsDbState<ContactModel>> snap,
+                    ) {
+                      final WsDbState<ContactModel> s =
+                          snap.data ?? WsDbState<ContactModel>.idle();
+                      final ContactModel? c = s.doc;
+                      return Padding(
+                        padding: const EdgeInsets.all(12),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: <Widget>[
+                            _kv('loading', '${s.loading}'),
+                            _kv('docId', s.docId),
+                            _kv('isWatching', '${s.isWatching}'),
+                            _kv('error', s.error?.code ?? 'null'),
+                            const Divider(),
+                            const Text(
+                              'doc snapshot',
+                              style: TextStyle(fontWeight: FontWeight.bold),
                             ),
-                          ),
+                            const SizedBox(height: 6),
+                            Expanded(
+                              child: SingleChildScrollView(
+                                child: Text(
+                                  c == null ? 'null' : c.toJson().toString(),
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
-                  );
-                },
+                      );
+                    },
               ),
             ),
             const Divider(height: 1),
@@ -415,39 +416,40 @@ class _WsContactsHomeState extends State<WsContactsHome> {
               child: StreamBuilder<List<ContactModel>>(
                 stream: widget.contactsCollectionBloc.stream,
                 initialData: widget.contactsCollectionBloc.value,
-                builder: (
-                  BuildContext context,
-                  AsyncSnapshot<List<ContactModel>> snap,
-                ) {
-                  final List<ContactModel> items =
-                      snap.data ?? const <ContactModel>[];
-                  if (items.isEmpty) {
-                    return const Center(child: Text('No contacts yet'));
-                  }
-                  return ListView.separated(
-                    padding: const EdgeInsets.all(8),
-                    itemCount: items.length,
-                    separatorBuilder: (_, __) => const Divider(height: 1),
-                    itemBuilder: (_, int i) {
-                      final ContactModel c = items[i];
-                      return ListTile(
-                        leading: CircleAvatar(
-                          child: Text(c.name.isEmpty ? '?' : c.name[0]),
-                        ),
-                        title: Text(c.name),
-                        subtitle: Text(
-                          '${c.relationship} • ${c.phoneNumber}\n${c.email}',
-                        ),
-                        isThreeLine: true,
-                        trailing: Text('#${c.id}'),
-                        onTap: () {
-                          // Autorrellena form al tocar un item
-                          _fillForm(c);
+                builder:
+                    (
+                      BuildContext context,
+                      AsyncSnapshot<List<ContactModel>> snap,
+                    ) {
+                      final List<ContactModel> items =
+                          snap.data ?? const <ContactModel>[];
+                      if (items.isEmpty) {
+                        return const Center(child: Text('No contacts yet'));
+                      }
+                      return ListView.separated(
+                        padding: const EdgeInsets.all(8),
+                        itemCount: items.length,
+                        separatorBuilder: (_, __) => const Divider(height: 1),
+                        itemBuilder: (_, int i) {
+                          final ContactModel c = items[i];
+                          return ListTile(
+                            leading: CircleAvatar(
+                              child: Text(c.name.isEmpty ? '?' : c.name[0]),
+                            ),
+                            title: Text(c.name),
+                            subtitle: Text(
+                              '${c.relationship} • ${c.phoneNumber}\n${c.email}',
+                            ),
+                            isThreeLine: true,
+                            trailing: Text('#${c.id}'),
+                            onTap: () {
+                              // Autorrellena form al tocar un item
+                              _fillForm(c);
+                            },
+                          );
                         },
                       );
                     },
-                  );
-                },
               ),
             ),
             const Divider(height: 1),
@@ -558,13 +560,10 @@ Widget _kv(String k, String v) {
 /// ---------------------------------------------------------------------------
 class ContactsCollectionBloc extends BlocGeneral<List<ContactModel>> {
   ContactsCollectionBloc({
-    required ServiceWsDb service,
-    required String collection,
-    required ContactModel Function(Map<String, dynamic>) fromJson,
-  })  : _service = service,
-        _collection = collection,
-        _fromJson = fromJson,
-        super(const <ContactModel>[]);
+    required this._service,
+    required this._collection,
+    required this._fromJson,
+  }) : super(const <ContactModel>[]);
 
   final ServiceWsDb _service;
   final String _collection;
@@ -574,23 +573,25 @@ class ContactsCollectionBloc extends BlocGeneral<List<ContactModel>> {
 
   void start() {
     _sub?.cancel();
-    _sub = _service.collectionStream(collection: _collection).listen(
-      (List<Map<String, dynamic>> rawList) {
-        final List<ContactModel> items = <ContactModel>[];
-        for (final Map<String, dynamic> m in rawList) {
-          try {
-            items.add(_fromJson(m));
-          } catch (_) {
-            // Swallow mapping errors in demo; in prod, mapea a ErrorItem/log.
-          }
-        }
-        value = items;
-      },
-      onError: (Object e, StackTrace s) {
-        // En demo, solo log. En prod, mapea a ErrorItem y publícalo en estado.
-        // print('collection error: $e');
-      },
-    );
+    _sub = _service
+        .collectionStream(collection: _collection)
+        .listen(
+          (List<Map<String, dynamic>> rawList) {
+            final List<ContactModel> items = <ContactModel>[];
+            for (final Map<String, dynamic> m in rawList) {
+              try {
+                items.add(_fromJson(m));
+              } catch (_) {
+                // Swallow mapping errors in demo; in prod, mapea a ErrorItem/log.
+              }
+            }
+            value = items;
+          },
+          onError: (Object e, StackTrace s) {
+            // En demo, solo log. En prod, mapea a ErrorItem y publícalo en estado.
+            // print('collection error: $e');
+          },
+        );
   }
 
   @override

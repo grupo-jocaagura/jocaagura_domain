@@ -11,10 +11,7 @@ void main() {
         category: 'Food Products',
         description: 'Consumables',
       ),
-      price: const ModelPrice(
-        amount: 1899,
-        currency: CurrencyEnum.COP,
-      ),
+      price: const ModelPrice(amount: 1899, currency: CurrencyEnum.COP),
       attributes: const <AttributeModel<dynamic>>[
         AttributeModel<String>(name: 'Size', value: 'Small'),
         AttributeModel<int>(name: 'Stock', value: 20),
@@ -79,57 +76,68 @@ void main() {
   });
 
   group('ModelItem', () {
-    test('Given attributes list When constructed Then becomes unmodifiable',
-        () {
-      final List<ModelAttribute<dynamic>> attrs = <ModelAttribute<dynamic>>[
-        const AttributeModel<String>(name: 'Color', value: 'Blue'),
-      ];
-      final ModelItem item = ModelItem(
-        id: '',
-        name: 'Mask',
-        description: 'Medical mask',
-        type: const ModelCategory(category: 'health', description: 'x'),
-        price: const ModelPrice(amount: 2500, currency: CurrencyEnum.COP),
-        attributes: attrs,
-      );
+    test(
+      'Given attributes list When constructed Then becomes unmodifiable',
+      () {
+        final List<ModelAttribute<dynamic>> attrs = <ModelAttribute<dynamic>>[
+          const AttributeModel<String>(name: 'Color', value: 'Blue'),
+        ];
+        final ModelItem item = ModelItem(
+          id: '',
+          name: 'Mask',
+          description: 'Medical mask',
+          type: const ModelCategory(category: 'health', description: 'x'),
+          price: const ModelPrice(amount: 2500, currency: CurrencyEnum.COP),
+          attributes: attrs,
+        );
 
-      // mutate original list -> item.attributes must not change
-      attrs.add(const AttributeModel<int>(name: 'Stock', value: 10));
-      expect(item.attributes.length, 1);
+        // mutate original list -> item.attributes must not change
+        attrs.add(const AttributeModel<int>(name: 'Stock', value: 10));
+        expect(item.attributes.length, 1);
 
-      // list must be truly unmodifiable
-      expect(
-        () => item.attributes
-            .add(const AttributeModel<String>(name: 'S', value: 'x')),
-        throwsUnsupportedError,
-      );
-    });
+        // list must be truly unmodifiable
+        expect(
+          () => item.attributes.add(
+            const AttributeModel<String>(name: 'S', value: 'x'),
+          ),
+          throwsUnsupportedError,
+        );
+      },
+    );
 
-    test('Given empty id When toJson Then id falls back to normalized category',
-        () {
-      final ModelItem item = ModelItem(
-        id: '',
-        name: '  Mask  ',
-        description: '  Medical  ',
-        type:
-            const ModelCategory(category: 'health-supplies', description: 'x'),
-        price: const ModelPrice(amount: 1000, currency: CurrencyEnum.COP),
-      );
-      final Map<String, dynamic> json = item.toJson();
-      expect(json['id'], ModelCategory.normalizeCategory('health-supplies'));
-      expect(json['name'], 'Mask');
-      expect(json['description'], 'Medical');
-    });
+    test(
+      'Given empty id When toJson Then id falls back to normalized category',
+      () {
+        final ModelItem item = ModelItem(
+          id: '',
+          name: '  Mask  ',
+          description: '  Medical  ',
+          type: const ModelCategory(
+            category: 'health-supplies',
+            description: 'x',
+          ),
+          price: const ModelPrice(amount: 1000, currency: CurrencyEnum.COP),
+        );
+        final Map<String, dynamic> json = item.toJson();
+        expect(json['id'], ModelCategory.normalizeCategory('health-supplies'));
+        expect(json['name'], 'Mask');
+        expect(json['description'], 'Medical');
+      },
+    );
 
     test('Given json When fromJson Then roundtrip preserves fields', () {
       final Map<String, dynamic> json = <String, dynamic>{
         'id': 'SKU1',
         'name': 'Gloves',
         'description': 'Latex',
-        'type':
-            const ModelCategory(category: 'health', description: 'x').toJson(),
-        'price':
-            const ModelPrice(amount: 1999, currency: CurrencyEnum.USD).toJson(),
+        'type': const ModelCategory(
+          category: 'health',
+          description: 'x',
+        ).toJson(),
+        'price': const ModelPrice(
+          amount: 1999,
+          currency: CurrencyEnum.USD,
+        ).toJson(),
         'attributes': <Map<String, dynamic>>[
           const AttributeModel<String>(name: 'Size', value: 'M').toJson(),
           const AttributeModel<int>(name: 'Stock', value: 50).toJson(),
@@ -142,9 +150,7 @@ void main() {
       expect(item.attributes.length, 2);
     });
 
-    test(
-        'Given copyWith When change fields Then new instance with same immutability',
-        () {
+    test('Given copyWith When change fields Then new instance with same immutability', () {
       final ModelItem base = ModelItem(
         id: 'A',
         name: 'Item',
@@ -162,36 +168,39 @@ void main() {
 
       expect(changed.id, 'B');
       expect(
-        () => changed.attributes
-            .add(const AttributeModel<int>(name: 'X', value: 1)),
+        () => changed.attributes.add(
+          const AttributeModel<int>(name: 'X', value: 1),
+        ),
         throwsUnsupportedError,
       );
     });
 
-    test('Given equals/hash When same fields Then equality true and hash equal',
-        () {
-      final ModelItem a = ModelItem(
-        id: 'A',
-        name: 'N',
-        description: 'D',
-        type: const ModelCategory(category: 'cat', description: 'x'),
-        price: const ModelPrice(amount: 1, currency: CurrencyEnum.CLP),
-        attributes: const <ModelAttribute<dynamic>>[
-          AttributeModel<int>(name: 'Stock', value: 1),
-        ],
-      );
-      final ModelItem b = ModelItem(
-        id: 'A',
-        name: 'N',
-        description: 'D',
-        type: const ModelCategory(category: 'cat', description: 'x'),
-        price: const ModelPrice(amount: 1, currency: CurrencyEnum.CLP),
-        attributes: const <ModelAttribute<dynamic>>[
-          AttributeModel<int>(name: 'Stock', value: 1),
-        ],
-      );
-      expect(a == b, isTrue);
-      expect(a.hashCode, equals(b.hashCode));
-    });
+    test(
+      'Given equals/hash When same fields Then equality true and hash equal',
+      () {
+        final ModelItem a = ModelItem(
+          id: 'A',
+          name: 'N',
+          description: 'D',
+          type: const ModelCategory(category: 'cat', description: 'x'),
+          price: const ModelPrice(amount: 1, currency: CurrencyEnum.CLP),
+          attributes: const <ModelAttribute<dynamic>>[
+            AttributeModel<int>(name: 'Stock', value: 1),
+          ],
+        );
+        final ModelItem b = ModelItem(
+          id: 'A',
+          name: 'N',
+          description: 'D',
+          type: const ModelCategory(category: 'cat', description: 'x'),
+          price: const ModelPrice(amount: 1, currency: CurrencyEnum.CLP),
+          attributes: const <ModelAttribute<dynamic>>[
+            AttributeModel<int>(name: 'Stock', value: 1),
+          ],
+        );
+        expect(a == b, isTrue);
+        expect(a.hashCode, equals(b.hashCode));
+      },
+    );
   });
 }

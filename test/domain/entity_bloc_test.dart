@@ -28,31 +28,19 @@ void main() {
       controller.sink.add(2);
       controller.sink.add(3);
       controller.sink.close();
-      expect(
-        stream,
-        emitsInOrder(<int>[0, 1, 2, 3]),
-      );
+      expect(stream, emitsInOrder(<int>[0, 1, 2, 3]));
     });
     test('Bloc initial value', () {
       const int a = 0;
-      expect(
-        bloc.stream,
-        emitsInOrder(<int>[a]),
-      );
+      expect(bloc.stream, emitsInOrder(<int>[a]));
 
-      expect(
-        bloc.value,
-        0,
-      );
+      expect(bloc.value, 0);
     });
 
     test('Bloc set value', () {
       final List<int> expectedValues = <int>[0, 1, 2, 3];
 
-      expect(
-        bloc.stream,
-        emitsInOrder(expectedValues),
-      );
+      expect(bloc.stream, emitsInOrder(expectedValues));
 
       for (final int value in expectedValues.skip(1)) {
         bloc.value = value;
@@ -108,9 +96,7 @@ void main() {
       expect(blocCore.getBlocModule<BlocModule>('test'), blocModule);
     });
 
-    test(
-        'deleteBlocGeneral should dispose the bloc and remove it from the injector',
-        () {
+    test('deleteBlocGeneral should dispose the bloc and remove it from the injector', () {
       final BlocGeneral<int> blocGeneral = BlocGeneral<int>(0);
       blocCore.addBlocGeneral('test', blocGeneral);
       blocCore.deleteBlocGeneral('test');
@@ -120,9 +106,7 @@ void main() {
       );
     });
 
-    test(
-        'deleteBlocModule should dispose the module and remove it from the moduleInjector',
-        () {
+    test('deleteBlocModule should dispose the module and remove it from the moduleInjector', () {
       final MockBlocModule blocModule = MockBlocModule();
       blocCore.addBlocModule<BlocModule>('test', blocModule);
       blocCore.deleteBlocModule('test');
@@ -151,9 +135,7 @@ void main() {
       blocGeneral = BlocGeneral<int>(0);
     });
 
-    test(
-        'addFunctionToProcessTValueOnStream should add the function to the _functionsMap',
-        () {
+    test('addFunctionToProcessTValueOnStream should add the function to the _functionsMap', () {
       blocGeneral.addFunctionToProcessTValueOnStream('test', (int value) {
         if (kDebugMode) {
           print('value: $value');
@@ -162,9 +144,7 @@ void main() {
       expect(blocGeneral.containsKeyFunction('test'), equals(true));
     });
 
-    test(
-        'deleteFunctionToProcessTValueOnStream should remove the function from the _functionsMap',
-        () {
+    test('deleteFunctionToProcessTValueOnStream should remove the function from the _functionsMap', () {
       blocGeneral.addFunctionToProcessTValueOnStream('test', (int value) {
         if (kDebugMode) {
           print('value: $value');
@@ -194,8 +174,9 @@ void main() {
       final Stream<int> repeatedStream = controller.stream.call(lastValue);
 
       final List<int> emittedValues = <int>[];
-      final StreamSubscription<int> subscription =
-          repeatedStream.listen(emittedValues.add);
+      final StreamSubscription<int> subscription = repeatedStream.listen(
+        emittedValues.add,
+      );
 
       // Emit a new value
       controller.add(1);
@@ -241,8 +222,9 @@ void main() {
       final Stream<int> repeatedStream = controller.stream.call(42);
 
       final List<int> emittedValues = <int>[];
-      final StreamSubscription<int> subscription =
-          repeatedStream.listen(emittedValues.add);
+      final StreamSubscription<int> subscription = repeatedStream.listen(
+        emittedValues.add,
+      );
 
       controller.close(); // Trigger onDone
 
@@ -254,34 +236,35 @@ void main() {
       subscription.cancel();
     });
 
-    test('Stream closes when done is true and new subscription is made',
-        () async {
-      final StreamController<int> controller = StreamController<int>();
-      final Stream<int> repeatedStream = controller.stream.call(42);
+    test(
+      'Stream closes when done is true and new subscription is made',
+      () async {
+        final StreamController<int> controller = StreamController<int>();
+        final Stream<int> repeatedStream = controller.stream.call(42);
 
-      // Close the original stream to trigger `onDone`
-      controller.close();
+        // Close the original stream to trigger `onDone`
+        controller.close();
 
-      await Future<void>.delayed(
-        const Duration(milliseconds: 50),
-      ); // Allow time for `onDone`
+        await Future<void>.delayed(
+          const Duration(milliseconds: 50),
+        ); // Allow time for `onDone`
 
-      // Create a new subscription after the original stream is done
-      final List<int> emittedValues = <int>[];
-      final StreamSubscription<int> subscription =
-          repeatedStream.listen(emittedValues.add);
+        // Create a new subscription after the original stream is done
+        final List<int> emittedValues = <int>[];
+        final StreamSubscription<int> subscription = repeatedStream.listen(
+          emittedValues.add,
+        );
 
-      await Future<void>.delayed(
-        const Duration(
-          milliseconds: 50,
-        ),
-      ); // Allow time for subscription handling
+        await Future<void>.delayed(
+          const Duration(milliseconds: 50),
+        ); // Allow time for subscription handling
 
-      // Expect no new values as the stream should be closed
-      expect(emittedValues, isEmpty);
+        // Expect no new values as the stream should be closed
+        expect(emittedValues, isEmpty);
 
-      subscription.cancel();
-    });
+        subscription.cancel();
+      },
+    );
   });
 }
 

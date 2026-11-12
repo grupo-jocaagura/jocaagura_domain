@@ -46,47 +46,45 @@ void main() {
 
   group('ModelPrice', () {
     test('Given valid inputs When construct Then decimalAmount correct', () {
-      const ModelPrice p = ModelPrice(
-        amount: 1250,
-        currency: CurrencyEnum.COP,
-      );
+      const ModelPrice p = ModelPrice(amount: 1250, currency: CurrencyEnum.COP);
       expect(p.decimalAmount, closeTo(12.5, 0.0000001));
       expect(p.toString(), '💰 12.50 COP');
     });
 
     test('Given negative amount When construct Then assert (debug mode)', () {
       expect(
-        () => ModelPrice(
-          amount: -1,
-          currency: CurrencyEnum.USD,
-        ),
+        () => ModelPrice(amount: -1, currency: CurrencyEnum.USD),
         throwsA(isA<AssertionError>()),
       );
     });
 
-    test('Given negative precision When construct Then assert (debug mode)',
-        () {
-      expect(
-        () => ModelPrice(
-          amount: 1,
-          mathPrecision: -1,
-          currency: CurrencyEnum.USD,
-        ),
-        throwsA(isA<AssertionError>()),
-      );
-    });
+    test(
+      'Given negative precision When construct Then assert (debug mode)',
+      () {
+        expect(
+          () => ModelPrice(
+            amount: 1,
+            mathPrecision: -1,
+            currency: CurrencyEnum.USD,
+          ),
+          throwsA(isA<AssertionError>()),
+        );
+      },
+    );
 
-    test('Given fromJson with unknown currency When parse Then defaults to COP',
-        () {
-      final ModelPrice p = ModelPrice.fromJson(const <String, Object?>{
-        'amount': -999, // will be abs() => 999
-        'mathPrecision': 2,
-        'currency': '???',
-      });
-      expect(p.amount, 999);
-      expect(p.currency, CurrencyEnum.COP);
-      expect(p.decimalAmount, closeTo(9.99, 0.0000001));
-    });
+    test(
+      'Given fromJson with unknown currency When parse Then defaults to COP',
+      () {
+        final ModelPrice p = ModelPrice.fromJson(const <String, Object?>{
+          'amount': -999, // will be abs() => 999
+          'mathPrecision': 2,
+          'currency': '???',
+        });
+        expect(p.amount, 999);
+        expect(p.currency, CurrencyEnum.COP);
+        expect(p.decimalAmount, closeTo(9.99, 0.0000001));
+      },
+    );
 
     test('Given copyWith When amount negative Then coerced to abs', () {
       const ModelPrice base = ModelPrice(
@@ -100,24 +98,27 @@ void main() {
     });
 
     test(
-        'Given copyWith When precision negative Then normalized to non-negative',
-        () {
-      const ModelPrice base = ModelPrice(
-        amount: 100,
-        currency: CurrencyEnum.USD,
-      );
-      final ModelPrice changed = base.copyWith(mathPrecision: -3);
-      expect(changed.mathPrecision, ModelPrice.defaultMathprecision);
-      expect(changed.decimalAmount, 1.00);
-    });
+      'Given copyWith When precision negative Then normalized to non-negative',
+      () {
+        const ModelPrice base = ModelPrice(
+          amount: 100,
+          currency: CurrencyEnum.USD,
+        );
+        final ModelPrice changed = base.copyWith(mathPrecision: -3);
+        expect(changed.mathPrecision, ModelPrice.defaultMathprecision);
+        expect(changed.decimalAmount, 1.00);
+      },
+    );
 
-    test('Given two equal instances When compare Then == true and hash equal',
-        () {
-      const ModelPrice a = ModelPrice(amount: 1, currency: CurrencyEnum.CLP);
-      const ModelPrice b = ModelPrice(amount: 1, currency: CurrencyEnum.CLP);
-      expect(a == b, isTrue);
-      expect(a.hashCode, equals(b.hashCode));
-    });
+    test(
+      'Given two equal instances When compare Then == true and hash equal',
+      () {
+        const ModelPrice a = ModelPrice(amount: 1, currency: CurrencyEnum.CLP);
+        const ModelPrice b = ModelPrice(amount: 1, currency: CurrencyEnum.CLP);
+        expect(a == b, isTrue);
+        expect(a.hashCode, equals(b.hashCode));
+      },
+    );
 
     test('Given toJson When serialize Then matches expected keys', () {
       const ModelPrice p = ModelPrice(amount: 123, currency: CurrencyEnum.MXN);

@@ -32,8 +32,9 @@ void main() {
     });
 
     test('Copy with method', () {
-      final AddressModel addressModel2 =
-          defaultAddressModel.copyWith(id: 'Tcech');
+      final AddressModel addressModel2 = defaultAddressModel.copyWith(
+        id: 'Tcech',
+      );
       final AddressModel addressModel3 = defaultAddressModel.copyWith();
 
       expect(addressModel3, defaultAddressModel);

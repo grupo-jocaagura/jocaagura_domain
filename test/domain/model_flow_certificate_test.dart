@@ -89,47 +89,39 @@ void main() {
           'Checklist validada secuencialmente y aprobada para cierre.',
     );
 
-    test(
-      'Given a certificate When toJson and fromJson Then preserves the contract',
-      () {
-        final Map<String, dynamic> json = certificate.toJson();
-        final ModelFlowCertificate roundtrip =
-            ModelFlowCertificate.fromJson(json);
+    test('Given a certificate When toJson and fromJson Then preserves the contract', () {
+      final Map<String, dynamic> json = certificate.toJson();
+      final ModelFlowCertificate roundtrip = ModelFlowCertificate.fromJson(
+        json,
+      );
 
-        expect(roundtrip, certificate);
-        expect(roundtrip.toJson(), certificate.toJson());
-      },
-    );
+      expect(roundtrip, certificate);
+      expect(roundtrip.toJson(), certificate.toJson());
+    });
 
-    test(
-      'Given current Dart JSON When fromJson and toJson Then preserves JSON roundtrip',
-      () {
-        final Map<String, dynamic> json = certificate.toJson();
+    test('Given current Dart JSON When fromJson and toJson Then preserves JSON roundtrip', () {
+      final Map<String, dynamic> json = certificate.toJson();
 
-        final ModelFlowCertificate parsed = ModelFlowCertificate.fromJson(json);
+      final ModelFlowCertificate parsed = ModelFlowCertificate.fromJson(json);
 
-        expect(parsed.toJson(), json);
-      },
-    );
+      expect(parsed.toJson(), json);
+    });
 
-    test(
-      'Given a certificate When copyWith overrides fields Then returns updated copy',
-      () {
-        final ModelFlowCertificate copy = certificate.copyWith(
-          certificateKey: 'CERT-ONBOARDING-002',
-          state: ModelFlowCertificateStateEnum.readyForCertification,
-          certifiedAt: null,
-          certifiedBy: null,
-          certifierNotes: null,
-        );
+    test('Given a certificate When copyWith overrides fields Then returns updated copy', () {
+      final ModelFlowCertificate copy = certificate.copyWith(
+        certificateKey: 'CERT-ONBOARDING-002',
+        state: ModelFlowCertificateStateEnum.readyForCertification,
+        certifiedAt: null,
+        certifiedBy: null,
+        certifierNotes: null,
+      );
 
-        expect(copy.certificateKey, 'CERT-ONBOARDING-002');
-        expect(copy.state, ModelFlowCertificateStateEnum.readyForCertification);
-        expect(copy.certifiedAt, isNull);
-        expect(copy.certifiedBy, isNull);
-        expect(copy.certifierNotes, isNull);
-        expect(copy, isNot(certificate));
-      },
-    );
+      expect(copy.certificateKey, 'CERT-ONBOARDING-002');
+      expect(copy.state, ModelFlowCertificateStateEnum.readyForCertification);
+      expect(copy.certifiedAt, isNull);
+      expect(copy.certifiedBy, isNull);
+      expect(copy.certifierNotes, isNull);
+      expect(copy, isNot(certificate));
+    });
   });
 }

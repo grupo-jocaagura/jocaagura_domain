@@ -76,11 +76,7 @@ class FakeServiceSession implements ServiceSession {
     required String message,
     Map<String, dynamic> extra = const <String, dynamic>{},
   }) {
-    return <String, dynamic>{
-      'ok': true,
-      'message': message,
-      ...extra,
-    };
+    return <String, dynamic>{'ok': true, 'message': message, ...extra};
   }
 
   Map<String, dynamic> _buildUser({
@@ -92,8 +88,7 @@ class FakeServiceSession implements ServiceSession {
     return <String, dynamic>{
       'id': id,
       'displayName': displayName ?? email.split('@').first,
-      'photoUrl':
-          'https://jocaagura.com/blogjocaagura/wp-content/uploads/2021/08/avatar.png',
+      'photoUrl': 'https://jocaagura.com/blogjocaagura/wp-content/uploads/2021/08/avatar.png',
       'email': email,
       'jwt': <String, dynamic>{
         'accessToken': 'fake-token-$id',
@@ -234,8 +229,9 @@ class FakeServiceSession implements ServiceSession {
 
     final DateTime now = DateTime.now();
 
-    final Map<String, dynamic> next =
-        Utils.mapFromDynamic(Utils.getJsonEncode(sessionJson));
+    final Map<String, dynamic> next = Utils.mapFromDynamic(
+      Utils.getJsonEncode(sessionJson),
+    );
     final Map<String, dynamic> nextTmp = Utils.mapFromDynamic(next['jwt']);
 
     final Map<String, dynamic> jwt = Utils.mapFromDynamic(
@@ -302,8 +298,9 @@ class FakeServiceSession implements ServiceSession {
     }
 
     // Deep copy using only Utils helpers (required by your constraint).
-    final Map<String, dynamic> deep =
-        Utils.mapFromDynamic(Utils.getJsonEncode(u));
+    final Map<String, dynamic> deep = Utils.mapFromDynamic(
+      Utils.getJsonEncode(u),
+    );
 
     return Map<String, dynamic>.unmodifiable(deep);
   }

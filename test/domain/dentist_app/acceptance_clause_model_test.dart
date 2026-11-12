@@ -49,15 +49,16 @@ ID: xmio
     });
 
     test('copyWith updates values', () {
-      final AcceptanceClauseModel updatedClause =
-          defaultAcceptanceClauseModel.copyWith(
-        id: 'new_id',
-        odontologistSignature:
-            defaultOdontologistSignature.copyWith(id: 'new_sig'),
-        patientPrint: 'new_patientPrint',
-        patientSignature: defaultPatientSignature.copyWith(id: 'new_sig'),
-        stringAcceptanceLeyend: 'new_leyend',
-      );
+      final AcceptanceClauseModel updatedClause = defaultAcceptanceClauseModel
+          .copyWith(
+            id: 'new_id',
+            odontologistSignature: defaultOdontologistSignature.copyWith(
+              id: 'new_sig',
+            ),
+            patientPrint: 'new_patientPrint',
+            patientSignature: defaultPatientSignature.copyWith(id: 'new_sig'),
+            stringAcceptanceLeyend: 'new_leyend',
+          );
 
       expect(updatedClause.id, 'new_id');
       expect(updatedClause.odontologistSignature.id, 'new_sig');
@@ -67,8 +68,8 @@ ID: xmio
     });
 
     test('copyWith without arguments returns the same object', () {
-      final AcceptanceClauseModel copiedClause =
-          defaultAcceptanceClauseModel.copyWith();
+      final AcceptanceClauseModel copiedClause = defaultAcceptanceClauseModel
+          .copyWith();
       expect(copiedClause, equals(defaultAcceptanceClauseModel));
       expect(
         copiedClause.hashCode,
@@ -103,8 +104,8 @@ ID: xmio
         AcceptanceClauseEnum.odontologistSignature.name:
             defaultOdontologistSignature.toJson(),
         AcceptanceClauseEnum.patientPrint.name: 'new_patientPrint',
-        AcceptanceClauseEnum.patientSignature.name:
-            defaultPatientSignature.toJson(),
+        AcceptanceClauseEnum.patientSignature.name: defaultPatientSignature
+            .toJson(),
         AcceptanceClauseEnum.stringAcceptanceLeyend.name: 'new_leyend',
       };
 

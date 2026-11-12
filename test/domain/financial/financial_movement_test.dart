@@ -53,8 +53,8 @@ void main() {
     });
 
     test('Equality operator works correctly', () {
-      final FinancialMovementModel identicalMovement =
-          defaultMovement.copyWith();
+      final FinancialMovementModel identicalMovement = defaultMovement
+          .copyWith();
       expect(defaultMovement, equals(identicalMovement));
     });
 
@@ -65,8 +65,9 @@ void main() {
     });
 
     test('Inequality operator works correctly', () {
-      final FinancialMovementModel differentMovement =
-          defaultMovement.copyWith(amount: 500);
+      final FinancialMovementModel differentMovement = defaultMovement.copyWith(
+        amount: 500,
+      );
       expect(defaultMovement, isNot(equals(differentMovement)));
     });
 
@@ -82,8 +83,9 @@ void main() {
     test('Handles empty JSON gracefully', () {
       final Map<String, dynamic> json = <String, dynamic>{};
 
-      final FinancialMovementModel movement =
-          FinancialMovementModel.fromJson(json);
+      final FinancialMovementModel movement = FinancialMovementModel.fromJson(
+        json,
+      );
 
       expect(movement.id, '');
       expect(movement.amount, 0);
@@ -107,8 +109,9 @@ void main() {
         'createdAt': '2024-07-25T00:00:00.000Z',
       };
 
-      final FinancialMovementModel movement =
-          FinancialMovementModel.fromJson(json);
+      final FinancialMovementModel movement = FinancialMovementModel.fromJson(
+        json,
+      );
 
       expect(movement.id, 'fm001');
       expect(movement.amount, 1500);
@@ -129,8 +132,9 @@ void main() {
         'createdAt': '2024-07-25T00:00:00.000Z',
       };
 
-      final FinancialMovementModel movement =
-          FinancialMovementModel.fromJson(json);
+      final FinancialMovementModel movement = FinancialMovementModel.fromJson(
+        json,
+      );
 
       expect(movement.id, 'fm002');
       expect(movement.amount, 500);
@@ -141,28 +145,31 @@ void main() {
       expect(movement.createdAt, DateTime.parse('2024-07-25T00:00:00.000Z'));
     });
 
-    test('Handles missing required fields with default values or exceptions',
-        () {
-      final Map<String, String?> json = <String, String?>{
-        'id': 'fm003',
-        'amount': null,
-        'date': '2024-07-22T00:00:00.000Z',
-        'concept': 'Movie Night',
-        'category': 'entertainment',
-        'createdAt': '2024-07-25T00:00:00.000Z',
-      };
+    test(
+      'Handles missing required fields with default values or exceptions',
+      () {
+        final Map<String, String?> json = <String, String?>{
+          'id': 'fm003',
+          'amount': null,
+          'date': '2024-07-22T00:00:00.000Z',
+          'concept': 'Movie Night',
+          'category': 'entertainment',
+          'createdAt': '2024-07-25T00:00:00.000Z',
+        };
 
-      final FinancialMovementModel movement =
-          FinancialMovementModel.fromJson(json);
+        final FinancialMovementModel movement = FinancialMovementModel.fromJson(
+          json,
+        );
 
-      expect(movement.id, 'fm003');
-      expect(movement.amount, 0); // Default to 0 if null
-      expect(movement.date, DateTime.parse('2024-07-22T00:00:00.000Z'));
-      expect(movement.concept, 'Movie Night');
-      expect(movement.detailedDescription, ''); // Default empty string
-      expect(movement.category, 'entertainment');
-      expect(movement.createdAt, DateTime.parse('2024-07-25T00:00:00.000Z'));
-    });
+        expect(movement.id, 'fm003');
+        expect(movement.amount, 0); // Default to 0 if null
+        expect(movement.date, DateTime.parse('2024-07-22T00:00:00.000Z'));
+        expect(movement.concept, 'Movie Night');
+        expect(movement.detailedDescription, ''); // Default empty string
+        expect(movement.category, 'entertainment');
+        expect(movement.createdAt, DateTime.parse('2024-07-25T00:00:00.000Z'));
+      },
+    );
 
     test('Handles incorrect data types gracefully', () {
       final Map<String, Object?> json = <String, Object?>{
@@ -174,8 +181,9 @@ void main() {
         'createdAt': null, // Should be a valid timestamp
       };
 
-      final FinancialMovementModel movement =
-          FinancialMovementModel.fromJson(json);
+      final FinancialMovementModel movement = FinancialMovementModel.fromJson(
+        json,
+      );
 
       expect(movement.id, '12345'); // Converted to string
       expect(movement.amount, 2000); // Converted to integer
@@ -189,8 +197,9 @@ void main() {
     test('Handles empty JSON gracefully', () {
       final Map<String, dynamic> json = <String, dynamic>{};
 
-      final FinancialMovementModel movement =
-          FinancialMovementModel.fromJson(json);
+      final FinancialMovementModel movement = FinancialMovementModel.fromJson(
+        json,
+      );
 
       expect(movement.id, '');
       expect(movement.amount, 0);
@@ -250,18 +259,15 @@ void main() {
     test('throws assertion error when decimalAmount is negative', () {
       final FinancialMovementModel decimalFinancial =
           FinancialMovementModel.fromDecimal(
-        id: 'tx004',
-        decimalAmount: -5.0,
-        date: DateTime(2024, 07, 20),
-        concept: 'Invalid',
-        category: 'Negative',
-        createdAt: DateTime(2024, 07, 25),
-      );
+            id: 'tx004',
+            decimalAmount: -5.0,
+            date: DateTime(2024, 07, 20),
+            concept: 'Invalid',
+            category: 'Negative',
+            createdAt: DateTime(2024, 07, 25),
+          );
 
-      expect(
-        decimalFinancial.amount,
-        greaterThan(0),
-      );
+      expect(decimalFinancial.amount, greaterThan(0));
     });
 
     test('handles double with 8 decimal places at precision 4', () {
@@ -322,8 +328,9 @@ void main() {
         createdAt: DateTime(2025, 1, 2, 8),
         mathPrecision: 2,
       );
-      final FinancialMovementModel copy =
-          FinancialMovementModel.fromJson(original.toJson());
+      final FinancialMovementModel copy = FinancialMovementModel.fromJson(
+        original.toJson(),
+      );
       expect(copy, equals(original));
       expect(copy.mathPrecision, 2);
     });
@@ -347,137 +354,127 @@ void main() {
   });
 
   group('copyWith', () {
-    test('Given base When copyWith amount Then returns new with updated field',
-        () {
-      final FinancialMovementModel base = FinancialMovementModel(
-        id: 'i',
-        amount: 1,
-        date: DateTime(2025),
-        concept: 'C',
-        category: 'Income',
-        createdAt: DateTime(2025),
-      );
-      final FinancialMovementModel c =
-          base.copyWith(amount: 2, mathPrecision: 3);
-      expect(c.amount, 2);
-      expect(c.mathPrecision, 3);
-      expect(c.id, base.id);
-    });
+    test(
+      'Given base When copyWith amount Then returns new with updated field',
+      () {
+        final FinancialMovementModel base = FinancialMovementModel(
+          id: 'i',
+          amount: 1,
+          date: DateTime(2025),
+          concept: 'C',
+          category: 'Income',
+          createdAt: DateTime(2025),
+        );
+        final FinancialMovementModel c = base.copyWith(
+          amount: 2,
+          mathPrecision: 3,
+        );
+        expect(c.amount, 2);
+        expect(c.mathPrecision, 3);
+        expect(c.id, base.id);
+      },
+    );
   });
 
   group('FinancialMovementModel — Normalización de signo', () {
-    test(
-      'Given decimalAmount negativo '
-      'When se construye con fromDecimal '
-      'Then amount es no-negativo y coincide con |decimal| escalado',
-      () {
-        // Arrange
-        const int precision = FinancialMovementModel.defaultMathPrecision;
-        const double decimalAmount = -12.34;
-        final DateTime now = DateTime(2025);
+    test('Given decimalAmount negativo '
+        'When se construye con fromDecimal '
+        'Then amount es no-negativo y coincide con |decimal| escalado', () {
+      // Arrange
+      const int precision = FinancialMovementModel.defaultMathPrecision;
+      const double decimalAmount = -12.34;
+      final DateTime now = DateTime(2025);
 
-        // Act
-        final FinancialMovementModel m = FinancialMovementModel.fromDecimal(
-          id: 'neg-dec',
-          decimalAmount: decimalAmount,
-          date: now,
-          concept: 'Test',
-          category: 'Expense',
-          createdAt: now,
-        );
+      // Act
+      final FinancialMovementModel m = FinancialMovementModel.fromDecimal(
+        id: 'neg-dec',
+        decimalAmount: decimalAmount,
+        date: now,
+        concept: 'Test',
+        category: 'Expense',
+        createdAt: now,
+      );
 
-        // Assert
-        expect(m.amount, isNonNegative);
-        expect(m.decimalAmount, closeTo(decimalAmount.abs(), 1e-9));
-        expect(m.mathPrecision, precision);
-      },
-    );
+      // Assert
+      expect(m.amount, isNonNegative);
+      expect(m.decimalAmount, closeTo(decimalAmount.abs(), 1e-9));
+      expect(m.mathPrecision, precision);
+    });
 
-    test(
-      'Given JSON con amount negativo '
-      'When fromJson '
-      'Then amount se normaliza a no-negativo',
-      () {
-        // Arrange
-        final DateTime date = DateTime(2025, 1, 2, 10, 30);
-        final DateTime created = DateTime(2025, 1, 3, 8);
-        final Map<String, dynamic> json = <String, dynamic>{
-          FinancialMovementEnum.id.name: 'neg-json',
-          FinancialMovementEnum.amount.name: -1234,
-          FinancialMovementEnum.date.name: DateUtils.dateTimeToString(date),
-          FinancialMovementEnum.concept.name: 'Test',
-          FinancialMovementEnum.detailedDescription.name: 'Desc',
-          FinancialMovementEnum.category.name: 'Expense',
-          FinancialMovementEnum.createdAt.name:
-              DateUtils.dateTimeToString(created),
-          FinancialMovementModel.mathPrecisionKey:
-              FinancialMovementModel.defaultMathPrecision,
-        };
+    test('Given JSON con amount negativo '
+        'When fromJson '
+        'Then amount se normaliza a no-negativo', () {
+      // Arrange
+      final DateTime date = DateTime(2025, 1, 2, 10, 30);
+      final DateTime created = DateTime(2025, 1, 3, 8);
+      final Map<String, dynamic> json = <String, dynamic>{
+        FinancialMovementEnum.id.name: 'neg-json',
+        FinancialMovementEnum.amount.name: -1234,
+        FinancialMovementEnum.date.name: DateUtils.dateTimeToString(date),
+        FinancialMovementEnum.concept.name: 'Test',
+        FinancialMovementEnum.detailedDescription.name: 'Desc',
+        FinancialMovementEnum.category.name: 'Expense',
+        FinancialMovementEnum.createdAt.name: DateUtils.dateTimeToString(
+          created,
+        ),
+        FinancialMovementModel.mathPrecisionKey:
+            FinancialMovementModel.defaultMathPrecision,
+      };
 
-        // Act
-        final FinancialMovementModel m = FinancialMovementModel.fromJson(json);
+      // Act
+      final FinancialMovementModel m = FinancialMovementModel.fromJson(json);
 
-        // Assert
-        expect(m.amount, 1234);
-        expect(
-          m.decimalAmount,
-          closeTo(
-            1234 / FinancialMovementModel.getFactor(m.mathPrecision),
-            1e-9,
-          ),
-        );
-      },
-    );
+      // Assert
+      expect(m.amount, 1234);
+      expect(
+        m.decimalAmount,
+        closeTo(1234 / FinancialMovementModel.getFactor(m.mathPrecision), 1e-9),
+      );
+    });
 
-    test(
-      'Given instancia válida '
-      'When copyWith con amount negativo '
-      'Then amount resultante es no-negativo',
-      () {
-        // Arrange
-        final FinancialMovementModel base = FinancialMovementModel.fromDecimal(
-          id: 'copy-neg',
-          decimalAmount: 10.00,
-          date: DateTime(2025),
-          concept: 'Base',
-          category: 'Income',
-          createdAt: DateTime(2025),
-          precision: 2,
-        );
+    test('Given instancia válida '
+        'When copyWith con amount negativo '
+        'Then amount resultante es no-negativo', () {
+      // Arrange
+      final FinancialMovementModel base = FinancialMovementModel.fromDecimal(
+        id: 'copy-neg',
+        decimalAmount: 10.00,
+        date: DateTime(2025),
+        concept: 'Base',
+        category: 'Income',
+        createdAt: DateTime(2025),
+        precision: 2,
+      );
 
-        // Act
-        final FinancialMovementModel updated = base.copyWith(amount: -999);
+      // Act
+      final FinancialMovementModel updated = base.copyWith(amount: -999);
 
-        // Assert
-        expect(updated.amount, 999);
-        expect(updated.decimalAmount, closeTo(9.99, 1e-9));
-      },
-    );
+      // Assert
+      expect(updated.amount, 999);
+      expect(updated.decimalAmount, closeTo(9.99, 1e-9));
+    });
 
-    test(
-      'Given instancia con amount positivo '
-      'When toJson '
-      'Then el amount serializado es no-negativo (sin alterar el valor)',
-      () {
-        // Arrange
-        final FinancialMovementModel m = FinancialMovementModel.fromDecimal(
-          id: 'tojson-pos',
-          decimalAmount: -7.89,
-          date: DateTime(2025),
-          concept: 'Serialize',
-          category: 'Income',
-          createdAt: DateTime(2025),
-          precision: 2,
-        );
+    test('Given instancia con amount positivo '
+        'When toJson '
+        'Then el amount serializado es no-negativo (sin alterar el valor)', () {
+      // Arrange
+      final FinancialMovementModel m = FinancialMovementModel.fromDecimal(
+        id: 'tojson-pos',
+        decimalAmount: -7.89,
+        date: DateTime(2025),
+        concept: 'Serialize',
+        category: 'Income',
+        createdAt: DateTime(2025),
+        precision: 2,
+      );
 
-        // Act
-        final Map<String, dynamic> json = m.toJson();
+      // Act
+      final Map<String, dynamic> json = m.toJson();
 
-        // Assert
-        expect(json[FinancialMovementEnum.amount.name], isNonNegative);
-        expect(json[FinancialMovementEnum.amount.name], m.amount);
-      },
-    );
+      // Assert
+      expect(json[FinancialMovementEnum.amount.name], isNonNegative);
+      expect(json[FinancialMovementEnum.amount.name], m.amount);
+    });
     test(
       'Given JSON completo con amount negativo '
       'When fromJson '
@@ -495,8 +492,9 @@ void main() {
           FinancialMovementEnum.concept.name: 'Compra',
           FinancialMovementEnum.detailedDescription.name: 'Supermercado',
           FinancialMovementEnum.category.name: 'Expense',
-          FinancialMovementEnum.createdAt.name:
-              DateUtils.dateTimeToString(createdAt),
+          FinancialMovementEnum.createdAt.name: DateUtils.dateTimeToString(
+            createdAt,
+          ),
           FinancialMovementModel.mathPrecisionKey: precision,
         };
 
@@ -523,35 +521,41 @@ void main() {
       final Map<String, dynamic> json = <String, dynamic>{
         FinancialMovementEnum.id.name: 'id',
         FinancialMovementEnum.amount.name: 100,
-        FinancialMovementEnum.date.name:
-            DateUtils.dateTimeToString(DateTime(2025)),
+        FinancialMovementEnum.date.name: DateUtils.dateTimeToString(
+          DateTime(2025),
+        ),
         FinancialMovementEnum.concept.name: 'C',
         FinancialMovementEnum.detailedDescription.name: '',
         FinancialMovementEnum.category.name: 'Income',
-        FinancialMovementEnum.createdAt.name:
-            DateUtils.dateTimeToString(DateTime(2025)),
+        FinancialMovementEnum.createdAt.name: DateUtils.dateTimeToString(
+          DateTime(2025),
+        ),
         // sin mathPrecisionKey
       };
       final FinancialMovementModel m = FinancialMovementModel.fromJson(json);
       expect(m.mathPrecision, FinancialMovementModel.defaultMathPrecision);
     });
 
-    test('fromJson: con mathPrecision explícito respeta el valor (incluido 0)',
-        () {
-      final Map<String, dynamic> json = <String, dynamic>{
-        FinancialMovementEnum.id.name: 'id',
-        FinancialMovementEnum.amount.name: 100,
-        FinancialMovementEnum.date.name:
-            DateUtils.dateTimeToString(DateTime(2025)),
-        FinancialMovementEnum.concept.name: 'C',
-        FinancialMovementEnum.detailedDescription.name: '',
-        FinancialMovementEnum.category.name: 'Income',
-        FinancialMovementEnum.createdAt.name:
-            DateUtils.dateTimeToString(DateTime(2025)),
-        FinancialMovementModel.mathPrecisionKey: 0, // permitido
-      };
-      final FinancialMovementModel m = FinancialMovementModel.fromJson(json);
-      expect(m.mathPrecision, 0);
-    });
+    test(
+      'fromJson: con mathPrecision explícito respeta el valor (incluido 0)',
+      () {
+        final Map<String, dynamic> json = <String, dynamic>{
+          FinancialMovementEnum.id.name: 'id',
+          FinancialMovementEnum.amount.name: 100,
+          FinancialMovementEnum.date.name: DateUtils.dateTimeToString(
+            DateTime(2025),
+          ),
+          FinancialMovementEnum.concept.name: 'C',
+          FinancialMovementEnum.detailedDescription.name: '',
+          FinancialMovementEnum.category.name: 'Income',
+          FinancialMovementEnum.createdAt.name: DateUtils.dateTimeToString(
+            DateTime(2025),
+          ),
+          FinancialMovementModel.mathPrecisionKey: 0, // permitido
+        };
+        final FinancialMovementModel m = FinancialMovementModel.fromJson(json);
+        expect(m.mathPrecision, 0);
+      },
+    );
   });
 }

@@ -33,11 +33,11 @@ void main() {
     test('copyWith updates values', () {
       final MedicalTreatmentModel updatedTreatment =
           defaultMedicalTreatmentModel.copyWith(
-        id: 'new_id',
-        concept: 'Nuevo Tratamiento',
-        dateTimeOfRecord: DateTime(2025, 7, 28),
-        quantity: 2,
-      );
+            id: 'new_id',
+            concept: 'Nuevo Tratamiento',
+            dateTimeOfRecord: DateTime(2025, 7, 28),
+            quantity: 2,
+          );
 
       expect(updatedTreatment.id, 'new_id');
       expect(updatedTreatment.concept, 'Nuevo Tratamiento');
@@ -46,8 +46,8 @@ void main() {
     });
 
     test('copyWith without arguments returns the same object', () {
-      final MedicalTreatmentModel copiedTreatment =
-          defaultMedicalTreatmentModel.copyWith();
+      final MedicalTreatmentModel copiedTreatment = defaultMedicalTreatmentModel
+          .copyWith();
       expect(copiedTreatment, equals(defaultMedicalTreatmentModel));
       expect(
         copiedTreatment.hashCode,
@@ -73,8 +73,9 @@ void main() {
       final Map<String, Object> json = <String, Object>{
         MedicalTreatmentEnum.id.name: 'new_id',
         MedicalTreatmentEnum.concept.name: 'Nuevo Tratamiento',
-        MedicalTreatmentEnum.dateTimeOfRecord.name:
-            DateUtils.dateTimeToString(DateTime(2025, 7, 28)),
+        MedicalTreatmentEnum.dateTimeOfRecord.name: DateUtils.dateTimeToString(
+          DateTime(2025, 7, 28),
+        ),
         MedicalTreatmentEnum.quantity.name: 2,
       };
 

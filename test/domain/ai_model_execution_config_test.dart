@@ -13,37 +13,33 @@ void main() {
       deterministicPreferred: true,
     );
 
-    test(
-      'Given a canonical config When toJson and fromJson Then preserves the contract',
-      () {
-        final Map<String, dynamic> json = config.toJson();
-        final ModelAiExecutionConfig roundtrip =
-            ModelAiExecutionConfig.fromJson(json);
+    test('Given a canonical config When toJson and fromJson Then preserves the contract', () {
+      final Map<String, dynamic> json = config.toJson();
+      final ModelAiExecutionConfig roundtrip = ModelAiExecutionConfig.fromJson(
+        json,
+      );
 
-        expect(roundtrip, config);
-        expect(roundtrip.toJson(), config.toJson());
-      },
-    );
+      expect(roundtrip, config);
+      expect(roundtrip.toJson(), config.toJson());
+    });
 
-    test(
-      'Given canonical JSON When fromJson and toJson Then preserves JSON roundtrip',
-      () {
-        final Map<String, dynamic> json = <String, dynamic>{
-          ModelAiExecutionConfigEnum.temperature.name: 0,
-          ModelAiExecutionConfigEnum.topP.name: 0.95,
-          ModelAiExecutionConfigEnum.topK.name: 40,
-          ModelAiExecutionConfigEnum.maxOutputTokens.name: 512,
-          ModelAiExecutionConfigEnum.seed.name: 7,
-          ModelAiExecutionConfigEnum.stopSequences.name: <String>['</json>'],
-          ModelAiExecutionConfigEnum.deterministicPreferred.name: true,
-        };
+    test('Given canonical JSON When fromJson and toJson Then preserves JSON roundtrip', () {
+      final Map<String, dynamic> json = <String, dynamic>{
+        ModelAiExecutionConfigEnum.temperature.name: 0,
+        ModelAiExecutionConfigEnum.topP.name: 0.95,
+        ModelAiExecutionConfigEnum.topK.name: 40,
+        ModelAiExecutionConfigEnum.maxOutputTokens.name: 512,
+        ModelAiExecutionConfigEnum.seed.name: 7,
+        ModelAiExecutionConfigEnum.stopSequences.name: <String>['</json>'],
+        ModelAiExecutionConfigEnum.deterministicPreferred.name: true,
+      };
 
-        final ModelAiExecutionConfig parsed =
-            ModelAiExecutionConfig.fromJson(json);
+      final ModelAiExecutionConfig parsed = ModelAiExecutionConfig.fromJson(
+        json,
+      );
 
-        expect(parsed.toJson(), json);
-      },
-    );
+      expect(parsed.toJson(), json);
+    });
 
     test(
       'Given a config When copyWith overrides fields Then returns updated copy',

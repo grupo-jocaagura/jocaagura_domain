@@ -3,39 +3,33 @@ import 'package:jocaagura_domain/jocaagura_domain.dart';
 
 void main() {
   group('OnboardingState – factories y valores por defecto', () {
-    test(
-      'Given idle() When se crea Then status=idle, stepIndex=0, totalSteps=0, error=null',
-      () {
-        // Arrange & Act
-        final OnboardingState s = OnboardingState.idle();
+    test('Given idle() When se crea Then status=idle, stepIndex=0, totalSteps=0, error=null', () {
+      // Arrange & Act
+      final OnboardingState s = OnboardingState.idle();
 
-        // Assert
-        expect(s.status, OnboardingStatus.idle);
-        expect(s.stepIndex, 0);
-        expect(s.totalSteps, 0);
-        expect(s.error, isNull);
-        expect(s.hasStep, isFalse);
-        expect(s.stepNumber, 0);
-      },
-    );
+      // Assert
+      expect(s.status, OnboardingStatus.idle);
+      expect(s.stepIndex, 0);
+      expect(s.totalSteps, 0);
+      expect(s.error, isNull);
+      expect(s.hasStep, isFalse);
+      expect(s.stepNumber, 0);
+    });
   });
 
   group('OnboardingState – utilidades de UI', () {
-    test(
-      'Given running con totalSteps>0 When hasStep Then true y stepNumber = stepIndex+1',
-      () {
-        // Arrange
-        final OnboardingState s = OnboardingState.idle().copyWith(
-          status: OnboardingStatus.running,
-          stepIndex: 2,
-          totalSteps: 5,
-        );
+    test('Given running con totalSteps>0 When hasStep Then true y stepNumber = stepIndex+1', () {
+      // Arrange
+      final OnboardingState s = OnboardingState.idle().copyWith(
+        status: OnboardingStatus.running,
+        stepIndex: 2,
+        totalSteps: 5,
+      );
 
-        // Assert
-        expect(s.hasStep, isTrue);
-        expect(s.stepNumber, 3);
-      },
-    );
+      // Assert
+      expect(s.hasStep, isTrue);
+      expect(s.stepNumber, 3);
+    });
 
     test(
       'Given running con totalSteps==0 When hasStep Then false y stepNumber=0',
@@ -54,49 +48,42 @@ void main() {
   });
 
   group('OnboardingState – copyWith con centinela Unit.value', () {
-    test(
-      'Given state con error When copyWith(error: Unit.value) Then conserva el error',
-      () {
-        // Arrange
-        const ErrorItem err = ErrorItem(
-          title: 'Oops',
-          code: 'ERR_TEST',
-          description: 'Testing',
-          meta: <String, dynamic>{'k': 'v'},
-          errorLevel: ErrorLevelEnum.severe,
-        );
-        final OnboardingState s1 = OnboardingState.idle().copyWith(
-          status: OnboardingStatus.running,
-          totalSteps: 3,
-          stepIndex: 1,
-          error: err,
-        );
+    test('Given state con error When copyWith(error: Unit.value) Then conserva el error', () {
+      // Arrange
+      const ErrorItem err = ErrorItem(
+        title: 'Oops',
+        code: 'ERR_TEST',
+        description: 'Testing',
+        meta: <String, dynamic>{'k': 'v'},
+        errorLevel: ErrorLevelEnum.severe,
+      );
+      final OnboardingState s1 = OnboardingState.idle().copyWith(
+        status: OnboardingStatus.running,
+        totalSteps: 3,
+        stepIndex: 1,
+        error: err,
+      );
 
-        // Act
-        final OnboardingState s2 = s1.copyWith(
-          status: OnboardingStatus.running,
-          // Nota: no pasamos error explícito; usamos el centinela por omisión
-          // al no tocar el parámetro 'error' (queda en Unit.value via firma).
-        );
+      // Act
+      final OnboardingState s2 = s1.copyWith(
+        status: OnboardingStatus.running,
+        // Nota: no pasamos error explícito; usamos el centinela por omisión
+        // al no tocar el parámetro 'error' (queda en Unit.value via firma).
+      );
 
-        // Assert
-        expect(s2.error, same(err), reason: 'Debe conservar error existente');
-        expect(s2.status, OnboardingStatus.running);
-        expect(s2.totalSteps, 3);
-        expect(s2.stepIndex, 1);
-      },
-    );
+      // Assert
+      expect(s2.error, same(err), reason: 'Debe conservar error existente');
+      expect(s2.status, OnboardingStatus.running);
+      expect(s2.totalSteps, 3);
+      expect(s2.stepIndex, 1);
+    });
 
     test(
       'Given state con error When copyWith(error: null) Then limpia el error',
       () {
         // Arrange
         final OnboardingState s1 = OnboardingState.idle().copyWith(
-          error: const ErrorItem(
-            title: 'Err',
-            code: 'E',
-            description: 'desc',
-          ),
+          error: const ErrorItem(title: 'Err', code: 'E', description: 'desc'),
         );
 
         // Act
@@ -162,32 +149,29 @@ void main() {
       },
     );
 
-    test(
-      'Given JSON malformado When fromJson Then usa defaults (idle, enteros=0, error=null)',
-      () {
-        // Arrange
-        final Map<String, dynamic> bad = <String, dynamic>{
-          'status': '???', // no coincide -> idle
-          'stepIndex':
-              'x1,2a', // Utils -> 1 o 12 según normalización; forzamos caso raro
-          'totalSteps': null, // -> 0
-          'error': 'not-a-map', // -> {} -> ErrorItem.fromJson => strings vacíos
-        };
+    test('Given JSON malformado When fromJson Then usa defaults (idle, enteros=0, error=null)', () {
+      // Arrange
+      final Map<String, dynamic> bad = <String, dynamic>{
+        'status': '???', // no coincide -> idle
+        'stepIndex':
+            'x1,2a', // Utils -> 1 o 12 según normalización; forzamos caso raro
+        'totalSteps': null, // -> 0
+        'error': 'not-a-map', // -> {} -> ErrorItem.fromJson => strings vacíos
+      };
 
-        // Act
-        final OnboardingState r = OnboardingState.fromJson(bad);
+      // Act
+      final OnboardingState r = OnboardingState.fromJson(bad);
 
-        // Assert (verificamos solo lo fundamental; los enteros dependen de Utils)
-        expect(r.status, OnboardingStatus.idle);
-        expect(r.totalSteps, 0);
-        // stepIndex dependerá de la limpieza de Utils; validamos que sea int no negativo por diseño actual
-        expect(r.stepIndex, isA<int>());
-        // error: para 'not-a-map' -> Utils.mapFromDynamic retorna {}, lo que crea ErrorItem con strings vacíos.
-        // Sin embargo, el código solo crea error si json['error'] != null (aquí no es null), así que esperamos un ErrorItem "vacío".
-        expect(r.error, isNotNull);
-        expect(r.error!.code, isA<String>());
-      },
-    );
+      // Assert (verificamos solo lo fundamental; los enteros dependen de Utils)
+      expect(r.status, OnboardingStatus.idle);
+      expect(r.totalSteps, 0);
+      // stepIndex dependerá de la limpieza de Utils; validamos que sea int no negativo por diseño actual
+      expect(r.stepIndex, isA<int>());
+      // error: para 'not-a-map' -> Utils.mapFromDynamic retorna {}, lo que crea ErrorItem con strings vacíos.
+      // Sin embargo, el código solo crea error si json['error'] != null (aquí no es null), así que esperamos un ErrorItem "vacío".
+      expect(r.error, isNotNull);
+      expect(r.error!.code, isA<String>());
+    });
   });
 
   group('OnboardingState – igualdad, hashCode y toString', () {
@@ -220,63 +204,54 @@ void main() {
       },
     );
 
-    test(
-      'Given state When toString Then incluye claves del JSON',
-      () {
-        // Arrange
-        final OnboardingState s = OnboardingState.idle().copyWith(
-          status: OnboardingStatus.skipped,
-        );
+    test('Given state When toString Then incluye claves del JSON', () {
+      // Arrange
+      final OnboardingState s = OnboardingState.idle().copyWith(
+        status: OnboardingStatus.skipped,
+      );
 
-        // Act
-        final String str = s.toString();
+      // Act
+      final String str = s.toString();
 
-        // Assert
-        expect(str, contains('status'));
-        expect(str, contains('stepIndex'));
-        expect(str, contains('totalSteps'));
-        expect(str, contains('error'));
-      },
-    );
+      // Assert
+      expect(str, contains('status'));
+      expect(str, contains('stepIndex'));
+      expect(str, contains('totalSteps'));
+      expect(str, contains('error'));
+    });
   });
 
   group('OnboardingState – _statusFromString (fallback)', () {
-    test(
-      'Given string desconocido When parse Then idle como fallback',
-      () {
-        // Arrange
-        final Map<String, dynamic> j = <String, dynamic>{
-          'status': 'no-existe',
-          'stepIndex': 0,
-          'totalSteps': 0,
-          'error': null,
-        };
+    test('Given string desconocido When parse Then idle como fallback', () {
+      // Arrange
+      final Map<String, dynamic> j = <String, dynamic>{
+        'status': 'no-existe',
+        'stepIndex': 0,
+        'totalSteps': 0,
+        'error': null,
+      };
 
-        // Act
-        final OnboardingState r = OnboardingState.fromJson(j);
+      // Act
+      final OnboardingState r = OnboardingState.fromJson(j);
 
-        // Assert
-        expect(r.status, OnboardingStatus.idle);
-      },
-    );
+      // Assert
+      expect(r.status, OnboardingStatus.idle);
+    });
 
-    test(
-      'Given string válido When parse Then usa valor correcto',
-      () {
-        // Arrange
-        final Map<String, dynamic> j = <String, dynamic>{
-          'status': 'running',
-          'stepIndex': 1,
-          'totalSteps': 3,
-          'error': null,
-        };
+    test('Given string válido When parse Then usa valor correcto', () {
+      // Arrange
+      final Map<String, dynamic> j = <String, dynamic>{
+        'status': 'running',
+        'stepIndex': 1,
+        'totalSteps': 3,
+        'error': null,
+      };
 
-        // Act
-        final OnboardingState r = OnboardingState.fromJson(j);
+      // Act
+      final OnboardingState r = OnboardingState.fromJson(j);
 
-        // Assert
-        expect(r.status, OnboardingStatus.running);
-      },
-    );
+      // Assert
+      expect(r.status, OnboardingStatus.running);
+    });
   });
 }

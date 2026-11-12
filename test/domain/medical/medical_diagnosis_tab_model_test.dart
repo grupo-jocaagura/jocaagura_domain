@@ -36,12 +36,12 @@ void main() {
     test('copyWith updates values', () {
       final MedicalDiagnosisTabModel updatedDiagnosis =
           defaultMMedicalDiagnosisModel.copyWith(
-        id: 'newId2',
-        condition: 'newCondition2',
-        observation: 'newObservation2',
-        quantity: 2.0,
-        dateTimeOfRecord: DateTime(2025, 07, 22),
-      );
+            id: 'newId2',
+            condition: 'newCondition2',
+            observation: 'newObservation2',
+            quantity: 2.0,
+            dateTimeOfRecord: DateTime(2025, 07, 22),
+          );
       final MedicalDiagnosisTabModel sameUpdatedDiagnosis =
           defaultMMedicalDiagnosisModel.copyWith();
 
