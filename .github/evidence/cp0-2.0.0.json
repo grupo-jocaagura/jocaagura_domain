@@ -1,7 +1,59 @@
 {
+  "status": "passed",
   "package": "jocaagura_domain",
   "repository": "grupo-jocaagura/jocaagura_domain",
   "version": "2.0.0",
-  "status": "pending",
-  "reason": "No real domain OIDC upload is certified by this publisher PR. Use the supervised human-tag bootstrap path after the official release PR; record real run and pub.dev audit evidence before enabling orchestration."
+  "release_pr": 222,
+  "tag": "v2.0.0",
+  "tag_object_sha": "92fcf53417493c58ee3a5f774a1d222d401d2bb8",
+  "sha": "675abfc904775b2e02dbeebd3890dbad1cd1f480",
+  "run_url": "https://github.com/grupo-jocaagura/jocaagura_domain/actions/runs/43219171001",
+  "observed_claims": {
+    "iss": "https://token.actions.githubusercontent.com",
+    "aud": "https://pub.dev",
+    "repository": "grupo-jocaagura/jocaagura_domain",
+    "repository_id": "723526906",
+    "repository_owner_id": "193098028",
+    "sub": "repo:grupo-jocaagura/jocaagura_domain:environment:pub.dev",
+    "environment": "pub.dev",
+    "sha": "675abfc904775b2e02dbeebd3890dbad1cd1f480",
+    "ref": "refs/tags/v2.0.0",
+    "ref_type": "tag",
+    "event_name": "push",
+    "run_id": "43219171001",
+    "runner_environment": "github-hosted",
+    "workflow_ref": "grupo-jocaagura/jocaagura_domain/.github/workflows/publish.yaml@refs/tags/v2.0.0",
+    "mode": "publish",
+    "result": "signed_claims_verified",
+    "pub_dev_upload": "not_executed"
+  },
+  "claims_phase": "Observed and cryptographically verified before upload; the claims artifact is not the upload result.",
+  "publication": {
+    "status": "passed",
+    "server_message": "Successfully uploaded https://pub.dev/packages/jocaagura_domain version 2.0.0",
+    "published_at": "2026-11-12T12:41:09.242143Z",
+    "version_api": "https://pub.dev/api/packages/jocaagura_domain/versions/2.0.0",
+    "url": "https://pub.dev/packages/jocaagura_domain/versions/2.0.0"
+  },
+  "audit_log_attribution": {
+    "run_id": "43219171001",
+    "sha": "675abfc904775b2e02dbeebd3890dbad1cd1f480",
+    "url": "https://pub.dev/packages/jocaagura_domain/activity-log",
+    "publisher": "jocaagura.com",
+    "source": "Maintainer-provided verbatim Activity log excerpt, recorded at https://github.com/grupo-jocaagura/jocaagura_domain/issues/213#issuecomment-6823987382; no independent authenticated browser access is claimed.",
+    "text": "Package jocaagura_domain version 2.0.0 owned by publisher jocaagura.com was published from GitHub Actions (run_id: 43219171001) triggered by pushing revision 675abfc904775b2e02dbeebd3890dbad1cd1f480 to the grupo-jocaagura/jocaagura_domain repository."
+  },
+  "archive_verification": {
+    "status": "passed",
+    "sha": "675abfc904775b2e02dbeebd3890dbad1cd1f480",
+    "archive_sha256": "aad1a8ff8ae7125a9ba589e7e17573ab03540e0b73e45007b92325dbb966da79",
+    "lib_files_verified": 83,
+    "metadata_files": [
+      "pubspec.yaml",
+      "CHANGELOG.md"
+    ]
+  },
+  "github_release": "https://github.com/grupo-jocaagura/jocaagura_domain/releases/tag/v2.0.0",
+  "no_persistent_pub_credentials": true,
+  "certification_url": "https://github.com/grupo-jocaagura/jocaagura_domain/issues/213#issuecomment-6823987382"
 }

@@ -7,6 +7,12 @@ Recent entries aim to follow a normalized structure. Older historical entries ma
 
 ## Unreleased
 
+### CI/CD
+
+- Record domain's successful 2.0.0 OIDC publication, signed tag, hosted archive
+  verification and maintainer-provided pub.dev audit attribution as CP-0 evidence.
+  Future release orchestration must still pass all source and eligibility gates.
+
 ## [2.0.0] - 2026-11-11
 
 ### Fixed
