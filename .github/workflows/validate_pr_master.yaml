@@ -2,7 +2,7 @@ name: Validate Merge to master from develop
 
 on:
   pull_request:
-    branches: [ master ]
+    branches: [master]
 
 permissions:
   contents: read
@@ -12,88 +12,41 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  validate_master_pr:
-    name: Validate PR to master
+  release_readiness:
+    name: Release provenance and version
     runs-on: ubuntu-latest
-
+    timeout-minutes: 5
     steps:
-      - name: Ensure PR source branch is allowed
-        env:
-          HEAD_REF: ${{ github.head_ref }}
-        run: |
-          # 🔒 Estricto: solo develop → master
-          if [[ "$HEAD_REF" != "develop" ]]; then
-            echo "❌ Only pull requests from 'develop' to 'master' are allowed. Current: $HEAD_REF"
-            exit 1
-          fi
-
-      - name: Checkout Code
-        uses: actions/checkout@v6
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
-
-      - name: Set up Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          channel: stable
-          cache: true
-
-      - name: Install Dependencies
-        run: flutter pub get
-
-      - name: Validate Changelog and Version Match
-        shell: bash
+          persist-credentials: false
+      - run: python3 -m pip install --disable-pip-version-check -r .github/scripts/requirements.txt
+      - name: Require official develop PR, new version, dated notes and public eligibility
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
         run: |
           set -euo pipefail
-          VERSION_CHANGELOG="$(sed -n 's/^## \[\([0-9]\+\.[0-9]\+\.[0-9]\+\)\].*/\1/p' CHANGELOG.md | head -1)"
-          VERSION_PUBSPEC="$(awk '/^version:/{print $2}' pubspec.yaml)"
+          git show "$BASE_SHA:pubspec.yaml" > "$RUNNER_TEMP/master-pubspec.yaml"
+          python3 .github/scripts/publication_policy.py --pr-event "$GITHUB_EVENT_PATH" --base-pubspec "$RUNNER_TEMP/master-pubspec.yaml" --require-new
 
-          echo "🔍 CHANGELOG: $VERSION_CHANGELOG"
-          echo "🔍 pubspec.yaml: $VERSION_PUBSPEC"
+  ci:
+    name: Full release CI
+    uses: ./.github/workflows/validate_pr.yaml
+    with:
+      target_branch: master
 
-          if [[ -z "${VERSION_CHANGELOG:-}" || -z "${VERSION_PUBSPEC:-}" ]]; then
-            echo "❌ Could not parse versions from CHANGELOG.md or pubspec.yaml"
-            exit 1
-          fi
-
-          if [[ "$VERSION_CHANGELOG" != "$VERSION_PUBSPEC" ]]; then
-            echo "❌ Version mismatch: CHANGELOG=$VERSION_CHANGELOG vs PUBSPEC=$VERSION_PUBSPEC"
-            exit 1
-          fi
-
-          if ! grep -Eq "^## \[$VERSION_PUBSPEC\] - [0-9]{4}-[0-9]{2}-[0-9]{2}" CHANGELOG.md; then
-            echo "❌ Missing dated section for $VERSION_PUBSPEC in CHANGELOG.md (expected '## [$VERSION_PUBSPEC] - YYYY-MM-DD')."
-            exit 1
-          fi
-
-      - name: Check Formatting (read-only)
-        run: dart format --output=none --set-exit-if-changed .
-
-      - name: Analyze Code
-        run: flutter analyze
-
-      - name: Run Tests
-        run: flutter test
-
-      - name: Ensure version is greater than master
-        shell: bash
+  validate_master_pr:
+    # Preserve the existing required check in the master ruleset.
+    name: Validate PR to master
+    needs: [release_readiness, ci]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require every release gate
+        env:
+          RELEASE_RESULT: ${{ needs.release_readiness.result }}
+          CI_RESULT: ${{ needs.ci.result }}
         run: |
-          set -euo pipefail
-          VERSION_PUBSPEC="$(awk '/^version:/{print $2}' pubspec.yaml)"
-          git fetch origin master --depth=1
-          VERSION_MASTER="$(git show origin/master:pubspec.yaml | awk '/^version:/{print $2}')"
-
-          echo "📦 master version: $VERSION_MASTER"
-          echo "📦 PR version:     $VERSION_PUBSPEC"
-
-          if [[ -z "${VERSION_MASTER:-}" ]]; then
-            echo "ℹ️ No version could be read from origin/master (new repo?). Skipping compare."
-            exit 0
-          fi
-
-          # Requiere GNU sort (disponible en ubuntu-latest)
-          HIGHEST="$(printf '%s\n' "$VERSION_MASTER" "$VERSION_PUBSPEC" | sort -V | tail -1)"
-          if [[ "$HIGHEST" != "$VERSION_PUBSPEC" ]]; then
-            echo "❌ pubspec.yaml version ($VERSION_PUBSPEC) must be greater than master ($VERSION_MASTER)."
-            exit 1
-          fi
+          test "$RELEASE_RESULT" = success
+          test "$CI_RESULT" = success

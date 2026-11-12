@@ -6,12 +6,16 @@ on:
       - develop
   workflow_dispatch:
   workflow_call:
+    inputs:
+      target_branch:
+        type: string
+        default: develop
 
 permissions:
   contents: read
 
 concurrency:
-  group: validate-develop-${{ github.event.pull_request.number || github.ref }}
+  group: validate-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -35,18 +39,22 @@ jobs:
       - name: Setup Flutter
         uses: flutter-actions/setup-flutter@v4
         with:
+          version: '3.50.0'
           channel: stable
           cache: true
           cache-sdk: true
 
       - name: Validate target branch
         if: github.event_name == 'pull_request'
+        env:
+          TARGET_BRANCH: ${{ inputs.target_branch || 'develop' }}
+          BASE_REF: ${{ github.base_ref }}
         shell: bash
         run: |
           set -euo pipefail
 
-          if [[ "${{ github.base_ref }}" != "develop" ]]; then
-            echo "::error::This workflow only validates pull requests targeting develop."
+          if [[ "$BASE_REF" != "$TARGET_BRANCH" ]]; then
+            echo "::error::Pull request target does not match the authorized CI target."
             exit 1
           fi
 

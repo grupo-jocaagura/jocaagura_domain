@@ -1,0 +1,7 @@
+{
+  "package": "jocaagura_domain",
+  "repository": "grupo-jocaagura/jocaagura_domain",
+  "version": "2.0.0",
+  "status": "pending",
+  "reason": "No real domain OIDC upload is certified by this publisher PR. Use the supervised human-tag bootstrap path after the official release PR; record real run and pub.dev audit evidence before enabling orchestration."
+}

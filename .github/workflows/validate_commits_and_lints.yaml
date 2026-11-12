@@ -35,6 +35,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          python -m pip install --disable-pip-version-check -r .github/scripts/requirements.txt
           python -m unittest discover -s .github/scripts/tests -v
       - name: Check commit signatures
         id: commits
@@ -48,6 +49,11 @@ jobs:
           get_commit_shas_push() {
             local before
             local after
+
+            if [[ "$GITHUB_REF_TYPE" == "tag" ]]; then
+              git rev-parse HEAD
+              return
+            fi
 
             before="$(jq -r '.before // empty' "$GITHUB_EVENT_PATH")"
             after="$(jq -r '.after // empty' "$GITHUB_EVENT_PATH")"
@@ -147,6 +153,7 @@ jobs:
       - name: Setup Flutter
         uses: flutter-actions/setup-flutter@v4
         with:
+          version: '3.50.0'
           channel: stable
           cache: true
           cache-sdk: true
