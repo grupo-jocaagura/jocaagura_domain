@@ -86,6 +86,22 @@ class ReleaseDispatchTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 require_cp0(wrong)
 
+    def test_committed_domain_cp0_matches_real_upload_and_archive_evidence(self):
+        evidence = json.loads((ROOT / '.github/evidence/cp0-2.0.0.json').read_text(encoding='utf-8'))
+        require_cp0(evidence)
+        claims = evidence['observed_claims']
+        self.assertEqual(claims['mode'], 'publish')
+        self.assertEqual(claims['run_id'], '43219171001')
+        self.assertEqual(claims['sha'], '675abfc904775b2e02dbeebd3890dbad1cd1f480')
+        self.assertEqual(evidence['publication']['status'], 'passed')
+        self.assertEqual(evidence['archive_verification']['status'], 'passed')
+        self.assertEqual(evidence['archive_verification']['sha'], claims['sha'])
+        self.assertEqual(evidence['archive_verification']['archive_sha256'],
+                         'aad1a8ff8ae7125a9ba589e7e17573ab03540e0b73e45007b92325dbb966da79')
+        self.assertEqual(evidence['audit_log_attribution']['run_id'], claims['run_id'])
+        self.assertEqual(evidence['audit_log_attribution']['sha'], claims['sha'])
+        self.assertNotIn('token', claims)
+
     def test_cp0_rejects_old_target_or_inconsistent_tag(self):
         for version, ref in [('0.1.0', 'refs/tags/v0.1.0'),
                              ('2.0.0', 'refs/tags/v0.1.0'),

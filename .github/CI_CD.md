@@ -2,7 +2,7 @@
 
 Reference: `grupo-jocaagura/jocaagura_domain_core@f00f35dc36e7a408f245dffc8d447a05061deb17`.
 This adapts its release policy, notes, orchestration, publisher and tests to the
-Flutter package. The code remains `2.0.0`; this PR does not upload it.
+Flutter package. The package version is `2.0.0`, now published; evidence integration does not upload it again.
 
 ## Gates and authority
 
@@ -75,31 +75,33 @@ than the former non-executable `codeql.txt` placeholder.
 
 ## First real domain OIDC release and CP-0
 
-The core's successful upload does not certify domain. The manifest
-`evidence/cp0-2.0.0.json` intentionally remains `pending`. Consequently the
-post-master orchestrator and tag workflow_dispatch fail closed until domain's
-first real upload and pub.dev audit attribution are recorded.
+Domain's real 2.0.0 OIDC upload completed successfully in
+[run 43219171001](https://github.com/grupo-jocaagura/jocaagura_domain/actions/runs/43219171001).
+The signed immutable tag `v2.0.0` resolves to master release commit
+`675abfc904775b2e02dbeebd3890dbad1cd1f480` from the approved PR #222.
+`evidence/cp0-2.0.0.json` now records **passed** for this package's own upload,
+not the core's certification or a non-publishing probe.
 
-For the first **separately authorized** production upload:
+The manifest combines GitHub-verified OIDC claims, the server's successful upload
+response, independent hosted-version verification and the maintainer-provided
+pub.dev Activity log excerpt. The downloaded archive hash was verified, and its
+83 lib files plus pubspec/CHANGELOG match the authorized commit byte for byte.
+Full certification: https://github.com/grupo-jocaagura/jocaagura_domain/issues/213#issuecomment-6823987382
 
-1. Merge this publisher PR to develop and validate its final source. Do not
-   create a dummy version for testing.
-2. Open the official develop -> master PR for 2.0.0; pass the required checks,
-   review and merge with master's required squash strategy.
-3. Confirm OIDC settings above and the exact master/release SHA. A maintainer
-   may then create and push the immutable `v2.0.0` tag at that exact merge commit.
-   This human-tag bootstrap path follows the core and still runs provenance,
-   immutable source, full CI, OIDC identity and eligibility checks before upload.
-4. Observe `Publish package`, pub.dev 2.0.0 and its activity log. Record the real
-   run, exact SHA, signed identity and pub.dev audit attribution as CP-0 evidence.
-   A probe result is insufficient for `status=passed`.
-5. Only after that evidence is reviewed/committed, orchestration may dispatch
-   future eligible releases. Do not replay an already-published version.
+`observed_claims.pub_dev_upload=not_executed` refers only to the identity-check
+phase before upload. It is preserved verbatim; `publication.status=passed`, the
+successful run and audit attribution document the subsequent real upload.
 
-The expected fail-closed orchestration result before CP-0 does not authorize
-disabling its checks. Never weaken tag rules or move a conflicting tag. If only
-GitHub Release creation fails after a successful upload, repair that evidence
-step without uploading again.
+After this evidence PR is reviewed and merged to develop, it will accompany
+future release candidates into master and their immutable tags. This removes
+only the missing-CP-0 prerequisite: official PR provenance, version eligibility,
+full CI, signature, live master/tag checks, concurrency and OIDC remain mandatory.
+It does not publish a new package or dispatch any workflow by itself.
+
+**Do not retry 2.0.0, move its tag or edit its frozen source.** The original
+v2.0.0 tag still contains its historical pending manifest; it must not be changed
+to backfill evidence. Future releases consume this passed manifest. If only
+GitHub Release evidence needs repair, repair that step without uploading again.
 
 ## Reproduction and negative tests
 
@@ -108,6 +110,7 @@ python -m pip install -r .github/scripts/requirements.txt
 python -m unittest discover -s .github/scripts/tests -v
 actionlint -shellcheck=
 python .github/scripts/publication_policy.py --metadata-only
+# Only for a future, unpublished release candidate:
 python .github/scripts/publication_policy.py --require-new
 ```
 
