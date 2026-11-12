@@ -14,6 +14,11 @@ Recent entries aim to follow a normalized structure. Older historical entries ma
 
 ### Changed
 
+- Align version preparation with the core's atomic version/CHANGELOG update,
+  idempotent retries, full validation before mutation and GitHub-native signatures.
+  Preserve the mandatory exact develop SHA guard for all preparation entrypoints.
+- Run base validation on protected-branch pushes and pull requests, matching the
+  core and avoiding a redundant full-history signature scan on new feature pushes.
 - **Breaking:** require Flutter `>=3.50.0` and Dart `>=3.14.0 <4.0.0`
   in the package and its example.
 - Replace deprecated Flutter Material/Cupertino umbrella imports with
