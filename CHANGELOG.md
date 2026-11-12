@@ -48,6 +48,8 @@ Recent entries aim to follow a normalized structure. Older historical entries ma
 
 ### CI/CD
 
+- Reconcile the historical 1.43.0 release squash into develop without restoring
+  superseded local model implementations, allowing the official release PR.
 - Homologate the controlled tag publisher with the core: exact official release
   PR provenance, immutable source, full Flutter CI, OIDC identity checks,
   duplicate prevention and hosted-publication evidence.
