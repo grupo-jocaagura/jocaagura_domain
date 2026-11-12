@@ -84,16 +84,10 @@ void main() {
       int count = 0;
 
       Future<void> unit() => exec.withLock<void>('k', () async {
-            count++;
-          });
+        count++;
+      });
 
-      await Future.wait(<Future<void>>[
-        unit(),
-        unit(),
-        unit(),
-        unit(),
-        unit(),
-      ]);
+      await Future.wait(<Future<void>>[unit(), unit(), unit(), unit(), unit()]);
 
       expect(count, 5);
     });
@@ -119,33 +113,35 @@ void main() {
       expect(order, <String>['B', 'A']);
     });
 
-    test('High interleaving: preserves per-key FIFO across many keys',
-        () async {
-      final PerKeyFifoExecutor<int> exec = PerKeyFifoExecutor<int>();
-      final Map<int, int> lastSeen = <int, int>{};
+    test(
+      'High interleaving: preserves per-key FIFO across many keys',
+      () async {
+        final PerKeyFifoExecutor<int> exec = PerKeyFifoExecutor<int>();
+        final Map<int, int> lastSeen = <int, int>{};
 
-      Future<void> enqueue(int key, int seq) async {
-        await exec.withLock<void>(key, () async {
-          final int prev = lastSeen[key] ?? -1;
-          // Must see strictly increasing sequence per key.
-          expect(seq, greaterThan(prev));
-          lastSeen[key] = seq;
-        });
-      }
-
-      final List<Future<void>> futures = <Future<void>>[];
-      for (int k = 0; k < 10; k++) {
-        for (int i = 0; i < 10; i++) {
-          futures.add(enqueue(k, i));
+        Future<void> enqueue(int key, int seq) async {
+          await exec.withLock<void>(key, () async {
+            final int prev = lastSeen[key] ?? -1;
+            // Must see strictly increasing sequence per key.
+            expect(seq, greaterThan(prev));
+            lastSeen[key] = seq;
+          });
         }
-      }
-      await Future.wait(futures);
 
-      // Each key should have lastSeen == 9
-      for (int k = 0; k < 10; k++) {
-        expect(lastSeen[k], 9);
-      }
-    });
+        final List<Future<void>> futures = <Future<void>>[];
+        for (int k = 0; k < 10; k++) {
+          for (int i = 0; i < 10; i++) {
+            futures.add(enqueue(k, i));
+          }
+        }
+        await Future.wait(futures);
+
+        // Each key should have lastSeen == 9
+        for (int k = 0; k < 10; k++) {
+          expect(lastSeen[k], 9);
+        }
+      },
+    );
   });
 
   group('PerKeyFifoExecutor — dispose semantics', () {
@@ -164,38 +160,40 @@ void main() {
       expect(ran, isTrue);
     });
 
-    test('After dispose(), new actions are not chained (may overlap)',
-        () async {
-      final PerKeyFifoExecutor<String> exec = PerKeyFifoExecutor<String>();
-      final Completer<void> startedA = Completer<void>();
-      final Completer<void> finishedA = Completer<void>();
-      final Completer<void> finishedB = Completer<void>();
+    test(
+      'After dispose(), new actions are not chained (may overlap)',
+      () async {
+        final PerKeyFifoExecutor<String> exec = PerKeyFifoExecutor<String>();
+        final Completer<void> startedA = Completer<void>();
+        final Completer<void> finishedA = Completer<void>();
+        final Completer<void> finishedB = Completer<void>();
 
-      // Start a long action A.
-      // ignore: unawaited_futures
-      exec.withLock<void>('k', () async {
-        startedA.complete();
-        await Future<void>.delayed(const Duration(milliseconds: 40));
-        finishedA.complete();
-      });
+        // Start a long action A.
+        // ignore: unawaited_futures
+        exec.withLock<void>('k', () async {
+          startedA.complete();
+          await Future<void>.delayed(const Duration(milliseconds: 40));
+          finishedA.complete();
+        });
 
-      await startedA.future;
-      exec.dispose();
+        await startedA.future;
+        exec.dispose();
 
-      // Schedule B after dispose — it must NOT wait for A.
-      // ignore: unawaited_futures
-      exec.withLock<void>('k', () async {
-        // If B were chained, finishedB would happen after finishedA.
-        finishedB.complete();
-      });
+        // Schedule B after dispose — it must NOT wait for A.
+        // ignore: unawaited_futures
+        exec.withLock<void>('k', () async {
+          // If B were chained, finishedB would happen after finishedA.
+          finishedB.complete();
+        });
 
-      // B should complete before A.
-      await finishedB.future;
-      expect(finishedA.isCompleted, isFalse);
+        // B should complete before A.
+        await finishedB.future;
+        expect(finishedA.isCompleted, isFalse);
 
-      // Let A finish to avoid dangling futures in the test.
-      await finishedA.future;
-    });
+        // Let A finish to avoid dangling futures in the test.
+        await finishedA.future;
+      },
+    );
 
     test('Idempotent dispose()', () {
       final PerKeyFifoExecutor<String> exec = PerKeyFifoExecutor<String>();

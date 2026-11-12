@@ -24,21 +24,22 @@ void main() {
 
     // -------------------- READ --------------------
     group('read()', () {
-      test('retorna Right y agrega idKey cuando el servidor no lo envía',
-          () async {
-        await gateway.write('a', <String, dynamic>{'name': 'A'});
+      test(
+        'retorna Right y agrega idKey cuando el servidor no lo envía',
+        () async {
+          await gateway.write('a', <String, dynamic>{'name': 'A'});
 
-        final Either<ErrorItem, Map<String, dynamic>> res =
-            await gateway.read('a');
+          final Either<ErrorItem, Map<String, dynamic>> res = await gateway
+              .read('a');
 
-        res.fold(
-          (ErrorItem l) => fail('Se esperaba Right, fue Left: $l'),
-          (Map<String, dynamic> r) {
+          res.fold((ErrorItem l) => fail('Se esperaba Right, fue Left: $l'), (
+            Map<String, dynamic> r,
+          ) {
             expect(r['name'], 'A');
             expect(r['id'], 'a'); // inyectado por _withId
-          },
-        );
-      });
+          });
+        },
+      );
 
       test('respeta id del servidor si ya viene presente', () async {
         await service.saveDocument(
@@ -47,84 +48,88 @@ void main() {
           document: <String, dynamic>{'id': 'server-id', 'n': 1},
         );
 
-        final Either<ErrorItem, Map<String, dynamic>> res =
-            await gateway.read('b');
-
-        res.fold(
-          (ErrorItem l) => fail('Se esperaba Right, fue Left: $l'),
-          (Map<String, dynamic> r) {
-            expect(r['id'], 'server-id'); // no sobreescribe
-            expect(r['n'], 1);
-          },
+        final Either<ErrorItem, Map<String, dynamic>> res = await gateway.read(
+          'b',
         );
+
+        res.fold((ErrorItem l) => fail('Se esperaba Right, fue Left: $l'), (
+          Map<String, dynamic> r,
+        ) {
+          expect(r['id'], 'server-id'); // no sobreescribe
+          expect(r['n'], 1);
+        });
       });
 
-      test('retorna Left cuando el documento NO existe (readDocument lanza)',
-          () async {
-        final Either<ErrorItem, Map<String, dynamic>> res =
-            await gateway.read('missing');
+      test(
+        'retorna Left cuando el documento NO existe (readDocument lanza)',
+        () async {
+          final Either<ErrorItem, Map<String, dynamic>> res = await gateway
+              .read('missing');
 
-        // No dependemos del tipo exacto de ErrorItem: basta con verificar que es Left
-        expect(res.fold((_) => true, (_) => false), isTrue);
-      });
+          // No dependemos del tipo exacto de ErrorItem: basta con verificar que es Left
+          expect(res.fold((_) => true, (_) => false), isTrue);
+        },
+      );
     });
 
     // -------------------- WRITE -------------------
     group('write()', () {
-      test('optimista (readAfterWrite=false): retorna Right con id inyectado',
-          () async {
-        gateway = GatewayWsDbImpl(
-          service: service,
-          collection: 'canvases',
-          mapper: const DefaultErrorMapper(),
-        );
+      test(
+        'optimista (readAfterWrite=false): retorna Right con id inyectado',
+        () async {
+          gateway = GatewayWsDbImpl(
+            service: service,
+            collection: 'canvases',
+            mapper: const DefaultErrorMapper(),
+          );
 
-        final Either<ErrorItem, Map<String, dynamic>> res =
-            await gateway.write('c', <String, dynamic>{'v': 1});
+          final Either<ErrorItem, Map<String, dynamic>> res = await gateway
+              .write('c', <String, dynamic>{'v': 1});
 
-        res.fold(
-          (ErrorItem l) => fail('Se esperaba Right, fue Left: $l'),
-          (Map<String, dynamic> r) {
+          res.fold((ErrorItem l) => fail('Se esperaba Right, fue Left: $l'), (
+            Map<String, dynamic> r,
+          ) {
             expect(r['id'], 'c'); // inyectado
             expect(r['v'], 1);
-          },
-        );
-      });
+          });
+        },
+      );
 
       test(
-          'autoritatvo (readAfterWrite=true): retorna lo que persiste el backend',
-          () async {
-        gateway = GatewayWsDbImpl(
-          service: service,
-          collection: 'canvases',
-          mapper: const DefaultErrorMapper(),
-          readAfterWrite: true,
-        );
+        'autoritatvo (readAfterWrite=true): retorna lo que persiste el backend',
+        () async {
+          gateway = GatewayWsDbImpl(
+            service: service,
+            collection: 'canvases',
+            mapper: const DefaultErrorMapper(),
+            readAfterWrite: true,
+          );
 
-        final Either<ErrorItem, Map<String, dynamic>> res =
-            await gateway.write('d', <String, dynamic>{'k': 'v'});
+          final Either<ErrorItem, Map<String, dynamic>> res = await gateway
+              .write('d', <String, dynamic>{'k': 'v'});
 
-        res.fold(
-          (ErrorItem l) => fail('Se esperaba Right, fue Left: $l'),
-          (Map<String, dynamic> r) {
+          res.fold((ErrorItem l) => fail('Se esperaba Right, fue Left: $l'), (
+            Map<String, dynamic> r,
+          ) {
             // En este Fake el payload autoritativo == lo guardado.
             expect(r['id'], 'd');
             expect(r['k'], 'v');
-          },
-        );
-      });
+          });
+        },
+      );
 
       test('respeta id del JSON si viene incluido al escribir', () async {
-        final Either<ErrorItem, Map<String, dynamic>> res = await gateway
-            .write('e', <String, dynamic>{'id': 'from-client', 'v': 2});
-
-        res.fold(
-          (ErrorItem l) => fail('Se esperaba Right, fue Left: $l'),
-          (Map<String, dynamic> r) {
-            expect(r['id'], 'from-client'); // _withId no sobreescribe
-            expect(r['v'], 2);
-          },
+        final Either<ErrorItem, Map<String, dynamic>> res = await gateway.write(
+          'e',
+          <String, dynamic>{'id': 'from-client', 'v': 2},
         );
+
+        res.fold((ErrorItem l) => fail('Se esperaba Right, fue Left: $l'), (
+          Map<String, dynamic> r,
+        ) {
+          expect(r['id'], 'from-client'); // _withId no sobreescribe
+          expect(r['v'], 2);
+        });
       });
 
       test('mapea errores de save a Left(ErrorItem)', () async {
@@ -136,8 +141,10 @@ void main() {
           mapper: const DefaultErrorMapper(),
         );
 
-        final Either<ErrorItem, Map<String, dynamic>> res =
-            await gateway.write('x', <String, dynamic>{});
+        final Either<ErrorItem, Map<String, dynamic>> res = await gateway.write(
+          'x',
+          <String, dynamic>{},
+        );
 
         expect(res.fold((_) => true, (_) => false), isTrue);
       });
@@ -180,11 +187,10 @@ void main() {
 
     // -------------------- WATCH -------------------
     group('watch() + ref-count (detachWatch / releaseDoc / dispose)', () {
-      test(
-          'doc inexistente: con treatEmptyAsMissing=false el segundo evento trae id inyectado',
-          () async {
-        final Stream<Either<ErrorItem, Map<String, dynamic>>> s =
-            gateway.watch('w1');
+      test('doc inexistente: con treatEmptyAsMissing=false el segundo evento trae id inyectado', () async {
+        final Stream<Either<ErrorItem, Map<String, dynamic>>> s = gateway.watch(
+          'w1',
+        );
 
         final List<Either<ErrorItem, Map<String, dynamic>>> events =
             <Either<ErrorItem, Map<String, dynamic>>>[];
@@ -213,9 +219,7 @@ void main() {
         gateway.detachWatch('w1');
       });
 
-      test(
-          'doc inexistente: con treatEmptyAsMissing=true el segundo evento es Left(notFound)',
-          () async {
+      test('doc inexistente: con treatEmptyAsMissing=true el segundo evento es Left(notFound)', () async {
         gateway = GatewayWsDbImpl(
           service: service,
           collection: 'canvases',
@@ -269,24 +273,22 @@ void main() {
         gateway.detachWatch('w3');
       });
 
-      test(
-          'múltiples watchers: al detach de uno, el otro sigue recibiendo eventos',
-          () async {
+      test('múltiples watchers: al detach de uno, el otro sigue recibiendo eventos', () async {
         final List<Map<String, dynamic>> a = <Map<String, dynamic>>[];
         final List<Map<String, dynamic>> b = <Map<String, dynamic>>[];
 
         final StreamSubscription<Either<ErrorItem, Map<String, dynamic>>> subA =
-            gateway
-                .watch('w4')
-                .listen((Either<ErrorItem, Map<String, dynamic>> e) {
-          e.fold((_) {}, (Map<String, dynamic> r) => a.add(r));
-        });
+            gateway.watch('w4').listen((
+              Either<ErrorItem, Map<String, dynamic>> e,
+            ) {
+              e.fold((_) {}, (Map<String, dynamic> r) => a.add(r));
+            });
         final StreamSubscription<Either<ErrorItem, Map<String, dynamic>>> subB =
-            gateway
-                .watch('w4')
-                .listen((Either<ErrorItem, Map<String, dynamic>> e) {
-          e.fold((_) {}, (Map<String, dynamic> r) => b.add(r));
-        });
+            gateway.watch('w4').listen((
+              Either<ErrorItem, Map<String, dynamic>> e,
+            ) {
+              e.fold((_) {}, (Map<String, dynamic> r) => b.add(r));
+            });
 
         await pumpEventQueue(); // seeds
 
@@ -304,25 +306,26 @@ void main() {
       });
 
       test(
-          'releaseDoc fuerza cierre inmediato del canal (cualquier suscriptor)',
-          () async {
-        final List<Either<ErrorItem, Map<String, dynamic>>> events =
-            <Either<ErrorItem, Map<String, dynamic>>>[];
-        final StreamSubscription<Either<ErrorItem, Map<String, dynamic>>> sub =
-            gateway.watch('w5').listen(events.add);
+        'releaseDoc fuerza cierre inmediato del canal (cualquier suscriptor)',
+        () async {
+          final List<Either<ErrorItem, Map<String, dynamic>>> events =
+              <Either<ErrorItem, Map<String, dynamic>>>[];
+          final StreamSubscription<Either<ErrorItem, Map<String, dynamic>>>
+          sub = gateway.watch('w5').listen(events.add);
 
-        await pumpEventQueue(); // seed
-        gateway.releaseDoc('w5'); // corta canal y cierra Bloc del doc
+          await pumpEventQueue(); // seed
+          gateway.releaseDoc('w5'); // corta canal y cierra Bloc del doc
 
-        // Emitir después no debería entregar más eventos a este sub
-        await gateway.write('w5', <String, dynamic>{'x': 1});
-        await pumpEventQueue();
+          // Emitir después no debería entregar más eventos a este sub
+          await gateway.write('w5', <String, dynamic>{'x': 1});
+          await pumpEventQueue();
 
-        final int countAfter = events.length;
-        expect(countAfter >= 1, isTrue);
+          final int countAfter = events.length;
+          expect(countAfter >= 1, isTrue);
 
-        await sub.cancel(); // cleanup del lado del test
-      });
+          await sub.cancel(); // cleanup del lado del test
+        },
+      );
 
       test('dispose cierra todos los canales', () async {
         final StreamSubscription<Either<ErrorItem, Map<String, dynamic>>> sub1 =

@@ -3,7 +3,7 @@ import 'package:jocaagura_domain/jocaagura_domain.dart';
 
 class _FakeBlocAppVersion extends BlocAppVersionInterface {
   _FakeBlocAppVersion(Map<String, ModelAppVersion> seed)
-      : _byId = Map<String, ModelAppVersion>.from(seed);
+    : _byId = Map<String, ModelAppVersion>.from(seed);
 
   final Map<String, ModelAppVersion> _byId;
 
@@ -64,8 +64,9 @@ class _FakeBlocAppVersion extends BlocAppVersionInterface {
       return okA && okP && okC;
     }
 
-    final List<ModelAppVersion> out =
-        _byId.values.where(matches).toList(growable: false);
+    final List<ModelAppVersion> out = _byId.values
+        .where(matches)
+        .toList(growable: false);
 
     return Right<ErrorItem, List<ModelAppVersion>>(out);
   }
@@ -127,11 +128,10 @@ ModelAppVersion _v({
 
 void main() {
   group('BlocAppVersionInterface - versionKey', () {
-    test(
-        'Given mixed-case values When versionKey Then returns canonical lowercase trimmed key',
-        () {
-      final _FakeBlocAppVersion bloc =
-          _FakeBlocAppVersion(<String, ModelAppVersion>{});
+    test('Given mixed-case values When versionKey Then returns canonical lowercase trimmed key', () {
+      final _FakeBlocAppVersion bloc = _FakeBlocAppVersion(
+        <String, ModelAppVersion>{},
+      );
 
       final String key = bloc.versionKey(
         appName: '  Pixel ',
@@ -145,20 +145,21 @@ void main() {
 
   group('BlocAppVersionInterface - latestByBuildNumber', () {
     test('Given empty list When latestByBuildNumber Then returns null', () {
-      final _FakeBlocAppVersion bloc =
-          _FakeBlocAppVersion(<String, ModelAppVersion>{});
+      final _FakeBlocAppVersion bloc = _FakeBlocAppVersion(
+        <String, ModelAppVersion>{},
+      );
 
-      final ModelAppVersion? latest =
-          bloc.latestByBuildNumber(<ModelAppVersion>[]);
+      final ModelAppVersion? latest = bloc.latestByBuildNumber(
+        <ModelAppVersion>[],
+      );
 
       expect(latest, isNull);
     });
 
-    test(
-        'Given list with multiple items When latestByBuildNumber Then returns max buildNumber',
-        () {
-      final _FakeBlocAppVersion bloc =
-          _FakeBlocAppVersion(<String, ModelAppVersion>{});
+    test('Given list with multiple items When latestByBuildNumber Then returns max buildNumber', () {
+      final _FakeBlocAppVersion bloc = _FakeBlocAppVersion(
+        <String, ModelAppVersion>{},
+      );
 
       final List<ModelAppVersion> items = <ModelAppVersion>[
         _v(
@@ -195,189 +196,200 @@ void main() {
     });
   });
 
-  group('BlocAppVersionInterface - shouldForceUpdate (buildNumber strategy)',
-      () {
-    test('Given latest.forceUpdate=false When outdated Then returns false', () {
-      final _FakeBlocAppVersion bloc =
-          _FakeBlocAppVersion(<String, ModelAppVersion>{});
-
-      final ModelAppVersion current = _v(
-        id: 'c',
-        version: '1.0.0',
-        buildNumber: 10,
-        appName: 'Pixel',
-        platform: 'android',
-        channel: 'prod',
-      );
-      final ModelAppVersion latest = _v(
-        id: 'l',
-        version: '1.1.0',
-        buildNumber: 11,
-        appName: 'Pixel',
-        platform: 'android',
-        channel: 'prod',
-      );
-
-      final bool result =
-          bloc.shouldForceUpdate(current: current, latest: latest);
-
-      expect(result, false);
-    });
-
-    test(
-        'Given latest.forceUpdate=true and latest newer by buildNumber When shouldForceUpdate Then true',
+  group(
+    'BlocAppVersionInterface - shouldForceUpdate (buildNumber strategy)',
+    () {
+      test(
+        'Given latest.forceUpdate=false When outdated Then returns false',
         () {
-      final _FakeBlocAppVersion bloc =
-          _FakeBlocAppVersion(<String, ModelAppVersion>{});
+          final _FakeBlocAppVersion bloc = _FakeBlocAppVersion(
+            <String, ModelAppVersion>{},
+          );
 
-      final ModelAppVersion current = _v(
-        id: 'c',
-        version: '1.0.0',
-        buildNumber: 10,
-        appName: 'Pixel',
-        platform: 'android',
-        channel: 'prod',
-      );
-      final ModelAppVersion latest = _v(
-        id: 'l',
-        version: '1.1.0',
-        buildNumber: 11,
-        appName: 'Pixel',
-        platform: 'android',
-        channel: 'prod',
-        forceUpdate: true,
-      );
+          final ModelAppVersion current = _v(
+            id: 'c',
+            version: '1.0.0',
+            buildNumber: 10,
+            appName: 'Pixel',
+            platform: 'android',
+            channel: 'prod',
+          );
+          final ModelAppVersion latest = _v(
+            id: 'l',
+            version: '1.1.0',
+            buildNumber: 11,
+            appName: 'Pixel',
+            platform: 'android',
+            channel: 'prod',
+          );
 
-      final bool result =
-          bloc.shouldForceUpdate(current: current, latest: latest);
+          final bool result = bloc.shouldForceUpdate(
+            current: current,
+            latest: latest,
+          );
 
-      expect(result, true);
-    });
-
-    test(
-        'Given latest.forceUpdate=true but not outdated When shouldForceUpdate Then false',
-        () {
-      final _FakeBlocAppVersion bloc =
-          _FakeBlocAppVersion(<String, ModelAppVersion>{});
-
-      final ModelAppVersion current = _v(
-        id: 'c',
-        version: '1.1.0',
-        buildNumber: 11,
-        appName: 'Pixel',
-        platform: 'android',
-        channel: 'prod',
-      );
-      final ModelAppVersion latest = _v(
-        id: 'l',
-        version: '1.1.0',
-        buildNumber: 11,
-        appName: 'Pixel',
-        platform: 'android',
-        channel: 'prod',
-        forceUpdate: true,
+          expect(result, false);
+        },
       );
 
-      final bool result =
-          bloc.shouldForceUpdate(current: current, latest: latest);
+      test('Given latest.forceUpdate=true and latest newer by buildNumber When shouldForceUpdate Then true', () {
+        final _FakeBlocAppVersion bloc = _FakeBlocAppVersion(
+          <String, ModelAppVersion>{},
+        );
 
-      expect(result, false);
-    });
+        final ModelAppVersion current = _v(
+          id: 'c',
+          version: '1.0.0',
+          buildNumber: 10,
+          appName: 'Pixel',
+          platform: 'android',
+          channel: 'prod',
+        );
+        final ModelAppVersion latest = _v(
+          id: 'l',
+          version: '1.1.0',
+          buildNumber: 11,
+          appName: 'Pixel',
+          platform: 'android',
+          channel: 'prod',
+          forceUpdate: true,
+        );
 
-    test(
-        'Given minSupportedBuildNumber provided and current below it When shouldForceUpdate Then true',
-        () {
-      final _FakeBlocAppVersion bloc =
-          _FakeBlocAppVersion(<String, ModelAppVersion>{});
+        final bool result = bloc.shouldForceUpdate(
+          current: current,
+          latest: latest,
+        );
 
-      final ModelAppVersion current = _v(
-        id: 'c',
-        version: '1.0.0',
-        buildNumber: 10,
-        appName: 'Pixel',
-        platform: 'android',
-        channel: 'prod',
-      );
-      final ModelAppVersion latest = _v(
-        id: 'l',
-        version: '1.2.0',
-        buildNumber: 12,
-        appName: 'Pixel',
-        platform: 'android',
-        channel: 'prod',
-      );
+        expect(result, true);
+      });
 
-      final bool result = bloc.shouldForceUpdate(
-        current: current,
-        latest: latest,
-        minSupportedBuildNumber: 11,
-      );
+      test('Given latest.forceUpdate=true but not outdated When shouldForceUpdate Then false', () {
+        final _FakeBlocAppVersion bloc = _FakeBlocAppVersion(
+          <String, ModelAppVersion>{},
+        );
 
-      expect(result, true);
-    });
+        final ModelAppVersion current = _v(
+          id: 'c',
+          version: '1.1.0',
+          buildNumber: 11,
+          appName: 'Pixel',
+          platform: 'android',
+          channel: 'prod',
+        );
+        final ModelAppVersion latest = _v(
+          id: 'l',
+          version: '1.1.0',
+          buildNumber: 11,
+          appName: 'Pixel',
+          platform: 'android',
+          channel: 'prod',
+          forceUpdate: true,
+        );
 
-    test(
-        'Given minSupportedBuildNumber disabled (-1) When only outdated and forceUpdate=false Then false',
-        () {
-      final _FakeBlocAppVersion bloc =
-          _FakeBlocAppVersion(<String, ModelAppVersion>{});
+        final bool result = bloc.shouldForceUpdate(
+          current: current,
+          latest: latest,
+        );
 
-      final ModelAppVersion current = _v(
-        id: 'c',
-        version: '1.0.0',
-        buildNumber: 10,
-        appName: 'Pixel',
-        platform: 'android',
-        channel: 'prod',
-      );
-      final ModelAppVersion latest = _v(
-        id: 'l',
-        version: '1.1.0',
-        buildNumber: 11,
-        appName: 'Pixel',
-        platform: 'android',
-        channel: 'prod',
-      );
+        expect(result, false);
+      });
 
-      final bool result = bloc.shouldForceUpdate(
-        current: current,
-        latest: latest,
-      );
+      test('Given minSupportedBuildNumber provided and current below it When shouldForceUpdate Then true', () {
+        final _FakeBlocAppVersion bloc = _FakeBlocAppVersion(
+          <String, ModelAppVersion>{},
+        );
 
-      expect(result, false);
-    });
-  });
+        final ModelAppVersion current = _v(
+          id: 'c',
+          version: '1.0.0',
+          buildNumber: 10,
+          appName: 'Pixel',
+          platform: 'android',
+          channel: 'prod',
+        );
+        final ModelAppVersion latest = _v(
+          id: 'l',
+          version: '1.2.0',
+          buildNumber: 12,
+          appName: 'Pixel',
+          platform: 'android',
+          channel: 'prod',
+        );
+
+        final bool result = bloc.shouldForceUpdate(
+          current: current,
+          latest: latest,
+          minSupportedBuildNumber: 11,
+        );
+
+        expect(result, true);
+      });
+
+      test('Given minSupportedBuildNumber disabled (-1) When only outdated and forceUpdate=false Then false', () {
+        final _FakeBlocAppVersion bloc = _FakeBlocAppVersion(
+          <String, ModelAppVersion>{},
+        );
+
+        final ModelAppVersion current = _v(
+          id: 'c',
+          version: '1.0.0',
+          buildNumber: 10,
+          appName: 'Pixel',
+          platform: 'android',
+          channel: 'prod',
+        );
+        final ModelAppVersion latest = _v(
+          id: 'l',
+          version: '1.1.0',
+          buildNumber: 11,
+          appName: 'Pixel',
+          platform: 'android',
+          channel: 'prod',
+        );
+
+        final bool result = bloc.shouldForceUpdate(
+          current: current,
+          latest: latest,
+        );
+
+        expect(result, false);
+      });
+    },
+  );
 
   group('BlocAppVersionInterface - tryParseSemVer', () {
     test('Given "1" When tryParseSemVer Then returns [1,0,0]', () {
-      final _FakeBlocAppVersion bloc =
-          _FakeBlocAppVersion(<String, ModelAppVersion>{});
+      final _FakeBlocAppVersion bloc = _FakeBlocAppVersion(
+        <String, ModelAppVersion>{},
+      );
       expect(bloc.tryParseSemVer('1'), <int>[1, 0, 0]);
     });
 
     test('Given "1.2" When tryParseSemVer Then returns [1,2,0]', () {
-      final _FakeBlocAppVersion bloc =
-          _FakeBlocAppVersion(<String, ModelAppVersion>{});
+      final _FakeBlocAppVersion bloc = _FakeBlocAppVersion(
+        <String, ModelAppVersion>{},
+      );
       expect(bloc.tryParseSemVer('1.2'), <int>[1, 2, 0]);
     });
 
     test('Given "1.2.3" When tryParseSemVer Then returns [1,2,3]', () {
-      final _FakeBlocAppVersion bloc =
-          _FakeBlocAppVersion(<String, ModelAppVersion>{});
+      final _FakeBlocAppVersion bloc = _FakeBlocAppVersion(
+        <String, ModelAppVersion>{},
+      );
       expect(bloc.tryParseSemVer('1.2.3'), <int>[1, 2, 3]);
     });
 
-    test(
-        'Given "1.2.3-beta+7" When tryParseSemVer Then ignores suffix and returns [1,2,3]',
-        () {
-      final _FakeBlocAppVersion bloc =
-          _FakeBlocAppVersion(<String, ModelAppVersion>{});
+    test('Given "1.2.3-beta+7" When tryParseSemVer Then ignores suffix and returns [1,2,3]', () {
+      final _FakeBlocAppVersion bloc = _FakeBlocAppVersion(
+        <String, ModelAppVersion>{},
+      );
       expect(bloc.tryParseSemVer('1.2.3-beta+7'), <int>[1, 2, 3]);
     });
 
     test('Given invalid semver When tryParseSemVer Then returns null', () {
-      final _FakeBlocAppVersion bloc =
-          _FakeBlocAppVersion(<String, ModelAppVersion>{});
+      final _FakeBlocAppVersion bloc = _FakeBlocAppVersion(
+        <String, ModelAppVersion>{},
+      );
       expect(bloc.tryParseSemVer('x.y.z'), isNull);
       expect(bloc.tryParseSemVer('1.x.3'), isNull);
       expect(bloc.tryParseSemVer(''), isNull);
@@ -386,11 +398,10 @@ void main() {
   });
 
   group('BlocAppVersionInterface - shouldForceUpdateBySemVerOrBuildNumber', () {
-    test(
-        'Given semver newer and latest.forceUpdate=true When shouldForceUpdateBySemVerOrBuildNumber Then true',
-        () {
-      final _FakeBlocAppVersion bloc =
-          _FakeBlocAppVersion(<String, ModelAppVersion>{});
+    test('Given semver newer and latest.forceUpdate=true When shouldForceUpdateBySemVerOrBuildNumber Then true', () {
+      final _FakeBlocAppVersion bloc = _FakeBlocAppVersion(
+        <String, ModelAppVersion>{},
+      );
 
       final ModelAppVersion current = _v(
         id: 'c',
@@ -419,11 +430,10 @@ void main() {
       expect(result, true);
     });
 
-    test(
-        'Given semver equal and latest.forceUpdate=true When shouldForceUpdateBySemVerOrBuildNumber Then false',
-        () {
-      final _FakeBlocAppVersion bloc =
-          _FakeBlocAppVersion(<String, ModelAppVersion>{});
+    test('Given semver equal and latest.forceUpdate=true When shouldForceUpdateBySemVerOrBuildNumber Then false', () {
+      final _FakeBlocAppVersion bloc = _FakeBlocAppVersion(
+        <String, ModelAppVersion>{},
+      );
 
       final ModelAppVersion current = _v(
         id: 'c',
@@ -452,11 +462,10 @@ void main() {
       expect(result, false);
     });
 
-    test(
-        'Given semver cannot be parsed When shouldForceUpdateBySemVerOrBuildNumber Then falls back to buildNumber',
-        () {
-      final _FakeBlocAppVersion bloc =
-          _FakeBlocAppVersion(<String, ModelAppVersion>{});
+    test('Given semver cannot be parsed When shouldForceUpdateBySemVerOrBuildNumber Then falls back to buildNumber', () {
+      final _FakeBlocAppVersion bloc = _FakeBlocAppVersion(
+        <String, ModelAppVersion>{},
+      );
 
       final ModelAppVersion current = _v(
         id: 'c',
@@ -484,11 +493,10 @@ void main() {
       expect(result, true);
     });
 
-    test(
-        'Given latest.forceUpdate=false When newer Then shouldForceUpdateBySemVerOrBuildNumber returns false',
-        () {
-      final _FakeBlocAppVersion bloc =
-          _FakeBlocAppVersion(<String, ModelAppVersion>{});
+    test('Given latest.forceUpdate=false When newer Then shouldForceUpdateBySemVerOrBuildNumber returns false', () {
+      final _FakeBlocAppVersion bloc = _FakeBlocAppVersion(
+        <String, ModelAppVersion>{},
+      );
 
       final ModelAppVersion current = _v(
         id: 'c',

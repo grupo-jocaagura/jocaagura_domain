@@ -106,16 +106,12 @@ class BlocCore<T> {
   }
 
   void dispose() {
-    _injector.forEach(
-      (String key, BlocGeneral<dynamic> value) {
-        value.dispose();
-      },
-    );
-    _moduleInjector.forEach(
-      (String key, BlocModule value) {
-        value.dispose();
-      },
-    );
+    _injector.forEach((String key, BlocGeneral<dynamic> value) {
+      value.dispose();
+    });
+    _moduleInjector.forEach((String key, BlocModule value) {
+      value.dispose();
+    });
     Future<void>.delayed(const Duration(milliseconds: 999), () {
       _injector.clear();
       _moduleInjector.clear();

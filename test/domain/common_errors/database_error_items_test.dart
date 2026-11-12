@@ -3,9 +3,7 @@ import 'package:jocaagura_domain/jocaagura_domain.dart';
 
 void main() {
   group('DatabaseErrorItems catalog', () {
-    test(
-        'Given predefined database errors When inspected Then all use DB code prefix and database source meta',
-        () {
+    test('Given predefined database errors When inspected Then all use DB code prefix and database source meta', () {
       final List<ErrorItem> errors = <ErrorItem>[
         DatabaseErrorItems.connectionFailed,
         DatabaseErrorItems.unavailable,
@@ -33,27 +31,25 @@ void main() {
       }
     });
 
-    test(
-        'Given predefined database errors When inspected Then each error exposes expected severity',
-        () {
+    test('Given predefined database errors When inspected Then each error exposes expected severity', () {
       final Map<ErrorItem, ErrorLevelEnum> expectedLevels =
           <ErrorItem, ErrorLevelEnum>{
-        DatabaseErrorItems.connectionFailed: ErrorLevelEnum.danger,
-        DatabaseErrorItems.unavailable: ErrorLevelEnum.severe,
-        DatabaseErrorItems.unauthorized: ErrorLevelEnum.severe,
-        DatabaseErrorItems.forbidden: ErrorLevelEnum.severe,
-        DatabaseErrorItems.notFound: ErrorLevelEnum.warning,
-        DatabaseErrorItems.alreadyExists: ErrorLevelEnum.warning,
-        DatabaseErrorItems.conflict: ErrorLevelEnum.warning,
-        DatabaseErrorItems.constraintViolation: ErrorLevelEnum.warning,
-        DatabaseErrorItems.validationFailed: ErrorLevelEnum.warning,
-        DatabaseErrorItems.serializationError: ErrorLevelEnum.severe,
-        DatabaseErrorItems.timeout: ErrorLevelEnum.warning,
-        DatabaseErrorItems.quotaExceeded: ErrorLevelEnum.severe,
-        DatabaseErrorItems.transactionFailed: ErrorLevelEnum.severe,
-        DatabaseErrorItems.deadlock: ErrorLevelEnum.severe,
-        DatabaseErrorItems.streamClosed: ErrorLevelEnum.warning,
-      };
+            DatabaseErrorItems.connectionFailed: ErrorLevelEnum.danger,
+            DatabaseErrorItems.unavailable: ErrorLevelEnum.severe,
+            DatabaseErrorItems.unauthorized: ErrorLevelEnum.severe,
+            DatabaseErrorItems.forbidden: ErrorLevelEnum.severe,
+            DatabaseErrorItems.notFound: ErrorLevelEnum.warning,
+            DatabaseErrorItems.alreadyExists: ErrorLevelEnum.warning,
+            DatabaseErrorItems.conflict: ErrorLevelEnum.warning,
+            DatabaseErrorItems.constraintViolation: ErrorLevelEnum.warning,
+            DatabaseErrorItems.validationFailed: ErrorLevelEnum.warning,
+            DatabaseErrorItems.serializationError: ErrorLevelEnum.severe,
+            DatabaseErrorItems.timeout: ErrorLevelEnum.warning,
+            DatabaseErrorItems.quotaExceeded: ErrorLevelEnum.severe,
+            DatabaseErrorItems.transactionFailed: ErrorLevelEnum.severe,
+            DatabaseErrorItems.deadlock: ErrorLevelEnum.severe,
+            DatabaseErrorItems.streamClosed: ErrorLevelEnum.warning,
+          };
 
       for (final MapEntry<ErrorItem, ErrorLevelEnum> entry
           in expectedLevels.entries) {
@@ -63,9 +59,7 @@ void main() {
   });
 
   group('DatabaseErrorItems.unknown', () {
-    test(
-        'Given no reason When unknown is called Then returns default unknown database error',
-        () {
+    test('Given no reason When unknown is called Then returns default unknown database error', () {
       final ErrorItem result = DatabaseErrorItems.unknown();
 
       expect(result.title, 'Unknown Database Error');
@@ -77,9 +71,7 @@ void main() {
       );
     });
 
-    test(
-        'Given custom reason When unknown is called Then uses reason as description',
-        () {
+    test('Given custom reason When unknown is called Then uses reason as description', () {
       final ErrorItem result = DatabaseErrorItems.unknown(
         reason: 'Provider returned an unexpected status.',
       );
@@ -95,9 +87,7 @@ void main() {
   });
 
   group('DatabaseErrorItems.fromCode', () {
-    test(
-        'Given known database code When fromCode is called Then returns matching predefined error',
-        () {
+    test('Given known database code When fromCode is called Then returns matching predefined error', () {
       final Map<String, ErrorItem> expectedItems = <String, ErrorItem>{
         'DB_CONN_FAILED': DatabaseErrorItems.connectionFailed,
         'DB_UNAVAILABLE': DatabaseErrorItems.unavailable,
@@ -130,9 +120,7 @@ void main() {
       }
     });
 
-    test(
-        'Given unknown database code When fromCode is called Then returns unknown error with unrecognized code description',
-        () {
+    test('Given unknown database code When fromCode is called Then returns unknown error with unrecognized code description', () {
       final ErrorItem result = DatabaseErrorItems.fromCode('DB_CUSTOM_FAILURE');
 
       expect(result.title, 'Unknown Database Error');
@@ -147,9 +135,7 @@ void main() {
       );
     });
 
-    test(
-        'Given empty database code When fromCode is called Then returns unknown error preserving empty code context',
-        () {
+    test('Given empty database code When fromCode is called Then returns unknown error preserving empty code context', () {
       final ErrorItem result = DatabaseErrorItems.fromCode('');
 
       expect(result.code, 'DB_UNKNOWN');

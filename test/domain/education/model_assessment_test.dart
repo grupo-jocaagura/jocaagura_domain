@@ -25,8 +25,7 @@ void main() {
       );
     }
 
-    test(
-        'Given valid instance '
+    test('Given valid instance '
         'When toJson -> fromJson '
         'Then roundtrip equality holds', () {
       final ModelAssessment a = mk(
@@ -55,8 +54,7 @@ void main() {
       );
     });
 
-    test(
-        'Given items list '
+    test('Given items list '
         'When accessing items '
         'Then it is unmodifiable', () {
       final ModelAssessment a = mk();
@@ -66,8 +64,7 @@ void main() {
       );
     });
 
-    test(
-        'Given base instance '
+    test('Given base instance '
         'When copyWith overrides some fields '
         'Then new instance reflects changes and preserves others', () {
       final ModelAssessment base = mk();
@@ -88,8 +85,7 @@ void main() {
       expect(c.shuffleOptions, base.shuffleOptions);
     });
 
-    test(
-        'Given out-of-range passScore in constructor '
+    test('Given out-of-range passScore in constructor '
         'When constructing '
         'Then value is clamped to 0..100', () {
       final ModelAssessment a = mk(passScore: -10);
@@ -99,8 +95,7 @@ void main() {
       expect(b.passScore, 100);
     });
 
-    test(
-        'Given passScore out of range in fromJson '
+    test('Given passScore out of range in fromJson '
         'When parsing '
         'Then passScore is clamped', () {
       final Map<String, dynamic> j = <String, dynamic>{
@@ -124,33 +119,33 @@ void main() {
     });
 
     test(
-        'Given missing shuffle flags and timeLimit '
-        'When fromJson '
-        'Then shuffle defaults to true and timeLimit defaults to Duration.zero',
-        () {
-      final Map<String, dynamic> j = <String, dynamic>{
-        AssessmentEnum.id.name: 'ASMT-DEF',
-        AssessmentEnum.title.name: 'Defaults Test',
-        AssessmentEnum.items.name: <Map<String, dynamic>>[
-          defaultModelLearningItem.toJson(),
-        ],
-        // Note: omitimos shuffleItems, shuffleOptions y timeLimitMs
-        AssessmentEnum.passScore.name: 50,
-      };
+      'Given missing shuffle flags and timeLimit '
+      'When fromJson '
+      'Then shuffle defaults to true and timeLimit defaults to Duration.zero',
+      () {
+        final Map<String, dynamic> j = <String, dynamic>{
+          AssessmentEnum.id.name: 'ASMT-DEF',
+          AssessmentEnum.title.name: 'Defaults Test',
+          AssessmentEnum.items.name: <Map<String, dynamic>>[
+            defaultModelLearningItem.toJson(),
+          ],
+          // Note: omitimos shuffleItems, shuffleOptions y timeLimitMs
+          AssessmentEnum.passScore.name: 50,
+        };
 
-      final ModelAssessment a = ModelAssessment.fromJson(j);
-      expect(a.shuffleItems, isTrue);
-      expect(a.shuffleOptions, isTrue);
-      expect(a.timeLimit, ModelAssessment.defaultTimeLimit);
-      expect(a.passScore, 50);
-    });
+        final ModelAssessment a = ModelAssessment.fromJson(j);
+        expect(a.shuffleItems, isTrue);
+        expect(a.shuffleOptions, isTrue);
+        expect(a.timeLimit, ModelAssessment.defaultTimeLimit);
+        expect(a.passScore, 50);
+      },
+    );
 
-    test(
-        'Given timeLimitMs provided '
+    test('Given timeLimitMs provided '
         'When fromJson '
         'Then timeLimit parsed as Duration(milliseconds)', () {
-      final Map<String, dynamic> j =
-          mk(timeLimit: const Duration(minutes: 3)).toJson();
+      final Map<String, dynamic> j = mk(timeLimit: const Duration(minutes: 3))
+          .toJson();
 
       // Forzamos 90_000 ms (1.5 minutos)
       j[AssessmentEnum.timeLimitMs.name] = 90000;
@@ -160,27 +155,30 @@ void main() {
     });
 
     test(
-        'Given two equal assessments '
-        'When comparing '
-        'Then equals and hashCode match; changing items order breaks equality',
-        () {
-      final ModelLearningItem i1 = defaultModelLearningItem;
-      final ModelLearningItem i2 =
-          defaultModelLearningItem.copyWith(id: 'LI-2', label: 'Alt item');
+      'Given two equal assessments '
+      'When comparing '
+      'Then equals and hashCode match; changing items order breaks equality',
+      () {
+        final ModelLearningItem i1 = defaultModelLearningItem;
+        final ModelLearningItem i2 = defaultModelLearningItem.copyWith(
+          id: 'LI-2',
+          label: 'Alt item',
+        );
 
-      final ModelAssessment a = mk(items: <ModelLearningItem>[i1, i2]);
-      final ModelAssessment b = mk(items: <ModelLearningItem>[i1, i2]);
+        final ModelAssessment a = mk(items: <ModelLearningItem>[i1, i2]);
+        final ModelAssessment b = mk(items: <ModelLearningItem>[i1, i2]);
 
-      expect(a, equals(b));
-      expect(a.hashCode, equals(b.hashCode));
+        expect(a, equals(b));
+        expect(a.hashCode, equals(b.hashCode));
 
-      final ModelAssessment c =
-          mk(items: <ModelLearningItem>[i2, i1]); // otro orden
-      expect(a == c, isFalse);
-    });
+        final ModelAssessment c = mk(
+          items: <ModelLearningItem>[i2, i1],
+        ); // otro orden
+        expect(a == c, isFalse);
+      },
+    );
 
-    test(
-        'Given instance '
+    test('Given instance '
         'When toString '
         'Then outputs valid JSON with enum keys', () {
       final ModelAssessment a = mk();

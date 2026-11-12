@@ -62,26 +62,21 @@ import '../../jocaagura_domain.dart';
 class GatewayWsDatabaseImpl implements GatewayWsDatabase {
   /// Creates a gateway over a [ServiceWsDatabase] that stores JSON documents.
   ///
-  /// - [service]: the underlying database service (JSON `Map<String, dynamic>`).
-  /// - [collection]: collection name to scope operations.
+  /// - [_service]: the underlying database service (JSON `Map<String, dynamic>`).
+  /// - [_collection]: collection name to scope operations.
   /// - [mapper]: optional [ErrorMapper]; defaults to [DefaultErrorMapper].
-  /// - [idKey]: JSON key used to expose the `docId` in successful payloads.
-  /// - [readAfterWrite]: when `true`, `write()` returns a fresh `read()` result.
-  /// - [treatEmptyAsMissing]: when `true`, `{}` snapshots are treated as "not found".
+  /// - [_idKey]: JSON key used to expose the `docId` in successful payloads.
+  /// - [_readAfterWrite]: when `true`, `write()` returns a fresh `read()` result.
+  /// - [_treatEmptyAsMissing]: when `true`, `{}` snapshots are treated as "not found".
   @Deprecated('Use GatewayWsDb at Repository layer.')
   GatewayWsDatabaseImpl({
-    required ServiceWsDatabase<Map<String, dynamic>> service,
-    required String collection,
+    required this._service,
+    required this._collection,
     ErrorMapper? mapper,
-    String idKey = defaultIdKey,
-    bool readAfterWrite = false,
-    bool treatEmptyAsMissing = false,
-  })  : _service = service,
-        _collection = collection,
-        _mapper = mapper ?? const DefaultErrorMapper(),
-        _idKey = idKey,
-        _readAfterWrite = readAfterWrite,
-        _treatEmptyAsMissing = treatEmptyAsMissing;
+    this._idKey = defaultIdKey,
+    this._readAfterWrite = false,
+    this._treatEmptyAsMissing = false,
+  }) : _mapper = mapper ?? const DefaultErrorMapper();
 
   /// Default JSON key used to publish the document id in successful payloads.
   static const String defaultIdKey = 'id';
@@ -129,8 +124,10 @@ class GatewayWsDatabaseImpl implements GatewayWsDatabase {
         docId: docId,
       );
 
-      final ErrorItem? payloadErr =
-          _mapper.fromPayload(json, location: 'GatewayWsDatabase.read');
+      final ErrorItem? payloadErr = _mapper.fromPayload(
+        json,
+        location: 'GatewayWsDatabase.read',
+      );
       if (payloadErr != null) {
         return Left<ErrorItem, Map<String, dynamic>>(payloadErr);
       }
@@ -217,35 +214,38 @@ class GatewayWsDatabaseImpl implements GatewayWsDatabase {
     final _DocChannel channel = _channels.putIfAbsent(docId, () {
       final BlocGeneral<Either<ErrorItem, Map<String, dynamic>>> bloc =
           BlocGeneral<Either<ErrorItem, Map<String, dynamic>>>(
-        const Right<ErrorItem, Map<String, dynamic>>(<String, dynamic>{}),
-      );
+            const Right<ErrorItem, Map<String, dynamic>>(<String, dynamic>{}),
+          );
 
       return _DocChannel(
         bloc: bloc,
         sub: _service
             .documentStream(collection: _collection, docId: docId)
             .listen(
-          (Map<String, dynamic> json) {
-            final Either<ErrorItem, Map<String, dynamic>> event = _mapPayload(
-              docId,
-              json,
-              location: 'GatewayWsDatabase.watch',
-            );
-            bloc.value = event;
-          },
-          onError: (Object error, StackTrace st) {
-            final ErrorItem mapped = _mapper.fromException(
-              error,
-              st,
-              location: 'GatewayWsDatabase.watch:onError',
-            );
-            bloc.value = Left<ErrorItem, Map<String, dynamic>>(mapped);
-          },
-          onDone: () {
-            const ErrorItem closed = DatabaseErrorItems.streamClosed;
-            bloc.value = const Left<ErrorItem, Map<String, dynamic>>(closed);
-          },
-        ),
+              (Map<String, dynamic> json) {
+                final Either<ErrorItem, Map<String, dynamic>> event =
+                    _mapPayload(
+                      docId,
+                      json,
+                      location: 'GatewayWsDatabase.watch',
+                    );
+                bloc.value = event;
+              },
+              onError: (Object error, StackTrace st) {
+                final ErrorItem mapped = _mapper.fromException(
+                  error,
+                  st,
+                  location: 'GatewayWsDatabase.watch:onError',
+                );
+                bloc.value = Left<ErrorItem, Map<String, dynamic>>(mapped);
+              },
+              onDone: () {
+                const ErrorItem closed = DatabaseErrorItems.streamClosed;
+                bloc.value = const Left<ErrorItem, Map<String, dynamic>>(
+                  closed,
+                );
+              },
+            ),
       );
     });
 

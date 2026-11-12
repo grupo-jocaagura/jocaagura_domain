@@ -38,9 +38,7 @@ class LogInUserAndPasswordUsecase
   final RepositoryAuth repository;
 
   @override
-  Future<Either<ErrorItem, UserModel>> call(
-    UserModel user,
-  ) async {
+  Future<Either<ErrorItem, UserModel>> call(UserModel user) async {
     final String password = Utils.getStringFromDynamic(user.jwt[passwordKey]);
     final String email = user.email;
 

@@ -23,12 +23,11 @@ class JocaaguraFakeHttpRequest implements ServiceHttp {
   /// Creates a new fake HTTP request dispatcher.
   ///
   /// - [services] are evaluated in order; the first that can handle a request wins.
-  /// - [config] controls latency, canned responses, and forced failures.
+  /// - [_config] controls latency, canned responses, and forced failures.
   JocaaguraFakeHttpRequest({
     required List<VirtualCrudService> services,
-    FakeHttpRequestConfig config = FakeHttpRequestConfig.none,
-  })  : _services = List<VirtualCrudService>.unmodifiable(services),
-        _config = config;
+    this._config = FakeHttpRequestConfig.none,
+  }) : _services = List<VirtualCrudService>.unmodifiable(services);
 
   final List<VirtualCrudService> _services;
   final FakeHttpRequestConfig _config;
@@ -208,8 +207,9 @@ class JocaaguraFakeHttpRequest implements ServiceHttp {
 
     final Map<String, String> qp = <String, String>{
       ...base.queryParameters,
-      ...queryParameters
-          .map((String k, dynamic v) => MapEntry<String, String>(k, '$v')),
+      ...queryParameters.map(
+        (String k, dynamic v) => MapEntry<String, String>(k, '$v'),
+      ),
     };
 
     return base.replace(queryParameters: qp);

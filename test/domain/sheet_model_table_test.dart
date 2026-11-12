@@ -22,43 +22,34 @@ void main() {
       id: 'tbl_customers',
       name: 'customers',
       primaryKeyColumn: 'customerId',
-      columns: <ModelSheetColumn>[
-        pkColumn,
-        nameColumn,
-      ],
+      columns: <ModelSheetColumn>[pkColumn, nameColumn],
       rowsCount: 128,
     );
 
-    test(
-      'Given a canonical table When toJson and fromJson Then preserves the contract',
-      () {
-        final Map<String, dynamic> json = table.toJson();
-        final ModelSheetTable roundtrip = ModelSheetTable.fromJson(json);
+    test('Given a canonical table When toJson and fromJson Then preserves the contract', () {
+      final Map<String, dynamic> json = table.toJson();
+      final ModelSheetTable roundtrip = ModelSheetTable.fromJson(json);
 
-        expect(roundtrip, table);
-        expect(roundtrip.toJson(), table.toJson());
-      },
-    );
+      expect(roundtrip, table);
+      expect(roundtrip.toJson(), table.toJson());
+    });
 
-    test(
-      'Given canonical JSON When fromJson and toJson Then preserves JSON roundtrip',
-      () {
-        final Map<String, dynamic> json = <String, dynamic>{
-          ModelSheetTableEnum.id.name: 'tbl_customers',
-          ModelSheetTableEnum.name.name: 'customers',
-          ModelSheetTableEnum.primaryKeyColumn.name: 'customerId',
-          ModelSheetTableEnum.columns.name: <Map<String, dynamic>>[
-            pkColumn.toJson(),
-            nameColumn.toJson(),
-          ],
-          ModelSheetTableEnum.rowsCount.name: 128,
-        };
+    test('Given canonical JSON When fromJson and toJson Then preserves JSON roundtrip', () {
+      final Map<String, dynamic> json = <String, dynamic>{
+        ModelSheetTableEnum.id.name: 'tbl_customers',
+        ModelSheetTableEnum.name.name: 'customers',
+        ModelSheetTableEnum.primaryKeyColumn.name: 'customerId',
+        ModelSheetTableEnum.columns.name: <Map<String, dynamic>>[
+          pkColumn.toJson(),
+          nameColumn.toJson(),
+        ],
+        ModelSheetTableEnum.rowsCount.name: 128,
+      };
 
-        final ModelSheetTable parsed = ModelSheetTable.fromJson(json);
+      final ModelSheetTable parsed = ModelSheetTable.fromJson(json);
 
-        expect(parsed.toJson(), json);
-      },
-    );
+      expect(parsed.toJson(), json);
+    });
 
     test(
       'Given a table When copyWith overrides fields Then returns updated copy',

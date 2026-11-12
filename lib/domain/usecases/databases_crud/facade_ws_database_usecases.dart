@@ -87,19 +87,28 @@ class FacadeWsDatabaseUsecases<T extends Model> {
     final ExistsDocUseCase<T> exists = ExistsDocUseCase<T>(repository);
     final WatchDocUseCase<T> watch = WatchDocUseCase<T>(repository);
     final MutateDocUseCase<T> mutate = MutateDocUseCase<T>(repository);
-    final PatchDocFieldsUseCase<T> patch =
-        PatchDocFieldsUseCase<T>(repository, fromJson: fromJson);
+    final PatchDocFieldsUseCase<T> patch = PatchDocFieldsUseCase<T>(
+      repository,
+      fromJson: fromJson,
+    );
     final EnsureDocUseCase<T> ensure = EnsureDocUseCase<T>(repository);
-    final ReadManyDocsUseCase<T> readMany =
-        ReadManyDocsUseCase<T>(repository, mapper: mapper);
-    final WriteManyDocsUseCase<T> writeMany =
-        WriteManyDocsUseCase<T>(repository, mapper: mapper);
-    final DeleteManyDocsUseCase<T> deleteMany =
-        DeleteManyDocsUseCase<T>(repository, mapper: mapper);
+    final ReadManyDocsUseCase<T> readMany = ReadManyDocsUseCase<T>(
+      repository,
+      mapper: mapper,
+    );
+    final WriteManyDocsUseCase<T> writeMany = WriteManyDocsUseCase<T>(
+      repository,
+      mapper: mapper,
+    );
+    final DeleteManyDocsUseCase<T> deleteMany = DeleteManyDocsUseCase<T>(
+      repository,
+      mapper: mapper,
+    );
     final DetachWatchUseCase<T> detach = DetachWatchUseCase<T>(repository);
     final ReleaseDocUseCase<T> release = ReleaseDocUseCase<T>(repository);
-    final DisposeWsDatabaseUseCase<T> dispose =
-        DisposeWsDatabaseUseCase<T>(repository);
+    final DisposeWsDatabaseUseCase<T> dispose = DisposeWsDatabaseUseCase<T>(
+      repository,
+    );
 
     ReadOrDefaultUseCase<T> readOrDefaultBuilder(T Function() orElse) {
       return ReadOrDefaultUseCase<T>(repository, orElse: orElse);
@@ -151,9 +160,9 @@ class FacadeWsDatabaseUsecases<T extends Model> {
 
   // Builders for parameterized UCs
   final ReadOrDefaultUseCase<T> Function(T Function() orElse)
-      readOrDefaultBuilder;
+  readOrDefaultBuilder;
   final WatchDocUntilUseCase<T> Function(bool Function(T) predicate)
-      watchUntilBuilder;
+  watchUntilBuilder;
 
   // ---------------- Convenience methods (thin wrappers) ----------------
 
@@ -188,47 +197,41 @@ class FacadeWsDatabaseUsecases<T extends Model> {
   Future<Either<ErrorItem, T>> mutateDoc(
     String docId,
     T Function(T current) transform,
-  ) =>
-      mutate(MutateParams<T>(docId, transform));
+  ) => mutate(MutateParams<T>(docId, transform));
 
   /// Partially updates a document by merging [patch] into JSON.
   Future<Either<ErrorItem, T>> patchDoc(
     String docId,
     Map<String, dynamic> patch,
-  ) =>
-      patchFields(PatchParams(docId, patch));
+  ) => patchFields(PatchParams(docId, patch));
 
   /// Ensures a document exists; creates or optionally updates it.
   Future<Either<ErrorItem, T>> ensureDoc({
     required String docId,
     required T Function() create,
     T Function(T current)? updateIfExists,
-  }) =>
-      ensure(
-        EnsureParams<T>(
-          docId: docId,
-          create: create,
-          updateIfExists: updateIfExists,
-        ),
-      );
+  }) => ensure(
+    EnsureParams<T>(
+      docId: docId,
+      create: create,
+      updateIfExists: updateIfExists,
+    ),
+  );
 
   /// Reads multiple documents.
   Future<Either<ErrorItem, Map<String, Either<ErrorItem, T>>>> readDocs(
     List<String> ids,
-  ) =>
-      readMany(ReadManyParams(ids));
+  ) => readMany(ReadManyParams(ids));
 
   /// Writes multiple documents.
   Future<Either<ErrorItem, Map<String, Either<ErrorItem, T>>>> writeDocs(
     Map<String, T> entries,
-  ) =>
-      writeMany(WriteManyParams<T>(entries));
+  ) => writeMany(WriteManyParams<T>(entries));
 
   /// Deletes multiple documents.
   Future<Either<ErrorItem, Map<String, Either<ErrorItem, Unit>>>> deleteDocs(
     List<String> ids,
-  ) =>
-      deleteMany(DeleteManyParams(ids));
+  ) => deleteMany(DeleteManyParams(ids));
 
   /// Decrements the watch ref-count for [docId].
   Future<Either<ErrorItem, Unit>> detach(String docId) =>

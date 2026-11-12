@@ -16,10 +16,7 @@ abstract class ErrorMapper {
   });
 
   /// Extract a business error from a payload, or return `null` if none.
-  ErrorItem? fromPayload(
-    Map<String, dynamic> payload, {
-    String location,
-  });
+  ErrorItem? fromPayload(Map<String, dynamic> payload, {String location});
 }
 
 /// Default, conservative error mapper.

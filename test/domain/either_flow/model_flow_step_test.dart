@@ -3,9 +3,7 @@ import 'package:jocaagura_domain/jocaagura_domain.dart';
 
 void main() {
   group('ModelFlowStep.immutable()', () {
-    test(
-        'Given mutable inputs When building immutable Then instance is not affected by later mutations',
-        () {
+    test('Given mutable inputs When building immutable Then instance is not affected by later mutations', () {
       // Arrange
       final List<String> constraints = <String>['requiresInternet'];
       final Map<String, double> cost = <String, double>{
@@ -34,9 +32,7 @@ void main() {
       expect(step.cost['latencyMs'], equals(250));
     });
 
-    test(
-        'Given immutable instance When mutating constraints/cost Then throws UnsupportedError',
-        () {
+    test('Given immutable instance When mutating constraints/cost Then throws UnsupportedError', () {
       // Arrange
       final ModelFlowStep step = ModelFlowStep.immutable(
         index: 1,
@@ -54,9 +50,7 @@ void main() {
       expect(() => step.cost['networkKb'] = 1.0, throwsUnsupportedError);
     });
 
-    test(
-        'Given non-finite/negative costs When building immutable Then normalizes to 0.0',
-        () {
+    test('Given non-finite/negative costs When building immutable Then normalizes to 0.0', () {
       // Arrange
       final Map<String, double> cost = <String, double>{
         'nan': double.nan,
@@ -85,9 +79,7 @@ void main() {
   });
 
   group('ModelFlowStep.fromJson()', () {
-    test(
-        'Given empty json When parsing Then uses safe defaults and returns deeply immutable instance',
-        () {
+    test('Given empty json When parsing Then uses safe defaults and returns deeply immutable instance', () {
       // Arrange
       final Map<String, dynamic> json = <String, dynamic>{};
 
@@ -104,9 +96,7 @@ void main() {
       expect(() => step.cost['k'] = 1.0, throwsUnsupportedError);
     });
 
-    test(
-        'Given cost with dynamic values When parsing Then normalizes invalid to 0.0',
-        () {
+    test('Given cost with dynamic values When parsing Then normalizes invalid to 0.0', () {
       // Arrange
       final Map<String, dynamic> json = <String, dynamic>{
         FlowStepEnum.cost.name: <String, dynamic>{
@@ -126,33 +116,32 @@ void main() {
     });
 
     test(
-        'Given instance When toJson/fromJson Then preserves equality (roundtrip)',
-        () {
-      // Arrange
-      final ModelFlowStep original = ModelFlowStep.immutable(
-        index: 10,
-        title: 'Authenticate',
-        description: 'Runs auth use case',
-        failureCode: 'AUTH_FAILED',
-        nextOnSuccessIndex: 11,
-        nextOnFailureIndex: 99,
-        constraints: const <String>['requiresInternet'],
-        cost: const <String, double>{'latencyMs': 250, 'networkKb': 12.5},
-      );
+      'Given instance When toJson/fromJson Then preserves equality (roundtrip)',
+      () {
+        // Arrange
+        final ModelFlowStep original = ModelFlowStep.immutable(
+          index: 10,
+          title: 'Authenticate',
+          description: 'Runs auth use case',
+          failureCode: 'AUTH_FAILED',
+          nextOnSuccessIndex: 11,
+          nextOnFailureIndex: 99,
+          constraints: const <String>['requiresInternet'],
+          cost: const <String, double>{'latencyMs': 250, 'networkKb': 12.5},
+        );
 
-      // Act
-      final Map<String, dynamic> json = original.toJson();
-      final ModelFlowStep roundtrip = ModelFlowStep.fromJson(json);
+        // Act
+        final Map<String, dynamic> json = original.toJson();
+        final ModelFlowStep roundtrip = ModelFlowStep.fromJson(json);
 
-      // Assert
-      expect(roundtrip, equals(original));
-    });
+        // Assert
+        expect(roundtrip, equals(original));
+      },
+    );
   });
 
   group('ModelFlowStep.copyWith()', () {
-    test(
-        'Given instance When copyWith called with no args Then returns same object (identical)',
-        () {
+    test('Given instance When copyWith called with no args Then returns same object (identical)', () {
       // Arrange
       final ModelFlowStep step = ModelFlowStep.immutable(
         index: 1,
@@ -170,9 +159,7 @@ void main() {
       expect(identical(copied, step), isTrue);
     });
 
-    test(
-        'Given instance When copyWith changes one field Then returns a new object with updated value',
-        () {
+    test('Given instance When copyWith changes one field Then returns a new object with updated value', () {
       // Arrange
       final ModelFlowStep step = ModelFlowStep.immutable(
         index: 1,
@@ -223,9 +210,7 @@ void main() {
       expect(a.hashCode, equals(b.hashCode));
     });
 
-    test(
-        'Given same cost entries with different insertion order When comparing Then equals and same hashCode',
-        () {
+    test('Given same cost entries with different insertion order When comparing Then equals and same hashCode', () {
       // Arrange
       final ModelFlowStep a = ModelFlowStep.immutable(
         index: 1,
@@ -255,9 +240,7 @@ void main() {
       expect(a.hashCode, equals(b.hashCode));
     });
 
-    test(
-        'Given a single instance When reading hashCode multiple times Then it is stable',
-        () {
+    test('Given a single instance When reading hashCode multiple times Then it is stable', () {
       // Arrange
       final ModelFlowStep step = ModelFlowStep.immutable(
         index: 7,

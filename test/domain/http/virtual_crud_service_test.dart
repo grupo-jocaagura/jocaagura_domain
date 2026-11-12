@@ -2,25 +2,25 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('VirtualCrudService contract (via FakeVirtualCrudService)', () {
-    test('Given a matching context When canHandle is called Then returns true',
-        () {
-      // Arrange
-      final VirtualCrudService service = FakeVirtualCrudService();
-      final RequestContext ctx = RequestContext(
-        method: 'GET',
-        uri: Uri.parse('https://example.com/items/42'),
-      );
-
-      // Act
-      final bool result = service.canHandle(ctx);
-
-      // Assert
-      expect(result, isTrue);
-    });
-
     test(
-        'Given a non-matching context When canHandle is called Then returns false',
-        () {
+      'Given a matching context When canHandle is called Then returns true',
+      () {
+        // Arrange
+        final VirtualCrudService service = FakeVirtualCrudService();
+        final RequestContext ctx = RequestContext(
+          method: 'GET',
+          uri: Uri.parse('https://example.com/items/42'),
+        );
+
+        // Act
+        final bool result = service.canHandle(ctx);
+
+        // Assert
+        expect(result, isTrue);
+      },
+    );
+
+    test('Given a non-matching context When canHandle is called Then returns false', () {
       // Arrange
       final VirtualCrudService service = FakeVirtualCrudService();
       final RequestContext ctx = RequestContext(
@@ -35,9 +35,7 @@ void main() {
       expect(result, isFalse);
     });
 
-    test(
-        'Given a matching context When handle is called Then returns a JSON-like payload',
-        () async {
+    test('Given a matching context When handle is called Then returns a JSON-like payload', () async {
       // Arrange
       final FakeVirtualCrudService service = FakeVirtualCrudService();
       final RequestContext ctx = RequestContext(
@@ -55,9 +53,7 @@ void main() {
       expect(payload['calls'], 1);
     });
 
-    test(
-        'Given a non-matching context When handle is called Then throws StateError',
-        () async {
+    test('Given a non-matching context When handle is called Then throws StateError', () async {
       // Arrange
       final FakeVirtualCrudService service = FakeVirtualCrudService();
       final RequestContext ctx = RequestContext(
@@ -69,9 +65,7 @@ void main() {
       expect(() => service.handle(ctx), throwsA(isA<StateError>()));
     });
 
-    test(
-        'Given multiple handle calls When reset is called Then internal state is cleared',
-        () async {
+    test('Given multiple handle calls When reset is called Then internal state is cleared', () async {
       // Arrange
       final FakeVirtualCrudService service = FakeVirtualCrudService();
       final RequestContext ctx = RequestContext(
@@ -89,9 +83,7 @@ void main() {
       expect(payloadAfterReset['calls'], 1);
     });
 
-    test(
-        'Given same context When handle is called twice without reset Then calls increments deterministically',
-        () async {
+    test('Given same context When handle is called twice without reset Then calls increments deterministically', () async {
       // Arrange
       final FakeVirtualCrudService service = FakeVirtualCrudService();
       final RequestContext ctx = RequestContext(
@@ -136,11 +128,7 @@ class FakeVirtualCrudService implements VirtualCrudService {
     _calls += 1;
 
     final int id = int.parse(ctx.uri.pathSegments[1]);
-    return <String, dynamic>{
-      'ok': true,
-      'id': id,
-      'calls': _calls,
-    };
+    return <String, dynamic>{'ok': true, 'id': id, 'calls': _calls};
   }
 
   @override

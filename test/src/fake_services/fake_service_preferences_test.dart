@@ -21,8 +21,9 @@ void main() {
     test('allStream emite estado inicial', () async {
       final List<Map<String, dynamic>> events =
           <Map<String, dynamic>>[]; // antes era List<List<Map<...>>>
-      final StreamSubscription<Map<String, dynamic>> sub =
-          prefs.allStream().listen(events.add);
+      final StreamSubscription<Map<String, dynamic>> sub = prefs
+          .allStream()
+          .listen(events.add);
       await Future<void>.delayed(Duration.zero);
       expect(events.first, isEmpty);
       await sub.cancel();
@@ -30,8 +31,9 @@ void main() {
 
     test('setValue y getValue funcionan correctamente', () async {
       await prefs.setValue(key: 'a', value: 123);
-      final int val =
-          Utils.getIntegerFromDynamic(await prefs.getValue(key: 'a'));
+      final int val = Utils.getIntegerFromDynamic(
+        await prefs.getValue(key: 'a'),
+      );
       expect(val, equals(123));
     });
     test('getValue lanza StateError si la clave no existe', () async {
@@ -56,16 +58,18 @@ void main() {
     test('allStream emite estado inicial', () async {
       final List<Map<String, dynamic>> events =
           <Map<String, dynamic>>[]; // antes era List<List<Map<...>>>
-      final StreamSubscription<Map<String, dynamic>> sub =
-          prefs.allStream().listen(events.add);
+      final StreamSubscription<Map<String, dynamic>> sub = prefs
+          .allStream()
+          .listen(events.add);
       await Future<void>.delayed(Duration.zero);
       expect(events.first, isEmpty);
       await sub.cancel();
     });
 
     test('latencia configurable en getValue', () async {
-      final FakeServicePreferences p =
-          FakeServicePreferences(latency: const Duration(milliseconds: 30));
+      final FakeServicePreferences p = FakeServicePreferences(
+        latency: const Duration(milliseconds: 30),
+      );
       await p.setValue(key: 'a', value: 1);
       final Stopwatch sw = Stopwatch()..start();
       await p.getValue(key: 'a');
@@ -76,14 +80,16 @@ void main() {
 
     group('throwOnGet error cases', () {
       test('getValue lanza StateError si throwOnGet=true', () async {
-        final FakeServicePreferences p =
-            FakeServicePreferences(throwOnGet: true);
+        final FakeServicePreferences p = FakeServicePreferences(
+          throwOnGet: true,
+        );
         expect(() => p.getValue(key: 'x'), throwsA(isA<StateError>()));
         p.dispose();
       });
       test('getAll lanza StateError si throwOnGet=true', () async {
-        final FakeServicePreferences p =
-            FakeServicePreferences(throwOnGet: true);
+        final FakeServicePreferences p = FakeServicePreferences(
+          throwOnGet: true,
+        );
         expect(() => p.getAll(), throwsA(isA<StateError>()));
         p.dispose();
       });
@@ -91,8 +97,9 @@ void main() {
 
     group('throwOnSet error cases', () {
       test('setValue lanza StateError si throwOnSet=true', () async {
-        final FakeServicePreferences p =
-            FakeServicePreferences(throwOnSet: true);
+        final FakeServicePreferences p = FakeServicePreferences(
+          throwOnSet: true,
+        );
         expect(
           () => p.setValue(key: 'a', value: 1),
           throwsA(isA<StateError>()),
@@ -100,17 +107,16 @@ void main() {
         p.dispose();
       });
       test('remove lanza StateError si throwOnSet=true', () async {
-        final FakeServicePreferences p =
-            FakeServicePreferences(throwOnSet: true);
-        expect(
-          () => p.remove(key: 'a'),
-          throwsA(isA<StateError>()),
+        final FakeServicePreferences p = FakeServicePreferences(
+          throwOnSet: true,
         );
+        expect(() => p.remove(key: 'a'), throwsA(isA<StateError>()));
         p.dispose();
       });
       test('clear lanza StateError si throwOnSet=true', () async {
-        final FakeServicePreferences p =
-            FakeServicePreferences(throwOnSet: true);
+        final FakeServicePreferences p = FakeServicePreferences(
+          throwOnSet: true,
+        );
         expect(() => p.clear(), throwsA(isA<StateError>()));
         p.dispose();
       });
@@ -135,8 +141,9 @@ void main() {
       final FakeServicePreferences prefs = FakeServicePreferences();
       final List<Map<String, dynamic>> events =
           <Map<String, dynamic>>[]; // ahora captura Maps, no List<Maps>
-      final StreamSubscription<Map<String, dynamic>> sub =
-          prefs.allStream().listen(events.add);
+      final StreamSubscription<Map<String, dynamic>> sub = prefs
+          .allStream()
+          .listen(events.add);
 
       await prefs.setValue(key: 'a', value: 1);
       await Future<void>.delayed(Duration.zero);
@@ -177,8 +184,9 @@ void main() {
 
     test('reset emite estado vacío en allStream', () async {
       final List<Map<String, dynamic>> events = <Map<String, dynamic>>[];
-      final StreamSubscription<Map<String, dynamic>> sub =
-          prefs.allStream().listen(events.add);
+      final StreamSubscription<Map<String, dynamic>> sub = prefs
+          .allStream()
+          .listen(events.add);
       await prefs.setValue(key: 'a', value: 1);
       await Future<void>.delayed(Duration.zero);
       prefs.reset();

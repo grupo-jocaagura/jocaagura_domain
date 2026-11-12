@@ -43,15 +43,15 @@ void main() {
 
     // Test copyWith
     test('copyWith updates values', () {
-      final AppointmentModel updatedAppointment =
-          defaultAppointmentModel.copyWith(
-        id: 'new_id',
-        date: DateTime(2025, 07, 24),
-        odontologist: 'Dr. María López',
-        purpose: 'Limpieza Dental',
-        status: 'Confirmado',
-        notes: 'Paciente solicita revisión adicional',
-      );
+      final AppointmentModel updatedAppointment = defaultAppointmentModel
+          .copyWith(
+            id: 'new_id',
+            date: DateTime(2025, 07, 24),
+            odontologist: 'Dr. María López',
+            purpose: 'Limpieza Dental',
+            status: 'Confirmado',
+            notes: 'Paciente solicita revisión adicional',
+          );
 
       expect(updatedAppointment.id, 'new_id');
       expect(updatedAppointment.date, DateTime(2025, 07, 24));
@@ -62,8 +62,8 @@ void main() {
     });
 
     test('copyWith without arguments returns the same object', () {
-      final AppointmentModel copiedAppointment =
-          defaultAppointmentModel.copyWith();
+      final AppointmentModel copiedAppointment = defaultAppointmentModel
+          .copyWith();
       expect(copiedAppointment, equals(defaultAppointmentModel));
       expect(
         copiedAppointment.hashCode,
@@ -89,16 +89,18 @@ void main() {
     test('fromJson creates a new instance from json', () {
       final Map<String, String> json = <String, String>{
         AppointmentEnum.id.name: 'new_id',
-        AppointmentEnum.date.name:
-            DateUtils.dateTimeToString(DateTime(2025, 07, 24)),
+        AppointmentEnum.date.name: DateUtils.dateTimeToString(
+          DateTime(2025, 07, 24),
+        ),
         AppointmentEnum.odontologist.name: 'Dr. María López',
         AppointmentEnum.purpose.name: 'Limpieza Dental',
         AppointmentEnum.status.name: 'Confirmado',
         AppointmentEnum.notes.name: 'Paciente solicita revisión adicional',
       };
 
-      final AppointmentModel fromJsonAppointment =
-          AppointmentModel.fromJson(json);
+      final AppointmentModel fromJsonAppointment = AppointmentModel.fromJson(
+        json,
+      );
       expect(fromJsonAppointment, isA<AppointmentModel>());
       expect(fromJsonAppointment.id, 'new_id');
       expect(fromJsonAppointment.date, DateTime(2025, 07, 24));

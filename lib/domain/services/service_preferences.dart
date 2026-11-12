@@ -17,25 +17,18 @@ abstract class ServicePreferences {
   /// Stores a [value] under the given [key].
   ///
   /// Throws [ArgumentError] if [key] is empty.
-  Future<void> setValue({
-    required String key,
-    required dynamic value,
-  });
+  Future<void> setValue({required String key, required dynamic value});
 
   /// Retrieves the value for [key].
   ///
   /// Throws [ArgumentError] if [key] is empty.
   /// Throws [StateError] if no value is found.
-  Future<dynamic> getValue({
-    required String key,
-  });
+  Future<dynamic> getValue({required String key});
 
   /// Removes the entry for [key].
   ///
   /// Throws [ArgumentError] if [key] is empty.
-  Future<void> remove({
-    required String key,
-  });
+  Future<void> remove({required String key});
 
   /// Clears all preferences.
   Future<void> clear();

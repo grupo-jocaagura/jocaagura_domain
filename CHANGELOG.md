@@ -5,6 +5,86 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 Recent entries aim to follow a normalized structure. Older historical entries may preserve some original headings where reclassification would risk changing the original intent.
 
+## Unreleased
+
+## [2.0.0] - 2026-11-11
+
+### Fixed
+
+- Build the atomic version-commit payload on disk so large CHANGELOG files do
+  not exceed Linux argument limits during preparation.
+- Correct formatting in the core catalog identity test and GitHub expression
+  quoting in the legacy publication workflow so Actions can validate the branch.
+
+### Changed
+
+- Align version preparation with the core's atomic version/CHANGELOG update,
+  idempotent retries, full validation before mutation and GitHub-native signatures.
+  Preserve the mandatory exact develop SHA guard for all preparation entrypoints.
+- Run base validation on protected-branch pushes and pull requests, matching the
+  core and avoiding a redundant full-history signature scan on new feature pushes.
+- **Breaking:** require Flutter `>=3.50.0` and Dart `>=3.14.0 <4.0.0`
+  in the package and its example.
+- Replace deprecated Flutter Material/Cupertino umbrella imports with
+  `material_ui` and `cupertino_ui`; update example formatting and retired lint
+  rules for Dart 3.14. Remove an unreachable null check in the HTTP example.
+- Consume and reexport the core 1.3.0 model catalog instead of local duplicate
+  models, defaults, enums and CRUD parameter DTOs. Keep executable use cases and
+  the Flutter menu adapter; hide the core menu type from this facade to avoid a
+  name collision. Adopt the canonical JSON decoding and collection equality/hash
+  behavior, including the core fixes for death records and legal identity data.
+- Remove the local `Model` base implementation and use the canonical core
+  contract throughout the package, preserving its existing public export.
+- Preserve the previous inherited immutability contract with explicit
+  `@immutable` annotations on local model subclasses.
+- **Breaking:** expose the canonical core `ModelVector`. Replace
+  `ModelVector.fromOffset(offset)` with `UtilsFlutter.fromOffset(offset)` and
+  `vector.offset` with `UtilsFlutter.toOffset(vector)`. Both conversions preserve
+  the original coordinates without rounding or validation. The vector enum and
+  constants remain available through the existing package entrypoint.
+- Require `jocaagura_domain_core: ^1.3.0` as the dependency baseline for the
+  domain migration tracked in #212. Release pipeline certification remains
+  pending under #213.
+
+### CI/CD
+
+- Reconcile the historical 1.43.0 release squash into develop without restoring
+  superseded local model implementations, allowing the official release PR.
+- Homologate the controlled tag publisher with the core: exact official release
+  PR provenance, immutable source, full Flutter CI, OIDC identity checks,
+  duplicate prevention and hosted-publication evidence.
+- Add a non-publishing OIDC probe, fail-closed release tests and Actions CodeQL.
+- Preserve the required master check and replace the legacy master-push uploader.
+- Correct package repository metadata to the canonical organization URL.
+
+## [1.43.2] - 2026-09-18
+
+### CI/CD
+
+- Make pull request validation to `develop` read-only.
+- Remove automatic package version mutation from PR validation.
+- Remove CI-generated commits and branch pushes from the validation flow.
+- Add Flutter test coverage enforcement with a 90% minimum.
+- Add JSON Schema validation to the PR quality gates.
+- Add `flutter pub publish --dry-run` as a publication-readiness check.
+- Add deterministic release-policy validation for package version preparation.
+- Add a manually triggered version-preparation workflow guarded by the exact `develop` source SHA.
+- Replace legacy user impersonation with GitHub-native GraphQL version commits using the workflow token.
+- Require exact-head compare-and-swap validation and post-commit signature verification for version preparation.
+
+> Package version preparation and automated pub.dev publication remain outside this checkpoint until CP3-B execution is certified.
+## [1.43.1] - 2026-09-18
+
+### CI/CD
+
+- Add a reusable read-only base validation workflow.
+- Preserve signed commit validation and Flutter static analysis.
+- Add deterministic package discovery and dependency override checks.
+- Add structured validation summaries.
+- Prepare the repository for the staged CI/CD governance alignment tracked in #213.
+
+> Automated pub.dev publication certification is not part of this release.
+
 ## [1.43.0] - 2026-08-17
 
 ### Added
@@ -18,7 +98,8 @@ Recent entries aim to follow a normalized structure. Older historical entries ma
   * Added explicit fallback-language support using `ModelLanguage.undetermined` when no fallback is declared.
   * Added deterministic JSON round-trip support for localized text using stable public JSON keys and nested `ModelLanguage` serialization.
   * Exported the new internationalization models through the main `jocaagura_domain` library.
-
+  * Add deterministic release-policy validation for package version preparation.
+  * Add a manually triggered version-preparation workflow guarded by the exact `develop` source SHA.
 ### Changed
 
 * Updated analyzer exclusions for generated Flutter build and platform directories in the package and example project.

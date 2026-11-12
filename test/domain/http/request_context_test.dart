@@ -2,9 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('RequestContext', () {
-    test(
-        'Given required fields only When created Then optional fields are null and metadata is empty',
-        () {
+    test('Given required fields only When created Then optional fields are null and metadata is empty', () {
       // Arrange
       final Uri uri = Uri.parse('https://example.com');
 
@@ -21,39 +19,39 @@ void main() {
       expect(ctx.metadata, isEmpty);
     });
 
-    test('Given all fields When created Then values are preserved by reference',
-        () {
-      // Arrange
-      final Uri uri = Uri.parse('https://example.com/api');
-      final Map<String, String> headers = <String, String>{'x-id': '123'};
-      final Map<String, dynamic> body = <String, dynamic>{'name': 'Ada'};
-      const Duration timeout = Duration(seconds: 2);
-      final Map<String, dynamic> metadata = <String, dynamic>{
-        'forceError': true,
-      };
-
-      // Act
-      final RequestContext ctx = RequestContext(
-        method: 'POST',
-        uri: uri,
-        headers: headers,
-        body: body,
-        timeout: timeout,
-        metadata: metadata,
-      );
-
-      // Assert
-      expect(ctx.method, 'POST');
-      expect(ctx.uri, uri);
-      expect(ctx.headers, same(headers));
-      expect(ctx.body, same(body));
-      expect(ctx.timeout, timeout);
-      expect(ctx.metadata, same(metadata));
-    });
-
     test(
-        'Given default metadata When trying to mutate Then it throws UnsupportedError',
-        () {
+      'Given all fields When created Then values are preserved by reference',
+      () {
+        // Arrange
+        final Uri uri = Uri.parse('https://example.com/api');
+        final Map<String, String> headers = <String, String>{'x-id': '123'};
+        final Map<String, dynamic> body = <String, dynamic>{'name': 'Ada'};
+        const Duration timeout = Duration(seconds: 2);
+        final Map<String, dynamic> metadata = <String, dynamic>{
+          'forceError': true,
+        };
+
+        // Act
+        final RequestContext ctx = RequestContext(
+          method: 'POST',
+          uri: uri,
+          headers: headers,
+          body: body,
+          timeout: timeout,
+          metadata: metadata,
+        );
+
+        // Assert
+        expect(ctx.method, 'POST');
+        expect(ctx.uri, uri);
+        expect(ctx.headers, same(headers));
+        expect(ctx.body, same(body));
+        expect(ctx.timeout, timeout);
+        expect(ctx.metadata, same(metadata));
+      },
+    );
+
+    test('Given default metadata When trying to mutate Then it throws UnsupportedError', () {
       // Arrange
       final RequestContext ctx = RequestContext(
         method: 'GET',
@@ -64,9 +62,7 @@ void main() {
       expect(() => ctx.metadata['a'] = 1, throwsA(isA<UnsupportedError>()));
     });
 
-    test(
-        'Given const constructor When instantiated as const Then instance is canonicalized',
-        () {
+    test('Given const constructor When instantiated as const Then instance is canonicalized', () {
       // Arrange & Act
       final RequestContext a = RequestContext(
         method: 'GET',
@@ -81,9 +77,7 @@ void main() {
       expect(identical(a.uri.toString(), b.uri.toString()), isTrue);
     });
 
-    test(
-        'Given mutable metadata When caller mutates map Then ctx observes the change (documented behavior)',
-        () {
+    test('Given mutable metadata When caller mutates map Then ctx observes the change (documented behavior)', () {
       // Arrange
       final Map<String, dynamic> metadata = <String, dynamic>{'flag': false};
       final RequestContext ctx = RequestContext(

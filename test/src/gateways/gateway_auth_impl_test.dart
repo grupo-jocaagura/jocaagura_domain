@@ -10,10 +10,10 @@ class _FakeErrorItem extends ErrorItem {
     required String message,
     String? location,
   }) : super(
-          title: message,
-          description: location ?? message,
-          meta: const <String, dynamic>{},
-        );
+         title: message,
+         description: location ?? message,
+         meta: const <String, dynamic>{},
+       );
 }
 
 /// Fake ErrorMapper: mapea payloads con {ok:false} a ErrorItem y excepciones a ErrorItem.
@@ -54,7 +54,7 @@ class _StubServiceSession implements ServiceSession {
     this.logoutJson,
     this.currentUserJson,
     this.isSignedInJson,
-    Stream<Map<String, dynamic>?>? authStream,
+    this._authStream,
     this.throwOnSignIn = false,
     this.throwOnLogin = false,
     this.throwOnGoogle = false,
@@ -64,7 +64,7 @@ class _StubServiceSession implements ServiceSession {
     this.throwOnLogout = false,
     this.throwOnCurrent = false,
     this.throwOnIsSignedIn = false,
-  }) : _authStream = authStream;
+  });
 
   final Map<String, dynamic>? signInJson;
   final Map<String, dynamic>? loginJson;
@@ -208,26 +208,23 @@ Future<T> _expectRight<T>(
 
 Future<ErrorItem> _expectLeft<T>(Future<Either<ErrorItem, T>> fut) async {
   final Either<ErrorItem, T> r = await fut;
-  return r.fold(
-    (ErrorItem l) => l,
-    (T val) {
-      fail('Expected Left but got Right: $val');
-    },
-  );
+  return r.fold((ErrorItem l) => l, (T val) {
+    fail('Expected Left but got Right: $val');
+  });
 }
 
 // ======= TESTS =======
 
 void main() {
   group('GatewayAuthImpl | _guardJson paths', () {
-    test(
-        'Given success payload When logInUserAndPassword Then returns Right(user)',
-        () async {
+    test('Given success payload When logInUserAndPassword Then returns Right(user)', () async {
       final _StubServiceSession svc = _StubServiceSession(
         loginJson: <String, dynamic>{'email': 'a@b.com', 'ok': true},
       );
-      final GatewayAuthImpl gw =
-          GatewayAuthImpl(svc, errorMapper: const _FakeErrorMapper());
+      final GatewayAuthImpl gw = GatewayAuthImpl(
+        svc,
+        errorMapper: const _FakeErrorMapper(),
+      );
 
       await _expectRight<Map<String, dynamic>>(
         gw.logInUserAndPassword('a@b.com', 'x'),
@@ -236,33 +233,37 @@ void main() {
     });
 
     test(
-        'Given payload error (ok:false) When signIn Then returns Left(ErrorItem)',
-        () async {
-      final _StubServiceSession svc = _StubServiceSession(
-        signInJson: <String, dynamic>{
-          'ok': false,
-          'code': 'E100',
-          'message': 'invalid',
-        },
+      'Given payload error (ok:false) When signIn Then returns Left(ErrorItem)',
+      () async {
+        final _StubServiceSession svc = _StubServiceSession(
+          signInJson: <String, dynamic>{
+            'ok': false,
+            'code': 'E100',
+            'message': 'invalid',
+          },
+        );
+        final GatewayAuthImpl gw = GatewayAuthImpl(
+          svc,
+          errorMapper: const _FakeErrorMapper(),
+        );
+
+        final ErrorItem err = await _expectLeft<Map<String, dynamic>>(
+          gw.signInUserAndPassword('x@y.com', 'x'),
+        );
+        expect(err, isA<ErrorItem>());
+      },
+    );
+
+    test('Given service throws exception When getCurrentUser Then returns Left(ErrorItem)', () async {
+      final _StubServiceSession svc = _StubServiceSession(throwOnCurrent: true);
+      final GatewayAuthImpl gw = GatewayAuthImpl(
+        svc,
+        errorMapper: const _FakeErrorMapper(),
       );
-      final GatewayAuthImpl gw =
-          GatewayAuthImpl(svc, errorMapper: const _FakeErrorMapper());
 
       final ErrorItem err = await _expectLeft<Map<String, dynamic>>(
-        gw.signInUserAndPassword('x@y.com', 'x'),
+        gw.getCurrentUser(),
       );
-      expect(err, isA<ErrorItem>());
-    });
-
-    test(
-        'Given service throws exception When getCurrentUser Then returns Left(ErrorItem)',
-        () async {
-      final _StubServiceSession svc = _StubServiceSession(throwOnCurrent: true);
-      final GatewayAuthImpl gw =
-          GatewayAuthImpl(svc, errorMapper: const _FakeErrorMapper());
-
-      final ErrorItem err =
-          await _expectLeft<Map<String, dynamic>>(gw.getCurrentUser());
       expect(err, isA<ErrorItem>());
     });
   });
@@ -333,9 +334,7 @@ void main() {
     test('isSignedIn Right', () async {
       final GatewayAuthImpl gw = GatewayAuthImpl(
         _StubServiceSession(
-          isSignedInJson: <String, dynamic>{
-            'isSignedIn': true,
-          },
+          isSignedInJson: <String, dynamic>{'isSignedIn': true},
         ),
         errorMapper: const _FakeErrorMapper(),
       );
@@ -349,15 +348,16 @@ void main() {
   });
 
   group('GatewayAuthImpl | authStateChanges stream', () {
-    test(
-        'Given sequence [null, user] When listen Then emits Right(null) then Right(user)',
-        () async {
+    test('Given sequence [null, user] When listen Then emits Right(null) then Right(user)', () async {
       final StreamController<Map<String, dynamic>?> ctrl =
           StreamController<Map<String, dynamic>?>();
-      final _StubServiceSession svc =
-          _StubServiceSession(authStream: ctrl.stream);
-      final GatewayAuthImpl gw =
-          GatewayAuthImpl(svc, errorMapper: const _FakeErrorMapper());
+      final _StubServiceSession svc = _StubServiceSession(
+        authStream: ctrl.stream,
+      );
+      final GatewayAuthImpl gw = GatewayAuthImpl(
+        svc,
+        errorMapper: const _FakeErrorMapper(),
+      );
 
       final List<Either<ErrorItem, Map<String, dynamic>?>> emissions =
           <Either<ErrorItem, Map<String, dynamic>?>>[];
@@ -385,53 +385,65 @@ void main() {
       );
     });
 
-    test('Given payload error ok:false When listen Then emits Left(ErrorItem)',
-        () async {
-      final StreamController<Map<String, dynamic>?> ctrl =
-          StreamController<Map<String, dynamic>?>();
-      final _StubServiceSession svc =
-          _StubServiceSession(authStream: ctrl.stream);
-      final GatewayAuthImpl gw =
-          GatewayAuthImpl(svc, errorMapper: const _FakeErrorMapper());
+    test(
+      'Given payload error ok:false When listen Then emits Left(ErrorItem)',
+      () async {
+        final StreamController<Map<String, dynamic>?> ctrl =
+            StreamController<Map<String, dynamic>?>();
+        final _StubServiceSession svc = _StubServiceSession(
+          authStream: ctrl.stream,
+        );
+        final GatewayAuthImpl gw = GatewayAuthImpl(
+          svc,
+          errorMapper: const _FakeErrorMapper(),
+        );
 
-      final Completer<void> seenLeft = Completer<void>();
-      final StreamSubscription<Either<ErrorItem, Map<String, dynamic>?>> sub =
-          gw
-              .authStateChanges()
-              .listen((Either<ErrorItem, Map<String, dynamic>?> e) {
-        e.fold((ErrorItem l) => seenLeft.complete(), (_) {});
-      });
+        final Completer<void> seenLeft = Completer<void>();
+        final StreamSubscription<Either<ErrorItem, Map<String, dynamic>?>> sub =
+            gw.authStateChanges().listen((
+              Either<ErrorItem, Map<String, dynamic>?> e,
+            ) {
+              e.fold((ErrorItem l) => seenLeft.complete(), (_) {});
+            });
 
-      ctrl.add(
-        <String, dynamic>{'ok': false, 'code': 'E200', 'message': 'nope'},
-      );
-      await seenLeft.future;
-      await ctrl.close();
-      await sub.cancel();
-    });
+        ctrl.add(<String, dynamic>{
+          'ok': false,
+          'code': 'E200',
+          'message': 'nope',
+        });
+        await seenLeft.future;
+        await ctrl.close();
+        await sub.cancel();
+      },
+    );
 
-    test('Given service stream addError When listen Then emits Left(ErrorItem)',
-        () async {
-      final StreamController<Map<String, dynamic>?> ctrl =
-          StreamController<Map<String, dynamic>?>();
-      final _StubServiceSession svc =
-          _StubServiceSession(authStream: ctrl.stream);
-      final GatewayAuthImpl gw =
-          GatewayAuthImpl(svc, errorMapper: const _FakeErrorMapper());
+    test(
+      'Given service stream addError When listen Then emits Left(ErrorItem)',
+      () async {
+        final StreamController<Map<String, dynamic>?> ctrl =
+            StreamController<Map<String, dynamic>?>();
+        final _StubServiceSession svc = _StubServiceSession(
+          authStream: ctrl.stream,
+        );
+        final GatewayAuthImpl gw = GatewayAuthImpl(
+          svc,
+          errorMapper: const _FakeErrorMapper(),
+        );
 
-      final Completer<void> seenLeft = Completer<void>();
-      final StreamSubscription<Either<ErrorItem, Map<String, dynamic>?>> sub =
-          gw
-              .authStateChanges()
-              .listen((Either<ErrorItem, Map<String, dynamic>?> e) {
-        e.fold((_) => seenLeft.complete(), (_) {});
-      });
+        final Completer<void> seenLeft = Completer<void>();
+        final StreamSubscription<Either<ErrorItem, Map<String, dynamic>?>> sub =
+            gw.authStateChanges().listen((
+              Either<ErrorItem, Map<String, dynamic>?> e,
+            ) {
+              e.fold((_) => seenLeft.complete(), (_) {});
+            });
 
-      ctrl.addError(StateError('boom')); // debe mapear a Left(ErrorItem)
-      await seenLeft.future;
-      await ctrl.close();
-      await sub.cancel();
-    });
+        ctrl.addError(StateError('boom')); // debe mapear a Left(ErrorItem)
+        await seenLeft.future;
+        await ctrl.close();
+        await sub.cancel();
+      },
+    );
     test('Stub accepts all optional constructor params (silences lints)', () {
       final _StubServiceSession stub = _StubServiceSession(
         signInJson: <String, dynamic>{'ok': true},

@@ -1,7 +1,7 @@
 import 'dart:math';
 
-import 'package:flutter/material.dart';
 import 'package:jocaagura_domain/jocaagura_domain.dart';
+import 'package:material_ui/material_ui.dart';
 
 void main() => runApp(const JgEducationDemoApp());
 
@@ -38,7 +38,8 @@ class AssessmentChooserPage extends StatelessWidget {
           children: <Widget>[
             _AssessmentCard(
               title: math.title,
-              subtitle: 'Preguntas: ${math.items.length} • '
+              subtitle:
+                  'Preguntas: ${math.items.length} • '
                   'Tiempo: ${math.timeLimit == Duration.zero ? 'sin límite' : '${math.timeLimit.inMinutes} min'} • '
                   'Aprobación: ${math.passScore}%',
               onTap: () => Navigator.of(context).push(
@@ -50,7 +51,8 @@ class AssessmentChooserPage extends StatelessWidget {
             const SizedBox(height: 12),
             _AssessmentCard(
               title: art.title,
-              subtitle: 'Preguntas: ${art.items.length} • '
+              subtitle:
+                  'Preguntas: ${art.items.length} • '
                   'Tiempo: ${art.timeLimit.inMinutes} min • '
                   'Aprobación: ${art.passScore}%',
               onTap: () => Navigator.of(context).push(
@@ -182,8 +184,10 @@ ModelAssessment _buildMathAssessment() {
       attributes: const <ModelAttribute<dynamic>>[],
       achievementOne: indicator,
       estimatedTimeForAnswer: const Duration(minutes: 1),
-      category:
-          const ModelCategory(category: 'math', description: 'Matemáticas'),
+      category: const ModelCategory(
+        category: 'math',
+        description: 'Matemáticas',
+      ),
       cineLevel: 1,
     );
   }
@@ -262,8 +266,10 @@ ModelAssessment _buildDigitalArtAssessmentAdvanced() {
       attributes: const <ModelAttribute<dynamic>>[],
       achievementOne: indicator,
       estimatedTimeForAnswer: const Duration(seconds: 20),
-      category:
-          const ModelCategory(category: 'art', description: 'Arte Digital'),
+      category: const ModelCategory(
+        category: 'art',
+        description: 'Arte Digital',
+      ),
       cineLevel: 3,
     );
   }
@@ -386,9 +392,11 @@ class AssessmentHome extends StatelessWidget {
               style: Theme.of(context).textTheme.headlineSmall,
             ),
             const SizedBox(height: 8),
-            Text('Preguntas: ${assessment.items.length} • '
-                'Tiempo: ${assessment.timeLimit == Duration.zero ? 'sin límite' : '${assessment.timeLimit.inMinutes} min'} • '
-                'Aprobación: ${assessment.passScore}%'),
+            Text(
+              'Preguntas: ${assessment.items.length} • '
+              'Tiempo: ${assessment.timeLimit == Duration.zero ? 'sin límite' : '${assessment.timeLimit.inMinutes} min'} • '
+              'Aprobación: ${assessment.passScore}%',
+            ),
             const SizedBox(height: 12),
             Card(
               elevation: 1,
@@ -457,11 +465,13 @@ class _AssessmentRunnerPageState extends State<AssessmentRunnerPage> {
     if (a.shuffleItems) {
       items.shuffle(Random(a.id.hashCode));
     }
-    return items.map((ModelLearningItem it) {
-      final int seed = it.id.hashCode;
-      final List<String> opts = it.optionsShuffled(seed);
-      return ItemInstance(item: it, options: opts);
-    }).toList(growable: false);
+    return items
+        .map((ModelLearningItem it) {
+          final int seed = it.id.hashCode;
+          final List<String> opts = it.optionsShuffled(seed);
+          return ItemInstance(item: it, options: opts);
+        })
+        .toList(growable: false);
   }
 
   void _choose(String itemId, String option) {
@@ -567,8 +577,9 @@ class _AssessmentRunnerPageState extends State<AssessmentRunnerPage> {
             Row(
               children: <Widget>[
                 OutlinedButton.icon(
-                  onPressed:
-                      _index == 0 ? null : () => setState(() => _index--),
+                  onPressed: _index == 0
+                      ? null
+                      : () => setState(() => _index--),
                   icon: const Icon(Icons.arrow_back),
                   label: const Text('Atrás'),
                 ),
@@ -708,8 +719,9 @@ class AssessmentResultPage extends StatelessWidget {
                 ),
                 const Spacer(),
                 FilledButton.icon(
-                  onPressed: () => Navigator.of(context)
-                      .popUntil((Route<dynamic> r) => r.isFirst),
+                  onPressed: () =>
+                      Navigator.of(context)
+                          .popUntil((Route<dynamic> r) => r.isFirst),
                   icon: const Icon(Icons.home),
                   label: const Text('Inicio'),
                 ),

@@ -16,9 +16,10 @@ class FakeServiceNotifications implements ServiceNotifications {
     this.latency = Duration.zero,
     this.throwOnPermission = false,
     this.throwOnNotification = false,
-  })  : _notificationsBloc =
-            BlocGeneral<List<Map<String, dynamic>>>(<Map<String, dynamic>>[]),
-        _tapBloc = BlocGeneral<Map<String, dynamic>>(<String, dynamic>{});
+  }) : _notificationsBloc = BlocGeneral<List<Map<String, dynamic>>>(
+         <Map<String, dynamic>>[],
+       ),
+       _tapBloc = BlocGeneral<Map<String, dynamic>>(<String, dynamic>{});
 
   /// Simulated latency para todas las operaciones.
   final Duration latency;

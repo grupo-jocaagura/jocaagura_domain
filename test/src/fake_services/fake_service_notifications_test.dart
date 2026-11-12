@@ -20,8 +20,9 @@ void main() {
     });
 
     test('permissionsStream inicial vacío y error simulado', () async {
-      final FakeServiceNotifications svcErr =
-          FakeServiceNotifications(throwOnPermission: true);
+      final FakeServiceNotifications svcErr = FakeServiceNotifications(
+        throwOnPermission: true,
+      );
       expect(() => svcErr.requestPermission(), throwsA(isA<StateError>()));
       svcErr.dispose();
     });
@@ -29,8 +30,9 @@ void main() {
     test('notificationsStream emite lista inicial vacía', () async {
       final List<List<Map<String, dynamic>>> events =
           <List<Map<String, dynamic>>>[];
-      final StreamSubscription<List<Map<String, dynamic>>> sub =
-          svc.notificationsStream().listen(events.add);
+      final StreamSubscription<List<Map<String, dynamic>>> sub = svc
+          .notificationsStream()
+          .listen(events.add);
       await Future<void>.delayed(Duration.zero);
       expect(events.first, isEmpty);
       await sub.cancel();
@@ -39,8 +41,9 @@ void main() {
     test('showNotification agrega y emite notificación', () async {
       final List<List<Map<String, dynamic>>> events =
           <List<Map<String, dynamic>>>[];
-      final StreamSubscription<List<Map<String, dynamic>>> sub =
-          svc.notificationsStream().listen(events.add);
+      final StreamSubscription<List<Map<String, dynamic>>> sub = svc
+          .notificationsStream()
+          .listen(events.add);
       await svc.showNotification(id: 1, title: 'T', body: 'B');
       await Future<void>.delayed(Duration.zero);
       expect(events.last.length, 1);
@@ -56,8 +59,9 @@ void main() {
       await svc.showNotification(id: 2, title: 'x', body: 'y');
       final List<List<Map<String, dynamic>>> events =
           <List<Map<String, dynamic>>>[];
-      final StreamSubscription<List<Map<String, dynamic>>> sub =
-          svc.notificationsStream().listen(events.add);
+      final StreamSubscription<List<Map<String, dynamic>>> sub = svc
+          .notificationsStream()
+          .listen(events.add);
       await svc.cancelNotification(2);
       await Future<void>.delayed(Duration.zero);
       expect(events.last, isEmpty);
@@ -68,8 +72,9 @@ void main() {
       await svc.showNotification(id: 3, title: 'a', body: 'b');
       final List<List<Map<String, dynamic>>> events =
           <List<Map<String, dynamic>>>[];
-      final StreamSubscription<List<Map<String, dynamic>>> sub =
-          svc.notificationsStream().listen(events.add);
+      final StreamSubscription<List<Map<String, dynamic>>> sub = svc
+          .notificationsStream()
+          .listen(events.add);
       await svc.cancelAllNotifications();
       await Future<void>.delayed(Duration.zero);
       expect(events.last, isEmpty);
@@ -78,8 +83,9 @@ void main() {
 
     test('notificationTapStream emite payload simulado', () async {
       final List<Map<String, dynamic>> events = <Map<String, dynamic>>[];
-      final StreamSubscription<Map<String, dynamic>> sub =
-          svc.notificationTapStream().listen(events.add);
+      final StreamSubscription<Map<String, dynamic>> sub = svc
+          .notificationTapStream()
+          .listen(events.add);
       svc.simulateTap(<String, dynamic>{'foo': 'bar'});
       await Future<void>.delayed(Duration.zero);
       expect(events.last, <String, String>{'foo': 'bar'});
@@ -91,10 +97,12 @@ void main() {
           <List<Map<String, dynamic>>>[];
       final List<List<Map<String, dynamic>>> e2 =
           <List<Map<String, dynamic>>>[];
-      final StreamSubscription<List<Map<String, dynamic>>> s1 =
-          svc.notificationsStream().listen(e1.add);
-      final StreamSubscription<List<Map<String, dynamic>>> s2 =
-          svc.notificationsStream().listen(e2.add);
+      final StreamSubscription<List<Map<String, dynamic>>> s1 = svc
+          .notificationsStream()
+          .listen(e1.add);
+      final StreamSubscription<List<Map<String, dynamic>>> s2 = svc
+          .notificationsStream()
+          .listen(e2.add);
       await svc.showNotification(id: 4, title: 'T4', body: 'B4');
       await Future<void>.delayed(Duration.zero);
       expect(e1, equals(e2));
@@ -123,24 +131,13 @@ void main() {
       final FakeServiceNotifications svc = FakeServiceNotifications();
       final List<List<Map<String, dynamic>>> events =
           <List<Map<String, dynamic>>>[];
-      final StreamSubscription<List<Map<String, dynamic>>> sub =
-          svc.notificationsStream().listen(events.add);
+      final StreamSubscription<List<Map<String, dynamic>>> sub = svc
+          .notificationsStream()
+          .listen(events.add);
       final List<Map<String, Object>> entries = <Map<String, Object>>[
-        <String, Object>{
-          'id': 1,
-          'title': 'A',
-          'body': 'a',
-        },
-        <String, Object>{
-          'id': 2,
-          'title': 'B',
-          'body': 'b',
-        },
-        <String, Object>{
-          'id': 3,
-          'title': 'C',
-          'body': 'c',
-        },
+        <String, Object>{'id': 1, 'title': 'A', 'body': 'a'},
+        <String, Object>{'id': 2, 'title': 'B', 'body': 'b'},
+        <String, Object>{'id': 3, 'title': 'C', 'body': 'c'},
       ];
       for (final Map<String, Object> e in entries) {
         await svc.showNotification(
@@ -185,10 +182,12 @@ void main() {
           <List<Map<String, dynamic>>>[];
       final List<Map<String, dynamic>> tapEvents = <Map<String, dynamic>>[];
 
-      final StreamSubscription<List<Map<String, dynamic>>> sub1 =
-          svc.notificationsStream().listen(notifEvents.add);
-      final StreamSubscription<Map<String, dynamic>> sub2 =
-          svc.notificationTapStream().listen(tapEvents.add);
+      final StreamSubscription<List<Map<String, dynamic>>> sub1 = svc
+          .notificationsStream()
+          .listen(notifEvents.add);
+      final StreamSubscription<Map<String, dynamic>> sub2 = svc
+          .notificationTapStream()
+          .listen(tapEvents.add);
 
       await svc.showNotification(id: 1, title: 'A', body: 'B');
       svc.simulateTap(<String, dynamic>{'from': 'test'});
@@ -214,38 +213,36 @@ void main() {
   // Añade este grupo al final de fake_service_notifications_test.dart
 
   group('throwOnNotification error cases', () {
-    test('showNotification lanza StateError cuando throwOnNotification es true',
-        () async {
-      final FakeServiceNotifications svc =
-          FakeServiceNotifications(throwOnNotification: true);
-      expect(
-        () => svc.showNotification(id: 1, title: 'T', body: 'B'),
-        throwsA(isA<StateError>()),
-      );
-      svc.dispose();
-    });
+    test(
+      'showNotification lanza StateError cuando throwOnNotification es true',
+      () async {
+        final FakeServiceNotifications svc = FakeServiceNotifications(
+          throwOnNotification: true,
+        );
+        expect(
+          () => svc.showNotification(id: 1, title: 'T', body: 'B'),
+          throwsA(isA<StateError>()),
+        );
+        svc.dispose();
+      },
+    );
 
     test(
-        'cancelNotification lanza StateError cuando throwOnNotification es true',
-        () async {
-      final FakeServiceNotifications svc =
-          FakeServiceNotifications(throwOnNotification: true);
-      expect(
-        () => svc.cancelNotification(1),
-        throwsA(isA<StateError>()),
-      );
-      svc.dispose();
-    });
+      'cancelNotification lanza StateError cuando throwOnNotification es true',
+      () async {
+        final FakeServiceNotifications svc = FakeServiceNotifications(
+          throwOnNotification: true,
+        );
+        expect(() => svc.cancelNotification(1), throwsA(isA<StateError>()));
+        svc.dispose();
+      },
+    );
 
-    test(
-        'cancelAllNotifications lanza StateError cuando throwOnNotification es true',
-        () async {
-      final FakeServiceNotifications svc =
-          FakeServiceNotifications(throwOnNotification: true);
-      expect(
-        () => svc.cancelAllNotifications(),
-        throwsA(isA<StateError>()),
+    test('cancelAllNotifications lanza StateError cuando throwOnNotification es true', () async {
+      final FakeServiceNotifications svc = FakeServiceNotifications(
+        throwOnNotification: true,
       );
+      expect(() => svc.cancelAllNotifications(), throwsA(isA<StateError>()));
       svc.dispose();
     });
   });

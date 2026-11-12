@@ -27,8 +27,8 @@ class FakeRepositoryAuth implements RepositoryAuth {
 
   final BlocGeneral<Either<ErrorItem, UserModel?>> _authCtrl =
       BlocGeneral<Either<ErrorItem, UserModel?>>(
-    const Right<ErrorItem, UserModel?>(defaultUserModel),
-  );
+        const Right<ErrorItem, UserModel?>(defaultUserModel),
+      );
 
   void emitAuth(Either<ErrorItem, UserModel?> error) {
     if (_authCtrl.value.isLeft || _authCtrl.value.isRight) {
@@ -97,9 +97,7 @@ class FakeRepositoryAuth implements RepositoryAuth {
     logInSilentlyCalls++;
     return nextSilentResult ??
         Right<ErrorItem, UserModel>(
-          currentUser.copyWith(
-            jwt: <String, dynamic>{'ref': 'silent'},
-          ),
+          currentUser.copyWith(jwt: <String, dynamic>{'ref': 'silent'}),
         );
   }
 
@@ -110,9 +108,7 @@ class FakeRepositoryAuth implements RepositoryAuth {
     refreshSessionCalls++;
     return nextRefreshResult ??
         Right<ErrorItem, UserModel>(
-          currentUser.copyWith(
-            jwt: <String, dynamic>{'ref': 'refresh'},
-          ),
+          currentUser.copyWith(jwt: <String, dynamic>{'ref': 'refresh'}),
         );
   }
 

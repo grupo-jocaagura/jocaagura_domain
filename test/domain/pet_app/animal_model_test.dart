@@ -46,8 +46,10 @@ void main() {
     });
 
     test('copyWith returns updated instance', () {
-      final AnimalModel updatedAnimal =
-          mockAnimal.copyWith(energy: 70, joyful: 100);
+      final AnimalModel updatedAnimal = mockAnimal.copyWith(
+        energy: 70,
+        joyful: 100,
+      );
       expect(updatedAnimal.energy, 70);
       expect(updatedAnimal.joyful, 100);
       expect(updatedAnimal.weight, mockAnimal.weight);

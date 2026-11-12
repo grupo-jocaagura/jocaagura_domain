@@ -16,8 +16,9 @@ void main() {
         'internetSpeed': 100.0,
       };
 
-      final ConnectivityModel connectivityModel =
-          ConnectivityModel.fromJson(json);
+      final ConnectivityModel connectivityModel = ConnectivityModel.fromJson(
+        json,
+      );
 
       expect(connectivityModel.connectionType, ConnectionTypeEnum.wifi);
       expect(connectivityModel.internetSpeed, 100.0);
@@ -43,9 +44,7 @@ void main() {
         internetSpeed: 1000.0,
       );
 
-      final ConnectivityModel copied = original.copyWith(
-        internetSpeed: 500.0,
-      );
+      final ConnectivityModel copied = original.copyWith(internetSpeed: 500.0);
       final ConnectivityModel copiedOriginal = original.copyWith();
 
       expect(copied == original, false);
@@ -74,16 +73,18 @@ void main() {
       expect(hasConnectionModel.isConnected, isTrue);
     });
 
-    test('getConnectionTypeEnumFromString debería devolver el tipo correcto',
-        () {
-      expect(
-        ConnectivityModel.getConnectionTypeEnumFromString('mobile'),
-        ConnectionTypeEnum.mobile,
-      );
-      expect(
-        ConnectivityModel.getConnectionTypeEnumFromString('nonexistentType'),
-        ConnectionTypeEnum.other,
-      );
-    });
+    test(
+      'getConnectionTypeEnumFromString debería devolver el tipo correcto',
+      () {
+        expect(
+          ConnectivityModel.getConnectionTypeEnumFromString('mobile'),
+          ConnectionTypeEnum.mobile,
+        );
+        expect(
+          ConnectivityModel.getConnectionTypeEnumFromString('nonexistentType'),
+          ConnectionTypeEnum.other,
+        );
+      },
+    );
   });
 }

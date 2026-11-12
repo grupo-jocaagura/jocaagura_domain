@@ -71,8 +71,9 @@ void main() {
     });
 
     test('unknown returns custom description if provided', () {
-      final ErrorItem error =
-          WebSocketErrorItems.unknown(reason: 'Timeout at handshake');
+      final ErrorItem error = WebSocketErrorItems.unknown(
+        reason: 'Timeout at handshake',
+      );
       expect(error.description, 'Timeout at handshake');
     });
   });
@@ -93,8 +94,9 @@ void main() {
     });
 
     test('returns invalidResponse', () {
-      final ErrorItem error =
-          WebSocketErrorItems.fromCode('WS_INVALID_RESPONSE');
+      final ErrorItem error = WebSocketErrorItems.fromCode(
+        'WS_INVALID_RESPONSE',
+      );
       expect(error, WebSocketErrorItems.invalidResponse);
     });
 

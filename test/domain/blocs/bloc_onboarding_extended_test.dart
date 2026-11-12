@@ -12,38 +12,42 @@ void main() {
       bloc.dispose();
     });
 
-    test('Given configure([]) When start() Then completed inmediatamente',
-        () async {
-      // Arrange
-      bloc.configure(<OnboardingStep>[]);
+    test(
+      'Given configure([]) When start() Then completed inmediatamente',
+      () async {
+        // Arrange
+        bloc.configure(<OnboardingStep>[]);
 
-      // Act
-      bloc.start();
+        // Act
+        bloc.start();
 
-      // Assert
-      expect(bloc.state.status, OnboardingStatus.completed);
-      expect(bloc.state.totalSteps, 0);
-      expect(bloc.state.error, isNull);
-    });
+        // Assert
+        expect(bloc.state.status, OnboardingStatus.completed);
+        expect(bloc.state.totalSteps, 0);
+        expect(bloc.state.error, isNull);
+      },
+    );
 
-    test('Given configure(steps) When start() Then running en step 0',
-        () async {
-      // Arrange
-      final List<OnboardingStep> steps = <OnboardingStep>[
-        const OnboardingStep(title: 'A'),
-        const OnboardingStep(title: 'B'),
-      ];
-      bloc.configure(steps);
+    test(
+      'Given configure(steps) When start() Then running en step 0',
+      () async {
+        // Arrange
+        final List<OnboardingStep> steps = <OnboardingStep>[
+          const OnboardingStep(title: 'A'),
+          const OnboardingStep(title: 'B'),
+        ];
+        bloc.configure(steps);
 
-      // Act
-      bloc.start();
+        // Act
+        bloc.start();
 
-      // Assert
-      expect(bloc.state.status, OnboardingStatus.running);
-      expect(bloc.state.stepIndex, 0);
-      expect(bloc.state.totalSteps, 2);
-      expect(bloc.currentStep?.title, 'A');
-    });
+        // Assert
+        expect(bloc.state.status, OnboardingStatus.running);
+        expect(bloc.state.stepIndex, 0);
+        expect(bloc.state.totalSteps, 2);
+        expect(bloc.currentStep?.title, 'A');
+      },
+    );
   });
 
   group('BlocOnboarding – onEnter éxito y error', () {
@@ -56,9 +60,7 @@ void main() {
       bloc.dispose();
     });
 
-    test(
-        'Given onEnter Right When start Then no error y puede auto-advance si aplica',
-        () async {
+    test('Given onEnter Right When start Then no error y puede auto-advance si aplica', () async {
       // Arrange
       final OnboardingStep step = OnboardingStep(
         title: 'ok',
@@ -84,38 +86,34 @@ void main() {
       expect(bloc.currentStep?.title, 'next');
     });
 
-    test('Given onEnter Left When start Then coloca error y no auto-advance',
-        () async {
-      // Arrange
-      final OnboardingStep step = OnboardingStep(
-        title: 'fail',
-        autoAdvanceAfter: const Duration(milliseconds: 20),
-        onEnter: () async {
-          return const Left<ErrorItem, Unit>(
-            ErrorItem(
-              title: 'X',
-              code: 'ERR',
-              description: 'boom',
-            ),
-          );
-        },
-      );
-      const OnboardingStep step2 = OnboardingStep(title: 'next');
-      bloc.configure(<OnboardingStep>[step, step2]);
-
-      // Act
-      bloc.start();
-      await Future<void>.delayed(const Duration(milliseconds: 50));
-
-      // Assert: sigue en el mismo paso, con error
-      expect(bloc.state.stepIndex, 0);
-      expect(bloc.state.error, isNotNull);
-      expect(bloc.currentStep?.title, 'fail');
-    });
-
     test(
-        'Given onEnter lanza excepción When start Then mapea a ErrorItem y no auto-advance',
-        () async {
+      'Given onEnter Left When start Then coloca error y no auto-advance',
+      () async {
+        // Arrange
+        final OnboardingStep step = OnboardingStep(
+          title: 'fail',
+          autoAdvanceAfter: const Duration(milliseconds: 20),
+          onEnter: () async {
+            return const Left<ErrorItem, Unit>(
+              ErrorItem(title: 'X', code: 'ERR', description: 'boom'),
+            );
+          },
+        );
+        const OnboardingStep step2 = OnboardingStep(title: 'next');
+        bloc.configure(<OnboardingStep>[step, step2]);
+
+        // Act
+        bloc.start();
+        await Future<void>.delayed(const Duration(milliseconds: 50));
+
+        // Assert: sigue en el mismo paso, con error
+        expect(bloc.state.stepIndex, 0);
+        expect(bloc.state.error, isNotNull);
+        expect(bloc.currentStep?.title, 'fail');
+      },
+    );
+
+    test('Given onEnter lanza excepción When start Then mapea a ErrorItem y no auto-advance', () async {
       // Arrange
       final OnboardingStep step = OnboardingStep(
         title: 'throw',
@@ -149,59 +147,52 @@ void main() {
     });
 
     test(
-        'Given error en onEnter When retryOnEnter Then limpia error y reintenta',
-        () async {
-      // Arrange: primer intento falla, segundo intento pasa
-      int attempts = 0;
-      final OnboardingStep step = OnboardingStep(
-        title: 'retry',
-        onEnter: () async {
-          attempts++;
-          if (attempts == 1) {
-            return const Left<ErrorItem, Unit>(
-              ErrorItem(
-                title: 'F',
-                code: 'E1',
-                description: 'first',
-              ),
-            );
-          }
-          return const Right<ErrorItem, Unit>(Unit.value);
-        },
-        autoAdvanceAfter: const Duration(milliseconds: 20),
-      );
-      // autoAdvance para confirmar ejecución tras el retry
-      const OnboardingStep step2 = OnboardingStep(
-        title: 'next',
-        autoAdvanceAfter: Duration(milliseconds: 30),
-      );
-      bloc.configure(<OnboardingStep>[step, step2]);
+      'Given error en onEnter When retryOnEnter Then limpia error y reintenta',
+      () async {
+        // Arrange: primer intento falla, segundo intento pasa
+        int attempts = 0;
+        final OnboardingStep step = OnboardingStep(
+          title: 'retry',
+          onEnter: () async {
+            attempts++;
+            if (attempts == 1) {
+              return const Left<ErrorItem, Unit>(
+                ErrorItem(title: 'F', code: 'E1', description: 'first'),
+              );
+            }
+            return const Right<ErrorItem, Unit>(Unit.value);
+          },
+          autoAdvanceAfter: const Duration(milliseconds: 20),
+        );
+        // autoAdvance para confirmar ejecución tras el retry
+        const OnboardingStep step2 = OnboardingStep(
+          title: 'next',
+          autoAdvanceAfter: Duration(milliseconds: 30),
+        );
+        bloc.configure(<OnboardingStep>[step, step2]);
 
-      // Act: start -> primer onEnter falla
-      bloc.start();
-      await Future<void>.delayed(const Duration(milliseconds: 10));
-      expect(bloc.state.error, isNotNull);
+        // Act: start -> primer onEnter falla
+        bloc.start();
+        await Future<void>.delayed(const Duration(milliseconds: 10));
+        expect(bloc.state.error, isNotNull);
 
-      // retry: limpia error y reintenta
-      bloc.retryOnEnter();
-      await Future<void>.delayed(const Duration(milliseconds: 50));
+        // retry: limpia error y reintenta
+        bloc.retryOnEnter();
+        await Future<void>.delayed(const Duration(milliseconds: 50));
 
-      // Assert: ya no hay error y avanzó por auto-advance
-      expect(bloc.state.error, isNull);
-      expect(bloc.state.stepIndex, 1);
-      expect(attempts, equals(2));
-    });
+        // Assert: ya no hay error y avanzó por auto-advance
+        expect(bloc.state.error, isNull);
+        expect(bloc.state.stepIndex, 1);
+        expect(attempts, equals(2));
+      },
+    );
 
     test('clearError limpia el error manteniendo step/status', () async {
       // Arrange
       final OnboardingStep step = OnboardingStep(
         title: 'fail',
         onEnter: () async => const Left<ErrorItem, Unit>(
-          ErrorItem(
-            title: 'X',
-            code: 'ERR',
-            description: 'boom',
-          ),
+          ErrorItem(title: 'X', code: 'ERR', description: 'boom'),
         ),
       );
       bloc.configure(<OnboardingStep>[step]);
@@ -260,20 +251,22 @@ void main() {
       expect(bloc.state.error, isNull);
     });
 
-    test('currentStep es null cuando no está running o índice fuera de rango',
-        () async {
-      // Arrange
-      bloc.configure(<OnboardingStep>[]);
-      expect(bloc.currentStep, isNull);
+    test(
+      'currentStep es null cuando no está running o índice fuera de rango',
+      () async {
+        // Arrange
+        bloc.configure(<OnboardingStep>[]);
+        expect(bloc.currentStep, isNull);
 
-      bloc.configure(<OnboardingStep>[const OnboardingStep(title: 'only')]);
-      expect(bloc.currentStep, isNull); // aún idle
-      bloc.start();
-      expect(bloc.currentStep, isNotNull);
-      // Forzar estado inconsistente para probar null
-      bloc.complete();
-      expect(bloc.currentStep, isNull);
-    });
+        bloc.configure(<OnboardingStep>[const OnboardingStep(title: 'only')]);
+        expect(bloc.currentStep, isNull); // aún idle
+        bloc.start();
+        expect(bloc.currentStep, isNotNull);
+        // Forzar estado inconsistente para probar null
+        bloc.complete();
+        expect(bloc.currentStep, isNull);
+      },
+    );
   });
 
   group('BlocOnboarding – guards de carrera con epoch', () {
@@ -286,39 +279,41 @@ void main() {
       bloc.dispose();
     });
 
-    test('onEnter lento de step 0 no debe afectar cuando ya estamos en step 1',
-        () async {
-      // Arrange
-      final OnboardingStep slowFail = OnboardingStep(
-        title: 'slow-fail',
-        onEnter: () async {
-          await Future<void>.delayed(const Duration(milliseconds: 60));
-          return const Left<ErrorItem, Unit>(
-            ErrorItem(
-              title: 'late',
-              code: 'LATE',
-              description: 'arrived too late',
-            ),
-          );
-        },
-      );
-      final OnboardingStep ok = OnboardingStep(
-        title: 'ok',
-        onEnter: () async => const Right<ErrorItem, Unit>(Unit.value),
-      );
-      bloc.configure(<OnboardingStep>[slowFail, ok]);
+    test(
+      'onEnter lento de step 0 no debe afectar cuando ya estamos en step 1',
+      () async {
+        // Arrange
+        final OnboardingStep slowFail = OnboardingStep(
+          title: 'slow-fail',
+          onEnter: () async {
+            await Future<void>.delayed(const Duration(milliseconds: 60));
+            return const Left<ErrorItem, Unit>(
+              ErrorItem(
+                title: 'late',
+                code: 'LATE',
+                description: 'arrived too late',
+              ),
+            );
+          },
+        );
+        final OnboardingStep ok = OnboardingStep(
+          title: 'ok',
+          onEnter: () async => const Right<ErrorItem, Unit>(Unit.value),
+        );
+        bloc.configure(<OnboardingStep>[slowFail, ok]);
 
-      // Act: iniciar y saltar al siguiente antes de que termine onEnter del 1er paso
-      bloc.start(); // step 0
-      await Future<void>.delayed(const Duration(milliseconds: 10));
-      bloc.next(); // step 1
-      await Future<void>.delayed(const Duration(milliseconds: 80));
+        // Act: iniciar y saltar al siguiente antes de que termine onEnter del 1er paso
+        bloc.start(); // step 0
+        await Future<void>.delayed(const Duration(milliseconds: 10));
+        bloc.next(); // step 1
+        await Future<void>.delayed(const Duration(milliseconds: 80));
 
-      // Assert: debe mantenerse en step 1, con error == null (resultado tardío ignorado)
-      expect(bloc.state.stepIndex, 1);
-      expect(bloc.currentStep?.title, 'ok');
-      expect(bloc.state.error, isNull);
-    });
+        // Assert: debe mantenerse en step 1, con error == null (resultado tardío ignorado)
+        expect(bloc.state.stepIndex, 1);
+        expect(bloc.currentStep?.title, 'ok');
+        expect(bloc.state.error, isNull);
+      },
+    );
   });
 
   group('BlocOnboarding – terminal states y limpieza de error', () {
@@ -336,11 +331,7 @@ void main() {
       final OnboardingStep fail = OnboardingStep(
         title: 'fail',
         onEnter: () async => const Left<ErrorItem, Unit>(
-          ErrorItem(
-            title: 'boom',
-            code: 'ERR',
-            description: 'x',
-          ),
+          ErrorItem(title: 'boom', code: 'ERR', description: 'x'),
         ),
       );
       bloc.configure(<OnboardingStep>[fail]);
@@ -365,11 +356,7 @@ void main() {
       final OnboardingStep fail = OnboardingStep(
         title: 'fail',
         onEnter: () async => const Left<ErrorItem, Unit>(
-          ErrorItem(
-            title: 'boom',
-            code: 'ERR',
-            description: 'x',
-          ),
+          ErrorItem(title: 'boom', code: 'ERR', description: 'x'),
         ),
       );
       bloc.configure(<OnboardingStep>[fail]);
@@ -434,43 +421,40 @@ void main() {
       bloc.dispose();
     });
 
-    test(
-      'Given step con autoAdvance (sin onEnter) '
-      'When start -> avanza; back() '
-      'Then NO auto-advance tras volver y esperar > delay',
-      () async {
-        // Arrange
-        const OnboardingStep a = OnboardingStep(
-          title: 'A',
-          // Este delay auto-avanzaría normalmente, pero tras back() NO debe ocurrir.
-          autoAdvanceAfter: Duration(milliseconds: 40),
-        );
-        const OnboardingStep b = OnboardingStep(title: 'B');
+    test('Given step con autoAdvance (sin onEnter) '
+        'When start -> avanza; back() '
+        'Then NO auto-advance tras volver y esperar > delay', () async {
+      // Arrange
+      const OnboardingStep a = OnboardingStep(
+        title: 'A',
+        // Este delay auto-avanzaría normalmente, pero tras back() NO debe ocurrir.
+        autoAdvanceAfter: Duration(milliseconds: 40),
+      );
+      const OnboardingStep b = OnboardingStep(title: 'B');
 
-        bloc.configure(<OnboardingStep>[a, b]);
+      bloc.configure(<OnboardingStep>[a, b]);
 
-        // Act: start -> A, esperar auto-advance a B
-        bloc.start();
-        await Future<void>.delayed(const Duration(milliseconds: 70));
-        expect(bloc.state.stepIndex, 1, reason: 'Debe haber avanzado a B');
+      // Act: start -> A, esperar auto-advance a B
+      bloc.start();
+      await Future<void>.delayed(const Duration(milliseconds: 70));
+      expect(bloc.state.stepIndex, 1, reason: 'Debe haber avanzado a B');
 
-        // back() -> vuelve a A
-        bloc.back();
-        expect(bloc.state.stepIndex, 0, reason: 'Volvió a A');
+      // back() -> vuelve a A
+      bloc.back();
+      expect(bloc.state.stepIndex, 0, reason: 'Volvió a A');
 
-        // Esperar más que el delay de A; NO debe auto-avanzar
-        await Future<void>.delayed(const Duration(milliseconds: 80));
+      // Esperar más que el delay de A; NO debe auto-avanzar
+      await Future<void>.delayed(const Duration(milliseconds: 80));
 
-        // Assert
-        expect(
-          bloc.state.stepIndex,
-          0,
-          reason:
-              'Tras back() no debe auto-avanzar aunque A tenga autoAdvanceAfter',
-        );
-        expect(bloc.state.error, isNull);
-      },
-    );
+      // Assert
+      expect(
+        bloc.state.stepIndex,
+        0,
+        reason:
+            'Tras back() no debe auto-avanzar aunque A tenga autoAdvanceAfter',
+      );
+      expect(bloc.state.error, isNull);
+    });
 
     test(
       'Given step con onEnter Right + autoAdvance '
@@ -506,55 +490,50 @@ void main() {
         expect(
           bloc.state.stepIndex,
           0,
-          reason:
-              'Tras back(), el auto-advance está deshabilitado por política del BLoC',
+          reason: 'Tras back(), el auto-advance está deshabilitado por política del BLoC',
         );
         expect(bloc.state.error, isNull);
       },
     );
 
-    test(
-      'Given back() deshabilita auto-advance '
-      'When retryOnEnter() explícito '
-      'Then vuelve a habilitarse el auto-advance y avanza',
-      () async {
-        // Arrange
-        final OnboardingStep a = OnboardingStep(
-          title: 'A',
-          onEnter: () async => const Right<ErrorItem, Unit>(Unit.value),
-          autoAdvanceAfter: const Duration(milliseconds: 40),
-        );
-        const OnboardingStep b = OnboardingStep(title: 'B');
+    test('Given back() deshabilita auto-advance '
+        'When retryOnEnter() explícito '
+        'Then vuelve a habilitarse el auto-advance y avanza', () async {
+      // Arrange
+      final OnboardingStep a = OnboardingStep(
+        title: 'A',
+        onEnter: () async => const Right<ErrorItem, Unit>(Unit.value),
+        autoAdvanceAfter: const Duration(milliseconds: 40),
+      );
+      const OnboardingStep b = OnboardingStep(title: 'B');
 
-        bloc.configure(<OnboardingStep>[a, b]);
+      bloc.configure(<OnboardingStep>[a, b]);
 
-        // start -> auto-advance a B
-        bloc.start();
-        await Future<void>.delayed(const Duration(milliseconds: 70));
-        expect(bloc.state.stepIndex, 1);
+      // start -> auto-advance a B
+      bloc.start();
+      await Future<void>.delayed(const Duration(milliseconds: 70));
+      expect(bloc.state.stepIndex, 1);
 
-        // back() -> A, NO auto-advance
-        bloc.back();
-        expect(bloc.state.stepIndex, 0);
-        await Future<void>.delayed(const Duration(milliseconds: 70));
-        expect(
-          bloc.state.stepIndex,
-          0,
-          reason: 'Sigue en A: back() deshabilitó el auto-advance',
-        );
+      // back() -> A, NO auto-advance
+      bloc.back();
+      expect(bloc.state.stepIndex, 0);
+      await Future<void>.delayed(const Duration(milliseconds: 70));
+      expect(
+        bloc.state.stepIndex,
+        0,
+        reason: 'Sigue en A: back() deshabilitó el auto-advance',
+      );
 
-        // Act: retryOnEnter() (habilita de nuevo auto-advance si hay éxito)
-        bloc.retryOnEnter();
-        await Future<void>.delayed(const Duration(milliseconds: 70));
+      // Act: retryOnEnter() (habilita de nuevo auto-advance si hay éxito)
+      bloc.retryOnEnter();
+      await Future<void>.delayed(const Duration(milliseconds: 70));
 
-        // Assert: avanzó a B gracias al retry explícito
-        expect(
-          bloc.state.stepIndex,
-          1,
-          reason:
-              'retryOnEnter() corre onEnter y vuelve a permitir auto-advance',
-        );
-      },
-    );
+      // Assert: avanzó a B gracias al retry explícito
+      expect(
+        bloc.state.stepIndex,
+        1,
+        reason: 'retryOnEnter() corre onEnter y vuelve a permitir auto-advance',
+      );
+    });
   });
 }

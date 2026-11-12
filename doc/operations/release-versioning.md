@@ -1,105 +1,31 @@
-﻿## 🛠️ Publicación y Versionamiento
+# Preparación y publicación de releases
 
-### Commit firmado
-Usamos GPG para firmar todos los commits y garantizar trazabilidad.
+La versión 2.0.0 fue preparada por la Action en develop (`40098aa`) y pasó CI
+completo y dry-run sin warnings. No está publicada por ese hecho.
 
-1. Generar la clave (solo la primera vez):
-   ```bash
-   gpg --full-generate-key
-    ```
+La documentación vigente del publisher y del primer upload OIDC está en
+[.github/CI_CD.md](../../.github/CI_CD.md). Ese documento distingue la comprobación
+OIDC sin publicación de la evidencia de un upload real, y describe el bootstrap
+supervisado, los bloqueos y la recuperación sin mover tags ni duplicar versiones.
 
-2. Asociar la clave a Git (una sola vez):
-   ```bash
-   git config --global user.signingkey <KEY_ID>
-   ```
-3. Crear commits firmados (se te pedirá tu passphrase):
-   ```bash
-   git commit -S -m "feat(@username): add new password checker (#123)"
-   ```
-4. Verificar la firma:
-   ```bash
-   git log --show-signature
-   ```
+La preparación atómica de versión/CHANGELOG conserva SHA exacto, CAS, firma
+nativa de GitHub y reintentos idempotentes. Inputs: version, expected_head y
+changelog_base64. El payload se construye en disco para soportar CHANGELOGs grandes.
 
-### Etiquetado de PRs
-Para automatizar el bump de versión, aplicamos labels en GitHub: `major`, `minor` o `patch`.
-* **Título de PR**: debe arrancar con un prefijo semántico, autor y referencia al issue:
+La referencia canónica del checkpoint #213 es core develop
+`f00f35dc36e7a408f245dffc8d447a05061deb17`. Se conservan los gates adicionales
+Flutter, cobertura >=90% y JSON schemas. No se hereda una CP-0 del core.
 
-  ```
-  feat(@username): add new password checker (#123)
-  ```
-* **Labels**:
-  * `major` → bump de versión **mayor**
-  * `minor` → bump de versión **menor**
-  * `patch` → bump de **parche**
+| Tramo | Core | Adaptación domain |
+| --- | --- | --- |
+| Preparación | pubspec/CHANGELOG atómicos y firma GitHub | Integrado en #219/#220; SHA obligatorio y fecha America/Bogota |
+| PR a master | PR oficial, versión y full CI | Check requerido Validate PR to master conserva su nombre; gates Flutter/schemas |
+| Publish | tags, provenance, CP-0 para dispatch, OIDC, CI y release | Flutter 3.50.0, environment pub.dev, claims firmados y recheck de fuente viva |
+| CP-0 | Evidencia de upload real del core | Manifiesto propio domain pendiente; primer upload humano autorizado por tag |
+| Seguridad | CodeQL de Actions | Workflow CodeQL activo, sin uploader legacy paralelo |
+| Tags | Inmutables sin bypass | Ruleset 27088011 activo para v*; verificado por el publisher |
 
-### Actualización automática de `pubspec.yaml`
-La Action `validate_pr.yaml` detecta el label y actualiza la versión en `pubspec.yaml`:
-# .github/workflows/validate_pr.yaml (fragmento relevante)
-```yaml
-- name: Bump version
-  run: |
-    CURRENT_VERSION=$(grep '^version:' pubspec.yaml | awk '{print $2}')
-    LABELS=$(gh pr view ${{ github.event.pull_request.number }} --json labels --jq '.labels[].name')
-    if echo "$LABELS" | grep -q "major"; then
-      UPDATED_VERSION=$(echo $CURRENT_VERSION | awk -F. '{$1+=1; $2=0; $3=0}1' OFS=".")
-    elif echo "$LABELS" | grep -q "minor"; then
-      UPDATED_VERSION=$(echo $CURRENT_VERSION | awk -F. '{$2+=1; $3=0}1' OFS=".")
-    elif echo "$LABELS" | grep -q "patch"; then
-      UPDATED_VERSION=$(echo $CURRENT_VERSION | awk -F. '{$3+=1}1' OFS=".")
-    else
-      echo "❌ No version label found. Please add 'major', 'minor', or 'patch'."
-      exit 1
-    fi
-    sed -i "s/^version:.*/version: $UPDATED_VERSION/" pubspec.yaml
-    echo "Updated version: $UPDATED_VERSION"
-```
-
-**Ejemplo de diff tras un bump **\`\`** (1.20.0 → 1.21.0):**
-
-```diff
--version: 1.20.0
-+version: 1.21.0
-```
-
-### Generación automática de `CHANGELOG.md`
-Seguimos [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
-
-```markdown
-### [1.21.0] - 2025-07-09
-- Se crea la clase `FakeServiceHttp` para simular el comportamiento de un servicio HTTP en pruebas unitarias.
-- Se actualiza el README para incluir ejemplos de uso de las clases `FakeServiceHttp`, `FakeServiceSesion`, `FakeServiceWsDatabase`, `FakeServiceGeolocation`, `FakeServiceGyroscope`, `FakeServiceNotifications`, `FakeServiceConnectivity` y `FakeServicePreferences`.
-```
-
-### Flujo `develop` → `master`
-
-1. Abrir un \*\*issue de actualización de \*\*\`\`, indicando el bump deseado (`major`/`minor`/`patch`).
-2. Crear un PR de `maintain-branch` a `develop` con la version propuesta
-3. Crear un PR **directo** de `develop` a `master`, mencionando el issue para cierre automático.
-4. El PR **no** ejecuta bump: utiliza la versión que ya venía en `develop`.
-5. Tras pasar las validaciones automáticas, se fusiona mediante **auto-merge**.
-6. (Opcional) Publicar en pub.dev si no se dispara automáticamente.
-
-**NOTA:** El proximo issue debe incluir una actualizacion de `master` obligatoria para que quede en `develope` alineado.
-
-### Creación de tag & publicación
-
-El desarrollador, tras el merge, crea el tag semántico y lo envía al repo:
-
-```bash
-git tag -a v1.21.0 -m "Release v1.21.0"
-git push origin v1.21.0
-```
-
-La publicación en **pub.dev** se dispara automáticamente o puede iniciarse manualmente.
-
-### Badges
-
-Añade en el encabezado del README:
-
-```markdown
-![CI](https://img.shields.io/github/actions/workflow/status/grupo-jocaagura/jocaagura_domain/validate_pr.yaml?branch=develop)
-![Coverage](https://img.shields.io/codecov/c/github/grupo-jocaagura/jocaagura_domain)
-![Pub](https://img.shields.io/pub/v/jocaagura_domain)
-```
-
+Certificación del consumidor para el código de ec8d831:
+https://github.com/grupo-jocaagura/jocaaguraarchetype/blob/01561b2a755bd800d6eced0754c23584c37be32b/doc/workflows/evidence/135/certification-ec8d831.md
+La homologación del publisher modifica automatización/metadata/documentación;
+no modifica APIs de lib/.

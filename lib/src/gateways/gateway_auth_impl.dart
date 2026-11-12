@@ -49,10 +49,8 @@ class GatewayAuthImpl implements GatewayAuth {
   /// - [_service]: concrete auth service to adapt.
   /// - [errorMapper]: optional mapper to translate exceptions and error-like
   ///   payloads into [ErrorItem]. Defaults to [DefaultErrorMapper].
-  GatewayAuthImpl(
-    this._service, {
-    ErrorMapper? errorMapper,
-  }) : _err = errorMapper ?? const DefaultHttpErrorMapper();
+  GatewayAuthImpl(this._service, {ErrorMapper? errorMapper})
+    : _err = errorMapper ?? const DefaultHttpErrorMapper();
 
   final ServiceSession _service;
   final ErrorMapper _err;
@@ -81,22 +79,20 @@ class GatewayAuthImpl implements GatewayAuth {
   Future<Either<ErrorItem, Map<String, dynamic>>> signInUserAndPassword(
     String email,
     String password,
-  ) =>
-      _guardJson(
-        () => _service.signInUserAndPassword(email: email, password: password),
-        location: 'GatewayAuthImpl.signInUserAndPassword',
-      );
+  ) => _guardJson(
+    () => _service.signInUserAndPassword(email: email, password: password),
+    location: 'GatewayAuthImpl.signInUserAndPassword',
+  );
 
   /// See [GatewayAuth.logInUserAndPassword].
   @override
   Future<Either<ErrorItem, Map<String, dynamic>>> logInUserAndPassword(
     String email,
     String password,
-  ) =>
-      _guardJson(
-        () => _service.logInUserAndPassword(email: email, password: password),
-        location: 'GatewayAuthImpl.logInUserAndPassword',
-      );
+  ) => _guardJson(
+    () => _service.logInUserAndPassword(email: email, password: password),
+    location: 'GatewayAuthImpl.logInUserAndPassword',
+  );
 
   /// See [GatewayAuth.logInWithGoogle].
   @override
@@ -110,41 +106,37 @@ class GatewayAuthImpl implements GatewayAuth {
   @override
   Future<Either<ErrorItem, Map<String, dynamic>>> logInSilently(
     Map<String, dynamic> sessionJson,
-  ) =>
-      _guardJson(
-        () => _service.logInSilently(sessionJson),
-        location: 'GatewayAuthImpl.logInSilently',
-      );
+  ) => _guardJson(
+    () => _service.logInSilently(sessionJson),
+    location: 'GatewayAuthImpl.logInSilently',
+  );
 
   /// See [GatewayAuth.refreshSession].
   @override
   Future<Either<ErrorItem, Map<String, dynamic>>> refreshSession(
     Map<String, dynamic> sessionJson,
-  ) =>
-      _guardJson(
-        () => _service.refreshSession(sessionJson),
-        location: 'GatewayAuthImpl.refreshSession',
-      );
+  ) => _guardJson(
+    () => _service.refreshSession(sessionJson),
+    location: 'GatewayAuthImpl.refreshSession',
+  );
 
   /// See [GatewayAuth.recoverPassword].
   @override
   Future<Either<ErrorItem, Map<String, dynamic>>> recoverPassword(
     String email,
-  ) =>
-      _guardJson(
-        () => _service.recoverPassword(email: email),
-        location: 'GatewayAuthImpl.recoverPassword',
-      );
+  ) => _guardJson(
+    () => _service.recoverPassword(email: email),
+    location: 'GatewayAuthImpl.recoverPassword',
+  );
 
   /// See [GatewayAuth.logOutUser].
   @override
   Future<Either<ErrorItem, Map<String, dynamic>>> logOutUser(
     Map<String, dynamic> sessionJson,
-  ) =>
-      _guardJson(
-        () => _service.logOutUser(sessionJson),
-        location: 'GatewayAuthImpl.logOutUser',
-      );
+  ) => _guardJson(
+    () => _service.logOutUser(sessionJson),
+    location: 'GatewayAuthImpl.logOutUser',
+  );
 
   /// See [GatewayAuth.getCurrentUser].
   @override
@@ -156,10 +148,8 @@ class GatewayAuthImpl implements GatewayAuth {
 
   /// See [GatewayAuth.isSignedIn].
   @override
-  Future<Either<ErrorItem, Map<String, dynamic>>> isSignedIn() => _guardJson(
-        _service.isSignedIn,
-        location: 'GatewayAuthImpl.isSignedIn',
-      );
+  Future<Either<ErrorItem, Map<String, dynamic>>> isSignedIn() =>
+      _guardJson(_service.isSignedIn, location: 'GatewayAuthImpl.isSignedIn');
 
   /// Maps the underlying auth state stream to `Either`.
   ///
@@ -175,8 +165,10 @@ class GatewayAuthImpl implements GatewayAuth {
           yield const Right<ErrorItem, Map<String, dynamic>?>(null);
           continue;
         }
-        final ErrorItem? pe =
-            _err.fromPayload(e, location: 'GatewayAuthImpl.authStateChanges');
+        final ErrorItem? pe = _err.fromPayload(
+          e,
+          location: 'GatewayAuthImpl.authStateChanges',
+        );
         yield pe != null
             ? Left<ErrorItem, Map<String, dynamic>?>(pe)
             : Right<ErrorItem, Map<String, dynamic>?>(e);

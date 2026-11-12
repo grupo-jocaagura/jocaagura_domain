@@ -1,5 +1,7 @@
+import 'package:flutter/foundation.dart' show immutable;
 import 'package:jocaagura_domain/jocaagura_domain.dart';
 
+@immutable
 class MockAnimal extends AnimalModel {
   const MockAnimal({
     required super.energy,
@@ -72,14 +74,14 @@ class MockAnimal extends AnimalModel {
 
   @override
   int get hashCode => Object.hash(
-        energy,
-        weight,
-        intelligence,
-        animalType,
-        joyful,
-        hygiene,
-        gender,
-      );
+    energy,
+    weight,
+    intelligence,
+    animalType,
+    joyful,
+    hygiene,
+    gender,
+  );
 
   @override
   bool operator ==(Object other) {

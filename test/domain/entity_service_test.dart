@@ -94,8 +94,10 @@ void main() {
       service.createEntity(entity);
 
       expect(
-        () => service.entities
-            .add(<String, dynamic>{'id': '2', 'name': 'Entity 2'}),
+        () => service.entities.add(<String, dynamic>{
+          'id': '2',
+          'name': 'Entity 2',
+        }),
         throwsUnsupportedError,
       );
     });

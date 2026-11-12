@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:jocaagura_domain/jocaagura_domain.dart';
+import 'package:material_ui/material_ui.dart';
 
 void main() => runApp(const JgFlowEducationDemoApp());
 
@@ -195,72 +195,76 @@ class _CompleteFlowHomePageState extends State<CompleteFlowHomePage> {
       initialData: _flowBloc.value,
       builder:
           (BuildContext context, AsyncSnapshot<ModelCompleteFlow> snapshot) {
-        final ModelCompleteFlow flow =
-            snapshot.data ?? defaultModelCompleteFlow;
-        final List<ModelFlowStep> steps = flow.stepsSorted;
+            final ModelCompleteFlow flow =
+                snapshot.data ?? defaultModelCompleteFlow;
+            final List<ModelFlowStep> steps = flow.stepsSorted;
 
-        return Scaffold(
-          appBar: AppBar(
-            title: Text(flow.name.isEmpty ? 'Flow Demo' : flow.name),
-            actions: <Widget>[
-              IconButton(
-                tooltip: 'Export JSON',
-                icon: const Icon(Icons.code),
-                onPressed: () => _exportJson(context),
+            return Scaffold(
+              appBar: AppBar(
+                title: Text(flow.name.isEmpty ? 'Flow Demo' : flow.name),
+                actions: <Widget>[
+                  IconButton(
+                    tooltip: 'Export JSON',
+                    icon: const Icon(Icons.code),
+                    onPressed: () => _exportJson(context),
+                  ),
+                  IconButton(
+                    tooltip: 'Import Roundtrip',
+                    icon: const Icon(Icons.cached),
+                    onPressed: () => _importRoundtrip(context),
+                  ),
+                ],
               ),
-              IconButton(
-                tooltip: 'Import Roundtrip',
-                icon: const Icon(Icons.cached),
-                onPressed: () => _importRoundtrip(context),
+              body: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Text(
+                      flow.name.isEmpty ? 'Unnamed Flow' : flow.name,
+                      style: Theme.of(context).textTheme.headlineSmall,
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      flow.description.isEmpty
+                          ? 'No description.'
+                          : flow.description,
+                    ),
+                    const SizedBox(height: 12),
+                    _FlowStatsCard(flow: flow),
+                    const SizedBox(height: 12),
+                    Text(
+                      'Steps',
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                    const SizedBox(height: 8),
+                    Expanded(
+                      child: steps.isEmpty
+                          ? const Center(child: Text('No steps yet.'))
+                          : ListView.separated(
+                              itemCount: steps.length,
+                              separatorBuilder: (_, __) =>
+                                  const Divider(height: 1),
+                              itemBuilder: (_, int i) => _FlowStepTile(
+                                step: steps[i],
+                                onRemove: () => _flowBloc.value = flow
+                                    .removeStepAt(steps[i].index),
+                              ),
+                            ),
+                    ),
+                    const SizedBox(height: 12),
+                    _HelperNote(flow: flow),
+                  ],
+                ),
               ),
-            ],
-          ),
-          body: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Text(
-                  flow.name.isEmpty ? 'Unnamed Flow' : flow.name,
-                  style: Theme.of(context).textTheme.headlineSmall,
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  flow.description.isEmpty
-                      ? 'No description.'
-                      : flow.description,
-                ),
-                const SizedBox(height: 12),
-                _FlowStatsCard(flow: flow),
-                const SizedBox(height: 12),
-                Text('Steps', style: Theme.of(context).textTheme.titleMedium),
-                const SizedBox(height: 8),
-                Expanded(
-                  child: steps.isEmpty
-                      ? const Center(child: Text('No steps yet.'))
-                      : ListView.separated(
-                          itemCount: steps.length,
-                          separatorBuilder: (_, __) => const Divider(height: 1),
-                          itemBuilder: (_, int i) => _FlowStepTile(
-                            step: steps[i],
-                            onRemove: () => _flowBloc.value =
-                                flow.removeStepAt(steps[i].index),
-                          ),
-                        ),
-                ),
-                const SizedBox(height: 12),
-                _HelperNote(flow: flow),
-              ],
-            ),
-          ),
-          floatingActionButton: _FabMenu(
-            onRename: _renameFlow,
-            onUpsertNew: _upsertNewStep,
-            onUpdateStep10: _updateExistingStep10,
-            onRemoveEntry: _removeEntryStep,
-          ),
-        );
-      },
+              floatingActionButton: _FabMenu(
+                onRename: _renameFlow,
+                onUpsertNew: _upsertNewStep,
+                onUpdateStep10: _updateExistingStep10,
+                onRemoveEntry: _removeEntryStep,
+              ),
+            );
+          },
     );
   }
 }
@@ -307,10 +311,7 @@ class _FlowStatsCard extends StatelessWidget {
 }
 
 class _FlowStepTile extends StatelessWidget {
-  const _FlowStepTile({
-    required this.step,
-    required this.onRemove,
-  });
+  const _FlowStepTile({required this.step, required this.onRemove});
 
   final ModelFlowStep step;
   final VoidCallback onRemove;
@@ -320,8 +321,8 @@ class _FlowStepTile extends StatelessWidget {
     final String costLabel = step.cost.isEmpty
         ? '—'
         : step.cost.entries
-            .map((MapEntry<String, double> e) => '${e.key}: ${e.value}')
-            .join(' • ');
+              .map((MapEntry<String, double> e) => '${e.key}: ${e.value}')
+              .join(' • ');
 
     return ListTile(
       leading: CircleAvatar(child: Text('${step.index}')),

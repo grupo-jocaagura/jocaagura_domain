@@ -38,8 +38,9 @@ void main() {
     });
 
     test('getEntityById returns null when the entity does not exist', () {
-      final Map<String, dynamic>? result =
-          provider.getEntityById('nonexistent');
+      final Map<String, dynamic>? result = provider.getEntityById(
+        'nonexistent',
+      );
       expect(result, isEmpty);
     });
 
@@ -60,9 +61,7 @@ void main() {
       expect(deleteResult, isA<bool>());
     });
 
-    test(
-        'deleteEntityById does not affect the list when the entity does not exist',
-        () {
+    test('deleteEntityById does not affect the list when the entity does not exist', () {
       final Map<String, String> entity = <String, String>{
         'id': '3',
         'name': 'Entity 3',

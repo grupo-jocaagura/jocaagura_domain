@@ -145,14 +145,15 @@ class BlocOnboarding extends BlocModule {
   BlocOnboarding({
     ErrorMapper? errorMapper,
     AutoAdvancePolicy? autoAdvancePolicy,
-  })  : _errorMapper = errorMapper ?? const DefaultErrorMapper(),
-        _autoAdvancePolicy = autoAdvancePolicy ?? defaultAutoAdvancePolicy;
+  }) : _errorMapper = errorMapper ?? const DefaultErrorMapper(),
+       _autoAdvancePolicy = autoAdvancePolicy ?? defaultAutoAdvancePolicy;
 
   final AutoAdvancePolicy _autoAdvancePolicy;
 
   /// Reactive state holder. Starts from [OnboardingState.idle].
-  final BlocGeneral<OnboardingState> _state =
-      BlocGeneral<OnboardingState>(OnboardingState.idle());
+  final BlocGeneral<OnboardingState> _state = BlocGeneral<OnboardingState>(
+    OnboardingState.idle(),
+  );
 
   /// Logical name for diagnostics and registries.
   static const String name = 'blocOnboarding';
@@ -347,8 +348,9 @@ class BlocOnboarding extends BlocModule {
     if (step.onEnter != null) {
       Either<ErrorItem, Unit> result;
       try {
-        result = await (step.onEnter?.call() ??
-            const Right<ErrorItem, Unit>(Unit.value));
+        result =
+            await (step.onEnter?.call() ??
+                const Right<ErrorItem, Unit>(Unit.value));
       } catch (e, s) {
         if (isDisposed ||
             epochAtCall != epoch ||

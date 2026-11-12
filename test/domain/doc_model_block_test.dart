@@ -9,31 +9,25 @@ void main() {
       level: 1,
     );
 
-    test(
-      'Given a canonical block When toJson and fromJson Then preserves the contract',
-      () {
-        final Map<String, dynamic> json = block.toJson();
-        final ModelDocBlock roundtrip = ModelDocBlock.fromJson(json);
+    test('Given a canonical block When toJson and fromJson Then preserves the contract', () {
+      final Map<String, dynamic> json = block.toJson();
+      final ModelDocBlock roundtrip = ModelDocBlock.fromJson(json);
 
-        expect(roundtrip, block);
-        expect(roundtrip.toJson(), block.toJson());
-      },
-    );
+      expect(roundtrip, block);
+      expect(roundtrip.toJson(), block.toJson());
+    });
 
-    test(
-      'Given canonical JSON When fromJson and toJson Then preserves JSON roundtrip',
-      () {
-        final Map<String, dynamic> json = <String, dynamic>{
-          ModelDocBlockEnum.kind.name: 'heading',
-          ModelDocBlockEnum.content.name: 'Bienvenido',
-          ModelDocBlockEnum.level.name: 1,
-        };
+    test('Given canonical JSON When fromJson and toJson Then preserves JSON roundtrip', () {
+      final Map<String, dynamic> json = <String, dynamic>{
+        ModelDocBlockEnum.kind.name: 'heading',
+        ModelDocBlockEnum.content.name: 'Bienvenido',
+        ModelDocBlockEnum.level.name: 1,
+      };
 
-        final ModelDocBlock parsed = ModelDocBlock.fromJson(json);
+      final ModelDocBlock parsed = ModelDocBlock.fromJson(json);
 
-        expect(parsed.toJson(), json);
-      },
-    );
+      expect(parsed.toJson(), json);
+    });
 
     test(
       'Given a block When copyWith overrides fields Then returns updated copy',

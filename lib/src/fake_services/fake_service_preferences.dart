@@ -44,10 +44,7 @@ class FakeServicePreferences implements ServicePreferences {
   }
 
   @override
-  Future<void> setValue({
-    required String key,
-    required dynamic value,
-  }) async {
+  Future<void> setValue({required String key, required dynamic value}) async {
     _checkDisposed();
     _validateKey(key);
     if (throwOnSet) {
@@ -59,9 +56,7 @@ class FakeServicePreferences implements ServicePreferences {
   }
 
   @override
-  Future<dynamic> getValue({
-    required String key,
-  }) async {
+  Future<dynamic> getValue({required String key}) async {
     _checkDisposed();
     _validateKey(key);
     if (throwOnGet) {
@@ -76,9 +71,7 @@ class FakeServicePreferences implements ServicePreferences {
   }
 
   @override
-  Future<void> remove({
-    required String key,
-  }) async {
+  Future<void> remove({required String key}) async {
     _checkDisposed();
     _validateKey(key);
     if (throwOnSet) {

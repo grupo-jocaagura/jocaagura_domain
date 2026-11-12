@@ -22,8 +22,8 @@
 import 'dart:async';
 import 'dart:math' show Random, max, min;
 
-import 'package:flutter/material.dart';
 import 'package:jocaagura_domain/jocaagura_domain.dart';
+import 'package:material_ui/material_ui.dart';
 
 void main() => runApp(const KitchenSinkApp());
 
@@ -256,8 +256,7 @@ class _OnboardingSquareAreaValidationPageState
       ),
       const OnboardingStep(
         title: 'Explicación',
-        description:
-            'El área de un cuadrado es lado × lado. Ingresarás un valor y lo validaremos.',
+        description: 'El área de un cuadrado es lado × lado. Ingresarás un valor y lo validaremos.',
         autoAdvanceAfter: Duration(milliseconds: 3000),
       ),
       OnboardingStep(
@@ -332,8 +331,9 @@ class _OnboardingSquareAreaValidationPageState
               content = _buildValidationStep(state);
               break;
             case 'Resultado':
-              final String area =
-                  side != null ? (side! * side!).toStringAsFixed(2) : '--';
+              final String area = side != null
+                  ? (side! * side!).toStringAsFixed(2)
+                  : '--';
               content = _buildResultStep(area);
               break;
             case 'Final':
@@ -402,8 +402,9 @@ class _OnboardingSquareAreaValidationPageState
               const SizedBox(height: 12),
               TextField(
                 controller: sideController,
-                keyboardType:
-                    const TextInputType.numberWithOptions(decimal: true),
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
                 decoration: const InputDecoration(
                   border: OutlineInputBorder(),
                   hintText: 'Ej: 12.5',
@@ -415,8 +416,9 @@ class _OnboardingSquareAreaValidationPageState
                 children: <Widget>[
                   ElevatedButton.icon(
                     onPressed: () {
-                      final double? value =
-                          double.tryParse(sideController.text.trim());
+                      final double? value = double.tryParse(
+                        sideController.text.trim(),
+                      );
                       if (value != null) {
                         setState(() => side = value);
                         bloc.next(); // pasa a Validación
@@ -652,13 +654,12 @@ class _BlocOnboardingDemoPageState extends State<BlocOnboardingDemoPage> {
         'STATE → status=${s.status}, step=${s.stepIndex}/${s.totalSteps}, error=${s.error != null}',
       );
       if (s.status == OnboardingStatus.completed) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Onboarding completed')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Onboarding completed')));
       } else if (s.status == OnboardingStatus.skipped) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Onboarding skipped')),
-        );
+        ScaffoldMessenger.of(context)
+            .showSnackBar(const SnackBar(content: Text('Onboarding skipped')));
       }
     });
   }
@@ -971,8 +972,11 @@ class _StateCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final String statusText =
-        state.status.toString().split('.').last.toUpperCase();
+    final String statusText = state.status
+        .toString()
+        .split('.')
+        .last
+        .toUpperCase();
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -1026,10 +1030,12 @@ class LedgerChartsPage extends StatefulWidget {
 }
 
 class _LedgerChartsPageState extends State<LedgerChartsPage> {
-  final BlocGeneral<LedgerModel> _ledgerBloc =
-      BlocGeneral<LedgerModel>(defaultLedgerModel());
-  final BlocGeneral<ModelGraph> _barsBloc =
-      BlocGeneral<ModelGraph>(defaultModelGraph());
+  final BlocGeneral<LedgerModel> _ledgerBloc = BlocGeneral<LedgerModel>(
+    defaultLedgerModel(),
+  );
+  final BlocGeneral<ModelGraph> _barsBloc = BlocGeneral<ModelGraph>(
+    defaultModelGraph(),
+  );
 
   final Map<String, Color> _categoryColors = <String, Color>{
     'Mercado': const Color(0xFFFFD54F),
@@ -1059,8 +1065,9 @@ class _LedgerChartsPageState extends State<LedgerChartsPage> {
   Widget build(BuildContext context) {
     final TextTheme t = Theme.of(context).textTheme;
     return Scaffold(
-      appBar:
-          AppBar(title: Text('Resumen financiero 2024 • ${widget.regionName}')),
+      appBar: AppBar(
+        title: Text('Resumen financiero 2024 • ${widget.regionName}'),
+      ),
       body: StreamBuilder<LedgerModel>(
         stream: _ledgerBloc.stream,
         initialData: _ledgerBloc.value,
@@ -1070,76 +1077,80 @@ class _LedgerChartsPageState extends State<LedgerChartsPage> {
             return const Center(child: CircularProgressIndicator());
           }
           final Map<String, double> byCategory = _sumExpensesByCategory(ledger);
-          final double totalExpenses =
-              byCategory.values.fold(0.0, (double a, double b) => a + b);
+          final double totalExpenses = byCategory.values.fold(
+            0.0,
+            (double a, double b) => a + b,
+          );
 
           return StreamBuilder<ModelGraph>(
             stream: _barsBloc.stream,
             initialData: _barsBloc.value,
             builder:
                 (BuildContext context, AsyncSnapshot<ModelGraph> barsSnap) {
-              final ModelGraph? bars = barsSnap.data;
-              if (bars == null) {
-                return const Center(child: CircularProgressIndicator());
-              }
+                  final ModelGraph? bars = barsSnap.data;
+                  if (bars == null) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
 
-              return SingleChildScrollView(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: <Widget>[
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 8),
-                      child: Text(
-                        'Por categoría',
-                        textAlign: TextAlign.center,
-                        style: t.titleMedium
-                            ?.copyWith(fontWeight: FontWeight.w700),
-                      ),
-                    ),
-                    AspectRatio(
-                      aspectRatio: 1.1,
-                      child: Card(
-                        elevation: 2,
-                        clipBehavior: Clip.antiAlias,
-                        child: Padding(
-                          padding: const EdgeInsets.all(24.0),
-                          child: _PieChart(
-                            totals: byCategory,
-                            colors: _categoryColors,
-                            centerLabel: 'Gasto total',
-                            centerValue: _fmtCOP(totalExpenses),
+                  return SingleChildScrollView(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: <Widget>[
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 8),
+                          child: Text(
+                            'Por categoría',
+                            textAlign: TextAlign.center,
+                            style: t.titleMedium?.copyWith(
+                              fontWeight: FontWeight.w700,
+                            ),
                           ),
                         ),
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 8),
-                      child: Text(
-                        'Por fecha',
-                        textAlign: TextAlign.center,
-                        style: t.titleMedium
-                            ?.copyWith(fontWeight: FontWeight.w700),
-                      ),
-                    ),
-                    AspectRatio(
-                      aspectRatio: 1.7,
-                      child: Card(
-                        elevation: 2,
-                        clipBehavior: Clip.antiAlias,
-                        child: Padding(
-                          padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-                          child: _BarsChart(graph: bars),
+                        AspectRatio(
+                          aspectRatio: 1.1,
+                          child: Card(
+                            elevation: 2,
+                            clipBehavior: Clip.antiAlias,
+                            child: Padding(
+                              padding: const EdgeInsets.all(24.0),
+                              child: _PieChart(
+                                totals: byCategory,
+                                colors: _categoryColors,
+                                centerLabel: 'Gasto total',
+                                centerValue: _fmtCOP(totalExpenses),
+                              ),
+                            ),
+                          ),
                         ),
-                      ),
+                        const SizedBox(height: 24),
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 8),
+                          child: Text(
+                            'Por fecha',
+                            textAlign: TextAlign.center,
+                            style: t.titleMedium?.copyWith(
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ),
+                        AspectRatio(
+                          aspectRatio: 1.7,
+                          child: Card(
+                            elevation: 2,
+                            clipBehavior: Clip.antiAlias,
+                            child: Padding(
+                              padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+                              child: _BarsChart(graph: bars),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+                        _Legend(colors: _categoryColors, totals: byCategory),
+                      ],
                     ),
-                    const SizedBox(height: 24),
-                    _Legend(colors: _categoryColors, totals: byCategory),
-                  ],
-                ),
-              );
-            },
+                  );
+                },
           );
         },
       ),
@@ -1593,8 +1604,9 @@ class PizzaPricesPage extends StatefulWidget {
 }
 
 class _PizzaPricesPageState extends State<PizzaPricesPage> {
-  final BlocGeneral<ModelGraph> _bloc =
-      BlocGeneral<ModelGraph>(defaultModelGraph());
+  final BlocGeneral<ModelGraph> _bloc = BlocGeneral<ModelGraph>(
+    defaultModelGraph(),
+  );
   Timer? _timer;
   final Random _rng = Random(2024);
   int _futureMonthsAppended = 0;
@@ -1700,10 +1712,16 @@ class _PizzaPricesPageState extends State<PizzaPricesPage> {
     final double maxY = pts.map((ModelPoint p) => p.vector.dy).reduce(max);
 
     return ModelGraph(
-      xAxis:
-          ModelGraphAxisSpec(title: current.xAxis.title, min: minX, max: maxX),
-      yAxis:
-          ModelGraphAxisSpec(title: current.yAxis.title, min: minY, max: maxY),
+      xAxis: ModelGraphAxisSpec(
+        title: current.xAxis.title,
+        min: minX,
+        max: maxX,
+      ),
+      yAxis: ModelGraphAxisSpec(
+        title: current.yAxis.title,
+        min: minY,
+        max: maxY,
+      ),
       points: pts,
       title: current.title.isEmpty ? 'Precio Pizza — $region' : current.title,
       subtitle: 'Serie mensual 2024 (+ futuro simulado)',
@@ -1940,8 +1958,11 @@ class _SimpleLineChartPainter extends CustomPainter {
     }
 
     final List<ModelPoint> pts = graph.points;
-    final List<int> idxs =
-        <int>{0, (pts.length / 2).floor(), pts.length - 1}.toList()..sort();
+    final List<int> idxs = <int>{
+      0,
+      (pts.length / 2).floor(),
+      pts.length - 1,
+    }.toList()..sort();
     for (final int i in idxs) {
       final ModelPoint p = pts[i];
       final double xx = sx(p.vector.dx);
@@ -1958,10 +1979,7 @@ class _SimpleLineChartPainter extends CustomPainter {
       final double textX = xx - (tp.width / 2);
       tp.paint(
         canvas,
-        Offset(
-          textX.clamp(plot.left, plot.right - tp.width),
-          plot.bottom + 6,
-        ),
+        Offset(textX.clamp(plot.left, plot.right - tp.width), plot.bottom + 6),
       );
     }
   }
@@ -1994,18 +2012,19 @@ class WsContactsHome extends StatefulWidget {
     );
     final RepositoryWsDatabase<ContactModel> repo =
         RepositoryWsDatabaseImpl<ContactModel>(
-      gateway: gateway,
-      fromJson: ContactModel.fromJson,
-      mapper: const DefaultErrorMapper(),
-      serializeWrites: true,
-    );
+          gateway: gateway,
+          fromJson: ContactModel.fromJson,
+          mapper: const DefaultErrorMapper(),
+          serializeWrites: true,
+        );
     final FacadeWsDatabaseUsecases<ContactModel> facade =
         FacadeWsDatabaseUsecases<ContactModel>.fromRepository(
-      repository: repo,
-      fromJson: ContactModel.fromJson,
+          repository: repo,
+          fromJson: ContactModel.fromJson,
+        );
+    final BlocWsDatabase<ContactModel> docBloc = BlocWsDatabase<ContactModel>(
+      facade: facade,
     );
-    final BlocWsDatabase<ContactModel> docBloc =
-        BlocWsDatabase<ContactModel>(facade: facade);
     final ContactsCollectionBloc collBloc = ContactsCollectionBloc(
       service: service,
       collection: 'contacts',
@@ -2052,12 +2071,12 @@ class _WsContactsHomeState extends State<WsContactsHome> {
   }
 
   ContactModel _fromForm() => ContactModel(
-        id: _id.text.trim(),
-        name: _name.text.trim(),
-        relationship: _relationship.text.trim(),
-        phoneNumber: _phone.text.trim(),
-        email: _email.text.trim(),
-      );
+    id: _id.text.trim(),
+    name: _name.text.trim(),
+    relationship: _relationship.text.trim(),
+    phoneNumber: _phone.text.trim(),
+    email: _email.text.trim(),
+  );
 
   void _fillForm(ContactModel c) {
     _id.text = c.id;
@@ -2071,15 +2090,14 @@ class _WsContactsHomeState extends State<WsContactsHome> {
     if (_id.text.trim().isEmpty) {
       return;
     }
-    final Either<ErrorItem, ContactModel> res =
-        await widget.contactsBloc.readDoc(_id.text.trim());
-    res.fold(
-      (ErrorItem e) => _snack('READ error: ${e.code}'),
-      (ContactModel c) {
-        _fillForm(c);
-        _snack('READ ok: ${c.id}');
-      },
-    );
+    final Either<ErrorItem, ContactModel> res = await widget.contactsBloc
+        .readDoc(_id.text.trim());
+    res.fold((ErrorItem e) => _snack('READ error: ${e.code}'), (
+      ContactModel c,
+    ) {
+      _fillForm(c);
+      _snack('READ ok: ${c.id}');
+    });
   }
 
   Future<void> _write() async {
@@ -2087,23 +2105,23 @@ class _WsContactsHomeState extends State<WsContactsHome> {
     if (c.id.isEmpty) {
       return;
     }
-    final Either<ErrorItem, ContactModel> res =
-        await widget.contactsBloc.writeDoc(c.id, c);
-    res.fold(
-      (ErrorItem e) => _snack('WRITE error: ${e.code}'),
-      (ContactModel saved) {
-        _fillForm(saved);
-        _snack('WRITE ok: ${saved.id}');
-      },
-    );
+    final Either<ErrorItem, ContactModel> res = await widget.contactsBloc
+        .writeDoc(c.id, c);
+    res.fold((ErrorItem e) => _snack('WRITE error: ${e.code}'), (
+      ContactModel saved,
+    ) {
+      _fillForm(saved);
+      _snack('WRITE ok: ${saved.id}');
+    });
   }
 
   Future<void> _delete() async {
     if (_id.text.trim().isEmpty) {
       return;
     }
-    final Either<ErrorItem, Unit> res =
-        await widget.contactsBloc.deleteDoc(_id.text.trim());
+    final Either<ErrorItem, Unit> res = await widget.contactsBloc.deleteDoc(
+      _id.text.trim(),
+    );
     res.fold(
       (ErrorItem e) => _snack('DELETE error: ${e.code}'),
       (_) => _snack('DELETE ok'),
@@ -2125,10 +2143,7 @@ class _WsContactsHomeState extends State<WsContactsHome> {
 
   void _snack(String msg) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(msg),
-        duration: const Duration(milliseconds: 900),
-      ),
+      SnackBar(content: Text(msg), duration: const Duration(milliseconds: 900)),
     );
   }
 
@@ -2277,39 +2292,40 @@ class _WsContactsHomeState extends State<WsContactsHome> {
               child: StreamBuilder<WsDbState<ContactModel>>(
                 stream: widget.contactsBloc.stream,
                 initialData: widget.contactsBloc.value,
-                builder: (
-                  BuildContext context,
-                  AsyncSnapshot<WsDbState<ContactModel>> snap,
-                ) {
-                  final WsDbState<ContactModel> s =
-                      snap.data ?? WsDbState<ContactModel>.idle();
-                  final ContactModel? c = s.doc;
-                  return Padding(
-                    padding: const EdgeInsets.all(12),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: <Widget>[
-                        _kv('loading', '${s.loading}'),
-                        _kv('docId', s.docId),
-                        _kv('isWatching', '${s.isWatching}'),
-                        _kv('error', s.error?.code ?? 'null'),
-                        const Divider(),
-                        const Text(
-                          'doc snapshot',
-                          style: TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                        const SizedBox(height: 6),
-                        Expanded(
-                          child: SingleChildScrollView(
-                            child: Text(
-                              c == null ? 'null' : c.toJson().toString(),
+                builder:
+                    (
+                      BuildContext context,
+                      AsyncSnapshot<WsDbState<ContactModel>> snap,
+                    ) {
+                      final WsDbState<ContactModel> s =
+                          snap.data ?? WsDbState<ContactModel>.idle();
+                      final ContactModel? c = s.doc;
+                      return Padding(
+                        padding: const EdgeInsets.all(12),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: <Widget>[
+                            _kv('loading', '${s.loading}'),
+                            _kv('docId', s.docId),
+                            _kv('isWatching', '${s.isWatching}'),
+                            _kv('error', s.error?.code ?? 'null'),
+                            const Divider(),
+                            const Text(
+                              'doc snapshot',
+                              style: TextStyle(fontWeight: FontWeight.bold),
                             ),
-                          ),
+                            const SizedBox(height: 6),
+                            Expanded(
+                              child: SingleChildScrollView(
+                                child: Text(
+                                  c == null ? 'null' : c.toJson().toString(),
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
-                  );
-                },
+                      );
+                    },
               ),
             ),
             const Divider(height: 1),
@@ -2325,36 +2341,37 @@ class _WsContactsHomeState extends State<WsContactsHome> {
               child: StreamBuilder<List<ContactModel>>(
                 stream: widget.contactsCollectionBloc.stream,
                 initialData: widget.contactsCollectionBloc.value,
-                builder: (
-                  BuildContext context,
-                  AsyncSnapshot<List<ContactModel>> snap,
-                ) {
-                  final List<ContactModel> items =
-                      snap.data ?? const <ContactModel>[];
-                  if (items.isEmpty) {
-                    return const Center(child: Text('No contacts yet'));
-                  }
-                  return ListView.separated(
-                    padding: const EdgeInsets.all(8),
-                    itemCount: items.length,
-                    separatorBuilder: (_, __) => const Divider(height: 1),
-                    itemBuilder: (_, int i) {
-                      final ContactModel c = items[i];
-                      return ListTile(
-                        leading: CircleAvatar(
-                          child: Text(c.name.isEmpty ? '?' : c.name[0]),
-                        ),
-                        title: Text(c.name),
-                        subtitle: Text(
-                          '${c.relationship} • ${c.phoneNumber}\n${c.email}',
-                        ),
-                        isThreeLine: true,
-                        trailing: Text('#${c.id}'),
-                        onTap: () => _fillForm(c),
+                builder:
+                    (
+                      BuildContext context,
+                      AsyncSnapshot<List<ContactModel>> snap,
+                    ) {
+                      final List<ContactModel> items =
+                          snap.data ?? const <ContactModel>[];
+                      if (items.isEmpty) {
+                        return const Center(child: Text('No contacts yet'));
+                      }
+                      return ListView.separated(
+                        padding: const EdgeInsets.all(8),
+                        itemCount: items.length,
+                        separatorBuilder: (_, __) => const Divider(height: 1),
+                        itemBuilder: (_, int i) {
+                          final ContactModel c = items[i];
+                          return ListTile(
+                            leading: CircleAvatar(
+                              child: Text(c.name.isEmpty ? '?' : c.name[0]),
+                            ),
+                            title: Text(c.name),
+                            subtitle: Text(
+                              '${c.relationship} • ${c.phoneNumber}\n${c.email}',
+                            ),
+                            isThreeLine: true,
+                            trailing: Text('#${c.id}'),
+                            onTap: () => _fillForm(c),
+                          );
+                        },
                       );
                     },
-                  );
-                },
               ),
             ),
             const Divider(height: 1),
@@ -2461,13 +2478,10 @@ Widget _kv(String k, String v) {
 
 class ContactsCollectionBloc extends BlocGeneral<List<ContactModel>> {
   ContactsCollectionBloc({
-    required ServiceWsDb service,
-    required String collection,
-    required ContactModel Function(Map<String, dynamic>) fromJson,
-  })  : _service = service,
-        _collection = collection,
-        _fromJson = fromJson,
-        super(const <ContactModel>[]);
+    required this._service,
+    required this._collection,
+    required this._fromJson,
+  }) : super(const <ContactModel>[]);
 
   final ServiceWsDb _service;
   final String _collection;
@@ -2476,18 +2490,17 @@ class ContactsCollectionBloc extends BlocGeneral<List<ContactModel>> {
 
   void start() {
     _sub?.cancel();
-    _sub = _service.collectionStream(collection: _collection).listen(
-      (List<Map<String, dynamic>> rawList) {
-        final List<ContactModel> items = <ContactModel>[];
-        for (final Map<String, dynamic> m in rawList) {
-          try {
-            items.add(_fromJson(m));
-          } catch (_) {}
-        }
-        value = items;
-      },
-      onError: (Object _, StackTrace __) {},
-    );
+    _sub = _service.collectionStream(collection: _collection).listen((
+      List<Map<String, dynamic>> rawList,
+    ) {
+      final List<ContactModel> items = <ContactModel>[];
+      for (final Map<String, dynamic> m in rawList) {
+        try {
+          items.add(_fromJson(m));
+        } catch (_) {}
+      }
+      value = items;
+    }, onError: (Object _, StackTrace __) {});
   }
 
   @override
@@ -2516,8 +2529,10 @@ ServiceSession _buildServiceForFlavor(String flavor) {
 
 BlocSession _buildBlocSession() {
   final ServiceSession svc = _buildServiceForFlavor(kFlavor);
-  final GatewayAuth gateway =
-      GatewayAuthImpl(svc, errorMapper: const DefaultErrorMapper());
+  final GatewayAuth gateway = GatewayAuthImpl(
+    svc,
+    errorMapper: const DefaultErrorMapper(),
+  );
   final RepositoryAuth repository = RepositoryAuthImpl(
     gateway: gateway,
     errorMapper: const DefaultErrorMapper(),
@@ -2534,8 +2549,9 @@ class SessionFlavorDemoPage extends StatefulWidget {
 
 class _SessionFlavorDemoPageState extends State<SessionFlavorDemoPage> {
   late final BlocSession session;
-  final TextEditingController email =
-      TextEditingController(text: 'user@fake.com');
+  final TextEditingController email = TextEditingController(
+    text: 'user@fake.com',
+  );
   final TextEditingController pass = TextEditingController(text: 'secret');
 
   @override
@@ -2572,9 +2588,7 @@ class _SessionFlavorDemoPageState extends State<SessionFlavorDemoPage> {
                 child: Text(
                   'FLAVOR: $kFlavor',
                   style: TextStyle(
-                    fontFeatures: <FontFeature>[
-                      FontFeature.tabularFigures(),
-                    ],
+                    fontFeatures: <FontFeature>[FontFeature.tabularFigures()],
                   ),
                 ),
               ),
@@ -2659,14 +2673,12 @@ class _SessionFlavorDemoPageState extends State<SessionFlavorDemoPage> {
                               onPressed: () async {
                                 final Either<ErrorItem, UserModel> r =
                                     await session.logIn(
-                                  email: email.text,
-                                  password: pass.text,
-                                );
+                                      email: email.text,
+                                      password: pass.text,
+                                    );
                                 r.fold(
-                                  (ErrorItem e) => _toast(
-                                    context,
-                                    'Login error: ${e.code}',
-                                  ),
+                                  (ErrorItem e) =>
+                                      _toast(context, 'Login error: ${e.code}'),
                                   (UserModel u) =>
                                       _toast(context, 'Hello ${u.email}'),
                                 );
@@ -2677,9 +2689,9 @@ class _SessionFlavorDemoPageState extends State<SessionFlavorDemoPage> {
                               onPressed: () async {
                                 final Either<ErrorItem, UserModel> r =
                                     await session.signIn(
-                                  email: email.text,
-                                  password: pass.text,
-                                );
+                                      email: email.text,
+                                      password: pass.text,
+                                    );
                                 r.fold(
                                   (ErrorItem e) => _toast(
                                     context,
@@ -2792,8 +2804,8 @@ class _SessionFlavorDemoPageState extends State<SessionFlavorDemoPage> {
                             ),
                             ElevatedButton(
                               onPressed: () async {
-                                final Either<ErrorItem, void>? r =
-                                    await session.logOut();
+                                final Either<ErrorItem, void>? r = await session
+                                    .logOut();
                                 if (r == null && context.mounted) {
                                   _toast(context, 'Already signed out');
                                   return;
@@ -2889,113 +2901,122 @@ class _ConnectivityDemoPageState extends State<ConnectivityDemoPage> {
       body: StreamBuilder<Either<ErrorItem, ConnectivityModel>>(
         stream: _bloc.stream,
         initialData: _bloc.value,
-        builder: (
-          BuildContext context,
-          AsyncSnapshot<Either<ErrorItem, ConnectivityModel>> snap,
-        ) {
-          final Either<ErrorItem, ConnectivityModel> either =
-              snap.data ?? _bloc.value;
-          final ConnectivityModel m = either.isRight
-              ? (either as Right<ErrorItem, ConnectivityModel>).value
-              : _lastGood;
-          if (either.isRight) {
-            _lastGood = (either as Right<ErrorItem, ConnectivityModel>).value;
-          }
+        builder:
+            (
+              BuildContext context,
+              AsyncSnapshot<Either<ErrorItem, ConnectivityModel>> snap,
+            ) {
+              final Either<ErrorItem, ConnectivityModel> either =
+                  snap.data ?? _bloc.value;
+              final ConnectivityModel m = either.isRight
+                  ? (either as Right<ErrorItem, ConnectivityModel>).value
+                  : _lastGood;
+              if (either.isRight) {
+                _lastGood =
+                    (either as Right<ErrorItem, ConnectivityModel>).value;
+              }
 
-          return ErrorItemWidget(
-            state: either as Either<ErrorItem, Object>,
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Text(
-                    'Type:  ${m.connectionType.name}',
-                    style: Theme.of(context).textTheme.titleLarge,
-                  ),
-                  const SizedBox(height: 8),
-                  Text('Speed: ${m.internetSpeed.toStringAsFixed(1)} Mbps'),
-                  const SizedBox(height: 16),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
+              return ErrorItemWidget(
+                state: either as Either<ErrorItem, Object>,
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
-                      ElevatedButton(
-                        onPressed: () => _service
-                            .simulateConnection(ConnectionTypeEnum.none),
-                        child: const Text('Go Offline'),
+                      Text(
+                        'Type:  ${m.connectionType.name}',
+                        style: Theme.of(context).textTheme.titleLarge,
                       ),
-                      ElevatedButton(
-                        onPressed: () => _service
-                            .simulateConnection(ConnectionTypeEnum.wifi),
-                        child: const Text('Wi-Fi'),
-                      ),
-                      ElevatedButton(
-                        onPressed: () => _service
-                            .simulateConnection(ConnectionTypeEnum.mobile),
-                        child: const Text('Mobile'),
-                      ),
-                      ElevatedButton(
-                        onPressed: () => _service.simulateSpeed(
-                          (((m.internetSpeed + 10).clamp(0.0, 9999.0)) as num)
-                              .toDouble(),
-                        ),
-                        child: const Text('+10 Mbps'),
-                      ),
-                      ElevatedButton(
-                        onPressed: () => _service.simulateSpeed(
-                          (((m.internetSpeed - 10).clamp(0.0, 9999.0)) as num)
-                              .toDouble(),
-                        ),
-                        child: const Text('−10 Mbps'),
-                      ),
-                      ElevatedButton(
-                        onPressed: () => _service.startSpeedJitter(),
-                        child: const Text('Start Jitter'),
-                      ),
-                      ElevatedButton(
-                        onPressed: () => _service.stopSpeedJitter(),
-                        child: const Text('Stop Jitter'),
-                      ),
-                      ElevatedButton(
-                        onPressed: _bloc.refreshType,
-                        child: const Text('Refresh Type'),
-                      ),
-                      ElevatedButton(
-                        onPressed: _bloc.refreshSpeed,
-                        child: const Text('Refresh Speed'),
-                      ),
-                      const SizedBox(height: 12),
-                      const Divider(),
-                      const SizedBox(height: 12),
-                      ElevatedButton(
-                        onPressed: () {
-                          _service.simulateErrorOnCheckConnectivityOnce();
-                          _bloc.refreshType();
-                        },
-                        child: const Text('Sim error: check type'),
-                      ),
-                      ElevatedButton(
-                        onPressed: () {
-                          _service.simulateErrorOnCheckSpeedOnce();
-                          _bloc.refreshSpeed();
-                        },
-                        child: const Text('Sim error: check speed'),
-                      ),
-                      ElevatedButton(
-                        onPressed: () {
-                          _service.simulateStreamErrorOnce();
-                          _service.simulateSpeed(m.internetSpeed + 1);
-                        },
-                        child: const Text('Sim error: stream'),
+                      const SizedBox(height: 8),
+                      Text('Speed: ${m.internetSpeed.toStringAsFixed(1)} Mbps'),
+                      const SizedBox(height: 16),
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: <Widget>[
+                          ElevatedButton(
+                            onPressed: () => _service.simulateConnection(
+                              ConnectionTypeEnum.none,
+                            ),
+                            child: const Text('Go Offline'),
+                          ),
+                          ElevatedButton(
+                            onPressed: () => _service.simulateConnection(
+                              ConnectionTypeEnum.wifi,
+                            ),
+                            child: const Text('Wi-Fi'),
+                          ),
+                          ElevatedButton(
+                            onPressed: () => _service.simulateConnection(
+                              ConnectionTypeEnum.mobile,
+                            ),
+                            child: const Text('Mobile'),
+                          ),
+                          ElevatedButton(
+                            onPressed: () => _service.simulateSpeed(
+                              (((m.internetSpeed + 10).clamp(
+                                0.0,
+                                9999.0,
+                              )) as num).toDouble(),
+                            ),
+                            child: const Text('+10 Mbps'),
+                          ),
+                          ElevatedButton(
+                            onPressed: () => _service.simulateSpeed(
+                              (((m.internetSpeed - 10).clamp(
+                                0.0,
+                                9999.0,
+                              )) as num).toDouble(),
+                            ),
+                            child: const Text('−10 Mbps'),
+                          ),
+                          ElevatedButton(
+                            onPressed: () => _service.startSpeedJitter(),
+                            child: const Text('Start Jitter'),
+                          ),
+                          ElevatedButton(
+                            onPressed: () => _service.stopSpeedJitter(),
+                            child: const Text('Stop Jitter'),
+                          ),
+                          ElevatedButton(
+                            onPressed: _bloc.refreshType,
+                            child: const Text('Refresh Type'),
+                          ),
+                          ElevatedButton(
+                            onPressed: _bloc.refreshSpeed,
+                            child: const Text('Refresh Speed'),
+                          ),
+                          const SizedBox(height: 12),
+                          const Divider(),
+                          const SizedBox(height: 12),
+                          ElevatedButton(
+                            onPressed: () {
+                              _service.simulateErrorOnCheckConnectivityOnce();
+                              _bloc.refreshType();
+                            },
+                            child: const Text('Sim error: check type'),
+                          ),
+                          ElevatedButton(
+                            onPressed: () {
+                              _service.simulateErrorOnCheckSpeedOnce();
+                              _bloc.refreshSpeed();
+                            },
+                            child: const Text('Sim error: check speed'),
+                          ),
+                          ElevatedButton(
+                            onPressed: () {
+                              _service.simulateStreamErrorOnce();
+                              _service.simulateSpeed(m.internetSpeed + 1);
+                            },
+                            child: const Text('Sim error: stream'),
+                          ),
+                        ],
                       ),
                     ],
                   ),
-                ],
-              ),
-            ),
-          );
-        },
+                ),
+              );
+            },
       ),
     );
   }
@@ -3217,19 +3238,20 @@ class _BlocLoadingDemoPageState extends State<BlocLoadingDemoPage> {
                               StreamBuilder<String>(
                                 stream: _bloc.loadingMsgStream,
                                 initialData: _bloc.loadingMsg,
-                                builder: (
-                                  BuildContext context,
-                                  AsyncSnapshot<String> s2,
-                                ) {
-                                  final String msg = s2.data ?? '';
-                                  return Text(
-                                    msg.isEmpty ? 'Loading…' : msg,
-                                    textAlign: TextAlign.center,
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  );
-                                },
+                                builder:
+                                    (
+                                      BuildContext context,
+                                      AsyncSnapshot<String> s2,
+                                    ) {
+                                      final String msg = s2.data ?? '';
+                                      return Text(
+                                        msg.isEmpty ? 'Loading…' : msg,
+                                        textAlign: TextAlign.center,
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      );
+                                    },
                               ),
                             ],
                           ),

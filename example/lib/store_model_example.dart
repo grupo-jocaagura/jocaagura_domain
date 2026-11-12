@@ -1,7 +1,7 @@
 import 'dart:math';
 
-import 'package:flutter/material.dart';
 import 'package:jocaagura_domain/jocaagura_domain.dart';
+import 'package:material_ui/material_ui.dart';
 
 void main() {
   runApp(const PetStoreApp());
@@ -38,10 +38,7 @@ class _PetStoreAppState extends State<PetStoreApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Jocaagura Pet Store',
-      theme: ThemeData(
-        colorSchemeSeed: Colors.teal,
-        useMaterial3: true,
-      ),
+      theme: ThemeData(colorSchemeSeed: Colors.teal, useMaterial3: true),
       home: PetStoreHome(app: _app),
     );
   }
@@ -214,14 +211,8 @@ class StoreHeader extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             // Nombre + Alias como subtítulo
-            Text(
-              store.name,
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
-            Text(
-              store.alias,
-              style: Theme.of(context).textTheme.bodySmall,
-            ),
+            Text(store.name, style: Theme.of(context).textTheme.titleLarge),
+            Text(store.alias, style: Theme.of(context).textTheme.bodySmall),
             const SizedBox(height: 8),
             // NIT con dígito de verificación
             Text('NIT: ${store.nitNumber}'),
@@ -254,19 +245,13 @@ class ItemDetailPage extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         child: ListView(
           children: <Widget>[
-            ListTile(
-              title: Text(item.name),
-              subtitle: Text(item.description),
-            ),
+            ListTile(title: Text(item.name), subtitle: Text(item.description)),
             const SizedBox(height: 8),
             Text('Categoría: ${item.type.category}'),
             const SizedBox(height: 4),
             Text('Precio: ${item.price}'),
             const SizedBox(height: 12),
-            Text(
-              'Atributos',
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
+            Text('Atributos', style: Theme.of(context).textTheme.titleMedium),
             const SizedBox(height: 4),
             for (final ModelAttribute<dynamic> a in item.attributes)
               Text('• ${a.name}: ${a.value}'),
@@ -294,8 +279,10 @@ class CartPage extends StatelessWidget {
             return const Center(child: Text('Tu carrito está vacío.'));
           }
 
-          final int minorTotal =
-              cart.fold<int>(0, (int acc, ModelItem e) => acc + e.price.amount);
+          final int minorTotal = cart.fold<int>(
+            0,
+            (int acc, ModelItem e) => acc + e.price.amount,
+          );
           final double decimalTotal =
               minorTotal / pow(10, ModelPrice.defaultMathprecision).toDouble();
 
@@ -327,9 +314,9 @@ class CartPage extends StatelessWidget {
                     Row(
                       children: <Widget>[
                         const Expanded(child: Text('Total')),
-                        Text('💰 ${decimalTotal.toStringAsFixed(
-                          ModelPrice.defaultMathprecision,
-                        )} COP'),
+                        Text(
+                          '💰 ${decimalTotal.toStringAsFixed(ModelPrice.defaultMathprecision)} COP',
+                        ),
                       ],
                     ),
                     const SizedBox(height: 12),
@@ -343,8 +330,9 @@ class CartPage extends StatelessWidget {
                           if (context.mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
-                                content:
-                                    Text('Compra registrada como ingreso.'),
+                                content: Text(
+                                  'Compra registrada como ingreso.',
+                                ),
                               ),
                             );
                             Navigator.of(context).pop();
@@ -371,12 +359,12 @@ class CartPage extends StatelessWidget {
 /// Holds the reactive blocs and orchestrates use cases.
 class PetStoreAppManager {
   PetStoreAppManager()
-      : storeBloc = BlocGeneral<StoreModel>(defaultStoreModel),
-        itemsBloc = BlocGeneral<List<ModelItem>>(<ModelItem>[]),
-        cartBloc = BlocGeneral<List<ModelItem>>(<ModelItem>[]),
-        ledgerBloc = BlocGeneral<LedgerModel>(
-          defaultLedgerModel(), // starts empty-ish; we will append incomes on purchase
-        ) {
+    : storeBloc = BlocGeneral<StoreModel>(defaultStoreModel),
+      itemsBloc = BlocGeneral<List<ModelItem>>(<ModelItem>[]),
+      cartBloc = BlocGeneral<List<ModelItem>>(<ModelItem>[]),
+      ledgerBloc = BlocGeneral<LedgerModel>(
+        defaultLedgerModel(), // starts empty-ish; we will append incomes on purchase
+      ) {
     // Wiring use cases with repository pipeline
     _service = FakePetStoreService();
     _gateway = PetStoreGatewayImpl(_service);
@@ -425,8 +413,10 @@ class PetStoreAppManager {
       return;
     }
 
-    final int minorTotal =
-        cart.fold<int>(0, (int acc, ModelItem e) => acc + e.price.amount);
+    final int minorTotal = cart.fold<int>(
+      0,
+      (int acc, ModelItem e) => acc + e.price.amount,
+    );
 
     await registerSale(
       concept: 'Venta',
@@ -718,10 +708,7 @@ class FakePetStoreService implements PetStoreService {
       name: name,
       description: desc,
       type: ModelCategory(category: cat, description: 'Pet store category'),
-      price: ModelPrice(
-        amount: priceMinor,
-        currency: CurrencyEnum.COP,
-      ),
+      price: ModelPrice(amount: priceMinor, currency: CurrencyEnum.COP),
       attributes: attrs,
     );
   }

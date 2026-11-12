@@ -25,16 +25,15 @@ import '../../jocaagura_domain.dart';
 class GatewayHttpRequestImpl implements GatewayHttpRequest {
   /// Creates a new [GatewayHttpRequestImpl] instance.
   ///
-  /// - [service]: Low-level HTTP service (platform-specific).
+  /// - [_service]: Low-level HTTP service (platform-specific).
   /// - [errorMapper]: Optional mapper; if omitted, [DefaultErrorMapper] is used.
   /// - [location]: Logical name used in [ErrorItem.meta.location] to help
   ///   diagnostics and logging.
   const GatewayHttpRequestImpl({
-    required ServiceHttpRequest service,
+    required this._service,
     ErrorMapper? errorMapper,
     this.location = 'GatewayHttpRequestImpl',
-  })  : _service = service,
-        _errorMapper = errorMapper ?? const DefaultErrorMapper();
+  }) : _errorMapper = errorMapper ?? const DefaultErrorMapper();
 
   /// Underlying HTTP service used for actual transport.
   final ServiceHttpRequest _service;
@@ -83,8 +82,9 @@ class GatewayHttpRequestImpl implements GatewayHttpRequest {
     Map<String, dynamic> metadata = const <String, dynamic>{},
   }) async {
     final Map<String, String>? svcBody = _toFlatStringMapNullable(body);
-    final Map<String, Map<String, String>?> svcMetadata =
-        _toNestedMetadata(metadata);
+    final Map<String, Map<String, String>?> svcMetadata = _toNestedMetadata(
+      metadata,
+    );
 
     return _wrap(
       methodLabel: 'POST',
@@ -112,8 +112,9 @@ class GatewayHttpRequestImpl implements GatewayHttpRequest {
     Map<String, dynamic> metadata = const <String, dynamic>{},
   }) async {
     final Map<String, String>? svcBody = _toFlatStringMapNullable(body);
-    final Map<String, Map<String, String>?> svcMetadata =
-        _toNestedMetadata(metadata);
+    final Map<String, Map<String, String>?> svcMetadata = _toNestedMetadata(
+      metadata,
+    );
 
     return _wrap(
       methodLabel: 'PUT',
@@ -139,8 +140,9 @@ class GatewayHttpRequestImpl implements GatewayHttpRequest {
     Duration? timeout,
     Map<String, dynamic> metadata = const <String, dynamic>{},
   }) async {
-    final Map<String, Map<String, String>?> svcMetadata =
-        _toNestedMetadata(metadata);
+    final Map<String, Map<String, String>?> svcMetadata = _toNestedMetadata(
+      metadata,
+    );
 
     return _wrap(
       methodLabel: 'DELETE',
@@ -226,8 +228,6 @@ class GatewayHttpRequestImpl implements GatewayHttpRequest {
     Map<String, dynamic> metadata,
   ) {
     final Map<String, String> flat = _toFlatStringMap(metadata);
-    return <String, Map<String, String>?>{
-      'tags': flat,
-    };
+    return <String, Map<String, String>?>{'tags': flat};
   }
 }

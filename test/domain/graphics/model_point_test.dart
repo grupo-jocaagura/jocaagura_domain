@@ -4,30 +4,29 @@ import 'package:jocaagura_domain/jocaagura_domain.dart';
 void main() {
   group('ModelPoint', () {
     test(
-        'Given valid json When fromJson Then builds point and preserves values',
-        () {
-      // Arrange
-      final Map<String, dynamic> json = <String, dynamic>{
-        ModelPointEnum.label.name: 'Enero',
-        ModelPointEnum.vector.name: <String, dynamic>{
-          ModelVectorEnum.dx.name: 1.0,
-          ModelVectorEnum.dy.name: 60000.0,
-        },
-      };
+      'Given valid json When fromJson Then builds point and preserves values',
+      () {
+        // Arrange
+        final Map<String, dynamic> json = <String, dynamic>{
+          ModelPointEnum.label.name: 'Enero',
+          ModelPointEnum.vector.name: <String, dynamic>{
+            ModelVectorEnum.dx.name: 1.0,
+            ModelVectorEnum.dy.name: 60000.0,
+          },
+        };
 
-      // Act
-      final ModelPoint p = ModelPoint.fromJson(json);
+        // Act
+        final ModelPoint p = ModelPoint.fromJson(json);
 
-      // Assert
-      expect(p.label, 'Enero');
-      expect(p.vector.dx, 1.0);
-      expect(p.vector.dy, 60000.0);
-      expect(p.vector.isValidVector, isTrue);
-    });
+        // Assert
+        expect(p.label, 'Enero');
+        expect(p.vector.dx, 1.0);
+        expect(p.vector.dy, 60000.0);
+        expect(p.vector.isValidVector, isTrue);
+      },
+    );
 
-    test(
-        'Given noisy json When fromJson Then label may be empty and vector may be invalid',
-        () {
+    test('Given noisy json When fromJson Then label may be empty and vector may be invalid', () {
       // Arrange: vector ausente/ruidoso → mapFromDynamic devuelve {}
       final Map<String, dynamic> json = <String, dynamic>{
         ModelPointEnum.label.name: null,
@@ -62,22 +61,26 @@ void main() {
       expect(v[ModelVectorEnum.dy.name], 45000.0);
     });
 
-    test('Given two equal points When comparing Then == and hashCode match',
-        () {
-      // Arrange
-      const ModelPoint a =
-          ModelPoint(label: 'M', vector: ModelVector(1.0, 1.0));
-      const ModelPoint b =
-          ModelPoint(label: 'M', vector: ModelVector(1.0, 1.0));
-
-      // Assert
-      expect(a == b, isTrue);
-      expect(a.hashCode, b.hashCode);
-    });
-
     test(
-        'Given copyWith When overriding fields Then returns new instance with overrides',
-        () {
+      'Given two equal points When comparing Then == and hashCode match',
+      () {
+        // Arrange
+        const ModelPoint a = ModelPoint(
+          label: 'M',
+          vector: ModelVector(1.0, 1.0),
+        );
+        const ModelPoint b = ModelPoint(
+          label: 'M',
+          vector: ModelVector(1.0, 1.0),
+        );
+
+        // Assert
+        expect(a == b, isTrue);
+        expect(a.hashCode, b.hashCode);
+      },
+    );
+
+    test('Given copyWith When overriding fields Then returns new instance with overrides', () {
       // Arrange
       const ModelPoint p = ModelPoint(label: 'L', vector: ModelVector.zero);
 
@@ -93,12 +96,12 @@ void main() {
       expect(p2.vector.dy, -7.0);
     });
 
-    test(
-        'Given round-trip When fromJson(toJson()) Then preserves semantic equality',
-        () {
+    test('Given round-trip When fromJson(toJson()) Then preserves semantic equality', () {
       // Arrange
-      const ModelPoint original =
-          ModelPoint(label: 'R', vector: ModelVector(3.0, 4.0));
+      const ModelPoint original = ModelPoint(
+        label: 'R',
+        vector: ModelVector(3.0, 4.0),
+      );
 
       // Act
       final ModelPoint round = ModelPoint.fromJson(original.toJson());
@@ -109,15 +112,17 @@ void main() {
   });
 
   group('ModelVector (integration checks used by ModelPoint)', () {
-    test('Given approximate vectors When equalsApprox Then true within eps',
-        () {
-      // Arrange
-      const ModelVector a = ModelVector(1.000000001, 2.0);
-      const ModelVector b = ModelVector(1.0, 2.0);
+    test(
+      'Given approximate vectors When equalsApprox Then true within eps',
+      () {
+        // Arrange
+        const ModelVector a = ModelVector(1.000000001, 2.0);
+        const ModelVector b = ModelVector(1.0, 2.0);
 
-      // Assert
-      expect(a.equalsApprox(b), isTrue);
-    });
+        // Assert
+        expect(a.equalsApprox(b), isTrue);
+      },
+    );
 
     test('Given invalid numbers When isValidVector Then false', () {
       // Arrange

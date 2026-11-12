@@ -14,221 +14,6 @@ abstract class StreamUseCase<T, P> {
   Stream<T> call(P params);
 }
 
-/// Parameters for read-like operations (single document).
-///
-/// Contracts:
-/// - [docId] must be a non-empty string.
-///
-/// Example:
-/// ```dart
-/// void main() {
-///   const ReadParams p = ReadParams('u1');
-///   print(p.docId);
-/// }
-/// ```
-class ReadParams {
-  const ReadParams(this.docId);
-  final String docId;
-}
-
-/// Parameters for write (upsert) operations.
-///
-/// Contracts:
-/// - [docId] must be a non-empty string.
-/// - [entity] must be a valid domain model (server-side validation may apply).
-///
-/// Example:
-/// ```dart
-/// void main() {
-///   final WriteParams<UserModel> p = WriteParams<UserModel>('u1', defaultUser);
-///   print('${p.docId} -> ${p.entity}');
-/// }
-/// ```
-class WriteParams<T extends Model> {
-  const WriteParams(this.docId, this.entity);
-  final String docId;
-  final T entity;
-}
-
-/// Parameters for delete operations.
-///
-/// Contracts:
-/// - [docId] must be a non-empty string.
-///
-/// Example:
-/// ```dart
-/// void main() {
-///   const DeleteParams p = DeleteParams('u1');
-///   print(p.docId);
-/// }
-/// ```
-class DeleteParams {
-  const DeleteParams(this.docId);
-  final String docId;
-}
-
-/// Parameters for watch (real-time) operations on a single document.
-///
-/// Contracts:
-/// - [docId] must be a non-empty string.
-/// - The caller is responsible for stream cancellation and for calling
-///   `repo.detachWatch(docId)` after **all** subscriptions are canceled.
-///
-/// Example:
-/// ```dart
-/// void main() {
-///   const WatchParams p = WatchParams('u1');
-///   print(p.docId);
-/// }
-/// ```
-class WatchParams {
-  const WatchParams(this.docId);
-  final String docId;
-}
-
-/// Parameters for read–modify–write mutations (pure transformation).
-///
-/// Contracts:
-/// - [docId] must be a non-empty string.
-/// - [transform] must be a **pure** function: no side effects, deterministic.
-///
-/// Example:
-/// ```dart
-/// void main() {
-///   final MutateParams<UserModel> p = MutateParams<UserModel>(
-///     'u1',
-///     (u) => u.copyWith(displayName: 'Alice'),
-///   );
-///   print(p.docId);
-/// }
-/// ```
-class MutateParams<T extends Model> {
-  const MutateParams(this.docId, this.transform);
-  final String docId;
-
-  /// Pure function that transforms the current entity into a new one.
-  final T Function(T current) transform;
-}
-
-/// Parameters for JSON patch operations (partial merge).
-///
-/// Contracts:
-/// - [docId] must be a non-empty string.
-/// - [patch] keys must match the entity JSON schema expected by `fromJson`.
-///
-/// Example:
-/// ```dart
-/// void main() {
-///   const PatchParams p = PatchParams('u1', <String, dynamic>{'displayName': 'Alice'});
-///   print('${p.docId} -> ${p.patch}');
-/// }
-/// ```
-class PatchParams {
-  const PatchParams(this.docId, this.patch);
-  final String docId;
-
-  /// Partial JSON to merge into the current entity's JSON representation.
-  final Map<String, dynamic> patch;
-}
-
-/// Parameters for ensuring a document exists (optionally updating if present).
-///
-/// Semantics:
-/// - Creates a new entity with [create] if the document is missing.
-/// - If it exists and [updateIfExists] is provided, updates it and returns the new value.
-/// - Otherwise, returns the current value.
-///
-/// Contracts:
-/// - [docId] non-empty.
-/// - [create] returns a valid `T`.
-/// - If provided, [updateIfExists] must be pure and deterministic.
-///
-/// Example:
-/// ```dart
-/// void main() {
-///   final EnsureParams<UserModel> p = EnsureParams<UserModel>(
-///     docId: 'u1',
-///     create: () => defaultUser,
-///     updateIfExists: (u) => u.copyWith(flag: true),
-///   );
-///   print(p.docId);
-/// }
-/// ```
-class EnsureParams<T extends Model> {
-  const EnsureParams({
-    required this.docId,
-    required this.create,
-    this.updateIfExists,
-  });
-
-  final String docId;
-
-  /// Factory used when the document does not exist.
-  final T Function() create;
-
-  /// Optional transformation to apply when the document exists.
-  final T Function(T current)? updateIfExists;
-}
-
-/// Parameters for multi-read operations (by ids).
-///
-/// Contracts:
-/// - [ids] must not be empty; each id must be a non-empty string.
-///
-/// Example:
-/// ```dart
-/// void main() {
-///   const ReadManyParams p = ReadManyParams(<String>['u1','u2']);
-///   print(p.ids.length);
-/// }
-/// ```
-class ReadManyParams {
-  const ReadManyParams(this.ids);
-  final List<String> ids;
-}
-
-/// Parameters for multi-write (upsert) operations.
-///
-/// Semantics:
-/// - Keys are document ids; values are the entities to upsert.
-/// - Execution order may matter for deterministic tests; see use case docs.
-///
-/// Contracts:
-/// - [entries] must not be empty; keys must be non-empty.
-///
-/// Example:
-/// ```dart
-/// void main() {
-///   final WriteManyParams<UserModel> p = WriteManyParams<UserModel>(
-///     <String, UserModel>{'u1': defaultUser},
-///   );
-///   print(p.entries.keys.first);
-/// }
-/// ```
-class WriteManyParams<T extends Model> {
-  const WriteManyParams(this.entries);
-
-  /// Map of docId -> entity
-  final Map<String, T> entries;
-}
-
-/// Parameters for multi-delete operations.
-///
-/// Contracts:
-/// - [ids] must not be empty; each id must be a non-empty string.
-///
-/// Example:
-/// ```dart
-/// void main() {
-///   const DeleteManyParams p = DeleteManyParams(<String>['u1','u2']);
-///   print(p.ids);
-/// }
-/// ```
-class DeleteManyParams {
-  const DeleteManyParams(this.ids);
-  final List<String> ids;
-}
-
 // ---------------------------------------------------------------------------
 //  1) ReadDocUseCase
 // ---------------------------------------------------------------------------
@@ -354,14 +139,17 @@ class ExistsDocUseCase<T extends Model>
   @override
   Future<Either<ErrorItem, bool>> call(ReadParams params) async {
     final Either<ErrorItem, T> r = await _repo.read(params.docId);
-    return r.fold((ErrorItem err) {
-      if (err.code == DatabaseErrorItems.notFound.code) {
-        return const Right<ErrorItem, bool>(false);
-      }
-      return Left<ErrorItem, bool>(err);
-    }, (_) {
-      return const Right<ErrorItem, bool>(true);
-    });
+    return r.fold(
+      (ErrorItem err) {
+        if (err.code == DatabaseErrorItems.notFound.code) {
+          return const Right<ErrorItem, bool>(false);
+        }
+        return Left<ErrorItem, bool>(err);
+      },
+      (_) {
+        return const Right<ErrorItem, bool>(true);
+      },
+    );
   }
 }
 
@@ -391,8 +179,7 @@ class ExistsDocUseCase<T extends Model>
 /// ```
 class ReadOrDefaultUseCase<T extends Model>
     implements UseCase<Either<ErrorItem, T>, ReadParams> {
-  ReadOrDefaultUseCase(this._repo, {required T Function() orElse})
-      : _orElse = orElse;
+  ReadOrDefaultUseCase(this._repo, {required this._orElse});
 
   final RepositoryWsDatabase<T> _repo;
   final T Function() _orElse;
@@ -400,14 +187,17 @@ class ReadOrDefaultUseCase<T extends Model>
   @override
   Future<Either<ErrorItem, T>> call(ReadParams params) async {
     final Either<ErrorItem, T> r = await _repo.read(params.docId);
-    return r.fold((ErrorItem err) {
-      if (err.code == DatabaseErrorItems.notFound.code) {
-        return Right<ErrorItem, T>(_orElse());
-      }
-      return Left<ErrorItem, T>(err);
-    }, (T entity) {
-      return Right<ErrorItem, T>(entity);
-    });
+    return r.fold(
+      (ErrorItem err) {
+        if (err.code == DatabaseErrorItems.notFound.code) {
+          return Right<ErrorItem, T>(_orElse());
+        }
+        return Left<ErrorItem, T>(err);
+      },
+      (T entity) {
+        return Right<ErrorItem, T>(entity);
+      },
+    );
   }
 }
 
@@ -478,8 +268,7 @@ class WatchDocUseCase<T extends Model>
 /// ```
 class WatchDocUntilUseCase<T extends Model>
     implements UseCase<Either<ErrorItem, T>, WatchParams> {
-  WatchDocUntilUseCase(this._repo, {required bool Function(T) predicate})
-      : _predicate = predicate;
+  WatchDocUntilUseCase(this._repo, {required this._predicate});
 
   final RepositoryWsDatabase<T> _repo;
   final bool Function(T) _predicate;
@@ -490,30 +279,35 @@ class WatchDocUntilUseCase<T extends Model>
     final Completer<Either<ErrorItem, T>> done =
         Completer<Either<ErrorItem, T>>();
 
-    sub = _repo.watch(params.docId).listen(
-      (Either<ErrorItem, T> e) {
-        e.fold((ErrorItem err) {
-          // surface stream errors immediately
-          if (!done.isCompleted) {
-            done.complete(Left<ErrorItem, T>(err));
-          }
-        }, (T entity) {
-          if (_predicate(entity) && !done.isCompleted) {
-            done.complete(Right<ErrorItem, T>(entity));
-          }
-        });
-      },
-      onError: (Object error, StackTrace st) {
-        if (!done.isCompleted) {
-          final ErrorItem mapped = const DefaultErrorMapper().fromException(
-            error,
-            st,
-            location: 'WatchDocUntilUseCase.onError',
-          );
-          done.complete(Left<ErrorItem, T>(mapped));
-        }
-      },
-    );
+    sub = _repo
+        .watch(params.docId)
+        .listen(
+          (Either<ErrorItem, T> e) {
+            e.fold(
+              (ErrorItem err) {
+                // surface stream errors immediately
+                if (!done.isCompleted) {
+                  done.complete(Left<ErrorItem, T>(err));
+                }
+              },
+              (T entity) {
+                if (_predicate(entity) && !done.isCompleted) {
+                  done.complete(Right<ErrorItem, T>(entity));
+                }
+              },
+            );
+          },
+          onError: (Object error, StackTrace st) {
+            if (!done.isCompleted) {
+              final ErrorItem mapped = const DefaultErrorMapper().fromException(
+                error,
+                st,
+                location: 'WatchDocUntilUseCase.onError',
+              );
+              done.complete(Left<ErrorItem, T>(mapped));
+            }
+          },
+        );
 
     final Either<ErrorItem, T> result = await done.future;
     await sub.cancel();
@@ -591,10 +385,7 @@ class MutateDocUseCase<T extends Model>
 /// ```
 class PatchDocFieldsUseCase<T extends Model>
     implements UseCase<Either<ErrorItem, T>, PatchParams> {
-  PatchDocFieldsUseCase(
-    this._repo, {
-    required T Function(Map<String, dynamic>) fromJson,
-  }) : _fromJson = fromJson;
+  PatchDocFieldsUseCase(this._repo, {required this._fromJson});
 
   final RepositoryWsDatabase<T> _repo;
   final T Function(Map<String, dynamic>) _fromJson;
@@ -602,17 +393,16 @@ class PatchDocFieldsUseCase<T extends Model>
   @override
   Future<Either<ErrorItem, T>> call(PatchParams params) async {
     final Either<ErrorItem, T> r = await _repo.read(params.docId);
-    return r.fold(
-      (ErrorItem err) => Left<ErrorItem, T>(err),
-      (T current) async {
-        final Map<String, dynamic> merged = <String, dynamic>{
-          ...current.toJson(),
-          ...params.patch,
-        };
-        final T updated = _fromJson(merged);
-        return _repo.write(params.docId, updated);
-      },
-    );
+    return r.fold((ErrorItem err) => Left<ErrorItem, T>(err), (
+      T current,
+    ) async {
+      final Map<String, dynamic> merged = <String, dynamic>{
+        ...current.toJson(),
+        ...params.patch,
+      };
+      final T updated = _fromJson(merged);
+      return _repo.write(params.docId, updated);
+    });
   }
 }
 
@@ -650,17 +440,20 @@ class EnsureDocUseCase<T extends Model>
   @override
   Future<Either<ErrorItem, T>> call(EnsureParams<T> params) async {
     final Either<ErrorItem, T> r = await _repo.read(params.docId);
-    return r.fold((ErrorItem err) async {
-      if (err.code == DatabaseErrorItems.notFound.code) {
-        return _repo.write(params.docId, params.create());
-      }
-      return Left<ErrorItem, T>(err);
-    }, (T current) async {
-      if (params.updateIfExists != null) {
-        return _repo.write(params.docId, params.updateIfExists!(current));
-      }
-      return Right<ErrorItem, T>(current);
-    });
+    return r.fold(
+      (ErrorItem err) async {
+        if (err.code == DatabaseErrorItems.notFound.code) {
+          return _repo.write(params.docId, params.create());
+        }
+        return Left<ErrorItem, T>(err);
+      },
+      (T current) async {
+        if (params.updateIfExists != null) {
+          return _repo.write(params.docId, params.updateIfExists!(current));
+        }
+        return Right<ErrorItem, T>(current);
+      },
+    );
   }
 }
 
@@ -689,10 +482,12 @@ class EnsureDocUseCase<T extends Model>
 /// ```
 class ReadManyDocsUseCase<T extends Model>
     implements
-        UseCase<Either<ErrorItem, Map<String, Either<ErrorItem, T>>>,
-            ReadManyParams> {
+        UseCase<
+          Either<ErrorItem, Map<String, Either<ErrorItem, T>>>,
+          ReadManyParams
+        > {
   ReadManyDocsUseCase(this._repo, {ErrorMapper? mapper})
-      : _mapper = mapper ?? const DefaultErrorMapper();
+    : _mapper = mapper ?? const DefaultErrorMapper();
 
   final RepositoryWsDatabase<T> _repo;
   final ErrorMapper _mapper;
@@ -743,10 +538,12 @@ class ReadManyDocsUseCase<T extends Model>
 /// ```
 class WriteManyDocsUseCase<T extends Model>
     implements
-        UseCase<Either<ErrorItem, Map<String, Either<ErrorItem, T>>>,
-            WriteManyParams<T>> {
+        UseCase<
+          Either<ErrorItem, Map<String, Either<ErrorItem, T>>>,
+          WriteManyParams<T>
+        > {
   WriteManyDocsUseCase(this._repo, {ErrorMapper? mapper})
-      : _mapper = mapper ?? const DefaultErrorMapper();
+    : _mapper = mapper ?? const DefaultErrorMapper();
 
   final RepositoryWsDatabase<T> _repo;
   final ErrorMapper _mapper;
@@ -791,10 +588,12 @@ class WriteManyDocsUseCase<T extends Model>
 /// ```
 class DeleteManyDocsUseCase<T extends Model>
     implements
-        UseCase<Either<ErrorItem, Map<String, Either<ErrorItem, Unit>>>,
-            DeleteManyParams> {
+        UseCase<
+          Either<ErrorItem, Map<String, Either<ErrorItem, Unit>>>,
+          DeleteManyParams
+        > {
   DeleteManyDocsUseCase(this._repo, {ErrorMapper? mapper})
-      : _mapper = mapper ?? const DefaultErrorMapper();
+    : _mapper = mapper ?? const DefaultErrorMapper();
 
   final RepositoryWsDatabase<T> _repo;
   final ErrorMapper _mapper;

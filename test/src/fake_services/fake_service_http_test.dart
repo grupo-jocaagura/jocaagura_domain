@@ -19,8 +19,10 @@ void main() {
 
     test('POST devuelve body cuando no hay respuesta simulada', () async {
       final Map<String, int> body = <String, int>{'a': 1};
-      final Map<String, dynamic> res =
-          await http.post(url: '/post', body: body);
+      final Map<String, dynamic> res = await http.post(
+        url: '/post',
+        body: body,
+      );
       expect(res, equals(body));
     });
 
@@ -60,9 +62,7 @@ void main() {
           '/foo',
           <String, dynamic>{'created': 1},
         );
-        final Map<String, dynamic> res = await http.post(
-          url: '/foo',
-        );
+        final Map<String, dynamic> res = await http.post(url: '/foo');
         expect(res, equals(<String, dynamic>{'created': 1}));
       });
 
@@ -72,8 +72,10 @@ void main() {
           '/foo',
           <String, dynamic>{'updated': true},
         );
-        final Map<String, dynamic> res =
-            await http.put(url: '/foo', body: <String, dynamic>{});
+        final Map<String, dynamic> res = await http.put(
+          url: '/foo',
+          body: <String, dynamic>{},
+        );
         expect(res, equals(<String, dynamic>{'updated': true}));
       });
 
@@ -87,18 +89,8 @@ void main() {
           await http.get(url: '/onlyGet'),
           equals(<String, dynamic>{'a': 1}),
         );
-        expect(
-          await http.post(
-            url: '/onlyGet',
-          ),
-          isEmpty,
-        );
-        expect(
-          await http.put(
-            url: '/onlyGet',
-          ),
-          isEmpty,
-        );
+        expect(await http.post(url: '/onlyGet'), isEmpty);
+        expect(await http.put(url: '/onlyGet'), isEmpty);
         // DELETE sigue sin lanzar
         await http.delete(url: '/onlyGet');
       });
@@ -149,8 +141,9 @@ void main() {
 
   group('Latency simulation', () {
     test('GET respeta latencia', () async {
-      final FakeServiceHttp h =
-          FakeServiceHttp(latency: const Duration(milliseconds: 30));
+      final FakeServiceHttp h = FakeServiceHttp(
+        latency: const Duration(milliseconds: 30),
+      );
       final Stopwatch sw = Stopwatch()..start();
       await h.get(url: '/');
       sw.stop();
@@ -194,8 +187,10 @@ void main() {
         '/foo',
         <String, dynamic>{'updated': true},
       );
-      final Map<String, dynamic> res =
-          await http.put(url: '/foo', body: <dynamic, dynamic>{});
+      final Map<String, dynamic> res = await http.put(
+        url: '/foo',
+        body: <dynamic, dynamic>{},
+      );
       expect(res, equals(<String, bool>{'updated': true}));
     });
 

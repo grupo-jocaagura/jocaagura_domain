@@ -71,14 +71,13 @@ class BlocSession extends BlocModule {
   /// code paths that access getters after `dispose()`, you can opt into a
   /// lenient policy.
   BlocSession({
-    required SessionUsecases usecases,
+    required this._usecases,
     Debouncer? authDebouncer,
     Debouncer? refreshDebouncer,
     this.postDisposePolicy = PostDisposePolicy.throwStateError,
-  })  : _usecases = usecases,
-        _authDebouncer = authDebouncer ?? Debouncer(),
-        _refreshDebouncer = refreshDebouncer ?? Debouncer(),
-        _states = BlocGeneral<SessionState>(const Unauthenticated());
+  }) : _authDebouncer = authDebouncer ?? Debouncer(),
+       _refreshDebouncer = refreshDebouncer ?? Debouncer(),
+       _states = BlocGeneral<SessionState>(const Unauthenticated());
 
   /// Convenience factory that wires the required use cases using only a
   /// [RepositoryAuth]. This keeps callers repository-centric and backward
@@ -170,10 +169,10 @@ class BlocSession extends BlocModule {
   ///   stream; a late subscriber may receive the last replayed value and then
   ///   completion, but no further updates.
   Stream<SessionState> get sessionStream => _guard<Stream<SessionState>>(
-        body: () => _states.stream,
-        lastSnapshot: () => _states.stream,
-        sessionErrorFallback: () => _states.stream,
-      );
+    body: () => _states.stream,
+    lastSnapshot: () => _states.stream,
+    sessionErrorFallback: () => _states.stream,
+  );
 
   /// Canonical alias so consumers can use `session.stream`.
   ///
@@ -202,10 +201,10 @@ class BlocSession extends BlocModule {
   /// }
   /// ```
   SessionState get state => _guard<SessionState>(
-        body: () => _states.value,
-        lastSnapshot: () => _states.value,
-        sessionErrorFallback: () => const SessionError(_disposedError),
-      );
+    body: () => _states.value,
+    lastSnapshot: () => _states.value,
+    sessionErrorFallback: () => const SessionError(_disposedError),
+  );
 
   /// Synchronous **best-effort** snapshot for consumers that only care about
   /// “am I signed in or not?” without dealing with intermediate states.
@@ -232,19 +231,19 @@ class BlocSession extends BlocModule {
   /// final bool signedIn = session.stateOrDefault is Authenticated;
   /// ```
   SessionState get stateOrDefault => _guard<SessionState>(
-        body: () {
-          final SessionState state = _states.value;
-          if (state is Authenticated) {
-            return state; // no allocation if already authed
-          }
-          return const Unauthenticated();
-        },
-        lastSnapshot: () {
-          final SessionState s = _states.value;
-          return s is Authenticated ? s : const Unauthenticated();
-        },
-        sessionErrorFallback: () => const Unauthenticated(),
-      );
+    body: () {
+      final SessionState state = _states.value;
+      if (state is Authenticated) {
+        return state; // no allocation if already authed
+      }
+      return const Unauthenticated();
+    },
+    lastSnapshot: () {
+      final SessionState s = _states.value;
+      return s is Authenticated ? s : const Unauthenticated();
+    },
+    sessionErrorFallback: () => const Unauthenticated(),
+  );
 
   /// Current user (never null). Returns [defaultUserModel] if not authenticated.
   ///
@@ -253,16 +252,16 @@ class BlocSession extends BlocModule {
   /// - `returnLastSnapshot`: returns the last cached user or [defaultUserModel].
   /// - `returnSessionError`: returns [defaultUserModel] (safe helper).
   UserModel get currentUser => _guard<UserModel>(
-        body: () {
-          final SessionState s = _states.value;
-          return s is Authenticated ? s.user : defaultUserModel;
-        },
-        lastSnapshot: () {
-          final SessionState s = _states.value;
-          return s is Authenticated ? s.user : defaultUserModel;
-        },
-        sessionErrorFallback: () => defaultUserModel,
-      );
+    body: () {
+      final SessionState s = _states.value;
+      return s is Authenticated ? s.user : defaultUserModel;
+    },
+    lastSnapshot: () {
+      final SessionState s = _states.value;
+      return s is Authenticated ? s.user : defaultUserModel;
+    },
+    sessionErrorFallback: () => defaultUserModel,
+  );
 
   /// True if state is [Authenticated].
   ///
@@ -271,10 +270,10 @@ class BlocSession extends BlocModule {
   /// - `returnLastSnapshot`: returns the last cached truth value.
   /// - `returnSessionError`: returns `false` (safe helper).
   bool get isAuthenticated => _guard<bool>(
-        body: () => _states.value is Authenticated,
-        lastSnapshot: () => _states.value is Authenticated,
-        sessionErrorFallback: () => false,
-      );
+    body: () => _states.value is Authenticated,
+    lastSnapshot: () => _states.value is Authenticated,
+    sessionErrorFallback: () => false,
+  );
 
   // ---- Lifecycle -------------------------------------------------------------
 
@@ -302,19 +301,18 @@ class BlocSession extends BlocModule {
   Future<void> boot() async {
     _ensureNotDisposed();
     await cancelAuthSubscription();
-    _authSub = _usecases.watchAuthStateChangesUsecase
-        .call()
-        .listen((Either<ErrorItem, UserModel?> event) {
-      event.fold(
-        (ErrorItem err) => _states.value = SessionError(err),
-        (UserModel? user) {
-          if (user == null) {
-            _states.value = const Unauthenticated();
-          } else {
-            _states.value = Authenticated(user);
-          }
-        },
-      );
+    _authSub = _usecases.watchAuthStateChangesUsecase.call().listen((
+      Either<ErrorItem, UserModel?> event,
+    ) {
+      event.fold((ErrorItem err) => _states.value = SessionError(err), (
+        UserModel? user,
+      ) {
+        if (user == null) {
+          _states.value = const Unauthenticated();
+        } else {
+          _states.value = Authenticated(user);
+        }
+      });
     });
   }
 
@@ -340,9 +338,7 @@ class BlocSession extends BlocModule {
       displayName: email.split('@').first,
       photoUrl: '',
       email: email,
-      jwt: <String, dynamic>{
-        LogInUserAndPasswordUsecase.passwordKey: password,
-      },
+      jwt: <String, dynamic>{LogInUserAndPasswordUsecase.passwordKey: password},
     );
   }
 
@@ -368,10 +364,13 @@ class BlocSession extends BlocModule {
     required Completer<Either<ErrorItem, UserModel>> completer,
   }) async {
     _states.value = const Authenticating();
-    final UserModel req =
-        _buildUserForCredentials(email: email, password: password);
-    final Either<ErrorItem, UserModel> right =
-        await _usecases.logInUserAndPassword.call(req);
+    final UserModel req = _buildUserForCredentials(
+      email: email,
+      password: password,
+    );
+    final Either<ErrorItem, UserModel> right = await _usecases
+        .logInUserAndPassword
+        .call(req);
     right.fold(
       (ErrorItem errorItem) => _states.value = SessionError(errorItem),
       (UserModel user) => _states.value = Authenticated(user),
@@ -401,10 +400,13 @@ class BlocSession extends BlocModule {
     required Completer<Either<ErrorItem, UserModel>> completer,
   }) async {
     _states.value = const Authenticating();
-    final UserModel req =
-        _buildUserForCredentials(email: email, password: password);
-    final Either<ErrorItem, UserModel> right =
-        await _usecases.signInUserAndPassword.call(req);
+    final UserModel req = _buildUserForCredentials(
+      email: email,
+      password: password,
+    );
+    final Either<ErrorItem, UserModel> right = await _usecases
+        .signInUserAndPassword
+        .call(req);
     right.fold(
       (ErrorItem errorItem) => _states.value = SessionError(errorItem),
       (UserModel user) => _states.value = Authenticated(user),
@@ -429,8 +431,8 @@ class BlocSession extends BlocModule {
     required Completer<Either<ErrorItem, UserModel>> completer,
   }) async {
     _states.value = const Authenticating();
-    final Either<ErrorItem, UserModel> right =
-        await _usecases.loginWithGoogle.call();
+    final Either<ErrorItem, UserModel> right = await _usecases.loginWithGoogle
+        .call();
     right.fold(
       (ErrorItem errorItem) => _states.value = SessionError(errorItem),
       (UserModel user) => _states.value = Authenticated(user),
@@ -463,8 +465,8 @@ class BlocSession extends BlocModule {
 
     _states.value = const Authenticating();
 
-    final Either<ErrorItem, UserModel> right =
-        await _usecases.logInSilently.call(prev.user);
+    final Either<ErrorItem, UserModel> right = await _usecases.logInSilently
+        .call(prev.user);
     right.fold(
       (ErrorItem errorItem) => _states.value = SessionError(errorItem),
       (UserModel user) => _states.value = Authenticated(user),
@@ -495,8 +497,9 @@ class BlocSession extends BlocModule {
   }) async {
     final Authenticated prev = _states.value as Authenticated;
     _states.value = Refreshing(prev);
-    final Either<ErrorItem, UserModel> r =
-        await _usecases.refreshSession.call(prev.user);
+    final Either<ErrorItem, UserModel> r = await _usecases.refreshSession.call(
+      prev.user,
+    );
     r.fold(
       (ErrorItem e) => _states.value = SessionError(e),
       (UserModel u) => _states.value = Authenticated(u),
@@ -519,8 +522,9 @@ class BlocSession extends BlocModule {
       email: email,
       jwt: const <String, dynamic>{},
     );
-    final Either<ErrorItem, void> right =
-        await _usecases.recoverPassword.call(probe);
+    final Either<ErrorItem, void> right = await _usecases.recoverPassword.call(
+      probe,
+    );
     right.fold(
       (ErrorItem e) => _states.value = SessionError(e),
       (_) {}, // keep current state on success
@@ -539,8 +543,9 @@ class BlocSession extends BlocModule {
     }
     final Authenticated prev = _states.value as Authenticated;
     _states.value = const Authenticating();
-    final Either<ErrorItem, void> right =
-        await _usecases.logOutUsecase.call(prev.user);
+    final Either<ErrorItem, void> right = await _usecases.logOutUsecase.call(
+      prev.user,
+    );
     right.fold(
       (ErrorItem e) => _states.value = SessionError(e),
       (_) => _states.value = const Unauthenticated(),
@@ -636,8 +641,9 @@ class BlocSession extends BlocModule {
     _authDebouncer(() async {
       try {
         _states.value = const Authenticating();
-        final Either<ErrorItem, UserModel> result =
-            await _usecases.getCurrentUser.call();
+        final Either<ErrorItem, UserModel> result = await _usecases
+            .getCurrentUser
+            .call();
         result.fold(
           (ErrorItem e) => _states.value = SessionError(e),
           (UserModel u) => _states.value = Authenticated(u),

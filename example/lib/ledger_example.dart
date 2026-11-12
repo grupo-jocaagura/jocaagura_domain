@@ -1,7 +1,7 @@
 import 'dart:math' show Random, max;
 
-import 'package:flutter/material.dart';
 import 'package:jocaagura_domain/jocaagura_domain.dart';
+import 'package:material_ui/material_ui.dart';
 
 void main() {
   runApp(const LedgerChartsApp());
@@ -30,10 +30,12 @@ class LedgerChartsPage extends StatefulWidget {
 }
 
 class _LedgerChartsPageState extends State<LedgerChartsPage> {
-  final BlocGeneral<LedgerModel> _ledgerBloc =
-      BlocGeneral<LedgerModel>(defaultLedgerModel());
-  final BlocGeneral<ModelGraph> _barsBloc =
-      BlocGeneral<ModelGraph>(defaultModelGraph()); // egresos por mes
+  final BlocGeneral<LedgerModel> _ledgerBloc = BlocGeneral<LedgerModel>(
+    defaultLedgerModel(),
+  );
+  final BlocGeneral<ModelGraph> _barsBloc = BlocGeneral<ModelGraph>(
+    defaultModelGraph(),
+  ); // egresos por mes
 
   // Paleta fija por categoría (pastel).
   final Map<String, Color> _categoryColors = <String, Color>{
@@ -79,84 +81,96 @@ class _LedgerChartsPageState extends State<LedgerChartsPage> {
             return const Center(child: CircularProgressIndicator());
           }
           final Map<String, double> byCategory = _sumExpensesByCategory(ledger);
-          final double totalExpenses =
-              byCategory.values.fold(0.0, (double a, double b) => a + b);
+          final double totalExpenses = byCategory.values.fold(
+            0.0,
+            (double a, double b) => a + b,
+          );
 
           return StreamBuilder<ModelGraph>(
             stream: _barsBloc.stream,
             initialData: _barsBloc.value,
             builder:
                 (BuildContext context, AsyncSnapshot<ModelGraph> barsSnap) {
-              final ModelGraph? bars = barsSnap.data;
-              if (bars == null) {
-                return const Center(child: CircularProgressIndicator());
-              }
+                  final ModelGraph? bars = barsSnap.data;
+                  if (bars == null) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
 
-              return LayoutBuilder(
-                builder: (BuildContext context, BoxConstraints c) {
-                  return SingleChildScrollView(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: <Widget>[
-                        // --- Ponqué por categoría ---
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: 8),
-                          child: Text(
-                            'Por categoría',
-                            textAlign: TextAlign.center,
-                            style: t.titleMedium
-                                ?.copyWith(fontWeight: FontWeight.w700),
-                          ),
-                        ),
-                        AspectRatio(
-                          aspectRatio: 1.1,
-                          child: Card(
-                            elevation: 2,
-                            clipBehavior: Clip.antiAlias,
-                            child: Padding(
-                              padding: const EdgeInsets.all(24.0),
-                              child: _PieChart(
-                                totals: byCategory,
-                                colors: _categoryColors,
-                                centerLabel: 'Gasto total',
-                                centerValue: _fmtCOP(totalExpenses),
+                  return LayoutBuilder(
+                    builder: (BuildContext context, BoxConstraints c) {
+                      return SingleChildScrollView(
+                        padding: const EdgeInsets.all(16),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: <Widget>[
+                            // --- Ponqué por categoría ---
+                            Padding(
+                              padding: const EdgeInsets.only(bottom: 8),
+                              child: Text(
+                                'Por categoría',
+                                textAlign: TextAlign.center,
+                                style: t.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.w700,
+                                ),
                               ),
                             ),
-                          ),
-                        ),
-                        const SizedBox(height: 24),
-
-                        // --- Barras por mes (egreso) ---
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: 8),
-                          child: Text(
-                            'Por fecha',
-                            textAlign: TextAlign.center,
-                            style: t.titleMedium
-                                ?.copyWith(fontWeight: FontWeight.w700),
-                          ),
-                        ),
-                        AspectRatio(
-                          aspectRatio: 1.7,
-                          child: Card(
-                            elevation: 2,
-                            clipBehavior: Clip.antiAlias,
-                            child: Padding(
-                              padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-                              child: _BarsChart(graph: bars),
+                            AspectRatio(
+                              aspectRatio: 1.1,
+                              child: Card(
+                                elevation: 2,
+                                clipBehavior: Clip.antiAlias,
+                                child: Padding(
+                                  padding: const EdgeInsets.all(24.0),
+                                  child: _PieChart(
+                                    totals: byCategory,
+                                    colors: _categoryColors,
+                                    centerLabel: 'Gasto total',
+                                    centerValue: _fmtCOP(totalExpenses),
+                                  ),
+                                ),
+                              ),
                             ),
-                          ),
-                        ),
+                            const SizedBox(height: 24),
 
-                        const SizedBox(height: 24),
-                        _Legend(colors: _categoryColors, totals: byCategory),
-                      ],
-                    ),
+                            // --- Barras por mes (egreso) ---
+                            Padding(
+                              padding: const EdgeInsets.only(bottom: 8),
+                              child: Text(
+                                'Por fecha',
+                                textAlign: TextAlign.center,
+                                style: t.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ),
+                            AspectRatio(
+                              aspectRatio: 1.7,
+                              child: Card(
+                                elevation: 2,
+                                clipBehavior: Clip.antiAlias,
+                                child: Padding(
+                                  padding: const EdgeInsets.fromLTRB(
+                                    16,
+                                    8,
+                                    16,
+                                    8,
+                                  ),
+                                  child: _BarsChart(graph: bars),
+                                ),
+                              ),
+                            ),
+
+                            const SizedBox(height: 24),
+                            _Legend(
+                              colors: _categoryColors,
+                              totals: byCategory,
+                            ),
+                          ],
+                        ),
+                      );
+                    },
                   );
                 },
-              );
-            },
           );
         },
       ),

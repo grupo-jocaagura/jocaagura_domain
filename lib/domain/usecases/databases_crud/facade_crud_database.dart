@@ -150,40 +150,34 @@ class FacadeCrudDatabaseUsecases<T extends Model> {
   Future<Either<ErrorItem, T>> mutateDoc(
     String docId,
     T Function(T current) transform,
-  ) =>
-      mutate(MutateParams<T>(docId, transform));
+  ) => mutate(MutateParams<T>(docId, transform));
 
   Future<Either<ErrorItem, T>> patchDoc(
     String docId,
     Map<String, dynamic> patch,
-  ) =>
-      patchFields(PatchParams(docId, patch));
+  ) => patchFields(PatchParams(docId, patch));
 
   Future<Either<ErrorItem, T>> ensureDoc({
     required String docId,
     required T Function() create,
     T Function(T current)? updateIfExists,
-  }) =>
-      ensure(
-        EnsureParams<T>(
-          docId: docId,
-          create: create,
-          updateIfExists: updateIfExists,
-        ),
-      );
+  }) => ensure(
+    EnsureParams<T>(
+      docId: docId,
+      create: create,
+      updateIfExists: updateIfExists,
+    ),
+  );
 
   Future<Either<ErrorItem, Map<String, Either<ErrorItem, T>>>> readDocs(
     List<String> ids,
-  ) =>
-      readMany(ReadManyParams(ids));
+  ) => readMany(ReadManyParams(ids));
 
   Future<Either<ErrorItem, Map<String, Either<ErrorItem, T>>>> writeDocs(
     Map<String, T> entries,
-  ) =>
-      writeMany(WriteManyParams<T>(entries));
+  ) => writeMany(WriteManyParams<T>(entries));
 
   Future<Either<ErrorItem, Map<String, Either<ErrorItem, Unit>>>> deleteDocs(
     List<String> ids,
-  ) =>
-      deleteMany(DeleteManyParams(ids));
+  ) => deleteMany(DeleteManyParams(ids));
 }

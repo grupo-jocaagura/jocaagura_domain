@@ -131,17 +131,19 @@ void main() {
       );
     });
 
-    test('getErrorLevelFromString returns systemInfo for invalid or null input',
-        () {
-      expect(
-        ErrorItem.getErrorLevelFromString('unknown'),
-        ErrorLevelEnum.systemInfo,
-      );
-      expect(
-        ErrorItem.getErrorLevelFromString(null),
-        ErrorLevelEnum.systemInfo,
-      );
-    });
+    test(
+      'getErrorLevelFromString returns systemInfo for invalid or null input',
+      () {
+        expect(
+          ErrorItem.getErrorLevelFromString('unknown'),
+          ErrorLevelEnum.systemInfo,
+        );
+        expect(
+          ErrorItem.getErrorLevelFromString(null),
+          ErrorLevelEnum.systemInfo,
+        );
+      },
+    );
 
     test('fromJson includes errorLevel parsing', () {
       final Map<String, dynamic> json = <String, dynamic>{
@@ -185,8 +187,9 @@ void main() {
         errorLevel: ErrorLevelEnum.severe,
       );
 
-      final ErrorItem updated =
-          original.copyWith(errorLevel: ErrorLevelEnum.danger);
+      final ErrorItem updated = original.copyWith(
+        errorLevel: ErrorLevelEnum.danger,
+      );
 
       expect(updated.errorLevel, ErrorLevelEnum.danger);
       expect(original.errorLevel, ErrorLevelEnum.severe);
@@ -195,9 +198,7 @@ void main() {
     });
   });
   group('ErrorItem Model', () {
-    test(
-        'Given valid fields When toJson->fromJson Then round-trip yields equal instance',
-        () {
+    test('Given valid fields When toJson->fromJson Then round-trip yields equal instance', () {
       // Arrange
       final Map<String, Object?> meta = <String, Object?>{'a': 1, 'b': true};
       final ErrorItem original = ErrorItem(
@@ -210,8 +211,9 @@ void main() {
 
       // Act
       final String encoded = jsonEncode(original.toJson());
-      final ErrorItem decoded =
-          ErrorItem.fromJson(jsonDecode(encoded) as Map<String, dynamic>);
+      final ErrorItem decoded = ErrorItem.fromJson(
+        jsonDecode(encoded) as Map<String, dynamic>,
+      );
 
       // Assert
       expect(decoded, original);
@@ -220,9 +222,7 @@ void main() {
       expect(mapEquals(decoded.meta, meta), isTrue);
     });
 
-    test(
-        'Given unknown errorLevel string When fromJson Then defaults to systemInfo',
-        () {
+    test('Given unknown errorLevel string When fromJson Then defaults to systemInfo', () {
       // Arrange
       final Map<String, dynamic> json = <String, dynamic>{
         ErrorItemEnum.title.name: 'Strange',
@@ -240,37 +240,36 @@ void main() {
     });
 
     test(
-        'Given copyWith overrides When applied Then only provided fields change',
-        () {
-      // Arrange
-      const ErrorItem base = ErrorItem(
-        title: 'A',
-        code: 'C',
-        description: 'D',
-        meta: <String, Object?>{'k': 1},
-        errorLevel: ErrorLevelEnum.warning,
-      );
+      'Given copyWith overrides When applied Then only provided fields change',
+      () {
+        // Arrange
+        const ErrorItem base = ErrorItem(
+          title: 'A',
+          code: 'C',
+          description: 'D',
+          meta: <String, Object?>{'k': 1},
+          errorLevel: ErrorLevelEnum.warning,
+        );
 
-      // Act
-      final ErrorItem modified = base.copyWith(
-        title: 'A2',
-        meta: <String, Object?>{'k': 1, 'x': 'y'},
-      );
+        // Act
+        final ErrorItem modified = base.copyWith(
+          title: 'A2',
+          meta: <String, Object?>{'k': 1, 'x': 'y'},
+        );
 
-      // Assert
-      expect(modified.title, 'A2');
-      expect(modified.code, 'C');
-      expect(modified.description, 'D');
-      expect(modified.errorLevel, ErrorLevelEnum.warning);
-      expect(
-        mapEquals(modified.meta, <String, Object?>{'k': 1, 'x': 'y'}),
-        isTrue,
-      );
-    });
+        // Assert
+        expect(modified.title, 'A2');
+        expect(modified.code, 'C');
+        expect(modified.description, 'D');
+        expect(modified.errorLevel, ErrorLevelEnum.warning);
+        expect(
+          mapEquals(modified.meta, <String, Object?>{'k': 1, 'x': 'y'}),
+          isTrue,
+        );
+      },
+    );
 
-    test(
-        'Given two meta maps with different insertion orders Then equality and hashCode match',
-        () {
+    test('Given two meta maps with different insertion orders Then equality and hashCode match', () {
       // Arrange
       const ErrorItem i1 = ErrorItem(
         title: 'Order',
@@ -290,9 +289,7 @@ void main() {
       expect(i1.hashCode, i2.hashCode);
     });
 
-    test(
-        'Given toString When called Then includes title, code, description, level and meta if present',
-        () {
+    test('Given toString When called Then includes title, code, description, level and meta if present', () {
       // Arrange
       const ErrorItem item = ErrorItem(
         title: 'Oops',
@@ -311,9 +308,7 @@ void main() {
       expect(s, contains('Level: warning'));
     });
 
-    test(
-        'Given mutated meta map After constructing ErrorItem Then equality/hash may change (documenting risk)',
-        () {
+    test('Given mutated meta map After constructing ErrorItem Then equality/hash may change (documenting risk)', () {
       // ⚠️ Este test documenta el riesgo actual (pre-refactor).
       // No falla el pipeline; sólo evidencia el comportamiento.
       // Arrange
@@ -335,14 +330,11 @@ void main() {
       expect(
         a == b,
         isFalse,
-        reason:
-            'Meta is mutable and shared by reference; prefer Map.unmodifiable in ctor/fromJson/copyWith.',
+        reason: 'Meta is mutable and shared by reference; prefer Map.unmodifiable in ctor/fromJson/copyWith.',
       );
     });
 
-    test(
-        'Given defaultErrorItem When inspected Then fields match expected defaults',
-        () {
+    test('Given defaultErrorItem When inspected Then fields match expected defaults', () {
       // Assert
       expect(defaultErrorItem.title, 'Unknown Error');
       expect(defaultErrorItem.code, 'ERR_UNKNOWN');

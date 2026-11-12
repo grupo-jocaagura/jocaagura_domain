@@ -1,6 +1,6 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:jocaagura_domain/jocaagura_domain.dart';
+import 'package:material_ui/material_ui.dart';
 
 // revisado 10/03/2024 author: @albertjjimenezp
 void main() {
@@ -35,15 +35,12 @@ void main() {
       expect(copiedModelMainMenu.onPressed, equals(newOnPressed));
       expect(copiedModelMainMenu.label, equals(newLabel));
       expect(copiedModelMainMenu.description, equals(newDescription));
-      final ModelMainMenuModel copied2ModelMainMenu =
-          copiedModelMainMenu.copyWith();
+      final ModelMainMenuModel copied2ModelMainMenu = copiedModelMainMenu
+          .copyWith();
       expect(copied2ModelMainMenu, equals(copiedModelMainMenu));
 
       final ModelMainMenuModel identicalMainMenu = modelMainMenu.copyWith();
-      expect(
-        identicalMainMenu,
-        equals(modelMainMenu),
-      );
+      expect(identicalMainMenu, equals(modelMainMenu));
     });
 
     test('equality comparison returns true for equal instances', () {

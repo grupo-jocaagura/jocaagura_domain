@@ -6,9 +6,7 @@ void main() {
     // Define test data
     const String id = 'dtpm';
     final Map<String, MedicalTreatmentModel> medicalTreatments =
-        <String, MedicalTreatmentModel>{
-      'oxo': defaultMedicalTreatmentModel,
-    };
+        <String, MedicalTreatmentModel>{'oxo': defaultMedicalTreatmentModel};
 
     // Test the default model
     test('default model is correct', () {
@@ -44,8 +42,8 @@ void main() {
     });
 
     test('copyWith without arguments returns the same object', () {
-      final TreatmentPlanModel copiedPlan =
-          defaultTreatmentPlanModel.copyWith();
+      final TreatmentPlanModel copiedPlan = defaultTreatmentPlanModel
+          .copyWith();
       expect(copiedPlan, equals(defaultTreatmentPlanModel));
       expect(copiedPlan.hashCode, equals(defaultTreatmentPlanModel.hashCode));
     });
@@ -69,8 +67,8 @@ void main() {
         TreatmentPlanEnum.id.name: 'new_id',
         TreatmentPlanEnum.medicalTreatments.name:
             <String, Map<String, dynamic>>{
-          'new_oxo': defaultMedicalTreatmentModel.toJson(),
-        },
+              'new_oxo': defaultMedicalTreatmentModel.toJson(),
+            },
       };
 
       final TreatmentPlanModel fromJsonPlan = TreatmentPlanModel.fromJson(json);

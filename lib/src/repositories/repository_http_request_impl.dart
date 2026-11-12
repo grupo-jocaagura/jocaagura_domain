@@ -125,13 +125,8 @@ class RepositoryHttpRequestImpl implements RepositoryHttpRequest {
     Duration? timeout,
     Map<String, dynamic> metadata = const <String, dynamic>{},
   }) async {
-    final Either<ErrorItem, Map<String, dynamic>> result =
-        await _gateway.delete(
-      uri,
-      headers: headers,
-      timeout: timeout,
-      metadata: metadata,
-    );
+    final Either<ErrorItem, Map<String, dynamic>> result = await _gateway
+        .delete(uri, headers: headers, timeout: timeout, metadata: metadata);
 
     return result.fold(
       (ErrorItem error) => Left<ErrorItem, ModelConfigHttpRequest>(error),

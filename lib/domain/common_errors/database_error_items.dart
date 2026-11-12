@@ -154,11 +154,11 @@ abstract class DatabaseErrorItems {
 
   /// Generic fallback error for unrecognized Database issues.
   static ErrorItem unknown({String? reason}) => ErrorItem(
-        title: 'Unknown Database Error',
-        code: 'DB_UNKNOWN',
-        description: reason ?? 'An unknown database error has occurred.',
-        meta: const <String, dynamic>{sourceKey: sourceValue},
-      );
+    title: 'Unknown Database Error',
+    code: 'DB_UNKNOWN',
+    description: reason ?? 'An unknown database error has occurred.',
+    meta: const <String, dynamic>{sourceKey: sourceValue},
+  );
 
   /// Returns a predefined [ErrorItem] based on the database error [code].
   /// If the code is not recognized, returns [unknown].

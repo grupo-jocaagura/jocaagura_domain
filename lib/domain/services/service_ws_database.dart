@@ -55,25 +55,17 @@ abstract class ServiceWsDatabase<T> {
   /// does not exist.
   ///
   /// Throws [ArgumentError] if [collection] or [docId] is empty.
-  Future<T> readDocument({
-    required String collection,
-    required String docId,
-  });
+  Future<T> readDocument({required String collection, required String docId});
 
   /// Streams real-time updates of a single document.
   ///
   /// Throws [ArgumentError] if [collection] or [docId] is empty.
-  Stream<T> documentStream({
-    required String collection,
-    required String docId,
-  });
+  Stream<T> documentStream({required String collection, required String docId});
 
   /// Streams real-time updates of all documents in the specified [collection].
   ///
   /// Throws [ArgumentError] if [collection] is empty.
-  Stream<List<T>> collectionStream({
-    required String collection,
-  });
+  Stream<List<T>> collectionStream({required String collection});
 
   /// Deletes a single document from the specified [collection] by [docId].
   ///

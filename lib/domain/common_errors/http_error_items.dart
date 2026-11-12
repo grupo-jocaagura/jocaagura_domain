@@ -60,8 +60,7 @@ abstract class HttpErrorItems {
   static const ErrorItem unauthorized = ErrorItem(
     title: 'Unauthorized',
     code: 'HTTP_401',
-    description:
-        'Authentication is required and has failed or has not yet been provided.',
+    description: 'Authentication is required and has failed or has not yet been provided.',
     meta: <String, dynamic>{httpCode: 401},
     errorLevel: ErrorLevelEnum.warning,
   );
@@ -101,8 +100,7 @@ abstract class HttpErrorItems {
   static const ErrorItem notAcceptable = ErrorItem(
     title: 'Not Acceptable',
     code: 'HTTP_406',
-    description:
-        'The requested resource is capable of generating only content not acceptable.',
+    description: 'The requested resource is capable of generating only content not acceptable.',
     meta: <String, dynamic>{httpCode: 406},
     errorLevel: ErrorLevelEnum.severe,
   );
