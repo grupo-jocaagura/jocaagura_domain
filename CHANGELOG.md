@@ -7,6 +7,8 @@ Recent entries aim to follow a normalized structure. Older historical entries ma
 
 ## Unreleased
 
+## [2.0.0] - 2026-11-11
+
 ### Fixed
 
 - Build the atomic version-commit payload on disk so large CHANGELOG files do
