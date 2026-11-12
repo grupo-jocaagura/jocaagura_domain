@@ -18,8 +18,9 @@ jobs:
 
     steps:
       - name: Ensure PR source branch is allowed
+        env:
+          HEAD_REF: ${{ github.head_ref }}
         run: |
-          HEAD_REF="${{ github.head_ref }}"
           # 🔒 Estricto: solo develop → master
           if [[ "$HEAD_REF" != "develop" ]]; then
             echo "❌ Only pull requests from 'develop' to 'master' are allowed. Current: $HEAD_REF"
