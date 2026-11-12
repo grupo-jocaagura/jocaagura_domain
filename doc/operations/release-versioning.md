@@ -25,6 +25,7 @@ release_after_merge y los scripts de política/dispatch y tests asociados.
 | CI previo a preparar | reusable validate_pr | no se ejecutaba en prepare | Reutilizar CI Flutter completo, read-only |
 | Firma | GraphQL createCommitOnBranch, expectedHeadOid | ya certificado en CP3-B | Conservar, actualizar ambos archivos juntos |
 | PR CI | Dart puro | Flutter, cobertura >=90%, schemas, dry-run | Conservar los controles adicionales |
+| Triggers base | pushes develop/master y PR | pushes de cualquier rama | Alinear pushes a develop/master; conservar PR y dispatch |
 | Promoción | minor/major, consolidación de patches | intención major 2.0.0 explícita | Preparar notas; promoción automática posterior |
 | Release a master | orquestación, PR oficial y fuente exacta | validación legacy develop a master | Homologación pendiente |
 | Publicación | tag inmutable y OIDC, CI completo, no duplicados | push master, condición por actor/mensaje | Reemplazo pendiente; no certificar legacy |
