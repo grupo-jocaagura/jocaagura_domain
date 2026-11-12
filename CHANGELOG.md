@@ -7,6 +7,10 @@ Recent entries aim to follow a normalized structure. Older historical entries ma
 
 ## Unreleased
 
+### Temporary certification fixture
+
+- P12 intentional dry-run failure; DO NOT MERGE this branch.
+
 ### CI/CD
 
 - Prepare versions on a signed proposal branch and open a PR to protected
