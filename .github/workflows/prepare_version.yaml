@@ -66,6 +66,7 @@ jobs:
   prepare_version:
     permissions:
       contents: write
+      pull-requests: write
     name: Prepare version
     needs: ci
     runs-on: ubuntu-latest
@@ -488,7 +489,7 @@ jobs:
           git diff --check
           git diff -- pubspec.yaml CHANGELOG.md
 
-      - name: Create verified version commit
+      - name: Create verified version branch and pull request
         id: commit
         if: steps.prepare.outputs.state == 'NEW_PREPARATION'
         shell: bash
@@ -498,51 +499,7 @@ jobs:
           TRIGGERED_BY: ${{ github.triggering_actor }}
           RUN_ID: ${{ github.run_id }}
           RUN_ATTEMPT: ${{ github.run_attempt }}
-
-        run: |
-          set -euo pipefail
-
-          PAYLOAD_PATH="$RUNNER_TEMP/version-commit-payload.json"
-          python3 .github/scripts/version_commit_payload.py "$PAYLOAD_PATH"
-
-          RESPONSE="$(
-            curl -sSf \
-              -X POST \
-              -H "Authorization: Bearer ${GH_TOKEN}" \
-              -H "Accept: application/vnd.github+json" \
-              -H "Content-Type: application/json" \
-              https://api.github.com/graphql \
-              --data-binary "@$PAYLOAD_PATH"
-          )"
-
-          if [[ "$(jq '.errors | length // 0' <<< "$RESPONSE")" -gt 0 ]]; then
-            echo "$RESPONSE" | jq '.errors'
-
-            echo "::error title=VERSION_COMMIT_FAILED::GitHub rejected the atomic version commit."
-            exit 1
-          fi
-
-          COMMIT_SHA="$(
-            jq -r \
-              '.data.createCommitOnBranch.commit.oid // empty' \
-              <<< "$RESPONSE"
-          )"
-
-          COMMIT_URL="$(
-            jq -r \
-              '.data.createCommitOnBranch.commit.url // empty' \
-              <<< "$RESPONSE"
-          )"
-
-          if [[ -z "$COMMIT_SHA" ]]; then
-            echo "::error title=VERSION_COMMIT_FAILED::GitHub returned no commit SHA."
-            exit 1
-          fi
-
-          echo "sha=${COMMIT_SHA}" >> "$GITHUB_OUTPUT"
-          echo "url=${COMMIT_URL}" >> "$GITHUB_OUTPUT"
-
-          echo "Created version commit: ${COMMIT_SHA}"
+        run: python3 .github/scripts/version_pull_request.py
 
       - name: Verify materialized version
         id: verify
@@ -550,6 +507,7 @@ jobs:
         shell: bash
         env:
           COMMIT_SHA: ${{ steps.commit.outputs.sha }}
+          PREPARATION_BRANCH: ${{ steps.commit.outputs.branch }}
           EXPECTED_VERSION: ${{ steps.prepare.outputs.target_version }}
           EXPECTED_SEMVER: ${{ steps.prepare.outputs.target_semver }}
           EXPECTED_NOTES_SHA: ${{ steps.prepare.outputs.notes_sha }}
@@ -584,7 +542,7 @@ jobs:
             exit 1
           fi
 
-          git fetch origin develop
+          git fetch origin "$PREPARATION_BRANCH"
 
           if ! git cat-file -e "${COMMIT_SHA}^{commit}" 2>/dev/null; then
             echo "::error title=VERSION_POSTCONDITION_FAILED::Materialized commit is not reachable."
@@ -730,6 +688,7 @@ jobs:
         if: always()
         shell: bash
         env:
+          JOB_STATUS: ${{ job.status }}
           STARTED_AT: ${{ steps.timer.outputs.started_at }}
 
           STATE: ${{ steps.prepare.outputs.state }}
@@ -746,6 +705,8 @@ jobs:
 
           COMMIT_SHA: ${{ steps.commit.outputs.sha }}
           COMMIT_URL: ${{ steps.commit.outputs.url }}
+          PREPARATION_BRANCH: ${{ steps.commit.outputs.branch }}
+          PR_URL: ${{ steps.commit.outputs.pr_url }}
 
           COMMIT_VERIFIED: ${{ steps.verify.outputs.verified }}
 
@@ -780,9 +741,13 @@ jobs:
           }
 
           state_result() {
+            if [[ "$JOB_STATUS" != "success" ]]; then
+              printf '❌ VERSION_PREPARATION_FAILED'
+              return
+            fi
             case "${1:-}" in
               NEW_PREPARATION)
-                printf '✅ VERSION_PREPARED'
+                printf '✅ VERSION_PR_READY'
                 ;;
               VERSION_ALREADY_PREPARED)
                 printf '✅ VERSION_ALREADY_PREPARED'
@@ -804,7 +769,7 @@ jobs:
           mutation="none"
 
           if [[ -n "${COMMIT_SHA:-}" ]]; then
-            mutation="atomic commit"
+            mutation="atomic commit on preparation branch"
           fi
 
           signature="N/A"
@@ -828,7 +793,8 @@ jobs:
             echo "| Requested by | @${AUTHORIZED_BY} |"
             echo "| Triggered by | @${TRIGGERED_BY} |"
             echo "| Workflow attempt | ${RUN_ATTEMPT} |"
-            echo "| Target branch | \`${TARGET_BRANCH}\` |"
+            echo "| PR target | \`${TARGET_BRANCH}\` |"
+            echo "| Preparation branch | $(value_or_na "${PREPARATION_BRANCH:-}") |"
             echo ""
 
             echo "### Version"
@@ -867,6 +833,13 @@ jobs:
             fi
 
             echo "[Open workflow run](https://github.com/${GITHUB_REPOSITORY}/actions/runs/${RUN_ID})"
+
+            if [[ -n "${PR_URL:-}" ]]; then
+              echo "[Review version preparation PR](${PR_URL})"
+              echo ""
+              echo "Develop is unchanged. Approve workflows to run when prompted; required checks and independent review precede merging."
+              echo "No approval, merge, tag or publication was performed."
+            fi
 
             if [[ -n "${REASON:-}" ]]; then
               echo ""

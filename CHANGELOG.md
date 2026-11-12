@@ -9,6 +9,9 @@ Recent entries aim to follow a normalized structure. Older historical entries ma
 
 ### CI/CD
 
+- Prepare versions on a signed proposal branch and open a PR to protected
+  develop instead of committing directly. Preserve exact-source checks, atomic
+  version/CHANGELOG updates and safe retries; require CI and human review.
 - Record domain's successful 2.0.0 OIDC publication, signed tag, hosted archive
   verification and maintainer-provided pub.dev audit attribution as CP-0 evidence.
   Future release orchestration must still pass all source and eligibility gates.
