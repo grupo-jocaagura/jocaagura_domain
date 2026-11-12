@@ -9,6 +9,8 @@ Recent entries aim to follow a normalized structure. Older historical entries ma
 
 ### Fixed
 
+- Build the atomic version-commit payload on disk so large CHANGELOG files do
+  not exceed Linux argument limits during preparation.
 - Correct formatting in the core catalog identity test and GitHub expression
   quoting in the legacy publication workflow so Actions can validate the branch.
 

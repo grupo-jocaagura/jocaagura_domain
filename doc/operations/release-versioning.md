@@ -61,6 +61,9 @@ commits. Mantener una sola sección `## Unreleased` con notas sustanciales.
 4. El workflow exige repositorio/ref/SHA correctos, ejecuta el CI completo,
    comprueba de nuevo develop y construye pubspec + CHANGELOG. Solo entonces
    crea un commit atómico firmado por GitHub mediante expectedHeadOid.
+   El payload se construye en disco y curl lo lee desde un archivo: el tamaño
+   del CHANGELOG no se transmite como argumento de jq/curl ni como variable de
+   entorno. Esto corrige el fallo previo a mutación observado en run 43138945052.
 5. Verifica firma, versión, una sección fechada y el hash de las notas.
    Repetir con la misma versión y notas no crea otro commit; entradas incoherentes
    o SHA obsoleto fallan cerradas. Tras una primera preparación, un reintento debe

@@ -502,79 +502,8 @@ jobs:
         run: |
           set -euo pipefail
 
-          PUBSPEC_BASE64="$(
-            base64 < pubspec.yaml |
-              tr -d '\n'
-          )"
-
-          CHANGELOG_BASE64="$(
-            base64 < CHANGELOG.md |
-              tr -d '\n'
-          )"
-
-          COMMIT_BODY="$(
-            cat <<EOF
-          Version authorized by @${AUTHORIZED_BY}
-          Workflow triggered by @${TRIGGERED_BY}
-          Run: https://github.com/${GITHUB_REPOSITORY}/actions/runs/${RUN_ID}
-          Attempt: ${RUN_ATTEMPT}
-          EOF
-          )"
-
-          QUERY='
-            mutation CreateVersionCommit(
-              $input: CreateCommitOnBranchInput!
-            ) {
-              createCommitOnBranch(input: $input) {
-                commit {
-                  oid
-                  url
-                }
-              }
-            }
-          '
-
-          PAYLOAD="$(
-            jq -n \
-              --arg query "$QUERY" \
-              --arg repository "$GITHUB_REPOSITORY" \
-              --arg branch "$TARGET_BRANCH" \
-              --arg head "$EXPECTED_HEAD_OID" \
-              --arg version "$TARGET_VERSION" \
-              --arg body "$COMMIT_BODY" \
-              --arg pubspec "$PUBSPEC_BASE64" \
-              --arg changelog "$CHANGELOG_BASE64" \
-              --arg client_id "version-${RUN_ID}-${RUN_ATTEMPT}" \
-              '{
-                query: $query,
-                variables: {
-                  input: {
-                    branch: {
-                      repositoryNameWithOwner: $repository,
-                      branchName: $branch
-                    },
-                    expectedHeadOid: $head,
-                    message: {
-                      headline: ("chore(release): prepare version " + $version),
-                      body: $body
-                    },
-                    fileChanges: {
-                      additions: [
-                        {
-                          path: "pubspec.yaml",
-                          contents: $pubspec
-                        },
-                        {
-                          path: "CHANGELOG.md",
-                          contents: $changelog
-                        }
-                      ]
-                    },
-                    clientMutationId: $client_id
-                  }
-                }
-              }'
-          )"
+          PAYLOAD_PATH="$RUNNER_TEMP/version-commit-payload.json"
+          python3 .github/scripts/version_commit_payload.py "$PAYLOAD_PATH"
 
           RESPONSE="$(
             curl -sSf \
@@ -583,7 +512,7 @@ jobs:
               -H "Accept: application/vnd.github+json" \
               -H "Content-Type: application/json" \
               https://api.github.com/graphql \
-              --data "$PAYLOAD"
+              --data-binary "@$PAYLOAD_PATH"
           )"
 
           if [[ "$(jq '.errors | length // 0' <<< "$RESPONSE")" -gt 0 ]]; then
