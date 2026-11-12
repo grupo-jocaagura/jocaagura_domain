@@ -19,14 +19,14 @@ void main() {
         ModelVector: core.ModelVector,
         ScreenSizeConfig: core.ScreenSizeConfig,
         ReadParams: core.ReadParams,
-      WriteParams<Model>: core.WriteParams<core.Model>,
+        WriteParams<Model>: core.WriteParams<core.Model>,
         DeleteManyParams: core.DeleteManyParams,
       };
       for (final MapEntry<Type, Type> pair in types.entries) {
         expect(identical(pair.key, pair.value), isTrue, reason: '${pair.key}');
       }
       expect(identical(defaultErrorItem, core.defaultErrorItem), isTrue);
-    expect(identical(defaultModelVector, core.defaultModelVector), isTrue);
+      expect(identical(defaultModelVector, core.defaultModelVector), isTrue);
       expect(identical(ModelMainMenuModel, core.ModelMainMenuModel), isFalse);
     },
   );

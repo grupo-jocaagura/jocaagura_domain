@@ -14,7 +14,7 @@ jobs:
     # SOLO ejecutar si es merge desde develop o commit del bot
     if: |
       github.actor == 'github-actions[bot]' ||
-      startsWith(github.event.head_commit.message, 'Merge branch \'develop\'') ||
+      startsWith(github.event.head_commit.message, 'Merge branch ''develop''') ||
       startsWith(github.event.head_commit.message, 'Bump version to')
 
     permissions:

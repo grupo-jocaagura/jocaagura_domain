@@ -1,7 +1,7 @@
 import 'dart:async';
 
-import 'package:flutter/material.dart';
 import 'package:jocaagura_domain/jocaagura_domain.dart';
+import 'package:material_ui/material_ui.dart';
 
 void main() {
   runApp(const HttpRequestDemoApp());
@@ -42,160 +42,153 @@ class _HttpRequestDemoAppState extends State<HttpRequestDemoApp> {
       cannedResponses: <String, Map<String, dynamic>>{
         'GET https://example.com/profile':
             FakeHttpRequestConfig.cannedHttpResponse(
-          method: HttpMethodEnum.get,
-          uri: Uri.parse('https://example.com/profile'),
-          body: const <String, dynamic>{
-            'data': <String, dynamic>{
-              'name': 'Alice',
-              'role': 'student',
-            },
-          },
-          metadata: const <String, dynamic>{'requestId': 'req-profile-200'},
-          timeout: const Duration(seconds: 5),
-        ),
+              method: HttpMethodEnum.get,
+              uri: Uri.parse('https://example.com/profile'),
+              body: const <String, dynamic>{
+                'data': <String, dynamic>{'name': 'Alice', 'role': 'student'},
+              },
+              metadata: const <String, dynamic>{'requestId': 'req-profile-200'},
+              timeout: const Duration(seconds: 5),
+            ),
         'GET https://example.com/profile-pending':
             FakeHttpRequestConfig.cannedHttpResponse(
-          method: HttpMethodEnum.get,
-          uri: Uri.parse('https://example.com/profile-pending'),
-          statusCode: 202,
-          reasonPhrase: 'Accepted',
-          body: const <String, dynamic>{
-            'data': <String, dynamic>{
-              'status': 'pending_verification',
-              'etaSeconds': 30,
-            },
-          },
-        ),
+              method: HttpMethodEnum.get,
+              uri: Uri.parse('https://example.com/profile-pending'),
+              statusCode: 202,
+              reasonPhrase: 'Accepted',
+              body: const <String, dynamic>{
+                'data': <String, dynamic>{
+                  'status': 'pending_verification',
+                  'etaSeconds': 30,
+                },
+              },
+            ),
         'POST https://example.com/login':
             FakeHttpRequestConfig.cannedHttpResponse(
-          method: HttpMethodEnum.post,
-          uri: Uri.parse('https://example.com/login'),
-          statusCode: 401,
-          reasonPhrase: 'Unauthorized',
-          body: const <String, dynamic>{
-            'error': <String, dynamic>{
-              'code': 'AUTH_FAILED',
-              'message': 'Usuario o contraseña inválidos',
-            },
-          },
-        ),
+              method: HttpMethodEnum.post,
+              uri: Uri.parse('https://example.com/login'),
+              statusCode: 401,
+              reasonPhrase: 'Unauthorized',
+              body: const <String, dynamic>{
+                'error': <String, dynamic>{
+                  'code': 'AUTH_FAILED',
+                  'message': 'Usuario o contraseña inválidos',
+                },
+              },
+            ),
         'POST https://example.com/form-invalid':
             FakeHttpRequestConfig.cannedHttpResponse(
-          method: HttpMethodEnum.post,
-          uri: Uri.parse('https://example.com/form-invalid'),
-          statusCode: 400,
-          reasonPhrase: 'Bad Request',
-          body: const <String, dynamic>{
-            'error': <String, dynamic>{
-              'code': 'VALIDATION_ERROR',
-              'fields': <String, String>{
-                'email': 'Formato inválido',
+              method: HttpMethodEnum.post,
+              uri: Uri.parse('https://example.com/form-invalid'),
+              statusCode: 400,
+              reasonPhrase: 'Bad Request',
+              body: const <String, dynamic>{
+                'error': <String, dynamic>{
+                  'code': 'VALIDATION_ERROR',
+                  'fields': <String, String>{'email': 'Formato inválido'},
+                },
               },
-            },
-          },
-        ),
+            ),
         'GET https://example.com/admin':
             FakeHttpRequestConfig.cannedHttpResponse(
-          method: HttpMethodEnum.get,
-          uri: Uri.parse('https://example.com/admin'),
-          statusCode: 403,
-          reasonPhrase: 'Forbidden',
-          body: const <String, dynamic>{
-            'error': <String, dynamic>{
-              'code': 'NOT_ALLOWED',
-              'message': 'Rol insuficiente para acceder al recurso',
-            },
-          },
-        ),
+              method: HttpMethodEnum.get,
+              uri: Uri.parse('https://example.com/admin'),
+              statusCode: 403,
+              reasonPhrase: 'Forbidden',
+              body: const <String, dynamic>{
+                'error': <String, dynamic>{
+                  'code': 'NOT_ALLOWED',
+                  'message': 'Rol insuficiente para acceder al recurso',
+                },
+              },
+            ),
         'GET https://example.com/missing':
             FakeHttpRequestConfig.cannedHttpResponse(
-          method: HttpMethodEnum.get,
-          uri: Uri.parse('https://example.com/missing'),
-          statusCode: 404,
-          reasonPhrase: 'Not Found',
-          body: const <String, dynamic>{
-            'error': <String, dynamic>{
-              'code': 'NOT_FOUND',
-              'message': 'El recurso solicitado no existe',
-            },
-          },
-        ),
+              method: HttpMethodEnum.get,
+              uri: Uri.parse('https://example.com/missing'),
+              statusCode: 404,
+              reasonPhrase: 'Not Found',
+              body: const <String, dynamic>{
+                'error': <String, dynamic>{
+                  'code': 'NOT_FOUND',
+                  'message': 'El recurso solicitado no existe',
+                },
+              },
+            ),
         'POST https://example.com/orders':
             FakeHttpRequestConfig.cannedHttpResponse(
-          method: HttpMethodEnum.post,
-          uri: Uri.parse('https://example.com/orders'),
-          statusCode: 409,
-          reasonPhrase: 'Conflict',
-          body: const <String, dynamic>{
-            'error': <String, dynamic>{
-              'code': 'ORDER_IN_PROGRESS',
-              'message': 'Ya existe una orden en curso para este usuario',
-            },
-          },
-        ),
+              method: HttpMethodEnum.post,
+              uri: Uri.parse('https://example.com/orders'),
+              statusCode: 409,
+              reasonPhrase: 'Conflict',
+              body: const <String, dynamic>{
+                'error': <String, dynamic>{
+                  'code': 'ORDER_IN_PROGRESS',
+                  'message': 'Ya existe una orden en curso para este usuario',
+                },
+              },
+            ),
         'GET https://example.com/rate-limit':
             FakeHttpRequestConfig.cannedHttpResponse(
-          method: HttpMethodEnum.get,
-          uri: Uri.parse('https://example.com/rate-limit'),
-          statusCode: 429,
-          reasonPhrase: 'Too Many Requests',
-          body: const <String, dynamic>{
-            'error': <String, dynamic>{
-              'code': 'RATE_LIMITED',
-              'retryAfterSeconds': 60,
-            },
-          },
-        ),
+              method: HttpMethodEnum.get,
+              uri: Uri.parse('https://example.com/rate-limit'),
+              statusCode: 429,
+              reasonPhrase: 'Too Many Requests',
+              body: const <String, dynamic>{
+                'error': <String, dynamic>{
+                  'code': 'RATE_LIMITED',
+                  'retryAfterSeconds': 60,
+                },
+              },
+            ),
         'PUT https://example.com/profile':
             FakeHttpRequestConfig.cannedHttpResponse(
-          method: HttpMethodEnum.put,
-          uri: Uri.parse('https://example.com/profile'),
-          statusCode: 500,
-          reasonPhrase: 'Server Error',
-          body: const <String, dynamic>{
-            'error': <String, dynamic>{
-              'code': 'INTERNAL_ERROR',
-              'message': 'Ocurrió un fallo inesperado procesando el perfil',
-            },
-          },
-        ),
+              method: HttpMethodEnum.put,
+              uri: Uri.parse('https://example.com/profile'),
+              statusCode: 500,
+              reasonPhrase: 'Server Error',
+              body: const <String, dynamic>{
+                'error': <String, dynamic>{
+                  'code': 'INTERNAL_ERROR',
+                  'message': 'Ocurrió un fallo inesperado procesando el perfil',
+                },
+              },
+            ),
         'DELETE https://example.com/session':
             FakeHttpRequestConfig.cannedHttpResponse(
-          method: HttpMethodEnum.delete,
-          uri: Uri.parse('https://example.com/session'),
-          body: const <String, dynamic>{
-            'deleted': true,
-          },
-        ),
+              method: HttpMethodEnum.delete,
+              uri: Uri.parse('https://example.com/session'),
+              body: const <String, dynamic>{'deleted': true},
+            ),
         'GET https://example.com/slow-timeout':
             FakeHttpRequestConfig.cannedHttpResponse(
-          method: HttpMethodEnum.get,
-          uri: Uri.parse('https://example.com/slow-timeout'),
-          statusCode: 504,
-          reasonPhrase: 'Gateway Timeout',
-          metadata: const <String, dynamic>{'simulate': 'timeout'},
-        ),
+              method: HttpMethodEnum.get,
+              uri: Uri.parse('https://example.com/slow-timeout'),
+              statusCode: 504,
+              reasonPhrase: 'Gateway Timeout',
+              metadata: const <String, dynamic>{'simulate': 'timeout'},
+            ),
         'GET https://example.com/offline':
             FakeHttpRequestConfig.cannedHttpResponse(
-          method: HttpMethodEnum.get,
-          uri: Uri.parse('https://example.com/offline'),
-          metadata: const <String, dynamic>{'simulate': 'offline'},
-        ),
+              method: HttpMethodEnum.get,
+              uri: Uri.parse('https://example.com/offline'),
+              metadata: const <String, dynamic>{'simulate': 'offline'},
+            ),
         'GET https://example.com/unexpected-state':
             FakeHttpRequestConfig.cannedHttpResponse(
-          method: HttpMethodEnum.get,
-          uri: Uri.parse('https://example.com/unexpected-state'),
-          metadata: const <String, dynamic>{'simulate': 'stateError'},
-        ),
+              method: HttpMethodEnum.get,
+              uri: Uri.parse('https://example.com/unexpected-state'),
+              metadata: const <String, dynamic>{'simulate': 'stateError'},
+            ),
         'GET https://example.com/bad-json':
             FakeHttpRequestConfig.cannedHttpResponse(
-          method: HttpMethodEnum.get,
-          uri: Uri.parse('https://example.com/bad-json'),
-          body: const <String, dynamic>{
-            'method': 'bad-json',
-            'uri': 123, // fuerza error al parsear URI
-          },
-        ),
+              method: HttpMethodEnum.get,
+              uri: Uri.parse('https://example.com/bad-json'),
+              body: const <String, dynamic>{
+                'method': 'bad-json',
+                'uri': 123, // fuerza error al parsear URI
+              },
+            ),
         'GET https://example.com/echo': <String, dynamic>{},
       },
       cannedConfigs: <String, ModelConfigHttpRequest>{
@@ -222,9 +215,7 @@ class _HttpRequestDemoAppState extends State<HttpRequestDemoApp> {
     );
 
     // 3) Repository: devuelve ModelConfigHttpRequest como resultado de dominio
-    final RepositoryHttpRequest repository = RepositoryHttpRequestImpl(
-      gateway,
-    );
+    final RepositoryHttpRequest repository = RepositoryHttpRequestImpl(gateway);
 
     // 4) Usecases + fachada
     final FacadeHttpRequestUsecases facade = FacadeHttpRequestUsecases(
@@ -256,157 +247,141 @@ class _HttpRequestDemoAppState extends State<HttpRequestDemoApp> {
   Future<void> _doGetProfile() async {
     final Either<ErrorItem, ModelConfigHttpRequest> result =
         await _blocHttpRequest.get(
-      requestKey: 'demo.getProfile',
-      uri: Uri.parse('https://example.com/profile'),
-      metadata: <String, dynamic>{
-        'feature': 'demo',
-        'operation': 'getProfile',
-      },
-    );
+          requestKey: 'demo.getProfile',
+          uri: Uri.parse('https://example.com/profile'),
+          metadata: <String, dynamic>{
+            'feature': 'demo',
+            'operation': 'getProfile',
+          },
+        );
     setState(() => _lastResult = result);
   }
 
   Future<void> _doGetProfilePending() async {
     final Either<ErrorItem, ModelConfigHttpRequest> result =
         await _blocHttpRequest.get(
-      requestKey: 'demo.getProfilePending',
-      uri: Uri.parse('https://example.com/profile-pending'),
-      metadata: <String, dynamic>{
-        'feature': 'demo',
-        'operation': 'getProfilePending',
-      },
-    );
+          requestKey: 'demo.getProfilePending',
+          uri: Uri.parse('https://example.com/profile-pending'),
+          metadata: <String, dynamic>{
+            'feature': 'demo',
+            'operation': 'getProfilePending',
+          },
+        );
     setState(() => _lastResult = result);
   }
 
   Future<void> _doGetAdminForbidden() async {
     final Either<ErrorItem, ModelConfigHttpRequest> result =
         await _blocHttpRequest.get(
-      requestKey: 'demo.getAdminForbidden',
-      uri: Uri.parse('https://example.com/admin'),
-      metadata: <String, dynamic>{
-        'feature': 'demo',
-        'operation': 'getAdminForbidden',
-      },
-    );
+          requestKey: 'demo.getAdminForbidden',
+          uri: Uri.parse('https://example.com/admin'),
+          metadata: <String, dynamic>{
+            'feature': 'demo',
+            'operation': 'getAdminForbidden',
+          },
+        );
     setState(() => _lastResult = result);
   }
 
   Future<void> _doGetMissingResource() async {
     final Either<ErrorItem, ModelConfigHttpRequest> result =
         await _blocHttpRequest.get(
-      requestKey: 'demo.getMissing',
-      uri: Uri.parse('https://example.com/missing'),
-      metadata: <String, dynamic>{
-        'feature': 'demo',
-        'operation': 'getMissing',
-      },
-    );
+          requestKey: 'demo.getMissing',
+          uri: Uri.parse('https://example.com/missing'),
+          metadata: <String, dynamic>{
+            'feature': 'demo',
+            'operation': 'getMissing',
+          },
+        );
     setState(() => _lastResult = result);
   }
 
   Future<void> _doGetRateLimited() async {
     final Either<ErrorItem, ModelConfigHttpRequest> result =
         await _blocHttpRequest.get(
-      requestKey: 'demo.getRateLimited',
-      uri: Uri.parse('https://example.com/rate-limit'),
-      metadata: <String, dynamic>{
-        'feature': 'demo',
-        'operation': 'getRateLimited',
-      },
-    );
+          requestKey: 'demo.getRateLimited',
+          uri: Uri.parse('https://example.com/rate-limit'),
+          metadata: <String, dynamic>{
+            'feature': 'demo',
+            'operation': 'getRateLimited',
+          },
+        );
     setState(() => _lastResult = result);
   }
 
   Future<void> _doPostLogin() async {
     final Either<ErrorItem, ModelConfigHttpRequest> result =
         await _blocHttpRequest.post(
-      requestKey: 'demo.postLogin',
-      uri: Uri.parse('https://example.com/login'),
-      body: <String, dynamic>{
-        'username': 'demo',
-        'password': 'wrong',
-      },
-      metadata: <String, dynamic>{
-        'feature': 'demo',
-        'operation': 'login',
-      },
-    );
+          requestKey: 'demo.postLogin',
+          uri: Uri.parse('https://example.com/login'),
+          body: <String, dynamic>{'username': 'demo', 'password': 'wrong'},
+          metadata: <String, dynamic>{'feature': 'demo', 'operation': 'login'},
+        );
     setState(() => _lastResult = result);
   }
 
   Future<void> _doPostFormInvalid() async {
     final Either<ErrorItem, ModelConfigHttpRequest> result =
         await _blocHttpRequest.post(
-      requestKey: 'demo.postFormInvalid',
-      uri: Uri.parse('https://example.com/form-invalid'),
-      body: <String, dynamic>{
-        'email': 'not-an-email',
-      },
-      metadata: <String, dynamic>{
-        'feature': 'demo',
-        'operation': 'formInvalid',
-      },
-    );
+          requestKey: 'demo.postFormInvalid',
+          uri: Uri.parse('https://example.com/form-invalid'),
+          body: <String, dynamic>{'email': 'not-an-email'},
+          metadata: <String, dynamic>{
+            'feature': 'demo',
+            'operation': 'formInvalid',
+          },
+        );
     setState(() => _lastResult = result);
   }
 
   Future<void> _doPostOrderConflict() async {
     final Either<ErrorItem, ModelConfigHttpRequest> result =
         await _blocHttpRequest.post(
-      requestKey: 'demo.postOrderConflict',
-      uri: Uri.parse('https://example.com/orders'),
-      body: <String, dynamic>{
-        'sku': 'SKU-123',
-        'quantity': 1,
-      },
-      metadata: <String, dynamic>{
-        'feature': 'demo',
-        'operation': 'orderConflict',
-      },
-    );
+          requestKey: 'demo.postOrderConflict',
+          uri: Uri.parse('https://example.com/orders'),
+          body: <String, dynamic>{'sku': 'SKU-123', 'quantity': 1},
+          metadata: <String, dynamic>{
+            'feature': 'demo',
+            'operation': 'orderConflict',
+          },
+        );
     setState(() => _lastResult = result);
   }
 
   Future<void> _doPutProfileServerError() async {
     final Either<ErrorItem, ModelConfigHttpRequest> result =
         await _blocHttpRequest.put(
-      requestKey: 'demo.putProfile',
-      uri: Uri.parse('https://example.com/profile'),
-      body: <String, dynamic>{
-        'bio': 'New bio from demo',
-      },
-      metadata: <String, dynamic>{
-        'feature': 'demo',
-        'operation': 'updateProfile',
-      },
-    );
+          requestKey: 'demo.putProfile',
+          uri: Uri.parse('https://example.com/profile'),
+          body: <String, dynamic>{'bio': 'New bio from demo'},
+          metadata: <String, dynamic>{
+            'feature': 'demo',
+            'operation': 'updateProfile',
+          },
+        );
     setState(() => _lastResult = result);
   }
 
   Future<void> _doDeleteSession() async {
     final Either<ErrorItem, ModelConfigHttpRequest> result =
         await _blocHttpRequest.delete(
-      requestKey: 'demo.deleteSession',
-      uri: Uri.parse('https://example.com/session'),
-      metadata: <String, dynamic>{
-        'feature': 'demo',
-        'operation': 'logout',
-      },
-    );
+          requestKey: 'demo.deleteSession',
+          uri: Uri.parse('https://example.com/session'),
+          metadata: <String, dynamic>{'feature': 'demo', 'operation': 'logout'},
+        );
     setState(() => _lastResult = result);
   }
 
   Future<void> _doGetConfigFromModel() async {
     final Either<ErrorItem, ModelConfigHttpRequest> result =
         await _blocHttpRequest.get(
-      requestKey: 'demo.getConfigModel',
-      uri: Uri.parse('https://example.com/config-model'),
-      metadata: const <String, dynamic>{
-        'feature': 'demo',
-        'operation': 'config',
-      },
-    );
+          requestKey: 'demo.getConfigModel',
+          uri: Uri.parse('https://example.com/config-model'),
+          metadata: const <String, dynamic>{
+            'feature': 'demo',
+            'operation': 'config',
+          },
+        );
     setState(() => _lastResult = result);
   }
 
@@ -415,63 +390,63 @@ class _HttpRequestDemoAppState extends State<HttpRequestDemoApp> {
     if (previous == null) {
       return;
     }
-    previous.fold(
-      (_) => null,
-      (ModelConfigHttpRequest cfg) async {
-        final Either<ErrorItem, ModelConfigHttpRequest> retryResult =
-            await _blocHttpRequest.retry(
-          requestKey: 'demo.retry',
-          previousConfig: cfg,
-          extraMetadata: const <String, dynamic>{'retry': true},
-        );
-        setState(() => _lastResult = retryResult);
-      },
-    );
+    previous.fold((_) => null, (ModelConfigHttpRequest cfg) async {
+      final Either<ErrorItem, ModelConfigHttpRequest> retryResult =
+          await _blocHttpRequest.retry(
+            requestKey: 'demo.retry',
+            previousConfig: cfg,
+            extraMetadata: const <String, dynamic>{'retry': true},
+          );
+      setState(() => _lastResult = retryResult);
+    });
   }
 
   Future<void> _doGetEcho() async {
     final Either<ErrorItem, ModelConfigHttpRequest> result =
         await _blocHttpRequest.get(
-      requestKey: 'demo.getEcho',
-      uri: Uri.parse('https://example.com/echo'),
-      metadata: const <String, dynamic>{'feature': 'demo', 'operation': 'echo'},
-    );
+          requestKey: 'demo.getEcho',
+          uri: Uri.parse('https://example.com/echo'),
+          metadata: const <String, dynamic>{
+            'feature': 'demo',
+            'operation': 'echo',
+          },
+        );
     setState(() => _lastResult = result);
   }
 
   Future<void> _simulateTimeout() async {
     final Either<ErrorItem, ModelConfigHttpRequest> result =
         await _blocHttpRequest.get(
-      requestKey: 'demo.timeout',
-      uri: Uri.parse('https://example.com/slow-timeout'),
-    );
+          requestKey: 'demo.timeout',
+          uri: Uri.parse('https://example.com/slow-timeout'),
+        );
     setState(() => _lastResult = result);
   }
 
   Future<void> _simulateOffline() async {
     final Either<ErrorItem, ModelConfigHttpRequest> result =
         await _blocHttpRequest.get(
-      requestKey: 'demo.offline',
-      uri: Uri.parse('https://example.com/offline'),
-    );
+          requestKey: 'demo.offline',
+          uri: Uri.parse('https://example.com/offline'),
+        );
     setState(() => _lastResult = result);
   }
 
   Future<void> _simulateUnexpectedError() async {
     final Either<ErrorItem, ModelConfigHttpRequest> result =
         await _blocHttpRequest.get(
-      requestKey: 'demo.unexpected',
-      uri: Uri.parse('https://example.com/unexpected-state'),
-    );
+          requestKey: 'demo.unexpected',
+          uri: Uri.parse('https://example.com/unexpected-state'),
+        );
     setState(() => _lastResult = result);
   }
 
   Future<void> _simulateBadJson() async {
     final Either<ErrorItem, ModelConfigHttpRequest> result =
         await _blocHttpRequest.get(
-      requestKey: 'demo.badJson',
-      uri: Uri.parse('https://example.com/bad-json'),
-    );
+          requestKey: 'demo.badJson',
+          uri: Uri.parse('https://example.com/bad-json'),
+        );
     setState(() => _lastResult = result);
   }
 
@@ -482,11 +457,13 @@ class _HttpRequestDemoAppState extends State<HttpRequestDemoApp> {
     }
 
     return r.fold(
-      (ErrorItem e) => '❌ ErrorItem:\ncode: ${e.code}\n'
+      (ErrorItem e) =>
+          '❌ ErrorItem:\ncode: ${e.code}\n'
           'title: ${e.title}\n'
           'description: ${e.description}\n'
           'meta: ${e.meta}',
-      (ModelConfigHttpRequest cfg) => '✅ ModelConfigHttpRequest:\n'
+      (ModelConfigHttpRequest cfg) =>
+          '✅ ModelConfigHttpRequest:\n'
           'method: ${cfg.method.name}\n'
           'uri: ${cfg.uri}\n'
           'headers: ${cfg.headers}\n'
@@ -501,10 +478,7 @@ class _HttpRequestDemoAppState extends State<HttpRequestDemoApp> {
       width: 220,
       child: FilledButton(
         onPressed: () => action(),
-        child: Text(
-          label,
-          textAlign: TextAlign.center,
-        ),
+        child: Text(label, textAlign: TextAlign.center),
       ),
     );
   }
@@ -513,10 +487,7 @@ class _HttpRequestDemoAppState extends State<HttpRequestDemoApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'HTTP Request Demo – jocaagura_domain',
-      theme: ThemeData(
-        useMaterial3: true,
-        colorSchemeSeed: Colors.blueGrey,
-      ),
+      theme: ThemeData(useMaterial3: true, colorSchemeSeed: Colors.blueGrey),
       home: Scaffold(
         appBar: AppBar(
           title: const Text('HTTP Request Demo'),
@@ -656,10 +627,8 @@ class _ActiveRequestsPanel extends StatelessWidget {
       decoration: BoxDecoration(
         color: hasActive
             ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.94)
-            : Theme.of(context)
-                .colorScheme
-                .surfaceContainerHighest
-                .withValues(alpha: 0.7),
+            : Theme.of(context).colorScheme.surfaceContainerHighest
+                  .withValues(alpha: 0.7),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Padding(
@@ -674,12 +643,7 @@ class _ActiveRequestsPanel extends StatelessWidget {
                   : Theme.of(context).colorScheme.outline,
             ),
             const SizedBox(width: 8),
-            Expanded(
-              child: Text(
-                text,
-                style: const TextStyle(fontSize: 12),
-              ),
-            ),
+            Expanded(child: Text(text, style: const TextStyle(fontSize: 12))),
           ],
         ),
       ),

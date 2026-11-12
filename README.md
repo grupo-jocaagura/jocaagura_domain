@@ -66,7 +66,13 @@ anterior; no deben tratarse como un simple cambio de imports.
 
 ### Requisitos
 
-- Flutter SDK compatible con `sdk: >=3.2.0 <4.0.0`
+- Flutter SDK `>=3.50.0`, con Dart `>=3.14.0 <4.0.0`.
+
+La capa Flutter utiliza `material_ui` en lugar del import Material obsoleto del
+SDK. Los consumidores deben importar directamente los paquetes Material/Cupertino
+que utilicen. La certificación previa de JocaaguraArchetype corresponde al commit
+`87ee1b8`; los nuevos mínimos de SDK y estos ajustes requieren revalidar el
+consumidor contra el nuevo commit candidato.
 
 ### Instalación
 

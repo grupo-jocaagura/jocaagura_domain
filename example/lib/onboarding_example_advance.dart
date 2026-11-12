@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:jocaagura_domain/jocaagura_domain.dart';
+import 'package:material_ui/material_ui.dart';
 
 void main() => runApp(const RiceRecipeApp());
 
@@ -50,14 +50,12 @@ class _RiceOnboardingPageState extends State<RiceOnboardingPage> {
     bloc.configure(<OnboardingStep>[
       const OnboardingStep(
         title: 'Bienvenida',
-        description:
-            'Prepararemos arroz blanco paso a paso. Puedes avanzar/volver cuando quieras.',
+        description: 'Prepararemos arroz blanco paso a paso. Puedes avanzar/volver cuando quieras.',
         autoAdvanceAfter: Duration(milliseconds: 1600),
       ),
       const OnboardingStep(
         title: 'Sobre la receta',
-        description:
-            'Regla base: ~½ taza de arroz crudo por persona. Agua ~2× el volumen de arroz.',
+        description: 'Regla base: ~½ taza de arroz crudo por persona. Agua ~2× el volumen de arroz.',
         autoAdvanceAfter: Duration(milliseconds: 2200),
       ),
       OnboardingStep(
@@ -102,8 +100,7 @@ class _RiceOnboardingPageState extends State<RiceOnboardingPage> {
       ),
       const OnboardingStep(
         title: 'Cocción',
-        description:
-            'Enjuaga el arroz, sofríe opcionalmente, agrega agua y sal, hierve, baja fuego y tapa 15–18 min.',
+        description: 'Enjuaga el arroz, sofríe opcionalmente, agrega agua y sal, hierve, baja fuego y tapa 15–18 min.',
         autoAdvanceAfter: Duration(milliseconds: 2000),
       ),
       const OnboardingStep(
@@ -149,8 +146,10 @@ class _RiceOnboardingPageState extends State<RiceOnboardingPage> {
             builder: (_, AsyncSnapshot<OnboardingState> snap) {
               final OnboardingState s = snap.data!;
               return Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 14,
+                ),
                 child: Text('Paso ${s.stepNumber}/${s.totalSteps}'),
               );
             },
@@ -162,44 +161,44 @@ class _RiceOnboardingPageState extends State<RiceOnboardingPage> {
         initialData: bloc.state,
         builder:
             (BuildContext context, AsyncSnapshot<OnboardingState> snapshot) {
-          final OnboardingState state = snapshot.data!;
-          final OnboardingStep? step = bloc.currentStep;
+              final OnboardingState state = snapshot.data!;
+              final OnboardingStep? step = bloc.currentStep;
 
-          if (step == null) {
-            return const Center(child: Text('Sin pasos configurados.'));
-          }
+              if (step == null) {
+                return const Center(child: Text('Sin pasos configurados.'));
+              }
 
-          final Widget errorBanner = _buildErrorBannerIfAny(state);
+              final Widget errorBanner = _buildErrorBannerIfAny(state);
 
-          Widget content;
-          switch (step.title) {
-            case '¿Para cuántas personas?':
-              content = _buildServingsStep(state);
-              break;
-            case 'Validación de porciones':
-              content = _buildValidationStep(state);
-              break;
-            case 'Ingredientes':
-              content = _buildIngredientsStep(state);
-              break;
-            case 'Cocción':
-              content = _buildSimpleTextStep(step);
-              break;
-            case 'Listo':
-              content = _buildFinalStep(step);
-              break;
-            default:
-              content = _buildSimpleTextStep(step);
-          }
+              Widget content;
+              switch (step.title) {
+                case '¿Para cuántas personas?':
+                  content = _buildServingsStep(state);
+                  break;
+                case 'Validación de porciones':
+                  content = _buildValidationStep(state);
+                  break;
+                case 'Ingredientes':
+                  content = _buildIngredientsStep(state);
+                  break;
+                case 'Cocción':
+                  content = _buildSimpleTextStep(step);
+                  break;
+                case 'Listo':
+                  content = _buildFinalStep(step);
+                  break;
+                default:
+                  content = _buildSimpleTextStep(step);
+              }
 
-          return Column(
-            children: <Widget>[
-              if (errorBanner != const SizedBox.shrink()) errorBanner,
-              Expanded(child: content),
-              _buildNavBar(state),
-            ],
-          );
-        },
+              return Column(
+                children: <Widget>[
+                  if (errorBanner != const SizedBox.shrink()) errorBanner,
+                  Expanded(child: content),
+                  _buildNavBar(state),
+                ],
+              );
+            },
       ),
     );
   }
@@ -370,8 +369,9 @@ class _RiceOnboardingPageState extends State<RiceOnboardingPage> {
 
   Widget _buildIngredientsStep(OnboardingState state) {
     final int n = servings ?? 0;
-    final Map<String, String> map =
-        n > 0 ? _scaledIngredients(n) : <String, String>{};
+    final Map<String, String> map = n > 0
+        ? _scaledIngredients(n)
+        : <String, String>{};
 
     return Center(
       child: Padding(

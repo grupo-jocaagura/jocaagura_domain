@@ -7,8 +7,18 @@ Recent entries aim to follow a normalized structure. Older historical entries ma
 
 ## Unreleased
 
+### Fixed
+
+- Correct formatting in the core catalog identity test and GitHub expression
+  quoting in the legacy publication workflow so Actions can validate the branch.
+
 ### Changed
 
+- **Breaking:** require Flutter `>=3.50.0` and Dart `>=3.14.0 <4.0.0`
+  in the package and its example.
+- Replace deprecated Flutter Material/Cupertino umbrella imports with
+  `material_ui` and `cupertino_ui`; update example formatting and retired lint
+  rules for Dart 3.14. Remove an unreachable null check in the HTTP example.
 - Consume and reexport the core 1.3.0 model catalog instead of local duplicate
   models, defaults, enums and CRUD parameter DTOs. Keep executable use cases and
   the Flutter menu adapter; hide the core menu type from this facade to avoid a

@@ -70,7 +70,7 @@ enum ScreenSizeEnum {
 /// ## Example
 ///
 /// ```dart
-/// import 'package:flutter/material.dart';
+/// import 'package:material_ui/material_ui.dart';
 /// import 'package:jocaagura_domain/jocaagura_domain.dart';
 ///
 /// class MyLayout extends StatefulWidget {

@@ -1,10 +1,12 @@
 // main.dart
-import 'package:flutter/material.dart';
 import 'package:jocaagura_domain/jocaagura_domain.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// 0) Selección de flavor mediante --dart-define=FLAVOR=dev|qa|prod
-const String kFlavor =
-    String.fromEnvironment('FLAVOR', defaultValue: 'dev'); // dev por defecto
+const String kFlavor = String.fromEnvironment(
+  'FLAVOR',
+  defaultValue: 'dev',
+); // dev por defecto
 
 /// 1) Fábrica de ServiceSession por flavor.
 /// En dev/qa usamos FakeServiceSession. En prod puedes inyectar tu servicio real.
@@ -18,9 +20,7 @@ ServiceSession buildServiceForFlavor(String flavor) {
       );
     case 'qa':
       // Aqui reemplaza por tu implementación QA cuando esté lista.
-      return FakeServiceSession(
-        latency: const Duration(milliseconds: 150),
-      );
+      return FakeServiceSession(latency: const Duration(milliseconds: 150));
     case 'prod':
       // Aqui reemplaza por tu implementación real cuando esté lista.
       // return RealServiceSession(...);
@@ -67,8 +67,9 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   late final BlocSession session;
-  final TextEditingController email =
-      TextEditingController(text: 'user@fake.com');
+  final TextEditingController email = TextEditingController(
+    text: 'user@fake.com',
+  );
   final TextEditingController pass = TextEditingController(text: 'secret');
 
   @override
@@ -192,9 +193,9 @@ class _MyAppState extends State<MyApp> {
                               onPressed: () async {
                                 final Either<ErrorItem, UserModel> r =
                                     await session.logIn(
-                                  email: email.text,
-                                  password: pass.text,
-                                );
+                                      email: email.text,
+                                      password: pass.text,
+                                    );
                                 r.fold(
                                   (ErrorItem e) =>
                                       _toast(context, 'Login error: ${e.code}'),
@@ -208,9 +209,9 @@ class _MyAppState extends State<MyApp> {
                               onPressed: () async {
                                 final Either<ErrorItem, UserModel> r =
                                     await session.signIn(
-                                  email: email.text,
-                                  password: pass.text,
-                                );
+                                      email: email.text,
+                                      password: pass.text,
+                                    );
                                 r.fold(
                                   (ErrorItem e) => _toast(
                                     context,
@@ -239,10 +240,8 @@ class _MyAppState extends State<MyApp> {
                             ),
                             ElevatedButton(
                               onPressed: () async {
-                                final Either<ErrorItem, void> r =
-                                    await session.recoverPassword(
-                                  email: email.text,
-                                );
+                                final Either<ErrorItem, void> r = await session
+                                    .recoverPassword(email: email.text);
                                 r.fold(
                                   (ErrorItem e) => _toast(
                                     context,
@@ -325,8 +324,8 @@ class _MyAppState extends State<MyApp> {
                             ),
                             ElevatedButton(
                               onPressed: () async {
-                                final Either<ErrorItem, void>? r =
-                                    await session.logOut();
+                                final Either<ErrorItem, void>? r = await session
+                                    .logOut();
                                 if (r == null && context.mounted) {
                                   _toast(context, 'Already signed out');
                                   return;

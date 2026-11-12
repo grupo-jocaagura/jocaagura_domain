@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:jocaagura_domain/jocaagura_domain.dart';
+import 'package:material_ui/material_ui.dart';
 
 void main() {
   runApp(const MyApp());
@@ -66,8 +66,7 @@ class _OnboardingSquareAreaValidationPageState
       ),
       const OnboardingStep(
         title: 'Explicación',
-        description:
-            'El área de un cuadrado es lado × lado. Ingresarás un valor y lo validaremos.',
+        description: 'El área de un cuadrado es lado × lado. Ingresarás un valor y lo validaremos.',
         autoAdvanceAfter: Duration(milliseconds: 3000),
       ),
       OnboardingStep(
@@ -131,45 +130,46 @@ class _OnboardingSquareAreaValidationPageState
         initialData: bloc.state,
         builder:
             (BuildContext context, AsyncSnapshot<OnboardingState> snapshot) {
-          final OnboardingState state = snapshot.data!;
-          final OnboardingStep? step = bloc.currentStep;
+              final OnboardingState state = snapshot.data!;
+              final OnboardingStep? step = bloc.currentStep;
 
-          if (step == null) {
-            return const Center(child: Text('No hay pasos configurados.'));
-          }
+              if (step == null) {
+                return const Center(child: Text('No hay pasos configurados.'));
+              }
 
-          // Banner de error si existe
-          final Widget errorBanner = _buildErrorBannerIfAny(state);
+              // Banner de error si existe
+              final Widget errorBanner = _buildErrorBannerIfAny(state);
 
-          // Ramas de contenido por paso
-          Widget content;
-          switch (step.title) {
-            case 'Ingresa el lado':
-              content = _buildInputStep(state);
-              break;
-            case 'Validación':
-              content = _buildValidationStep(state);
-              break;
-            case 'Resultado':
-              final String area =
-                  side != null ? (side! * side!).toStringAsFixed(2) : '--';
-              content = _buildResultStep(area);
-              break;
-            case 'Final':
-              content = _buildFinalStep(step);
-              break;
-            default:
-              content = _buildSimpleStep(step, state);
-              break;
-          }
+              // Ramas de contenido por paso
+              Widget content;
+              switch (step.title) {
+                case 'Ingresa el lado':
+                  content = _buildInputStep(state);
+                  break;
+                case 'Validación':
+                  content = _buildValidationStep(state);
+                  break;
+                case 'Resultado':
+                  final String area = side != null
+                      ? (side! * side!).toStringAsFixed(2)
+                      : '--';
+                  content = _buildResultStep(area);
+                  break;
+                case 'Final':
+                  content = _buildFinalStep(step);
+                  break;
+                default:
+                  content = _buildSimpleStep(step, state);
+                  break;
+              }
 
-          return Column(
-            children: <Widget>[
-              if (errorBanner != const SizedBox.shrink()) errorBanner,
-              Expanded(child: content),
-            ],
-          );
-        },
+              return Column(
+                children: <Widget>[
+                  if (errorBanner != const SizedBox.shrink()) errorBanner,
+                  Expanded(child: content),
+                ],
+              );
+            },
       ),
     );
   }
@@ -224,8 +224,9 @@ class _OnboardingSquareAreaValidationPageState
               const SizedBox(height: 12),
               TextField(
                 controller: sideController,
-                keyboardType:
-                    const TextInputType.numberWithOptions(decimal: true),
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
                 decoration: const InputDecoration(
                   border: OutlineInputBorder(),
                   hintText: 'Ej: 12.5',
@@ -237,8 +238,9 @@ class _OnboardingSquareAreaValidationPageState
                 children: <Widget>[
                   ElevatedButton.icon(
                     onPressed: () {
-                      final double? value =
-                          double.tryParse(sideController.text.trim());
+                      final double? value = double.tryParse(
+                        sideController.text.trim(),
+                      );
                       if (value != null) {
                         setState(() => side = value);
                         bloc.next(); // pasa a Validación

@@ -4,9 +4,9 @@ library jocaagura_domain;
 
 import 'dart:async';
 
-import 'package:flutter/material.dart' hide DateUtils;
 import 'package:jocaagura_domain_core/jocaagura_domain_models.dart'
     hide ModelMainMenuModel;
+import 'package:material_ui/material_ui.dart' hide DateUtils;
 
 export 'package:jocaagura_domain_core/jocaagura_domain_core.dart';
 export 'package:jocaagura_domain_core/jocaagura_domain_models.dart'
