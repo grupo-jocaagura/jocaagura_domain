@@ -46,6 +46,15 @@ Recent entries aim to follow a normalized structure. Older historical entries ma
   domain migration tracked in #212. Release pipeline certification remains
   pending under #213.
 
+### CI/CD
+
+- Homologate the controlled tag publisher with the core: exact official release
+  PR provenance, immutable source, full Flutter CI, OIDC identity checks,
+  duplicate prevention and hosted-publication evidence.
+- Add a non-publishing OIDC probe, fail-closed release tests and Actions CodeQL.
+- Preserve the required master check and replace the legacy master-push uploader.
+- Correct package repository metadata to the canonical organization URL.
+
 ## [1.43.2] - 2026-09-18
 
 ### CI/CD
